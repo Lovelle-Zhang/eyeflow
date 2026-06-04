@@ -23,6 +23,7 @@ This checklist is for private alpha builds before sharing EyeFlow with another t
 - Completing assessment starts the first focus round from `00:00`.
 - Skipping assessment leaves a quiet calibration callout on Today.
 - Mira appears as the desktop companion and can be restored with `找回 Mira`.
+- v0.1.0-alpha.1 installed-app smoke test confirmed EyeFlow opens from `/Applications` and Mira is visible.
 
 ## Core Flow
 
@@ -33,6 +34,7 @@ This checklist is for private alpha builds before sharing EyeFlow with another t
 - `强制爱` preview and real recovery hide return until the countdown completes.
 - Desktop `强制爱` uses true kiosk fullscreen: no menu bar or Dock during countdown.
 - Recovery modes change the Mira-led task sequence.
+- v0.1.0-alpha.1 installed-app smoke test confirmed pause/resume, ordinary rest, and `强制爱` preview.
 
 ## Desktop Product Controls
 

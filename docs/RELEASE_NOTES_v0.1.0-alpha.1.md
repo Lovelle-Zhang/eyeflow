@@ -34,6 +34,16 @@ Attach these files to the GitHub Release:
 - Mounted the DMG read-only, confirmed it contains `EyeFlow.app` and an `/Applications` link, then detached it.
 - Relaunched `dist/mac/EyeFlow.app` and confirmed the running process is the packaged app bundle.
 
+## Manual Acceptance
+
+- Installed `EyeFlow.app` from the DMG into `/Applications`.
+- Launched `/Applications/EyeFlow.app` and confirmed the running process comes from the installed app bundle.
+- Confirmed the installed app opens the EyeFlow dashboard and shows Mira.
+- Confirmed pause/resume works from the focus-session card.
+- Confirmed Mira interaction works, including visible desktop companion behavior.
+- Confirmed ordinary rest flow works.
+- Confirmed `强制爱` preview works as expected in installed-app testing.
+
 ## Known Alpha Notes
 
 - This build is unsigned and not notarized.

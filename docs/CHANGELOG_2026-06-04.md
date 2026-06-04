@@ -199,3 +199,5 @@
 - Created a private-alpha DMG fallback with macOS `hdiutil`, containing `EyeFlow.app` and an `/Applications` install link.
 - Verified the fallback DMG with `hdiutil imageinfo`, mounted it read-only, confirmed `EyeFlow.app` and the `/Applications` symlink, then detached the volume.
 - Relaunched `/Users/lovellezhang/Projects/codex-project/dist/mac/EyeFlow.app` and confirmed the running process is the packaged app bundle.
+- Published `v0.1.0-alpha.1` as a GitHub pre-release with the DMG installer.
+- Installed the DMG into `/Applications`, launched `/Applications/EyeFlow.app`, confirmed the installed bundle is running, and smoke-tested the main dashboard, Mira, pause/resume, ordinary rest, and `强制爱` preview.
