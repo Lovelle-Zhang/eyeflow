@@ -60,6 +60,7 @@ This file records product decisions that should survive code edits and rebuilds.
 - `5 分钟后` should behave as a real five-minute snooze, not a vague dismissal; the snooze window should override the ordinary reminder cooldown when it expires.
 - The reminder rules panel must explicitly include L4 `强制爱`, including its opt-in boundary and hidden return button during countdown.
 - The full-screen forced-rest page must feel protective, not punitive: use an eye-friendly low-contrast palette, avoid oversized countdowns that invite staring, and make Mira's recovery action the main focus.
+- `强制爱` should support local voice guidance so the user can stop looking at the screen during recovery. Prefer system/offline voice first; do not require network, recording, or an account. Voice guidance should be optional but enabled by default.
 - Browser fallback forced-rest previews should mirror the desktop recovery flow enough to set expectations: four-step recovery task, small countdown, and no ordinary finish/snooze actions during force-rest.
 - Recovery feedback buttons should make the next action clear, such as starting the next round, reminding earlier, or continuing the rest. Do not make the user discover the result after clicking.
 - Every day on first open, Mira should ask the user to rate their current eye state before starting focus.

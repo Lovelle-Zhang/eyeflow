@@ -16,6 +16,7 @@ let lastAutoNotifyAt = 0;
 let lastInterventionLevel = 1;
 let autoPanelTimer = null;
 let startupPanelShown = false;
+let voiceProcess = null;
 let latestState = {
   mood: "calm",
   title: "Mira 很安静",
@@ -440,6 +441,35 @@ function notify(message) {
   }
 }
 
+function stopVoice() {
+  if (voiceProcess && !voiceProcess.killed) {
+    voiceProcess.kill();
+  }
+  voiceProcess = null;
+}
+
+function speak(message) {
+  const text = String(message?.text || message || "")
+    .replace(/\s+/g, " ")
+    .trim()
+    .slice(0, 520);
+  if (!text) return { ok: false, reason: "empty" };
+  stopVoice();
+  if (process.platform !== "darwin") {
+    return { ok: false, reason: "unsupported-platform" };
+  }
+  const child = execFile("say", ["-r", "165", text], (error) => {
+    if (error && error.killed !== true) {
+      console.warn("EyeFlow voice guide failed:", error.message);
+    }
+    if (voiceProcess === child) {
+      voiceProcess = null;
+    }
+  });
+  voiceProcess = child;
+  return { ok: true, engine: "say" };
+}
+
 function sanitizeBreakTasks(tasks) {
   if (!Array.isArray(tasks)) return [];
   const allowedMoods = new Set(["gaze", "blink", "close", "neck", "press"]);
@@ -466,6 +496,7 @@ function startBreakLock(payload = {}) {
   const title = String(payload.title || "Mira 带你离开屏幕一下");
   const copy = String(payload.copy || "不用盯着倒计时。我来守时间，你把视线交给远处。");
   const tasks = sanitizeBreakTasks(payload.tasks);
+  const voiceGuide = payload.voiceGuide !== false;
   breakLockCanClose = false;
 
   if (breakLockWindow && !breakLockWindow.isDestroyed()) {
@@ -474,7 +505,8 @@ function startBreakLock(payload = {}) {
       title,
       copy,
       tasks,
-      preview: Boolean(payload.preview)
+      preview: Boolean(payload.preview),
+      voiceGuide
     });
     breakLockWindow.show();
     enterBreakLockFullscreen();
@@ -509,7 +541,8 @@ function startBreakLock(payload = {}) {
       title,
       copy,
       tasks: JSON.stringify(tasks),
-      preview: payload.preview ? "1" : "0"
+      preview: payload.preview ? "1" : "0",
+      voiceGuide: voiceGuide ? "1" : "0"
     }
   });
   breakLockWindow.once("ready-to-show", () => {
@@ -528,6 +561,7 @@ function startBreakLock(payload = {}) {
 }
 
 function finishBreakLock(payload = {}) {
+  stopVoice();
   breakLockCanClose = true;
   if (breakLockWindow && !breakLockWindow.isDestroyed()) {
     breakLockWindow.setKiosk(false);
@@ -684,6 +718,7 @@ app.on("activate", showDashboard);
 
 app.on("before-quit", () => {
   app.isQuitting = true;
+  stopVoice();
 });
 
 ipcMain.handle("dashboard:show", () => {
@@ -732,6 +767,13 @@ ipcMain.handle("breakLock:start", (_event, payload) => {
 
 ipcMain.handle("breakLock:done", (_event, payload) => {
   finishBreakLock(payload);
+});
+
+ipcMain.handle("voice:speak", (_event, payload) => speak(payload));
+
+ipcMain.handle("voice:stop", () => {
+  stopVoice();
+  return { ok: true };
 });
 
 ipcMain.handle("state:publish", (_event, state) => {

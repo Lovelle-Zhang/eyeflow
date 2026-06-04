@@ -3666,6 +3666,7 @@
                   <button class="ghost active-setting" type="button" data-recovery-mode="mixed">混合</button>
                 </div>
                 <p id="recoveryModeCopy">强制爱会组合远眺、眨眼、闭眼和肩颈放松。</p>
+                <label><input type="checkbox" id="forceVoiceGuideToggle" checked=""> 强制爱语音引导</label>
               </div>
               <div class="intervention-card">
                 <div class="intervention-top">
@@ -3752,7 +3753,7 @@
             <li><strong>L1：</strong>只变状态球、表情和文字，不自动展开气泡。</li>
             <li><strong>L2：</strong>到点或自然断点时短暂展开气泡；中段只先变状态，不立刻打断。</li>
             <li><strong>L3：</strong>负荷偏高或明显超时时才增强提醒；如果开启系统通知，会按冷却时间提醒。</li>
-            <li><strong>L4 强制爱：</strong>只在你主动选择后启用；到点进入全屏恢复，倒计时结束前不显示返回按钮。</li>
+            <li><strong>L4 强制爱：</strong>只在你主动选择后启用；到点进入全屏恢复，倒计时结束前不显示返回按钮；开启语音引导后可以不看屏幕，Mira 会用声音带你完成。</li>
             <li><strong>颜色：</strong>绿=在线，蓝=专注，黄=眨眼，粉=休息建议或强制爱恢复。</li>
           </ul>
         </details>
@@ -3981,6 +3982,9 @@
     let forceBreakPreview = false;
     let forceBreakTimer = null;
     let forceBreakEndsAt = 0;
+    let forceVoiceGuide = true;
+    let forceVoiceTaskIndex = -1;
+    let forceVoiceCompletionSpoken = false;
     let latestCompanionState = null;
     let latestActivity = null;
     let forceConfirmPending = false;
@@ -4113,6 +4117,7 @@
       recoveryModeButtons: document.querySelectorAll("[data-recovery-mode]"),
       recoveryModeLabel: document.querySelector("#recoveryModeLabel"),
       recoveryModeCopy: document.querySelector("#recoveryModeCopy"),
+      forceVoiceGuideToggle: document.querySelector("#forceVoiceGuideToggle"),
       intensityCopy: document.querySelector("#intensityCopy"),
       forceConfirm: document.querySelector("#forceConfirm"),
       forceConfirmTitle: document.querySelector("#forceConfirmTitle"),
@@ -4318,7 +4323,8 @@
       els.deepWorkMiraOnlyToggle,
       els.miraStateToggle,
       els.soundToggle,
-      els.systemNotifyToggle
+      els.systemNotifyToggle,
+      els.forceVoiceGuideToggle
     ].forEach((input) => {
       input.addEventListener("change", () => {
         state.settings[input.id] = input.checked;
@@ -4389,6 +4395,7 @@
           miraStateToggle: true,
           soundToggle: false,
           systemNotifyToggle: false,
+          forceVoiceGuideToggle: true,
           recoveryMode: "mixed"
         },
         onboardingDismissed: false,
@@ -4480,6 +4487,7 @@
       els.miraStateToggle.checked = Boolean(state.settings.miraStateToggle);
       els.soundToggle.checked = Boolean(state.settings.soundToggle);
       els.systemNotifyToggle.checked = Boolean(state.settings.systemNotifyToggle);
+      els.forceVoiceGuideToggle.checked = state.settings.forceVoiceGuideToggle !== false;
     }
 
     function persist() {
@@ -4752,6 +4760,63 @@
       target.replaceChildren(fragment);
     }
 
+    function canUseSpeechSynthesis() {
+      return "speechSynthesis" in window && "SpeechSynthesisUtterance" in window;
+    }
+
+    function speakFallback(text) {
+      if (!canUseSpeechSynthesis()) return;
+      const utterance = new SpeechSynthesisUtterance(text);
+      utterance.lang = "zh-CN";
+      utterance.rate = 0.86;
+      utterance.pitch = 1;
+      utterance.volume = 0.82;
+      const voices = window.speechSynthesis.getVoices?.() || [];
+      const voice = voices.find((item) => /^zh/i.test(item.lang) || /Chinese|Mandarin|Ting|Mei/i.test(item.name));
+      if (voice) utterance.voice = voice;
+      window.speechSynthesis.cancel();
+      window.speechSynthesis.speak(utterance);
+    }
+
+    function stopForceVoiceGuide() {
+      window.eyeflowDesktop?.stopVoice?.();
+      if (canUseSpeechSynthesis()) window.speechSynthesis.cancel();
+    }
+
+    function speakForceVoiceGuide(text) {
+      if (!forceVoiceGuide) return;
+      const safeText = String(text || "").replace(/\s+/g, " ").trim().slice(0, 520);
+      if (!safeText) return;
+      if (window.eyeflowDesktop?.speak) {
+        window.eyeflowDesktop.speak({ text: safeText })
+          .then((result) => {
+            if (!result?.ok) speakFallback(safeText);
+          })
+          .catch(() => speakFallback(safeText));
+        return;
+      }
+      speakFallback(safeText);
+    }
+
+    function forceVoiceTextForTask(task, index) {
+      const prefix = index === 0
+        ? "现在可以不用看屏幕了，我会用声音带你完成。第一步，"
+        : `第 ${index + 1} 步，`;
+      return `${prefix}${task.label || task.title}。${task.copy}`;
+    }
+
+    function maybeSpeakForceTask(task, index) {
+      if (!forceVoiceGuide || index === forceVoiceTaskIndex) return;
+      forceVoiceTaskIndex = index;
+      speakForceVoiceGuide(forceVoiceTextForTask(task, index));
+    }
+
+    function maybeSpeakForceCompletion() {
+      if (!forceVoiceGuide || forceVoiceCompletionSpoken) return;
+      forceVoiceCompletionSpoken = true;
+      speakForceVoiceGuide("好了，可以慢慢回来了。回到 EyeFlow 的按钮已经出现。");
+    }
+
     function renderForceRecoveryTask(progress, remaining) {
       const tasks = activeRecoveryTasks.length ? activeRecoveryTasks : recoveryTasksForMode("mixed");
       const taskIndex = Math.min(tasks.length - 1, Math.floor(progress / (100 / tasks.length)));
@@ -4763,6 +4828,7 @@
       els.breakMiniTimerText.textContent = formatBreakTime(remaining);
       els.breakOverlay.dataset.relax = task.mood;
       els.breakMiraCaption.textContent = task.caption;
+      maybeSpeakForceTask(task, taskIndex);
     }
 
     function showBreak(reason) {
@@ -4800,12 +4866,15 @@
       const payload = {
         seconds,
         preview: forceBreakPreview,
+        voiceGuide: state.settings.forceVoiceGuideToggle !== false,
         recoveryMode: state.settings.recoveryMode || "mixed",
         tasks: recoveryTasksForMode(state.settings.recoveryMode || "mixed"),
         title: "Mira 带你离开屏幕一下",
         copy: options.preview
           ? "这是 15 秒预览，不会计入今日休息。你可以感受一下恢复画面的节奏。"
-          : "不用盯着倒计时。我来守时间，你把视线交给远处。"
+          : state.settings.forceVoiceGuideToggle === false
+            ? "不用盯着倒计时。我来守时间，你把视线交给远处。"
+            : "可以不用看屏幕。Mira 会用声音带你完成这段恢复。"
       };
       if (window.eyeflowDesktop?.startForceBreak) {
         window.eyeflowDesktop.startForceBreak(payload);
@@ -4829,6 +4898,10 @@
       showBreak("force");
       els.breakTitle.textContent = payload.title || "Mira 带你离开屏幕一下";
       activeRecoveryTasks = normalizeRecoveryTasks(payload.tasks, payload.recoveryMode || state.settings.recoveryMode || "mixed");
+      forceVoiceGuide = payload.voiceGuide !== false;
+      forceVoiceTaskIndex = -1;
+      forceVoiceCompletionSpoken = false;
+      stopForceVoiceGuide();
       const totalSeconds = Math.max(15, Number(payload.seconds) || Number(els.breakTarget.value) || 120);
       forceBreakEndsAt = Date.now() + totalSeconds * 1000;
       window.clearInterval(forceBreakTimer);
@@ -4845,6 +4918,7 @@
             : "这轮恢复完成。现在可以回到 EyeFlow。";
           renderForceRecoveryTask(100, 0);
           els.forceReturnBtn.hidden = false;
+          maybeSpeakForceCompletion();
         }
       };
       forceBreakTimer = window.setInterval(tickForceBreak, 250);
@@ -4854,6 +4928,7 @@
     function finishForceBreak(payload = {}) {
       window.clearInterval(forceBreakTimer);
       forceBreakTimer = null;
+      stopForceVoiceGuide();
       forceBreakActive = false;
       const isPreview = forceBreakPreview || Boolean(payload.preview);
       if (isPreview) {

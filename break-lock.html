@@ -534,6 +534,9 @@
     let endsAt = Date.now() + totalSeconds * 1000;
     let ticker = null;
     let previewSession = false;
+    let voiceGuide = true;
+    let spokenTaskIndex = -1;
+    let completionSpoken = false;
     const defaultTasks = [
       {
         mood: "gaze",
@@ -609,10 +612,71 @@
       els.stepFlow.replaceChildren(fragment);
     }
 
+    function canUseSpeechSynthesis() {
+      return "speechSynthesis" in window && "SpeechSynthesisUtterance" in window;
+    }
+
+    function speakFallback(text) {
+      if (!canUseSpeechSynthesis()) return;
+      const utterance = new SpeechSynthesisUtterance(text);
+      utterance.lang = "zh-CN";
+      utterance.rate = 0.86;
+      utterance.pitch = 1;
+      utterance.volume = 0.82;
+      const voices = window.speechSynthesis.getVoices?.() || [];
+      const voice = voices.find((item) => /^zh/i.test(item.lang) || /Chinese|Mandarin|Ting|Mei/i.test(item.name));
+      if (voice) utterance.voice = voice;
+      window.speechSynthesis.cancel();
+      window.speechSynthesis.speak(utterance);
+    }
+
+    function stopVoiceGuide() {
+      window.eyeflowDesktop?.stopVoice?.();
+      if (canUseSpeechSynthesis()) window.speechSynthesis.cancel();
+    }
+
+    function speakVoiceGuide(text) {
+      if (!voiceGuide) return;
+      const safeText = String(text || "").replace(/\s+/g, " ").trim().slice(0, 520);
+      if (!safeText) return;
+      if (window.eyeflowDesktop?.speak) {
+        window.eyeflowDesktop.speak({ text: safeText })
+          .then((result) => {
+            if (!result?.ok) speakFallback(safeText);
+          })
+          .catch(() => speakFallback(safeText));
+        return;
+      }
+      speakFallback(safeText);
+    }
+
+    function voiceTextForTask(task, index) {
+      const prefix = index === 0
+        ? "现在可以不用看屏幕了，我会用声音带你完成。第一步，"
+        : `第 ${index + 1} 步，`;
+      return `${prefix}${task.label || task.title}。${task.copy}`;
+    }
+
+    function maybeSpeakTask(task, index) {
+      if (!voiceGuide || index === spokenTaskIndex) return;
+      spokenTaskIndex = index;
+      speakVoiceGuide(voiceTextForTask(task, index));
+    }
+
+    function maybeSpeakCompletion() {
+      if (!voiceGuide || completionSpoken) return;
+      completionSpoken = true;
+      speakVoiceGuide("好了，可以慢慢回来了。回到 EyeFlow 的按钮已经出现。");
+    }
+
     function applyPayload(payload = {}) {
       totalSeconds = Math.max(15, Math.min(600, Number(payload.seconds) || totalSeconds));
       endsAt = Date.now() + totalSeconds * 1000;
       previewSession = payload.preview === true || payload.preview === "1";
+      voiceGuide = payload.voiceGuide !== false && payload.voiceGuide !== "0";
+      spokenTaskIndex = -1;
+      completionSpoken = false;
+      stopVoiceGuide();
       activeTasks = normalizeBreakTasks(payload.tasks || params.get("tasks"));
       els.eyebrow.textContent = previewSession ? "强制爱预览" : "强制爱恢复";
       els.title.textContent = payload.title || "Mira 带你离开屏幕一下";
@@ -633,16 +697,19 @@
       els.miraCaption.textContent = task.caption;
       renderStepFlow(taskIndex);
       document.body.dataset.relax = task.mood;
+      maybeSpeakTask(task, taskIndex);
       els.timer.textContent = formatTime(remaining);
       els.ring.style.setProperty("--progress", `${Math.max(0, Math.min(100, progress))}%`);
       if (remaining <= 0) {
         window.clearInterval(ticker);
         ticker = null;
         els.doneBtn.hidden = false;
+        maybeSpeakCompletion();
       }
     }
 
     els.doneBtn.addEventListener("click", () => {
+      stopVoiceGuide();
       window.eyeflowDesktop?.finishForceBreak?.({
         preview: previewSession,
         feedback: "better",
@@ -656,7 +723,8 @@
       title: params.get("title"),
       copy: params.get("copy"),
       tasks: params.get("tasks"),
-      preview: params.get("preview")
+      preview: params.get("preview"),
+      voiceGuide: params.get("voiceGuide")
     });
   </script>
 </body>

@@ -212,3 +212,4 @@
 - Standardized the EyeFlow icon-face geometry against Mira's 58-unit face reference, documenting the mask, status dot, and eye positions so app icon, sidebar mark, and compact feedback avatar stay consistent.
 - Split the visual identity rules into two strict systems: EyeFlow brand icon for product identity surfaces, and Mira avatar for companion/guidance surfaces.
 - Returned the ordinary-rest feedback card to the Mira avatar system with a standardized 64px mini Mira, keeping the antenna arc, mouth, and cheeks aligned to the shared face geometry.
+- Added optional `强制爱` voice guidance, enabled by default, using macOS system speech in the desktop app and browser speech synthesis as a fallback for previews.

@@ -9,6 +9,8 @@ contextBridge.exposeInMainWorld("eyeflowDesktop", {
   publishState: (state) => ipcRenderer.invoke("state:publish", state),
   startForceBreak: (payload) => ipcRenderer.invoke("breakLock:start", payload),
   finishForceBreak: (payload) => ipcRenderer.invoke("breakLock:done", payload),
+  speak: (payload) => ipcRenderer.invoke("voice:speak", payload),
+  stopVoice: () => ipcRenderer.invoke("voice:stop"),
   getPermissionStatus: () => ipcRenderer.invoke("permissions:status"),
   openAccessibilitySettings: () => ipcRenderer.invoke("permissions:openAccessibility"),
   getDesktopSettings: () => ipcRenderer.invoke("desktopSettings:get"),
