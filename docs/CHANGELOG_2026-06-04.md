@@ -204,3 +204,4 @@
 - Redesigned the ordinary-rest completion feedback state: the feedback buttons now live inside one integrated recovery panel with Mira, instead of appearing as a separate floating strip over the rest dialog.
 - Simplified the ordinary-rest feedback panel again after visual review: switched it to a lighter compact card, reduced Mira's visual weight, removed repeated feedback copy, and shortened the three feedback actions.
 - Fixed the feedback-panel Mira avatar overflow by removing inherited recovery animation scaling from the feedback state and tightening the avatar column.
+- Gave the ordinary-rest feedback panel its own calm Mira face instead of reusing the shoulder/neck recovery expression, so the feedback avatar no longer carries the crooked neck-release state.

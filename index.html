@@ -2993,6 +2993,36 @@
         0 14px 30px rgba(15, 23, 21, 0.12);
     }
 
+    .break-overlay.feedback-mode .break-mira .pet-face {
+      transform: none;
+    }
+
+    .break-overlay.feedback-mode .break-mira .pet-face::before,
+    .break-overlay.feedback-mode .break-mira .pet-face::after {
+      width: 5px;
+      height: 5px;
+      border-radius: 50%;
+      transform: none;
+      animation: petBlink 5s ease-in-out infinite;
+      background: #ffffff;
+    }
+
+    .break-overlay.feedback-mode .break-mira .pet-mouth {
+      top: 37px;
+      left: 50%;
+      width: 14px;
+      height: 7px;
+      border: 0;
+      border-bottom: 2px solid rgba(15, 23, 21, 0.78);
+      border-radius: 0 0 999px 999px;
+      background: transparent;
+      transform: translateX(-50%);
+    }
+
+    .break-overlay.feedback-mode .break-mira .pet-cheek {
+      top: 35px;
+    }
+
     .break-overlay.feedback-mode .break-mira-caption {
       display: none;
     }
@@ -4786,7 +4816,7 @@
 
     function finishBreak() {
       els.breakOverlay.classList.add("feedback-mode");
-      els.breakOverlay.dataset.relax = "neck";
+      els.breakOverlay.dataset.relax = "feedback";
       els.breakTitle.textContent = "恢复得怎么样？";
       els.breakCopy.textContent = "告诉 Mira 现在的感觉，下一轮会按你的反馈调整。";
       els.breakMira.hidden = false;
