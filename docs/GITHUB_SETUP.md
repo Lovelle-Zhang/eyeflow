@@ -40,6 +40,19 @@ git tag v0.1.0-alpha.1
 git push origin v0.1.0-alpha.1
 ```
 
+Release 页面正文可以使用：
+
+```text
+docs/RELEASE_NOTES_v0.1.0-alpha.1.md
+```
+
+附件上传：
+
+```text
+dist/EyeFlow-0.1.0-x64.dmg
+dist/EyeFlow-0.1.0-x64.zip
+```
+
 正式外测前再补：
 
 - macOS 签名与公证

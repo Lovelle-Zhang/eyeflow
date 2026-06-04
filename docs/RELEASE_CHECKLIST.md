@@ -8,6 +8,7 @@ This checklist is for private alpha builds before sharing EyeFlow with another t
 - App bundle: `dist/mac/EyeFlow.app`
 - DMG installer: `dist/EyeFlow-0.1.0-x64.dmg`
 - ZIP archive: `dist/EyeFlow-0.1.0-x64.zip`
+- Current release notes: `docs/RELEASE_NOTES_v0.1.0-alpha.1.md`
 
 ## Identity
 
