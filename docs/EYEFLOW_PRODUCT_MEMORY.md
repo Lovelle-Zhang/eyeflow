@@ -14,6 +14,27 @@ This file records product decisions that should survive code edits and rebuilds.
 - It should reduce burden for eyes and body, so the product must stay simple, quiet, and comfortable.
 - Keep only necessary features. Avoid adding complex dashboards, noisy gamification, or heavy workflows.
 
+## Visual Identity Standards
+
+- EyeFlow and Mira use related visual DNA, but they are not the same graphic.
+- `EyeFlow brand icon` is the product/app mark. Use it only for product identity surfaces:
+  - macOS Dock and Finder app icon
+  - `assets/icon.svg`, generated PNG/iconset/ICNS assets, DMG/app bundle icon
+  - sidebar brand mark beside `EyeFlow`
+  - About/release/install surfaces if an app mark is needed
+- EyeFlow brand icon must stay simple: rounded square tile, black mask, two small white eyes, one green status dot. It must not have Mira's antenna arc, mouth, cheeks, expressions, mood colors, or animations.
+- The EyeFlow brand icon's green dot is a brand signal, not a live mood indicator. Do not recolor it per eye-load state.
+- `Mira avatar` is the companion character. Use it only where Mira is present as a guide, companion, or recovery partner:
+  - draggable desktop companion in `companion.html`
+  - Mira speech bubble / companion panel
+  - onboarding and daily assessment guidance
+  - Today state stage when Mira interprets the user's state
+  - rest/recovery/fullscreen guidance screens
+  - Mira-led feedback or response moments
+- Mira avatar may have the antenna arc, mouth, cheeks, expressions, motion, and mood-colored status dot. It should feel alive and can change by state.
+- Do not use the full Mira avatar as the Dock/app icon. Do not replace the draggable Mira avatar with the simplified EyeFlow brand icon.
+- Shared geometry rule: both graphics can share the same core face proportions for the mask, eyes, and status dot, derived from the 58-unit Mira face reference: mask `x=10 y=19 w=38 h=18`, status dot `size=9 top=15 right=8`, and icon eyes centered at `x=21.5/36.5 y=26.5 r=2.5`. The difference is in context and allowed details: EyeFlow brand icon is simplified; Mira avatar is expressive.
+
 ## Mira Desktop Form
 
 - Mira should feel like a small desktop companion.
@@ -25,7 +46,6 @@ This file records product decisions that should survive code edits and rebuilds.
   - calm/focus: soft green or blue-green
   - blink: warm yellow
   - rest/high load: soft pink
-- Mira's icon-face geometry is a product standard and must stay consistent across the app icon, sidebar mark, compact feedback avatar, and Mira face variants. Use the 58-unit companion face as the reference: mask `x=10 y=19 w=38 h=18`, status dot `size=9 top=15 right=8`, and icon eyes centered at `x=21.5/36.5 y=26.5 r=2.5`. Do not resize or reposition the mask/status dot independently for one surface.
 
 ## Interaction Principles
 

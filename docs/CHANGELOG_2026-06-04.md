@@ -210,3 +210,4 @@
 - Simplified the feedback-panel Mira avatar into a clean icon face by hiding the antenna arc, mouth, and cheeks in that compact state.
 - Updated the EyeFlow app icon family and sidebar brand mark to the clean eyed icon face: black mask, two small eyes, and one green status dot.
 - Standardized the EyeFlow icon-face geometry against Mira's 58-unit face reference, documenting the mask, status dot, and eye positions so app icon, sidebar mark, and compact feedback avatar stay consistent.
+- Split the visual identity rules into two strict systems: EyeFlow brand icon for product identity surfaces, and Mira avatar for companion/guidance surfaces.
