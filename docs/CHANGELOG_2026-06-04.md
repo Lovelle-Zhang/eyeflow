@@ -214,3 +214,4 @@
 - Returned the ordinary-rest feedback card to the Mira avatar system with a standardized 64px mini Mira, keeping the antenna arc, mouth, and cheeks aligned to the shared face geometry.
 - Added optional `强制爱` voice guidance, enabled by default, using macOS system speech in the desktop app and browser speech synthesis as a fallback for previews.
 - Fixed the `强制爱` settings card so the chosen mode displays as L4 while the internal trigger still waits until a manual focus session reaches the target time.
+- Replaced the vague `安静 / 标准 / 强制爱` reminder selector with explicit `L1 / L2 / L3 / L4` choices so users can directly choose light, clearer, or forced reminder ceilings.

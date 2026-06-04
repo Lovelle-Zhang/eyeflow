@@ -1671,7 +1671,7 @@
     }
 
     .settings-card .timer-controls {
-      grid-template-columns: repeat(3, minmax(0, 1fr));
+      grid-template-columns: repeat(4, minmax(0, 1fr));
     }
 
     .recovery-mode {
@@ -3389,7 +3389,7 @@
             <div class="today-flow" id="todayFlowCopy">
               <span id="todayRhythmCopy">默认节奏 · 25 分钟 / 120 秒</span>
               <span class="today-flow-divider" aria-hidden="true"></span>
-              <span id="todayModeCopy">安静 · Mira 轻提醒</span>
+              <span id="todayModeCopy">L1 安静 · Mira 轻陪伴</span>
             </div>
             <div class="today-plan" id="todayPlanCopy">Mira 会根据今天评分和当前提醒方式，安排这一轮的专注与恢复。</div>
             <div class="assessment-reminder" id="assessmentReminder" hidden="">
@@ -3626,7 +3626,7 @@
                 </div>
                 <div class="reason">
                   <span>提醒强度</span>
-                  <b id="suggestIntensity">安静</b>
+                  <b id="suggestIntensity">L1 安静</b>
                 </div>
               </div>
               <p id="rhythmReasonCopy">当前负荷、提醒反馈和历史记录都还比较温和。</p>
@@ -3640,11 +3640,12 @@
             <div class="settings-card">
               <strong>提醒方式</strong>
               <div class="timer-controls">
-                <button class="ghost active-setting" type="button" data-intensity="quiet">安静</button>
-                <button class="ghost" type="button" data-intensity="standard">标准</button>
-                <button class="ghost" type="button" data-intensity="force">强制爱</button>
+                <button class="ghost active-setting" type="button" data-intensity="quiet">L1 安静</button>
+                <button class="ghost" type="button" data-intensity="standard">L2 轻提示</button>
+                <button class="ghost" type="button" data-intensity="clear">L3 明确</button>
+                <button class="ghost" type="button" data-intensity="force">L4 强制爱</button>
               </div>
-              <p id="intensityCopy">默认只用 Mira 状态和轻提示，不主动弹出全屏休息。</p>
+              <p id="intensityCopy">L1：只变 Mira 状态和文字，不主动展开气泡。</p>
               <div class="force-confirm" id="forceConfirm" hidden="">
                 <strong id="forceConfirmTitle">开启前确认</strong>
                 <p id="forceConfirmCopy">强制爱只会在你开始手动专注后接管；到点进入全屏恢复，倒计时结束前不会回到工作界面。</p>
@@ -4558,7 +4559,7 @@
         return {
           focus: 15,
           rest: 180,
-          intensity: "standard",
+          intensity: "clear",
           copy: "首轮先压低连续盯屏时间，恢复留足肩颈放松。"
         };
       }
@@ -4579,14 +4580,16 @@
     }
 
     function intensityLabel(level) {
-      if (level === "force") return "强制爱";
-      if (level === "standard") return "标准";
-      return "安静";
+      if (level === "force") return "L4 强制爱";
+      if (level === "clear") return "L3 明确提醒";
+      if (level === "standard") return "L2 轻提示";
+      return "L1 安静";
     }
 
     function modeActionCopy(level) {
       if (level === "force") return "到点进入全屏恢复，时间到才回到工作界面";
-      if (level === "standard") return "到点或自然断点才明确提醒，你可以休息或稍后处理";
+      if (level === "clear") return "到点或负荷偏高时明确提醒，连续超时会升级语气";
+      if (level === "standard") return "到点或自然断点短暂轻提示，你可以休息或稍后处理";
       return "到点先轻轻提醒，不抢你的控制权";
     }
 
@@ -4604,13 +4607,13 @@
       els.onboardingLoadValue.textContent = load;
       els.onboardingLoadBand.textContent = band;
       els.onboardingRhythmCopy.textContent = rhythm.copy;
-      els.onboardingRhythmValue.textContent = `${rhythm.focus} 分钟 / ${rhythm.rest} 秒 · ${intensityLabel(shownIntensity)}提醒`;
+      els.onboardingRhythmValue.textContent = `${rhythm.focus} 分钟 / ${rhythm.rest} 秒 · ${intensityLabel(shownIntensity)}`;
       els.onboardingPlanLoad.textContent = `当前估算为${band} ${load} 分。`;
       els.onboardingPlanRhythm.textContent = `先用 ${rhythm.focus} 分钟专注，${rhythm.rest} 秒恢复。`;
       els.onboardingPlanMira.textContent = shownIntensity === "force"
         ? "强制爱已开启。开始手动专注后，到点才会进入全屏恢复。"
         : load >= 74
-        ? "先把节奏放轻，到点明确提醒你休息。"
+        ? "先把节奏放轻，到点会明确提醒你休息。"
         : load >= 48
           ? "我会提前一点提醒，避免硬撑到很累。"
           : "先安静陪伴，到点再轻轻提醒。";
@@ -4712,7 +4715,7 @@
     }
 
     function nudgeRest(targetSeconds) {
-      if (state.settings.intensity === "force" || state.settings.intensity === "standard") return;
+      if (state.settings.intensity !== "quiet") return;
       const now = Date.now();
       if (now - lastNudgeAt < 3 * 60 * 1000) return;
       lastNudgeAt = now;
@@ -5265,10 +5268,14 @@
         button.classList.toggle("active-setting", button.dataset.intensity === level);
       });
       els.intensityCopy.textContent = level === "quiet"
-        ? "默认只用 Mira 状态和轻提示，不主动弹出全屏休息。"
+        ? "L1：只变 Mira 状态和文字，不主动展开气泡。"
+        : level === "standard"
+          ? "L2：到点或自然断点时短暂轻提示，约几秒后自动收起。"
+          : level === "clear"
+            ? "L3：负荷偏高或明显超时时更明确提醒；开启系统通知后会按冷却时间提醒。"
         : level === "force"
-          ? "开始手动专注后，到点进入全屏恢复。倒计时结束前不会显示完成按钮。"
-          : "到点或自然断点才出现轻提示；连续超时后，Mira 会更明确地建议休息。";
+          ? "L4：开始手动专注后，到点进入全屏恢复。倒计时结束前不会显示完成按钮。"
+          : "选择一个提醒等级。";
       state.settings.intensity = level;
       syncForceConfirm();
       if (options.persistChange !== false) persist();
@@ -5608,17 +5615,21 @@
         };
       }
 
-      if (elapsedMinutes >= focusTargetMinutes + 10) {
+      const chosenDisplayLevel = state.settings.intensity === "clear" ? 3 : 2;
+
+      if (state.settings.intensity === "clear" && elapsedMinutes >= focusTargetMinutes + 10) {
         return {
           level: 3,
+          displayLevel: 3,
           title: "已经明显超时",
           copy: "这轮已经超过目标时间较久，Mira 会更明确地建议你休息。"
         };
       }
 
-      if (load >= 74) {
+      if (state.settings.intensity === "clear" && load >= 74) {
         return {
           level: 3,
+          displayLevel: 3,
           title: "负荷偏高，准备提醒",
           copy: "眼睛信号偏高。Mira 会先观察节奏，持续一小段时间后再明确提醒。"
         };
@@ -5627,6 +5638,7 @@
       if (latestActivity && isNaturalBreak(latestActivity)) {
         return {
           level: 2,
+          displayLevel: chosenDisplayLevel,
           title: "在自然断点轻提示",
           copy: "你刚停下来一下，适合用轻提示提醒远眺，不打断正在输入的节奏。"
         };
@@ -5635,6 +5647,7 @@
       if (elapsedMinutes >= focusTargetMinutes) {
         return {
           level: 2,
+          displayLevel: chosenDisplayLevel,
           title: "到点轻提醒",
           copy: "这轮已经到点。找一个自然断点，看远处 20 秒。"
         };
@@ -5643,6 +5656,7 @@
       if (load >= 48 || elapsedMinutes >= focusTargetMinutes * 0.72) {
         return {
           level: 2,
+          displayLevel: chosenDisplayLevel,
           title: "提前观察眨眼或远眺",
           copy: "负荷进入中段。Mira 先只改变状态，不展开提醒；到点或自然断点再说清楚。"
         };
@@ -5650,8 +5664,11 @@
 
       return {
         level: 1,
-        title: "保持在旁边陪伴",
-        copy: "当前负荷不高，Mira 只保持在线状态，不制造额外打扰。"
+        displayLevel: chosenDisplayLevel,
+        title: state.settings.intensity === "clear" ? "明确提醒已开启" : "轻提示已开启",
+        copy: state.settings.intensity === "clear"
+          ? "Mira 先保持安静；到点、负荷偏高或明显超时时，会更明确地提醒你休息。"
+          : "Mira 先保持安静；到点或自然断点时，会短暂提醒你远眺。"
       };
     }
 
@@ -5763,20 +5780,27 @@
     function modeCopy() {
       if (state.settings.intensity === "force") {
         return {
-          label: "当前模式：强制爱",
+          label: "当前模式：L4 强制爱",
           copy: "到点后进入全屏恢复任务，倒计时结束前不回到工作界面。",
           timer: `${els.focusTarget.value} 分钟后全屏休息 · ${els.breakTarget.value} 秒`
         };
       }
+      if (state.settings.intensity === "clear") {
+        return {
+          label: "当前模式：L3 明确提醒",
+          copy: "负荷偏高或明显超时时会更明确提醒；到点也会提示远眺。",
+          timer: `${els.focusTarget.value} 分钟后明确提醒 · ${els.breakTarget.value} 秒`
+        };
+      }
       if (state.settings.intensity === "standard") {
         return {
-          label: "当前模式：标准提醒",
-          copy: "到点或自然断点才出现明确提醒；你可以休息，也可以稍后处理。",
+          label: "当前模式：L2 轻提示",
+          copy: "到点或自然断点才短暂提示；你可以休息，也可以稍后处理。",
           timer: `${els.focusTarget.value} 分钟后远眺 · ${els.breakTarget.value} 秒`
         };
       }
       return {
-        label: "当前模式：安静提醒",
+        label: "当前模式：L1 安静",
         copy: "Mira 主要用状态和轻提示陪伴，不主动弹出全屏休息。",
         timer: `${els.focusTarget.value} 分钟后轻提醒 · ${els.breakTarget.value} 秒`
       };
@@ -5797,9 +5821,11 @@
         ? isAutoTracking()
           ? "强制爱待命 · 手动专注后全屏恢复"
           : "强制爱 · 到点全屏恢复"
+        : state.settings.intensity === "clear"
+          ? "L3 明确 · 高负荷更明确提醒"
         : state.settings.intensity === "standard"
-          ? "标准 · 到点明确提醒"
-          : "安静 · Mira 轻提醒";
+          ? "L2 轻提示 · 到点短暂提醒"
+          : "L1 安静 · Mira 轻陪伴";
       els.todayModeCopy.textContent = text;
       els.todayFlowCopy.classList.toggle("force", state.settings.intensity === "force");
     }
@@ -6028,7 +6054,7 @@
       if (load >= 74 || symptomValue >= 7 || historicalHighDays >= 2) {
         focus = Math.max(15, focus - 5);
         rest = Math.min(240, Math.max(rest, 180));
-        intensity = state.settings.intensity === "force" ? "force" : "standard";
+        intensity = state.settings.intensity === "force" ? "force" : "clear";
         title = "缩短下一轮专注";
         copy = "负荷或主要不适偏高，下一轮更适合提前提醒，并把恢复时间留到能做完肩颈放松。";
         reason = "依据：当前高负荷、症状评分偏高，或近期历史里高负荷天数较多。";
