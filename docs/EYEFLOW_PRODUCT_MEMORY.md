@@ -25,6 +25,7 @@ This file records product decisions that should survive code edits and rebuilds.
   - calm/focus: soft green or blue-green
   - blink: warm yellow
   - rest/high load: soft pink
+- Mira's icon-face geometry is a product standard and must stay consistent across the app icon, sidebar mark, compact feedback avatar, and Mira face variants. Use the 58-unit companion face as the reference: mask `x=10 y=19 w=38 h=18`, status dot `size=9 top=15 right=8`, and icon eyes centered at `x=21.5/36.5 y=26.5 r=2.5`. Do not resize or reposition the mask/status dot independently for one surface.
 
 ## Interaction Principles
 

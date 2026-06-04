@@ -208,3 +208,5 @@
 - Re-centered the feedback-panel Mira mask, eyes, and mouth together after resizing the avatar, fixing the mouth alignment.
 - Removed the inherited white head highlight from the feedback-panel Mira avatar so the small calm face reads cleaner.
 - Simplified the feedback-panel Mira avatar into a clean icon face by hiding the antenna arc, mouth, and cheeks in that compact state.
+- Updated the EyeFlow app icon family and sidebar brand mark to the clean eyed icon face: black mask, two small eyes, and one green status dot.
+- Standardized the EyeFlow icon-face geometry against Mira's 58-unit face reference, documenting the mask, status dot, and eye positions so app icon, sidebar mark, and compact feedback avatar stay consistent.

@@ -47,6 +47,6 @@ app.whenReady().then(async () => {
   await win.loadURL(`data:text/html;charset=utf-8,${encodeURIComponent(html)}`);
   await new Promise((resolve) => setTimeout(resolve, 200));
   const image = await win.capturePage();
-  fs.writeFileSync(pngPath, image.toPNG());
+  fs.writeFileSync(pngPath, image.resize({ width: 1024, height: 1024 }).toPNG());
   app.quit();
 });

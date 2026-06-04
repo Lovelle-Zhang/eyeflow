@@ -13,8 +13,11 @@
 
   <g transform="translate(82 82) scale(0.84)">
     <rect width="1024" height="1024" rx="216" fill="url(#bg)"/>
-    <rect x="216" y="350" width="593" height="323" rx="162" fill="url(#lens)"/>
-    <rect x="216" y="350" width="593" height="323" rx="162" stroke="#7EEFD4" stroke-width="26" stroke-opacity="0.18"/>
-    <circle cx="768" cy="310" r="94" fill="#6FE7C3"/>
+    <!-- Mira icon-face standard, scaled from the 58-unit companion face. -->
+    <rect x="177" y="335" width="671" height="318" rx="159" fill="url(#lens)"/>
+    <rect x="177" y="335" width="671" height="318" rx="159" stroke="#7EEFD4" stroke-width="31" stroke-opacity="0.18"/>
+    <circle cx="380" cy="468" r="44" fill="#F8FFFC"/>
+    <circle cx="644" cy="468" r="44" fill="#F8FFFC"/>
+    <circle cx="803" cy="344" r="79" fill="#6FE7C3"/>
   </g>
 </svg>
