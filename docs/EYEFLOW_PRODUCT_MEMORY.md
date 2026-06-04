@@ -33,6 +33,7 @@ This file records product decisions that should survive code edits and rebuilds.
   - Mira-led feedback or response moments
 - Mira avatar may have the antenna arc, mouth, cheeks, expressions, motion, and mood-colored status dot. It should feel alive and can change by state.
 - Do not use the full Mira avatar as the Dock/app icon. Do not replace the draggable Mira avatar with the simplified EyeFlow brand icon.
+- Mira-led feedback cards are Mira avatar surfaces, not EyeFlow brand icon surfaces. If the feedback space is compact, use a `mini Mira` variant: keep the antenna arc, mouth, cheeks, mask, eyes, and mood dot, but scale them from the shared 58-unit face reference so nothing drifts or looks hand-placed.
 - Shared geometry rule: both graphics can share the same core face proportions for the mask, eyes, and status dot, derived from the 58-unit Mira face reference: mask `x=10 y=19 w=38 h=18`, status dot `size=9 top=15 right=8`, and icon eyes centered at `x=21.5/36.5 y=26.5 r=2.5`. The difference is in context and allowed details: EyeFlow brand icon is simplified; Mira avatar is expressive.
 
 ## Mira Desktop Form

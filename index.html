@@ -2997,6 +2997,7 @@
         0 14px 30px rgba(15, 23, 21, 0.12);
     }
 
+    /* Mini Mira: 64px avatar, scaled from the 58-unit Mira face standard. */
     .break-overlay.feedback-mode .break-mira .pet::before {
       top: 21px;
       left: 50%;
@@ -3013,26 +3014,73 @@
     }
 
     .break-overlay.feedback-mode .break-mira .pet-face {
-      top: 26px;
-      left: 50%;
-      width: 24px;
-      transform: translateX(-50%);
+      top: 26.5px;
+      left: 0;
+      width: 64px;
+      height: 8px;
+      transform: none;
     }
 
     .break-overlay.feedback-mode .break-mira .pet-face::before,
     .break-overlay.feedback-mode .break-mira .pet-face::after {
-      width: 5px;
-      height: 5px;
+      top: 0;
+      width: 5.5px;
+      height: 5.5px;
       border-radius: 50%;
       transform: none;
       animation: petBlink 5s ease-in-out infinite;
       background: #ffffff;
     }
 
+    .break-overlay.feedback-mode .break-mira .pet-face::before {
+      left: 21px;
+    }
+
+    .break-overlay.feedback-mode .break-mira .pet-face::after {
+      right: auto;
+      left: 37.5px;
+    }
+
     .break-overlay.feedback-mode .break-mira .pet-antenna,
     .break-overlay.feedback-mode .break-mira .pet-mouth,
     .break-overlay.feedback-mode .break-mira .pet-cheek {
-      display: none;
+      display: block;
+    }
+
+    .break-overlay.feedback-mode .break-mira .pet-antenna {
+      top: 8px;
+      left: 50%;
+      width: 24px;
+      height: 13px;
+      transform: translateX(-50%);
+      border-top-color: rgba(15, 23, 21, 0.28);
+    }
+
+    .break-overlay.feedback-mode .break-mira .pet-mouth {
+      top: 41px;
+      left: 50%;
+      width: 15.5px;
+      height: 8px;
+      border: 0;
+      border-bottom: 2px solid rgba(15, 23, 21, 0.72);
+      border-radius: 0 0 999px 999px;
+      background: transparent;
+      transform: translateX(-50%);
+    }
+
+    .break-overlay.feedback-mode .break-mira .pet-cheek {
+      top: 38.5px;
+      width: 7.7px;
+      height: 3.3px;
+      background: rgba(215, 79, 117, 0.18);
+    }
+
+    .break-overlay.feedback-mode .break-mira .pet-cheek.left {
+      left: 13.2px;
+    }
+
+    .break-overlay.feedback-mode .break-mira .pet-cheek.right {
+      right: 13.2px;
     }
 
     .break-overlay.feedback-mode .break-mira-caption {
