@@ -43,6 +43,7 @@ This file records product decisions that should survive code edits and rebuilds.
 - The expanded state should look like Mira is speaking, with a bubble tail or clear visual connection.
 - Avoid a disconnected rectangular card beside the avatar.
 - Day and night avatars should share the same geometry and expression system; only the color tone changes.
+- Mira avatars should avoid visible white head highlights on product surfaces. Soft color gradients are fine, but do not use a distinct circular white spot on the head.
 - Night avatars should avoid visible face highlights. Keep the dark surface clean, soft, and low-contrast; let the status dot, mouth, and expression carry the mood instead of a bright top-left glow.
 - The status signal is one small dot. Its color changes by state:
   - calm/focus: soft green or blue-green

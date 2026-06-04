@@ -216,3 +216,4 @@
 - Fixed the `强制爱` settings card so the chosen mode displays as L4 while the internal trigger still waits until a manual focus session reaches the target time.
 - Replaced the vague `安静 / 标准 / 强制爱` reminder selector with explicit `L1 / L2 / L3 / L4` choices so users can directly choose light, clearer, or forced reminder ceilings.
 - Removed the visible top-left highlight from the night Mira avatar and softened the night blink yellow so the compact companion feels calmer on dark desktops.
+- Removed the circular white head highlight from the Today state-stage Mira, in-app companion Mira, and full-screen recovery Mira so the avatar system stays cleaner and more consistent.
