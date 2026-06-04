@@ -207,3 +207,4 @@
 - Gave the ordinary-rest feedback panel its own calm Mira face instead of reusing the shoulder/neck recovery expression, so the feedback avatar no longer carries the crooked neck-release state.
 - Re-centered the feedback-panel Mira mask, eyes, and mouth together after resizing the avatar, fixing the mouth alignment.
 - Removed the inherited white head highlight from the feedback-panel Mira avatar so the small calm face reads cleaner.
+- Simplified the feedback-panel Mira avatar into a clean icon face by hiding the antenna arc, mouth, and cheeks in that compact state.
