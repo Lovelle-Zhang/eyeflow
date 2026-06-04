@@ -1,0 +1,5952 @@
+<!doctype html>
+<html lang="zh-CN"><head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>EyeFlow - AI 护眼工作系统</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --ink: #18201f;
+      --muted: #6c7672;
+      --line: #dfe8e2;
+      --panel: #ffffff;
+      --wash: #f6f9f6;
+      --wash-2: #eef5f0;
+      --mint: #0f9f7a;
+      --mint-soft: #d9f4eb;
+      --sage: #5e8677;
+      --sky: #dfeef3;
+      --blue: #2f6fed;
+      --blue-soft: #e3ecff;
+      --rose: #d74f75;
+      --amber: #b97816;
+      --amber-soft: #fff0d7;
+      --shadow: 0 24px 64px rgba(31, 47, 40, 0.08);
+      --shadow-soft: 0 10px 26px rgba(31, 47, 40, 0.055);
+      --shadow-line: inset 0 0 0 1px rgba(24, 32, 31, 0.06);
+      --radius: 8px;
+      --surface-tint: rgba(255, 255, 255, 0.72);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    [hidden] {
+      display: none !important;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      color: var(--ink);
+      background:
+        linear-gradient(180deg, #fcfdfb 0, #f7faf7 300px, #f1f7f3 100%),
+        var(--wash);
+    }
+
+    button,
+    input,
+    textarea {
+      font: inherit;
+    }
+
+    button {
+      border: 0;
+      cursor: default;
+    }
+
+    .app {
+      min-height: 100vh;
+      display: grid;
+      grid-template-columns: 260px minmax(0, 1fr);
+    }
+
+    .sidebar {
+      min-height: 100vh;
+      padding: 24px 22px;
+      background: linear-gradient(180deg, #0d1714 0%, #101916 100%);
+      color: #f7fbf7;
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+      position: sticky;
+      top: 0;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .mark {
+      width: 38px;
+      height: 38px;
+      border-radius: var(--radius);
+      background: linear-gradient(145deg, #eafff6 0%, #bdeaff 58%, #f2edc6 100%);
+      position: relative;
+      flex: 0 0 auto;
+      box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.54);
+    }
+
+    .mark::before {
+      content: "";
+      position: absolute;
+      left: 8px;
+      top: 13px;
+      width: 22px;
+      height: 12px;
+      border-radius: 999px;
+      background: #102124;
+      box-shadow: 0 0 0 2px rgba(126, 239, 212, 0.18);
+    }
+
+    .mark::after {
+      content: "";
+      position: absolute;
+      right: 7px;
+      top: 8px;
+      width: 7px;
+      height: 7px;
+      border-radius: 999px;
+      background: #6fe7c3;
+      box-shadow: 0 0 10px rgba(111, 231, 195, 0.8);
+    }
+
+    .brand h1 {
+      margin: 0;
+      font-size: 20px;
+      letter-spacing: 0;
+    }
+
+    .brand p {
+      margin: 2px 0 0;
+      color: #aebbb7;
+      font-size: 12px;
+    }
+
+    .nav {
+      display: grid;
+      gap: 6px;
+    }
+
+    .nav button {
+      width: 100%;
+      height: 42px;
+      padding: 0 12px;
+      border-radius: var(--radius);
+      color: #c9d5d0;
+      background: transparent;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      text-align: left;
+      transition: background 160ms ease, color 160ms ease;
+    }
+
+    .nav button.active {
+      color: #0f1715;
+      background: #e4f6ee;
+      box-shadow: inset 0 0 0 1px rgba(130, 233, 200, 0.36);
+    }
+
+    .nav button:not(.active):hover {
+      color: #ffffff;
+      background: rgba(255, 255, 255, 0.08);
+    }
+
+    .nav svg,
+    .icon-btn svg,
+    .small-icon {
+      width: 18px;
+      height: 18px;
+      flex: 0 0 auto;
+    }
+
+    .sidebar-footer {
+      margin-top: auto;
+      padding: 16px;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: var(--radius);
+      color: #c8d4d0;
+      font-size: 13px;
+      line-height: 1.5;
+      background: rgba(255, 255, 255, 0.04);
+    }
+
+    main {
+      width: min(1240px, 100%);
+      padding: 32px 34px 112px;
+      display: grid;
+      gap: 22px;
+      align-content: start;
+    }
+
+    .view {
+      display: grid;
+      gap: 18px;
+    }
+
+    .view[hidden] {
+      display: none;
+    }
+
+    .topbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .topbar > div {
+      min-width: 0;
+    }
+
+    .topbar h2 {
+      margin: 0;
+      font-size: clamp(27px, 3vw, 36px);
+      line-height: 1.12;
+      font-weight: 760;
+      letter-spacing: 0;
+    }
+
+    .topbar p {
+      margin: 5px 0 0;
+      color: var(--muted);
+    }
+
+    .actions {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+    }
+
+    .ghost,
+    .primary,
+    .danger {
+      max-width: 100%;
+      min-width: 0;
+      min-height: 42px;
+      border-radius: var(--radius);
+      padding: 0 15px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      white-space: normal;
+      text-align: center;
+      line-height: 1.22;
+      transition: transform 140ms ease, box-shadow 140ms ease, background 140ms ease, border-color 140ms ease, color 140ms ease;
+    }
+
+    .primary {
+      color: #f8fffb;
+      background: linear-gradient(180deg, #172522 0%, #111a18 100%);
+      box-shadow:
+        0 14px 28px rgba(24, 32, 31, 0.16),
+        inset 0 1px 0 rgba(255, 255, 255, 0.08);
+    }
+
+    .ghost {
+      color: var(--ink);
+      background: rgba(255, 255, 255, 0.7);
+      border: 1px solid rgba(24, 32, 31, 0.08);
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.72);
+    }
+
+    .primary:hover,
+    .ghost:hover {
+      transform: translateY(-1px);
+      box-shadow:
+        0 14px 30px rgba(31, 47, 40, 0.09),
+        inset 0 1px 0 rgba(255, 255, 255, 0.1);
+      border-color: #d3ded7;
+    }
+
+    .primary:active,
+    .ghost:active {
+      transform: translateY(0);
+      box-shadow: var(--shadow-soft);
+    }
+
+    button:disabled {
+      cursor: default;
+      opacity: 0.55;
+      box-shadow: none;
+    }
+
+    button:focus-visible,
+    input:focus-visible,
+    textarea:focus-visible {
+      outline: 2px solid rgba(15, 159, 122, 0.42);
+      outline-offset: 2px;
+    }
+
+    .danger {
+      color: #ffffff;
+      background: var(--rose);
+    }
+
+    .active-setting {
+      color: #ffffff;
+      background: var(--ink);
+      border-color: var(--ink);
+      box-shadow: 0 8px 18px rgba(24, 32, 31, 0.12);
+    }
+
+    .dashboard {
+      display: grid;
+      grid-template-columns: minmax(300px, 0.95fr) minmax(320px, 1.05fr);
+      gap: 16px;
+      align-items: start;
+    }
+
+    .note-dashboard {
+      grid-template-columns: minmax(0, 1fr);
+    }
+
+    .panel,
+    .metric,
+    .log-item {
+      min-width: 0;
+      background: rgba(255, 255, 255, 0.78);
+      border: 1px solid rgba(24, 32, 31, 0.07);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+    }
+
+    .panel {
+      padding: 18px;
+    }
+
+    .panel h3 {
+      margin: 0 0 14px;
+      font-size: 16px;
+      letter-spacing: 0;
+    }
+
+    .timer-card {
+      --session-accent: var(--mint);
+      --session-accent-soft: rgba(15, 159, 122, 0.18);
+      display: grid;
+      gap: 18px;
+      position: relative;
+      overflow: hidden;
+      align-content: start;
+    }
+
+    .timer-card[data-mood="focus"] {
+      --session-accent: #4fb8d8;
+      --session-accent-soft: rgba(79, 184, 216, 0.2);
+    }
+
+    .timer-card[data-mood="blink"] {
+      --session-accent: #d8a537;
+      --session-accent-soft: rgba(216, 165, 55, 0.22);
+    }
+
+    .timer-card[data-mood="rest"] {
+      --session-accent: #d7658a;
+      --session-accent-soft: rgba(215, 101, 138, 0.22);
+    }
+
+    .timer-card > * {
+      min-width: 0;
+    }
+
+    .session-card-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      min-width: 0;
+    }
+
+    .session-card-head h3 {
+      margin: 0;
+    }
+
+    .session-state-pill {
+      flex: 0 1 auto;
+      min-width: 0;
+      border: 1px solid rgba(24, 32, 31, 0.06);
+      border-radius: 999px;
+      padding: 5px 9px;
+      color: var(--muted);
+      background: rgba(248, 251, 248, 0.78);
+      font-size: 12px;
+      line-height: 1;
+      white-space: nowrap;
+    }
+
+    .session-state-pill[data-state="auto"] {
+      color: #587066;
+      background: #f1f8f4;
+      border-color: #d8e8df;
+    }
+
+    .session-state-pill[data-state="manual"] {
+      color: #0b7f65;
+      background: #def6ed;
+      border-color: #bfead9;
+    }
+
+    .session-state-pill[data-state="paused"] {
+      color: #68736e;
+      background: #f4f7f4;
+    }
+
+    .timer-card.session-pulse {
+      animation: sessionPulse 820ms ease;
+    }
+
+    .rhythm-space {
+      min-width: 0;
+      padding: 18px 12px 16px;
+      border-radius: var(--radius);
+      background:
+        radial-gradient(circle at 50% 44%, var(--session-accent-soft), transparent 0 44%, transparent 100%),
+        linear-gradient(180deg, rgba(250, 254, 251, 0.72), rgba(236, 246, 240, 0.42));
+      border: 1px solid rgba(24, 32, 31, 0.045);
+      box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.72),
+        inset 0 -18px 40px rgba(15, 159, 122, 0.045);
+      display: grid;
+      place-items: center;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .rhythm-guide {
+      position: absolute;
+      inset: 18px;
+      border-radius: 50%;
+      background:
+        repeating-conic-gradient(from -3deg, var(--session-accent-soft) 0 2deg, transparent 2deg 17deg);
+      opacity: 0.52;
+      mask: radial-gradient(circle, transparent 0 63%, #000 64% 100%);
+      -webkit-mask: radial-gradient(circle, transparent 0 63%, #000 64% 100%);
+      pointer-events: none;
+    }
+
+    .timer-ring {
+      width: min(100%, 246px);
+      aspect-ratio: 1;
+      border-radius: 50%;
+      margin: 0 auto;
+      display: grid;
+      place-items: center;
+      background:
+        conic-gradient(var(--session-accent) var(--progress), rgba(226, 235, 229, 0.86) 0);
+      position: relative;
+      box-shadow:
+        0 20px 44px rgba(31, 47, 40, 0.07),
+        inset 0 0 0 1px rgba(24, 32, 31, 0.03);
+    }
+
+    .timer-ring::before {
+      content: "";
+      position: absolute;
+      inset: 17px;
+      border-radius: 50%;
+      background:
+        linear-gradient(180deg, rgba(255, 255, 255, 0.96), rgba(250, 253, 250, 0.9));
+      box-shadow:
+        inset 0 0 0 1px rgba(24, 32, 31, 0.055),
+        0 10px 26px rgba(32, 43, 37, 0.045);
+    }
+
+    .timer-inner {
+      position: relative;
+      text-align: center;
+      display: grid;
+      gap: 8px;
+      width: calc(100% - 58px);
+      justify-items: center;
+      min-width: 0;
+    }
+
+    .time {
+      font-variant-numeric: tabular-nums;
+      font-size: clamp(44px, 6.6vw, 60px);
+      font-weight: 750;
+      line-height: 1;
+    }
+
+    .timer-inner span {
+      color: var(--muted);
+      width: min(100%, 190px);
+      font-size: 12px;
+      line-height: 1.35;
+      white-space: normal;
+      overflow-wrap: anywhere;
+    }
+
+    .timer-controls {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+
+    .timer-controls button {
+      min-width: 0;
+    }
+
+    .timer-card > .timer-controls {
+      gap: 12px;
+    }
+
+    .timer-card > .timer-controls .primary,
+    .timer-card > .timer-controls .ghost {
+      min-height: 48px;
+      font-weight: 680;
+    }
+
+    .timer-card > .timer-controls .primary {
+      background: linear-gradient(180deg, #18231f 0%, #111917 100%);
+      box-shadow:
+        0 16px 34px rgba(24, 32, 31, 0.18),
+        inset 0 1px 0 rgba(255, 255, 255, 0.08);
+    }
+
+    .timer-card > .timer-controls .ghost {
+      background: rgba(255, 255, 255, 0.56);
+      border-color: rgba(24, 32, 31, 0.065);
+    }
+
+    #forceReturnBtn {
+      grid-column: 1 / -1;
+    }
+
+    .session-settings {
+      display: grid;
+      gap: 12px;
+      padding: 12px;
+      border-radius: var(--radius);
+      background: rgba(255, 255, 255, 0.46);
+      border: 1px solid rgba(24, 32, 31, 0.045);
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.58);
+    }
+
+    .field {
+      display: grid;
+      gap: 7px;
+    }
+
+    label {
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    input[type="range"] {
+      width: 100%;
+      height: 22px;
+      margin: 0;
+      appearance: none;
+      -webkit-appearance: none;
+      cursor: default;
+      background: transparent;
+      --range-color: var(--mint);
+      --range-fill: 20%;
+      --range-rest: #e7eee9;
+      --range-glow: rgba(15, 159, 122, 0.18);
+    }
+
+    input[type="range"]::-webkit-slider-runnable-track {
+      height: 8px;
+      border-radius: 999px;
+      background:
+        linear-gradient(90deg, var(--range-color) 0 var(--range-fill), var(--range-rest) var(--range-fill) 100%);
+      box-shadow: inset 0 0 0 1px rgba(24, 32, 31, 0.04);
+      transition: background 160ms ease, box-shadow 160ms ease;
+    }
+
+    input[type="range"]::-webkit-slider-thumb {
+      appearance: none;
+      -webkit-appearance: none;
+      width: 18px;
+      height: 18px;
+      margin-top: -5px;
+      border-radius: 50%;
+      border: 3px solid #ffffff;
+      background: var(--range-color);
+      box-shadow:
+        0 2px 8px rgba(24, 32, 31, 0.14),
+        0 0 0 4px var(--range-glow);
+      transition: transform 140ms ease, box-shadow 140ms ease, background 160ms ease;
+    }
+
+    input[type="range"]:hover::-webkit-slider-thumb {
+      transform: scale(1.05);
+    }
+
+    input[type="range"]:active::-webkit-slider-thumb {
+      transform: scale(1.16);
+      box-shadow:
+        0 3px 10px rgba(24, 32, 31, 0.16),
+        0 0 0 7px var(--range-glow);
+    }
+
+    input[type="range"]:focus-visible {
+      outline: none;
+    }
+
+    input[type="range"]:focus-visible::-webkit-slider-runnable-track {
+      box-shadow:
+        inset 0 0 0 1px rgba(24, 32, 31, 0.04),
+        0 0 0 3px var(--range-glow);
+    }
+
+    input[type="range"]::-moz-range-track {
+      height: 8px;
+      border-radius: 999px;
+      background: var(--range-rest);
+    }
+
+    input[type="range"]::-moz-range-progress {
+      height: 8px;
+      border-radius: 999px;
+      background: var(--range-color);
+    }
+
+    input[type="range"]::-moz-range-thumb {
+      width: 14px;
+      height: 14px;
+      border-radius: 50%;
+      border: 3px solid #ffffff;
+      background: var(--range-color);
+      box-shadow:
+        0 2px 8px rgba(24, 32, 31, 0.14),
+        0 0 0 4px var(--range-glow);
+    }
+
+    .value-row {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .value-row > * {
+      min-width: 0;
+    }
+
+    .metrics {
+      display: grid;
+      grid-template-columns: minmax(160px, 1.15fr) repeat(3, minmax(72px, 0.62fr));
+      gap: 10px;
+      align-items: stretch;
+      padding: 10px;
+      border-radius: var(--radius);
+      background:
+        linear-gradient(180deg, rgba(255, 255, 255, 0.56), rgba(240, 248, 243, 0.42));
+      border: 1px solid rgba(24, 32, 31, 0.055);
+      box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.68),
+        0 14px 34px rgba(31, 47, 40, 0.045);
+    }
+
+    .intro {
+      display: grid;
+      grid-template-columns: 1.1fr 1fr 1fr;
+      gap: 10px;
+    }
+
+    .intro-wrap {
+      display: grid;
+      gap: 10px;
+    }
+
+    .intro-toggle {
+      width: fit-content;
+      color: var(--muted);
+      background: transparent;
+      border: 0;
+      min-height: 30px;
+      padding: 0;
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      font-size: 13px;
+    }
+
+    .intro-toggle:hover {
+      color: var(--ink);
+    }
+
+    .intro-toggle svg {
+      width: 15px;
+      height: 15px;
+      transition: transform 160ms ease;
+    }
+
+    .intro-wrap.open .intro-toggle svg {
+      transform: rotate(180deg);
+    }
+
+    .intro-wrap:not(.open) .intro {
+      display: none;
+    }
+
+    .intro-card {
+      min-width: 0;
+      padding: 13px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: var(--surface-tint);
+      display: grid;
+      grid-template-columns: auto 1fr;
+      gap: 11px;
+      align-items: start;
+      box-shadow: none;
+    }
+
+    .intro-card strong {
+      display: block;
+      margin-bottom: 5px;
+      font-size: 14px;
+    }
+
+    .intro-card p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.5;
+    }
+
+    .intro-icon {
+      width: 32px;
+      height: 32px;
+      border-radius: var(--radius);
+      display: grid;
+      place-items: center;
+      color: var(--ink);
+      background: var(--mint-soft);
+    }
+
+    .intro-card:nth-child(2) .intro-icon {
+      background: var(--blue-soft);
+    }
+
+    .intro-card:nth-child(3) .intro-icon {
+      background: var(--amber-soft);
+    }
+
+    .intro-icon svg {
+      width: 17px;
+      height: 17px;
+    }
+
+    .intervention-card {
+      min-width: 0;
+      margin-top: 14px;
+      padding: 14px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: #fbfdf9;
+      display: grid;
+      gap: 10px;
+    }
+
+    .intervention-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    .intervention-level {
+      width: 34px;
+      height: 34px;
+      border-radius: 999px;
+      display: grid;
+      place-items: center;
+      background: var(--mint-soft);
+      color: var(--ink);
+      font-weight: 750;
+      font-size: 13px;
+      flex: 0 0 auto;
+    }
+
+    .intervention-copy {
+      display: grid;
+      gap: 3px;
+      min-width: 0;
+    }
+
+    .intervention-copy strong {
+      font-size: 14px;
+    }
+
+    .intervention-copy p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.45;
+    }
+
+    .intervention-meter {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 5px;
+    }
+
+    .intervention-meter span {
+      height: 6px;
+      border-radius: 999px;
+      background: #edf2ec;
+    }
+
+    .intervention-meter span.active {
+      background: var(--mint);
+    }
+
+    .metric {
+      padding: 10px;
+      background: transparent;
+      border-color: transparent;
+      border-radius: 7px;
+      box-shadow: none;
+      min-height: 76px;
+      display: grid;
+      align-content: start;
+    }
+
+    .metrics .metric {
+      border-color: transparent;
+    }
+
+    .metrics .metric:first-child {
+      background: rgba(255, 255, 255, 0.42);
+      box-shadow: inset 0 0 0 1px rgba(24, 32, 31, 0.04);
+    }
+
+    .daily-summary {
+      display: grid;
+      grid-template-columns: minmax(300px, 1.15fr) minmax(260px, 0.85fr);
+      gap: 0;
+      border: 1px solid rgba(24, 32, 31, 0.06);
+      border-radius: var(--radius);
+      background: rgba(255, 255, 255, 0.58);
+      box-shadow: none;
+      overflow: hidden;
+    }
+
+    .summary-card {
+      min-width: 0;
+      padding: 16px 18px;
+      border: 0;
+      border-radius: 0;
+      background: transparent;
+      box-shadow: none;
+      display: grid;
+      gap: 7px;
+      align-content: start;
+    }
+
+    .summary-card + .summary-card {
+      border-left: 1px solid var(--line);
+    }
+
+    .summary-card.primary-summary {
+      background: linear-gradient(90deg, rgba(217, 244, 235, 0.32), rgba(255, 255, 255, 0));
+      border-color: transparent;
+    }
+
+    .summary-card span {
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .summary-card strong {
+      font-size: 17px;
+      line-height: 1.3;
+    }
+
+    .summary-card p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.45;
+    }
+
+    .state-center {
+      display: grid;
+      grid-template-columns: minmax(0, 1.06fr) minmax(320px, 0.94fr);
+      gap: 18px;
+      align-items: start;
+      padding: 2px;
+    }
+
+    .state-column {
+      min-width: 0;
+      display: grid;
+      gap: 12px;
+      align-content: start;
+    }
+
+    .state-hero {
+      min-width: 0;
+      padding: 24px;
+      border-radius: var(--radius);
+      border: 1px solid rgba(24, 32, 31, 0.06);
+      background:
+        linear-gradient(145deg, rgba(255, 255, 255, 0.95) 0%, rgba(249, 253, 250, 0.9) 56%, rgba(236, 246, 240, 0.78) 100%);
+      box-shadow:
+        0 24px 70px rgba(31, 47, 40, 0.09),
+        inset 0 1px 0 rgba(255, 255, 255, 0.76);
+      display: grid;
+      gap: 14px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .state-hero::before {
+      content: "";
+      position: absolute;
+      inset: 0 auto 0 0;
+      width: 4px;
+      background: linear-gradient(180deg, rgba(15, 159, 122, 0.75), rgba(95, 139, 124, 0.18));
+      opacity: 0.86;
+    }
+
+    .state-stage {
+      min-width: 0;
+      display: grid;
+      grid-template-columns: minmax(126px, 0.46fr) minmax(0, 1fr);
+      gap: 22px;
+      align-items: center;
+      position: relative;
+    }
+
+    .state-copy {
+      min-width: 0;
+      display: grid;
+      gap: 12px;
+      align-content: center;
+    }
+
+    .stage-mira {
+      --stage-accent: var(--mint);
+      --stage-accent-soft: rgba(15, 159, 122, 0.18);
+      min-width: 0;
+      width: min(100%, 164px);
+      aspect-ratio: 1;
+      border-radius: 50%;
+      display: grid;
+      place-items: center;
+      justify-self: center;
+      position: relative;
+      background:
+        radial-gradient(circle at 50% 50%, rgba(255, 255, 255, 0.88) 0 38%, transparent 39%),
+        radial-gradient(circle at 50% 50%, var(--stage-accent-soft) 0 52%, transparent 53%);
+      box-shadow:
+        inset 0 0 0 1px rgba(24, 32, 31, 0.045),
+        0 18px 38px rgba(31, 47, 40, 0.075);
+    }
+
+    .stage-orbit {
+      position: absolute;
+      inset: 9px;
+      border-radius: 50%;
+      background:
+        conic-gradient(from -32deg, var(--stage-accent) 0 16%, rgba(229, 237, 231, 0.78) 16% 100%);
+      opacity: 0.9;
+      mask: radial-gradient(circle, transparent 0 61%, #000 62% 100%);
+      -webkit-mask: radial-gradient(circle, transparent 0 61%, #000 62% 100%);
+    }
+
+    .stage-pet {
+      width: 78px;
+      aspect-ratio: 1;
+      border-radius: 24px 24px 21px 21px;
+      background:
+        radial-gradient(circle at 50% 12%, rgba(255, 255, 255, 0.82) 0 13px, transparent 14px),
+        linear-gradient(160deg, #d9f4eb 0%, #f7fffb 52%, #dfeaff 100%);
+      display: grid;
+      place-items: center;
+      position: relative;
+      overflow: hidden;
+      box-shadow:
+        inset 0 0 0 1px rgba(24, 32, 31, 0.08),
+        inset 0 -10px 20px rgba(15, 159, 122, 0.12),
+        0 14px 24px rgba(31, 47, 40, 0.1);
+      z-index: 1;
+    }
+
+    .stage-pet::before {
+      content: "";
+      position: absolute;
+      top: 26px;
+      left: 13px;
+      width: 52px;
+      height: 24px;
+      border-radius: 999px;
+      background: rgba(15, 23, 21, 0.86);
+      box-shadow: inset 0 0 0 2px rgba(255, 255, 255, 0.1);
+    }
+
+    .stage-pet::after {
+      content: "";
+      position: absolute;
+      top: 20px;
+      right: 11px;
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      background: var(--stage-accent);
+      box-shadow: 0 0 16px var(--stage-accent-soft);
+    }
+
+    .stage-pet .pet-face {
+      top: 32px;
+      left: 24px;
+      width: 29px;
+      height: 10px;
+    }
+
+    .stage-pet .pet-face::before,
+    .stage-pet .pet-face::after {
+      width: 6px;
+      height: 6px;
+    }
+
+    .stage-pet .pet-mouth {
+      top: 50px;
+      width: 18px;
+      height: 9px;
+    }
+
+    .stage-pet .pet-cheek {
+      top: 47px;
+      width: 9px;
+      height: 4px;
+    }
+
+    .stage-pet .pet-cheek.left {
+      left: 16px;
+    }
+
+    .stage-pet .pet-cheek.right {
+      right: 16px;
+    }
+
+    .stage-pet .pet-antenna {
+      top: 9px;
+      left: 24px;
+      width: 29px;
+      height: 16px;
+    }
+
+    .stage-mira span {
+      position: absolute;
+      right: 17px;
+      bottom: 17px;
+      min-width: 38px;
+      height: 30px;
+      padding: 0 8px;
+      border-radius: 999px;
+      display: grid;
+      place-items: center;
+      color: #f8fffb;
+      background: rgba(17, 25, 23, 0.88);
+      font-size: 16px;
+      font-weight: 760;
+      font-variant-numeric: tabular-nums;
+      box-shadow: 0 10px 20px rgba(31, 47, 40, 0.16);
+      z-index: 2;
+    }
+
+    .stage-mira[data-mood="focus"] {
+      --stage-accent: #4fb8d8;
+      --stage-accent-soft: rgba(79, 184, 216, 0.2);
+    }
+
+    .stage-mira[data-mood="blink"] {
+      --stage-accent: #d8a537;
+      --stage-accent-soft: rgba(216, 165, 55, 0.24);
+    }
+
+    .stage-mira[data-mood="rest"] {
+      --stage-accent: #d7658a;
+      --stage-accent-soft: rgba(215, 101, 138, 0.24);
+    }
+
+    .stage-mira[data-mood="focus"] .stage-pet {
+      background:
+        radial-gradient(circle at 50% 12%, rgba(255, 255, 255, 0.82) 0 13px, transparent 14px),
+        linear-gradient(160deg, #e3ecff 0%, #f7fffb 52%, #d9f4eb 100%);
+    }
+
+    .stage-mira[data-mood="blink"] .stage-pet {
+      background:
+        radial-gradient(circle at 50% 12%, rgba(255, 255, 255, 0.82) 0 13px, transparent 14px),
+        linear-gradient(160deg, #fff0d7 0%, #ffffff 52%, #d9f4eb 100%);
+    }
+
+    .stage-mira[data-mood="blink"] .pet-face::before,
+    .stage-mira[data-mood="blink"] .pet-face::after {
+      height: 2px;
+      border-radius: 999px;
+      transform: translateY(3px);
+      animation-duration: 2.2s;
+    }
+
+    .stage-mira[data-mood="blink"] .pet-mouth {
+      width: 15px;
+      height: 6px;
+      top: 50px;
+      border: 0;
+      border-bottom: 2px solid rgba(202, 143, 38, 0.78);
+      border-radius: 0 0 999px 999px;
+      transform: translateX(-50%) scaleX(0.82);
+    }
+
+    .stage-mira[data-mood="rest"] .stage-pet {
+      background:
+        radial-gradient(circle at 50% 12%, rgba(255, 255, 255, 0.82) 0 13px, transparent 14px),
+        linear-gradient(160deg, #ffe0e8 0%, #fff8fa 52%, #fff0d7 100%);
+    }
+
+    .stage-mira[data-mood="rest"] .pet-mouth {
+      width: 18px;
+      height: 16px;
+      top: 45px;
+      border: 0;
+      background: transparent;
+      transform: translateX(-50%);
+      display: grid;
+      place-items: center;
+    }
+
+    .stage-mira[data-mood="rest"] .pet-mouth::before {
+      content: "Ɛ";
+      font-family: ui-rounded, "SF Pro Rounded", Inter, system-ui, sans-serif;
+      font-size: 16px;
+      font-weight: 800;
+      line-height: 1;
+      color: rgba(214, 82, 125, 0.86);
+      transform: translateY(-1px) rotate(-4deg) scaleX(0.82);
+    }
+
+    .state-hero:nth-child(2) {
+      background: rgba(255, 255, 255, 0.9);
+      border-color: var(--line);
+      box-shadow: var(--shadow-soft);
+    }
+
+    .state-center .timer-card {
+      align-self: start;
+      background:
+        linear-gradient(180deg, rgba(255, 255, 255, 0.9), rgba(246, 252, 248, 0.82));
+      border-color: rgba(24, 32, 31, 0.065);
+      box-shadow:
+        0 22px 58px rgba(31, 47, 40, 0.075),
+        inset 0 1px 0 rgba(255, 255, 255, 0.74);
+    }
+
+    .state-label {
+      display: inline-flex;
+      width: fit-content;
+      align-items: center;
+      gap: 7px;
+      padding: 7px 11px;
+      border-radius: 999px;
+      background: var(--mint-soft);
+      color: var(--ink);
+      font-size: 13px;
+      font-weight: 650;
+      box-shadow:
+        inset 0 0 0 1px rgba(15, 159, 122, 0.16),
+        0 6px 16px rgba(15, 159, 122, 0.08);
+      position: relative;
+    }
+
+    .state-hero strong {
+      max-width: 680px;
+      font-size: clamp(30px, 3.2vw, 42px);
+      letter-spacing: 0;
+      line-height: 1.05;
+      position: relative;
+    }
+
+    .state-hero p {
+      margin: 0;
+      color: var(--muted);
+      line-height: 1.55;
+      position: relative;
+    }
+
+    .today-flow {
+      width: min(100%, max-content);
+      max-width: 100%;
+      padding: 10px 12px;
+      border-radius: var(--radius);
+      color: #40524c;
+      background: rgba(255, 255, 255, 0.62);
+      border: 1px solid rgba(24, 32, 31, 0.055);
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.74);
+      font-size: 13px;
+      line-height: 1.45;
+      overflow-wrap: anywhere;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 7px 10px;
+      align-items: center;
+    }
+
+    .today-flow span {
+      min-width: 0;
+    }
+
+    .today-flow-divider {
+      width: 1px;
+      height: 14px;
+      background: rgba(24, 32, 31, 0.12);
+      flex: 0 0 auto;
+    }
+
+    .today-flow.force {
+      color: #5e2635;
+      background: rgba(255, 224, 232, 0.78);
+      border-color: rgba(215, 79, 117, 0.18);
+    }
+
+    .today-plan {
+      width: min(100%, 560px);
+      padding: 12px 13px;
+      border-radius: var(--radius);
+      color: #52615c;
+      background: rgba(248, 252, 250, 0.72);
+      border: 1px solid rgba(24, 32, 31, 0.055);
+      font-size: 13px;
+      line-height: 1.5;
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.58);
+    }
+
+    .today-plan strong {
+      display: inline;
+      color: var(--ink);
+      font-size: inherit;
+      line-height: inherit;
+    }
+
+    .assessment-reminder {
+      min-width: 0;
+      display: grid;
+      gap: 9px;
+      width: min(100%, 480px);
+      padding: 12px;
+      border-radius: var(--radius);
+      background: rgba(255, 255, 255, 0.82);
+      border: 1px solid rgba(15, 159, 122, 0.18);
+    }
+
+    .assessment-reminder strong {
+      font-size: 14px;
+      line-height: 1.3;
+    }
+
+    .assessment-reminder p {
+      margin: -3px 0 0;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.45;
+    }
+
+    .assessment-reminder .ghost {
+      width: fit-content;
+      min-height: 34px;
+      padding: 0 11px;
+    }
+
+    .pending-reminder {
+      min-width: 0;
+      display: grid;
+      gap: 10px;
+      padding: 12px;
+      border-radius: var(--radius);
+      background: rgba(255, 255, 255, 0.84);
+      border: 1px solid rgba(15, 159, 122, 0.18);
+    }
+
+    .pending-reminder[hidden] {
+      display: none;
+    }
+
+    .pending-reminder strong {
+      font-size: 14px;
+      line-height: 1.3;
+    }
+
+    .pending-reminder p {
+      margin: -4px 0 0;
+      font-size: 13px;
+    }
+
+    .pending-reminder .actions {
+      justify-content: flex-start;
+    }
+
+    .reason-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 8px;
+    }
+
+    .reason {
+      min-width: 0;
+      padding: 11px;
+      border-radius: var(--radius);
+      background: rgba(248, 250, 247, 0.68);
+      border: 1px solid rgba(24, 32, 31, 0.055);
+    }
+
+    .reason span {
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .reason b {
+      display: block;
+      margin-top: 6px;
+      font-size: 16px;
+      overflow-wrap: anywhere;
+    }
+
+    .quick-check {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 9px;
+      position: relative;
+    }
+
+    .quick-check .ghost {
+      min-height: 36px;
+      padding: 0 12px;
+      color: #43534e;
+      background: rgba(255, 255, 255, 0.52);
+      border-color: rgba(24, 32, 31, 0.055);
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.6);
+    }
+
+    .quick-check .ghost:hover {
+      background: rgba(255, 255, 255, 0.76);
+    }
+
+    details.quick-log-panel {
+      padding: 0;
+      overflow: hidden;
+      background: rgba(255, 255, 255, 0.54);
+      box-shadow: none;
+    }
+
+    details.quick-log-panel summary {
+      padding: 14px 16px;
+      cursor: default;
+      color: var(--ink);
+      list-style: none;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+    }
+
+    details.quick-log-panel summary::-webkit-details-marker {
+      display: none;
+    }
+
+    details.quick-log-panel summary::before {
+      content: "+";
+      width: 18px;
+      height: 18px;
+      border-radius: 999px;
+      display: grid;
+      place-items: center;
+      background: var(--mint-soft);
+      color: var(--mint);
+      font-weight: 800;
+      flex: 0 0 auto;
+    }
+
+    details.quick-log-panel[open] summary::before {
+      content: "-";
+    }
+
+    .quick-log-title {
+      display: grid;
+      gap: 2px;
+      min-width: 0;
+      flex: 1;
+    }
+
+    .quick-log-title strong {
+      font-size: 15px;
+      line-height: 1.25;
+    }
+
+    .quick-log-title span {
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.35;
+    }
+
+    .quick-log-chip {
+      color: var(--muted);
+      font-size: 12px;
+      white-space: nowrap;
+    }
+
+    .quick-log-body {
+      padding: 0 16px 16px;
+      display: grid;
+      gap: 14px;
+    }
+
+    details.quick-log-panel:not([open]) .quick-log-body {
+      display: none;
+    }
+
+    .score-details {
+      margin-top: 2px;
+      padding-top: 12px;
+      border-top: 1px solid rgba(24, 32, 31, 0.06);
+      position: relative;
+    }
+
+    .score-details summary {
+      width: fit-content;
+      list-style: none;
+      color: var(--muted);
+      font-size: 13px;
+      font-weight: 650;
+      cursor: default;
+    }
+
+    .score-details summary::-webkit-details-marker {
+      display: none;
+    }
+
+    .score-details summary::before {
+      content: "+";
+      display: inline-block;
+      width: 16px;
+      color: var(--mint);
+    }
+
+    .score-details[open] summary::before {
+      content: "-";
+    }
+
+    .score-details .reason-grid {
+      margin-top: 10px;
+    }
+
+    .score-details p {
+      margin-top: 10px;
+      font-size: 13px;
+    }
+
+    .metric span {
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .metric strong {
+      display: block;
+      margin-top: 7px;
+      font-size: 25px;
+      font-variant-numeric: tabular-nums;
+      letter-spacing: 0;
+    }
+
+    .metric-main {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: 12px;
+      min-width: 0;
+    }
+
+    .load-band {
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.25;
+      text-align: right;
+    }
+
+    .load-legend {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 6px;
+      margin-top: 9px;
+    }
+
+    .load-legend span {
+      min-height: 28px;
+      padding: 5px;
+      border-radius: 7px;
+      background: rgba(248, 250, 248, 0.7);
+      color: var(--muted);
+      font-size: 10.5px;
+      line-height: 1.2;
+      display: grid;
+      align-content: center;
+    }
+
+    .load-legend span.active {
+      color: var(--ink);
+      background: rgba(217, 244, 235, 0.76);
+      box-shadow: inset 0 0 0 1px rgba(15, 159, 122, 0.26);
+    }
+
+    .symptom-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 12px;
+    }
+
+    .symptom {
+      min-width: 0;
+      padding: 12px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: #ffffff;
+      display: grid;
+      gap: 10px;
+      box-shadow: var(--shadow-soft);
+      transition: border-color 160ms ease, box-shadow 160ms ease, background 160ms ease;
+    }
+
+    .symptom:focus-within {
+      border-color: rgba(15, 159, 122, 0.24);
+      background: #fbfffd;
+      box-shadow:
+        0 10px 24px rgba(32, 43, 37, 0.06),
+        0 0 0 3px rgba(15, 159, 122, 0.08);
+    }
+
+    .symptom b {
+      font-size: 14px;
+    }
+
+    .symptom output {
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .note-box {
+      min-height: 82px;
+      width: 100%;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      resize: vertical;
+      padding: 12px;
+      color: var(--ink);
+      background: #ffffff;
+      transition: border-color 140ms ease, box-shadow 140ms ease;
+    }
+
+    .note-box:focus {
+      border-color: rgba(15, 159, 122, 0.5);
+      box-shadow: 0 0 0 3px rgba(15, 159, 122, 0.1);
+    }
+
+    .recovery-feedback {
+      display: grid;
+      gap: 10px;
+      margin-top: 12px;
+      padding: 12px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: rgba(255, 255, 255, 0.72);
+    }
+
+    .recovery-feedback[hidden] {
+      display: none;
+    }
+
+    .recovery-feedback p {
+      margin: 0;
+      color: var(--muted);
+      line-height: 1.5;
+    }
+
+    .recovery-feedback .timer-controls {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+
+    .recovery-feedback .timer-controls button {
+      white-space: normal;
+      line-height: 1.25;
+      min-height: 48px;
+      padding-inline: 10px;
+    }
+
+    .insight {
+      border-radius: var(--radius);
+      padding: 13px;
+      background: linear-gradient(180deg, #edf9f4, var(--mint-soft));
+      border: 1px solid rgba(15, 159, 122, 0.18);
+      display: flex;
+      gap: 12px;
+      align-items: flex-start;
+      line-height: 1.5;
+    }
+
+    .insight svg {
+      margin-top: 2px;
+      flex: 0 0 auto;
+    }
+
+    .recommendations {
+      display: grid;
+      gap: 10px;
+    }
+
+    .feature-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 12px;
+    }
+
+    .settings-grid {
+      display: grid;
+      grid-template-columns: minmax(320px, 1.05fr) minmax(300px, 0.95fr);
+      gap: 14px;
+      align-items: start;
+    }
+
+    .settings-primary,
+    .settings-secondary {
+      min-width: 0;
+      display: grid;
+      gap: 12px;
+    }
+
+    .settings-card {
+      min-width: 0;
+      padding: 16px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: rgba(255, 255, 255, 0.76);
+      box-shadow: var(--shadow-soft);
+      display: grid;
+      gap: 12px;
+      align-content: start;
+    }
+
+    .settings-card.soft {
+      background:
+        linear-gradient(180deg, rgba(255, 255, 255, 0.96), rgba(255, 255, 255, 0.78)),
+        var(--mint-soft);
+      border-color: rgba(15, 159, 122, 0.18);
+    }
+
+    .settings-card strong {
+      font-size: 16px;
+      line-height: 1.3;
+    }
+
+    .settings-card h3 {
+      margin: 0;
+      font-size: clamp(24px, 3vw, 34px);
+      line-height: 1.12;
+      letter-spacing: 0;
+    }
+
+    .settings-card p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.5;
+    }
+
+    .settings-card .timer-controls {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+
+    .recovery-mode {
+      display: grid;
+      gap: 10px;
+      padding: 12px;
+      border-radius: var(--radius);
+      background: rgba(246, 251, 248, 0.78);
+      border: 1px solid rgba(16, 27, 24, 0.08);
+    }
+
+    .recovery-mode .timer-controls {
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+    }
+
+    .recovery-mode .ghost {
+      min-height: 40px;
+      padding-inline: 10px;
+      font-size: 13px;
+    }
+
+    .force-confirm {
+      min-width: 0;
+      display: grid;
+      gap: 10px;
+      padding: 12px;
+      border-radius: var(--radius);
+      background: rgba(255, 241, 245, 0.72);
+      border: 1px solid rgba(215, 79, 117, 0.16);
+    }
+
+    .force-confirm[hidden] {
+      display: none;
+    }
+
+    .force-confirm strong {
+      color: #5e2635;
+      font-size: 14px;
+      line-height: 1.3;
+    }
+
+    .force-confirm p {
+      color: #6f4b55;
+    }
+
+    .force-confirm .actions {
+      justify-content: flex-start;
+    }
+
+    details.advanced-settings {
+      padding: 0;
+      overflow: hidden;
+      background: rgba(255, 255, 255, 0.66);
+      box-shadow: none;
+    }
+
+    details.advanced-settings summary {
+      padding: 15px 16px;
+    }
+
+    .advanced-body {
+      padding: 0 16px 16px;
+      display: grid;
+      gap: 12px;
+    }
+
+    details.advanced-settings:not([open]) .advanced-body {
+      display: none;
+    }
+
+    .feature-card {
+      min-width: 0;
+      padding: 15px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: var(--surface-tint);
+      display: grid;
+      gap: 10px;
+      box-shadow: var(--shadow-soft);
+    }
+
+    .feature-card strong {
+      font-size: 15px;
+    }
+
+    .feature-card p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.5;
+    }
+
+    .feature-card label {
+      display: flex;
+      align-items: flex-start;
+      gap: 8px;
+      line-height: 1.45;
+    }
+
+    .step-list {
+      display: grid;
+      gap: 10px;
+      margin: 0;
+      padding: 0;
+      list-style: none;
+    }
+
+    .step-list li {
+      padding: 12px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: var(--surface-tint);
+      color: var(--muted);
+      line-height: 1.45;
+    }
+
+    details.panel {
+      padding: 0;
+      overflow: hidden;
+    }
+
+    details.panel:not([open]) > :not(summary) {
+      display: none;
+    }
+
+    details.panel:not(.quick-log-panel):not([open]) {
+      max-height: 58px;
+    }
+
+    details.panel summary {
+      padding: 16px 18px;
+      cursor: default;
+      color: var(--ink);
+      font-weight: 650;
+      list-style: none;
+    }
+
+    details.panel summary::-webkit-details-marker {
+      display: none;
+    }
+
+    details.panel summary::after {
+      content: "+";
+      float: right;
+      color: var(--muted);
+    }
+
+    details.panel[open] summary::after {
+      content: "-";
+    }
+
+    details.panel .step-list {
+      padding: 0 18px 18px;
+    }
+
+    .profile-grid {
+      display: grid;
+      grid-template-columns: minmax(280px, 0.85fr) minmax(320px, 1.15fr);
+      gap: 18px;
+      align-items: start;
+    }
+
+    .profile-score {
+      font-size: 52px;
+      line-height: 1;
+      font-weight: 750;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .history-list {
+      display: grid;
+      gap: 10px;
+    }
+
+    .history-item {
+      padding: 13px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: var(--surface-tint);
+      display: grid;
+      grid-template-columns: minmax(120px, 0.8fr) repeat(4, minmax(80px, 0.5fr));
+      gap: 10px;
+      align-items: center;
+      box-shadow: var(--shadow-soft);
+    }
+
+    .history-item span {
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .history-item strong {
+      display: block;
+      margin-top: 3px;
+      font-size: 14px;
+    }
+
+    .history-empty {
+      color: var(--muted);
+      line-height: 1.55;
+    }
+
+    .tag-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .tag {
+      padding: 7px 9px;
+      border-radius: 999px;
+      background: var(--mint-soft);
+      color: var(--ink);
+      font-size: 12px;
+      border: 1px solid rgba(15, 159, 122, 0.18);
+    }
+
+    .rec {
+      min-width: 0;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      padding: 12px;
+      display: grid;
+      grid-template-columns: auto 1fr;
+      gap: 10px;
+      background: var(--surface-tint);
+      box-shadow: var(--shadow-soft);
+    }
+
+    .rec strong {
+      display: block;
+      margin-bottom: 3px;
+    }
+
+    .rec p {
+      margin: 0;
+      color: var(--muted);
+      line-height: 1.45;
+      font-size: 13px;
+    }
+
+    .trend {
+      height: 160px;
+      display: flex;
+      align-items: end;
+      gap: 8px;
+      padding: 12px;
+      border-radius: var(--radius);
+      background: #fbfcfa;
+      border: 1px solid var(--line);
+      box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.55);
+    }
+
+    .bar {
+      flex: 1;
+      min-width: 18px;
+      border-radius: 6px 6px 2px 2px;
+      background: linear-gradient(180deg, var(--blue), var(--mint));
+      height: var(--h);
+      position: relative;
+    }
+
+    .bar span {
+      position: absolute;
+      top: -24px;
+      left: 50%;
+      transform: translateX(-50%);
+      color: var(--muted);
+      font-size: 11px;
+      white-space: nowrap;
+    }
+
+    .companion {
+      position: fixed;
+      right: 22px;
+      bottom: 22px;
+      width: min(330px, calc(100vw - 36px));
+      padding: 12px;
+      border: 1px solid rgba(24, 32, 31, 0.1);
+      border-radius: var(--radius);
+      background: rgba(255, 255, 255, 0.94);
+      box-shadow: 0 18px 48px rgba(30, 44, 38, 0.14);
+      display: grid;
+      grid-template-columns: 58px 1fr auto;
+      gap: 12px;
+      align-items: center;
+      z-index: 10;
+      backdrop-filter: blur(14px);
+    }
+
+    body.desktop-shell .companion {
+      display: none;
+    }
+
+    .companion.minimized {
+      width: auto;
+      grid-template-columns: 58px auto;
+    }
+
+    .companion.minimized .companion-body,
+    .companion.minimized .companion-actions {
+      display: none;
+    }
+
+    .pet {
+      width: 58px;
+      aspect-ratio: 1;
+      border-radius: 18px 18px 16px 16px;
+      background:
+        radial-gradient(circle at 50% 12%, rgba(255, 255, 255, 0.82) 0 9px, transparent 10px),
+        linear-gradient(160deg, #d9f4eb 0%, #f7fffb 52%, #dfeaff 100%);
+      display: grid;
+      place-items: center;
+      position: relative;
+      overflow: hidden;
+      transition: background 180ms ease, transform 180ms ease;
+      box-shadow:
+        inset 0 0 0 1px rgba(24, 32, 31, 0.08),
+        inset 0 -8px 18px rgba(15, 159, 122, 0.12);
+    }
+
+    .companion.minimized .pet {
+      cursor: grab;
+    }
+
+    .companion.minimized .pet:active {
+      cursor: grabbing;
+    }
+
+    .companion.minimized .pet:hover {
+      transform: translateY(-2px);
+    }
+
+    .pet::before {
+      content: "";
+      position: absolute;
+      top: 19px;
+      left: 10px;
+      width: 38px;
+      height: 18px;
+      border-radius: 999px;
+      background: rgba(15, 23, 21, 0.86);
+      box-shadow: inset 0 0 0 2px rgba(255, 255, 255, 0.1);
+    }
+
+    .pet::after {
+      content: "";
+      position: absolute;
+      top: 15px;
+      right: 8px;
+      width: 9px;
+      height: 9px;
+      border-radius: 50%;
+      background: #77e2bf;
+      box-shadow: 0 0 14px rgba(119, 226, 191, 0.9);
+    }
+
+    .companion[data-mood="focus"] .pet::after {
+      background: #67d9ff;
+      box-shadow: 0 0 14px rgba(103, 217, 255, 0.9);
+    }
+
+    .companion[data-mood="blink"] .pet::after {
+      background: #ffd66f;
+      box-shadow: 0 0 14px rgba(255, 214, 111, 0.9);
+    }
+
+    .companion[data-mood="rest"] .pet::after {
+      background: #ff78a4;
+      box-shadow: 0 0 14px rgba(255, 120, 164, 0.9);
+    }
+
+    .pet-face {
+      position: absolute;
+      top: 24px;
+      left: 18px;
+      width: 22px;
+      height: 8px;
+      z-index: 1;
+    }
+
+    .pet-face::before,
+    .pet-face::after {
+      content: "";
+      position: absolute;
+      top: 0;
+      width: 5px;
+      height: 5px;
+      border-radius: 50%;
+      background: #ffffff;
+      animation: petBlink 5s ease-in-out infinite;
+    }
+
+    .pet-face::before {
+      left: 1px;
+    }
+
+    .pet-face::after {
+      right: 1px;
+    }
+
+    .pet-mouth {
+      position: absolute;
+      top: 37px;
+      left: 50%;
+      width: 14px;
+      height: 7px;
+      transform: translateX(-50%);
+      border-bottom: 2px solid rgba(15, 23, 21, 0.78);
+      border-radius: 0 0 999px 999px;
+      z-index: 1;
+    }
+
+    .pet-cheek {
+      position: absolute;
+      top: 35px;
+      width: 7px;
+      height: 3px;
+      border-radius: 999px;
+      background: rgba(215, 79, 117, 0.22);
+      z-index: 1;
+    }
+
+    .pet-cheek.left {
+      left: 12px;
+    }
+
+    .pet-cheek.right {
+      right: 12px;
+    }
+
+    .pet-antenna {
+      position: absolute;
+      top: 7px;
+      left: 18px;
+      width: 22px;
+      height: 12px;
+      border-top: 2px solid rgba(15, 23, 21, 0.36);
+      border-radius: 50%;
+      z-index: 0;
+    }
+
+    .companion[data-mood="focus"] .pet {
+      background:
+        radial-gradient(circle at 50% 12%, rgba(255, 255, 255, 0.82) 0 9px, transparent 10px),
+        linear-gradient(160deg, #e3ecff 0%, #f7fffb 52%, #d9f4eb 100%);
+    }
+
+    .companion[data-mood="blink"] .pet {
+      background:
+        radial-gradient(circle at 50% 12%, rgba(255, 255, 255, 0.82) 0 9px, transparent 10px),
+        linear-gradient(160deg, #fff0d7 0%, #ffffff 52%, #d9f4eb 100%);
+      transform: translateY(-2px);
+    }
+
+    .companion[data-mood="blink"] .pet-face::before,
+    .companion[data-mood="blink"] .pet-face::after {
+      height: 2px;
+      border-radius: 999px;
+      transform: translateY(2px);
+      animation-duration: 2.2s;
+    }
+
+    .companion[data-mood="blink"] .pet-mouth {
+      width: 12px;
+      height: 5px;
+      top: 37px;
+      border: 0;
+      border-bottom: 2px solid rgba(202, 143, 38, 0.78);
+      border-radius: 0 0 999px 999px;
+      transform: translateX(-50%) scaleX(0.82);
+      box-shadow: 0 1px 0 rgba(255, 255, 255, 0.62), 0 0 7px rgba(255, 214, 111, 0.2);
+    }
+
+    .companion[data-mood="rest"] .pet {
+      background:
+        radial-gradient(circle at 50% 12%, rgba(255, 255, 255, 0.82) 0 9px, transparent 10px),
+        linear-gradient(160deg, #ffe0e8 0%, #fff8fa 52%, #fff0d7 100%);
+      animation: petNudge 1.8s ease-in-out infinite;
+    }
+
+    .companion[data-mood="rest"] .pet-mouth {
+      width: 14px;
+      height: 15px;
+      top: 33px;
+      border: 0;
+      background: transparent;
+      transform: translateX(-50%);
+      display: grid;
+      place-items: center;
+      opacity: 0.94;
+    }
+
+    .companion[data-mood="rest"] .pet-mouth::before {
+      content: "Ɛ";
+      font-family: ui-rounded, "SF Pro Rounded", Inter, system-ui, sans-serif;
+      font-size: 13px;
+      font-weight: 800;
+      line-height: 1;
+      color: rgba(214, 82, 125, 0.86);
+      text-shadow:
+        0 1px 0 rgba(255, 255, 255, 0.68),
+        0 0 1px rgba(68, 30, 44, 0.24),
+        0 0 8px rgba(255, 154, 188, 0.36);
+      transform: translateY(-1px) rotate(-4deg) scaleX(0.82);
+    }
+
+    .companion-body {
+      min-width: 0;
+    }
+
+    .companion-body strong {
+      display: block;
+      font-size: 14px;
+      margin-bottom: 4px;
+    }
+
+    .companion-body p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.45;
+      overflow-wrap: anywhere;
+    }
+
+    .companion-actions {
+      display: grid;
+      gap: 8px;
+    }
+
+    .icon-btn {
+      width: 34px;
+      height: 34px;
+      border-radius: var(--radius);
+      background: #f6f8f4;
+      border: 1px solid var(--line);
+      color: var(--ink);
+      display: grid;
+      place-items: center;
+    }
+
+    .pet-toast {
+      position: fixed;
+      right: 22px;
+      bottom: 118px;
+      width: min(330px, calc(100vw - 36px));
+      padding: 12px 14px;
+      border-radius: var(--radius);
+      background: #0f1715;
+      color: #ffffff;
+      box-shadow: 0 18px 46px rgba(15, 23, 21, 0.22);
+      opacity: 0;
+      transform: translateY(12px);
+      pointer-events: none;
+      transition: opacity 180ms ease, transform 180ms ease;
+      z-index: 11;
+      font-size: 13px;
+      line-height: 1.45;
+    }
+
+    .pet-toast.show {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    @keyframes petBlink {
+      0%, 88%, 100% {
+        transform: scaleY(1);
+      }
+      92%, 96% {
+        transform: scaleY(0.12);
+      }
+    }
+
+    @keyframes petNudge {
+      0%, 100% {
+        transform: translateY(0);
+      }
+      50% {
+        transform: translateY(-4px);
+      }
+    }
+
+    @keyframes sessionPulse {
+      0%, 100% {
+        box-shadow: var(--shadow);
+      }
+      35% {
+        box-shadow:
+          0 18px 46px rgba(32, 43, 37, 0.06),
+          0 0 0 4px rgba(15, 159, 122, 0.12);
+      }
+    }
+
+    .logs {
+      display: grid;
+      gap: 10px;
+    }
+
+    .log-item {
+      padding: 13px;
+      box-shadow: none;
+      display: grid;
+      gap: 5px;
+    }
+
+    .log-item header {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .log-item strong {
+      font-size: 14px;
+    }
+
+    .log-item p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.45;
+    }
+
+    .break-overlay {
+      position: fixed;
+      inset: 0;
+      background:
+        radial-gradient(circle at 50% 46%, rgba(142, 223, 199, 0.1), transparent 32%),
+        rgba(16, 27, 24, 0.92);
+      color: #e7f1ec;
+      display: none;
+      place-items: center;
+      padding: 20px;
+      z-index: 20;
+    }
+
+    .onboarding-overlay {
+      position: fixed;
+      inset: 0;
+      padding: 22px;
+      display: none;
+      place-items: center;
+      background: rgba(15, 23, 21, 0.5);
+      backdrop-filter: blur(10px);
+      z-index: 30;
+    }
+
+    .onboarding-overlay.show {
+      display: grid;
+    }
+
+    .onboarding-dialog {
+      width: min(640px, 100%);
+      max-height: min(760px, calc(100vh - 44px));
+      overflow: auto;
+      padding: 22px;
+      border-radius: 8px;
+      background: #ffffff;
+      box-shadow: 0 30px 90px rgba(15, 23, 21, 0.28);
+      display: grid;
+      gap: 14px;
+      min-width: 0;
+    }
+
+    .onboarding-dialog h3 {
+      margin: 0;
+      font-size: clamp(23px, 4vw, 32px);
+      line-height: 1.12;
+    }
+
+    .onboarding-dialog > p {
+      margin: 0;
+      color: var(--muted);
+      line-height: 1.6;
+    }
+
+    .mira-intro {
+      min-width: 0;
+      display: grid;
+      grid-template-columns: 92px minmax(0, 1fr);
+      gap: 16px;
+      align-items: center;
+      padding: 14px;
+      border: 1px solid rgba(15, 159, 122, 0.16);
+      border-radius: 8px;
+      background: linear-gradient(180deg, #f6fffb, #eef8f3);
+    }
+
+    .mira-intro .pet {
+      width: 92px;
+      border-radius: 26px 26px 24px 24px;
+      background:
+        linear-gradient(160deg, #d9f4eb 0%, #f8fffc 54%, #dfeaff 100%);
+      box-shadow:
+        inset 0 0 0 1px rgba(24, 32, 31, 0.08),
+        inset 0 -14px 26px rgba(15, 159, 122, 0.11),
+        0 16px 34px rgba(15, 23, 21, 0.11);
+    }
+
+    .mira-intro .pet::before {
+      top: 36px;
+      left: 20px;
+      width: 52px;
+      height: 26px;
+      border-radius: 999px;
+      background:
+        linear-gradient(90deg, rgba(127, 232, 207, 0.2), rgba(104, 166, 232, 0.14)),
+        rgba(20, 34, 36, 0.9);
+      box-shadow:
+        inset 0 0 0 1px rgba(255, 255, 255, 0.14),
+        0 0 15px rgba(94, 207, 184, 0.14);
+    }
+
+    .mira-intro .pet::after {
+      top: 30px;
+      right: 18px;
+      width: 10px;
+      height: 10px;
+    }
+
+    .mira-intro .pet-face {
+      top: 45px;
+      left: 30px;
+      width: 32px;
+      height: 8px;
+    }
+
+    .mira-intro .pet-face::before,
+    .mira-intro .pet-face::after {
+      width: 6px;
+      height: 6px;
+    }
+
+    .mira-intro .pet-face::before {
+      left: 1px;
+    }
+
+    .mira-intro .pet-face::after {
+      right: 1px;
+    }
+
+    .mira-intro .pet-mouth {
+      top: 61px;
+      width: 19px;
+      height: 9px;
+      border-bottom-color: rgba(15, 159, 122, 0.72);
+    }
+
+    .mira-intro .pet-cheek {
+      top: 58px;
+      width: 10px;
+      height: 4px;
+      background: rgba(215, 79, 117, 0.18);
+    }
+
+    .mira-intro .pet-cheek.left {
+      left: 19px;
+    }
+
+    .mira-intro .pet-cheek.right {
+      right: 19px;
+    }
+
+    .mira-intro .pet-antenna {
+      top: 18px;
+      left: 29px;
+      width: 34px;
+      height: 17px;
+      border-top-color: rgba(15, 23, 21, 0.3);
+    }
+
+    .mira-intro strong {
+      display: block;
+      margin-bottom: 4px;
+      font-size: 20px;
+      overflow-wrap: anywhere;
+    }
+
+    .mira-intro p {
+      margin: 0;
+      color: var(--muted);
+      line-height: 1.5;
+      overflow-wrap: anywhere;
+    }
+
+    .onboarding-dialog .symptom-grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
+    }
+
+    .onboarding-dialog .symptom {
+      padding: 12px;
+      gap: 8px;
+    }
+
+    .onboarding-load {
+      min-width: 0;
+      padding: 14px;
+      border: 1px solid rgba(15, 159, 122, 0.16);
+      border-radius: 8px;
+      background: #f8fcfa;
+      display: grid;
+      gap: 10px;
+    }
+
+    .onboarding-load-main {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: 14px;
+    }
+
+    .onboarding-load-main strong {
+      font-size: 15px;
+    }
+
+    .onboarding-load-main span {
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .onboarding-load-value {
+      font-size: 28px;
+      font-weight: 800;
+      color: var(--ink);
+    }
+
+    .onboarding-bands {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 8px;
+    }
+
+    .onboarding-band {
+      min-width: 0;
+      padding: 8px 9px;
+      border-radius: 8px;
+      background: #ffffff;
+      border: 1px solid var(--line);
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.25;
+    }
+
+    .onboarding-band.active {
+      border-color: rgba(15, 159, 122, 0.24);
+      background: var(--mint-soft);
+      color: var(--ink);
+      font-weight: 700;
+    }
+
+    .onboarding-rhythm {
+      min-width: 0;
+      padding-top: 2px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 14px;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.35;
+    }
+
+    .onboarding-rhythm strong {
+      color: var(--ink);
+      font-size: 13px;
+    }
+
+    .onboarding-plan {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 8px;
+    }
+
+    .onboarding-plan-item {
+      min-width: 0;
+      min-height: 94px;
+      padding: 10px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: rgba(255, 255, 255, 0.72);
+      display: grid;
+      align-content: start;
+      gap: 6px;
+    }
+
+    .onboarding-plan-item span {
+      width: 22px;
+      height: 22px;
+      border-radius: 999px;
+      display: grid;
+      place-items: center;
+      color: var(--ink);
+      background: var(--mint-soft);
+      font-size: 12px;
+      font-weight: 760;
+    }
+
+    .onboarding-plan-item strong {
+      font-size: 13px;
+      line-height: 1.25;
+    }
+
+    .onboarding-plan-item p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.4;
+      overflow-wrap: anywhere;
+    }
+
+    .onboarding-permission-note {
+      margin: -2px 0 0;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.45;
+    }
+
+    .text-link {
+      padding: 0;
+      background: transparent;
+      color: var(--mint);
+      font-weight: 700;
+      text-decoration: none;
+      cursor: pointer;
+    }
+
+    .text-link:hover {
+      text-decoration: underline;
+    }
+
+    .onboarding-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 12px;
+    }
+
+    .onboarding-step {
+      padding: 14px;
+      border-radius: 8px;
+      border: 1px solid var(--line);
+      background: var(--wash);
+      display: grid;
+      gap: 8px;
+    }
+
+    .onboarding-step span {
+      width: 28px;
+      height: 28px;
+      border-radius: 999px;
+      background: var(--ink);
+      color: #ffffff;
+      display: grid;
+      place-items: center;
+      font-size: 13px;
+      font-weight: 700;
+    }
+
+    .onboarding-step strong {
+      font-size: 15px;
+    }
+
+    .onboarding-step p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.45;
+    }
+
+    .break-overlay.show {
+      display: grid;
+    }
+
+    .break-dialog {
+      width: min(520px, 100%);
+      padding: 26px;
+      border-radius: 8px;
+      background: rgba(230, 244, 238, 0.07);
+      color: #e7f1ec;
+      border: 1px solid rgba(176, 218, 203, 0.2);
+      display: grid;
+      gap: 18px;
+      box-shadow: 0 30px 80px rgba(0, 0, 0, 0.18);
+    }
+
+    .break-mira {
+      min-width: 0;
+      height: 152px;
+      display: grid;
+      place-items: center;
+      position: relative;
+      margin-bottom: -2px;
+    }
+
+    .break-mira[hidden] {
+      display: none;
+    }
+
+    .break-mira::before {
+      content: "";
+      position: absolute;
+      width: 168px;
+      height: 168px;
+      border-radius: 50%;
+      background:
+        radial-gradient(circle, rgba(142, 223, 199, 0.16), rgba(142, 223, 199, 0.04) 52%, transparent 70%);
+      animation: miraGuidePulse 3.6s ease-in-out infinite;
+    }
+
+    .break-mira .pet {
+      width: 58px;
+      transform: scale(1.9);
+      transform-origin: center;
+      box-shadow:
+        inset 0 0 0 1px rgba(231, 241, 236, 0.12),
+        inset 0 -8px 18px rgba(15, 159, 122, 0.16),
+        0 18px 42px rgba(0, 0, 0, 0.22);
+    }
+
+    .break-mira-caption {
+      position: absolute;
+      bottom: 4px;
+      left: 50%;
+      transform: translateX(-50%);
+      color: rgba(231, 241, 236, 0.52);
+      font-size: 12px;
+      font-weight: 720;
+      white-space: nowrap;
+    }
+
+    .break-overlay[data-relax="gaze"] .break-mira .pet-face {
+      transform: translateX(4px);
+    }
+
+    .break-overlay[data-relax="blink"] .break-mira .pet {
+      background:
+        radial-gradient(circle at 50% 12%, rgba(255, 255, 255, 0.82) 0 9px, transparent 10px),
+        linear-gradient(160deg, #fff0d7 0%, #ffffff 52%, #d9f4eb 100%);
+      animation: miraBlinkLead 1.8s ease-in-out infinite;
+    }
+
+    .break-overlay[data-relax="blink"] .break-mira .pet-face::before,
+    .break-overlay[data-relax="blink"] .break-mira .pet-face::after {
+      height: 2px;
+      border-radius: 999px;
+      transform: translateY(2px);
+      animation-duration: 1.8s;
+    }
+
+    .break-overlay[data-relax="blink"] .break-mira .pet-mouth {
+      border-bottom-color: rgba(202, 143, 38, 0.78);
+      transform: translateX(-50%) scaleX(0.82);
+    }
+
+    .break-overlay[data-relax="close"] .break-mira .pet-face::before,
+    .break-overlay[data-relax="close"] .break-mira .pet-face::after,
+    .break-overlay[data-relax="neck"] .break-mira .pet-face::before,
+    .break-overlay[data-relax="neck"] .break-mira .pet-face::after {
+      height: 2px;
+      border-radius: 999px;
+      transform: translateY(2px);
+      animation: none;
+    }
+
+    .break-overlay[data-relax="close"] .break-mira .pet,
+    .break-overlay[data-relax="neck"] .break-mira .pet {
+      animation: miraRestBreath 4s ease-in-out infinite;
+    }
+
+    .break-overlay[data-relax="neck"] .break-mira .pet-mouth {
+      width: 16px;
+      height: 5px;
+      border-radius: 999px;
+      border: 0;
+      background: rgba(142, 223, 199, 0.68);
+      transform: translateX(-50%) translateY(1px);
+    }
+
+    .break-overlay[data-relax="press"] .break-mira .pet {
+      background:
+        radial-gradient(circle at 50% 12%, rgba(255, 255, 255, 0.82) 0 9px, transparent 10px),
+        linear-gradient(160deg, #fff0d7 0%, #fff8fa 52%, #d9f4eb 100%);
+      animation: miraRestBreath 3.4s ease-in-out infinite;
+    }
+
+    .break-overlay[data-relax="press"] .break-mira .pet::after {
+      background: #ffd66f;
+      box-shadow: 0 0 16px rgba(255, 214, 111, 0.86);
+    }
+
+    .break-overlay[data-relax="press"] .break-mira .pet-face::before,
+    .break-overlay[data-relax="press"] .break-mira .pet-face::after {
+      height: 2px;
+      border-radius: 999px;
+      transform: translateY(2px);
+      animation: none;
+    }
+
+    .break-overlay[data-relax="press"] .break-mira .pet-mouth {
+      width: 12px;
+      height: 5px;
+      border: 0;
+      border-bottom: 2px solid rgba(202, 143, 38, 0.78);
+      border-radius: 0 0 999px 999px;
+      transform: translateX(-50%) scaleX(0.78);
+    }
+
+    .break-dialog h3 {
+      margin: 0;
+      font-size: 24px;
+    }
+
+    .break-dialog p {
+      margin: 0;
+      color: rgba(231, 241, 236, 0.64);
+      line-height: 1.6;
+    }
+
+    .break-task {
+      min-width: 0;
+      display: grid;
+      gap: 7px;
+      padding: 14px;
+      border: 1px solid rgba(176, 218, 203, 0.18);
+      border-radius: var(--radius);
+      background: rgba(230, 244, 238, 0.052);
+    }
+
+    .break-task span {
+      color: rgba(231, 241, 236, 0.42);
+      font-size: 12px;
+      font-weight: 720;
+    }
+
+    .break-task strong {
+      font-size: clamp(22px, 4vw, 32px);
+      line-height: 1.15;
+    }
+
+    .break-task p {
+      color: rgba(231, 241, 236, 0.58);
+      font-size: 13px;
+      line-height: 1.5;
+    }
+
+    .break-flow {
+      min-width: 0;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(74px, 1fr));
+      gap: 7px;
+    }
+
+    .break-flow[hidden] {
+      display: none;
+    }
+
+    .break-flow span {
+      min-width: 0;
+      min-height: 34px;
+      padding: 7px 8px;
+      border-radius: 8px;
+      border: 1px solid rgba(176, 218, 203, 0.14);
+      color: rgba(231, 241, 236, 0.48);
+      background: rgba(230, 244, 238, 0.045);
+      font-size: 11px;
+      font-weight: 760;
+      line-height: 1.25;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      overflow-wrap: anywhere;
+      transition:
+        color 180ms ease,
+        background 180ms ease,
+        border-color 180ms ease;
+    }
+
+    .break-flow span.done {
+      color: rgba(231, 241, 236, 0.62);
+      border-color: rgba(142, 223, 199, 0.16);
+      background: rgba(142, 223, 199, 0.075);
+    }
+
+    .break-flow span.active {
+      color: #11231f;
+      border-color: rgba(142, 223, 199, 0.52);
+      background: rgba(142, 223, 199, 0.84);
+      box-shadow: 0 10px 24px rgba(142, 223, 199, 0.12);
+    }
+
+    .break-mini-timer {
+      width: fit-content;
+      min-width: 112px;
+      margin: -4px auto 0;
+      padding: 10px 14px;
+      border: 1px solid rgba(176, 218, 203, 0.18);
+      border-radius: var(--radius);
+      color: #e7f1ec;
+      background: rgba(230, 244, 238, 0.052);
+      display: grid;
+      gap: 3px;
+      justify-items: center;
+    }
+
+    .break-mini-timer span {
+      color: rgba(231, 241, 236, 0.42);
+      font-size: 11px;
+      font-weight: 720;
+    }
+
+    .break-mini-timer strong {
+      font-variant-numeric: tabular-nums;
+      font-size: 28px;
+      line-height: 1;
+    }
+
+    @keyframes miraGuidePulse {
+      0%,
+      100% {
+        transform: scale(0.96);
+        opacity: 0.7;
+      }
+      50% {
+        transform: scale(1.04);
+        opacity: 1;
+      }
+    }
+
+    @keyframes miraBlinkLead {
+      0%,
+      100% {
+        transform: scale(1.9) translateY(0);
+      }
+      42% {
+        transform: scale(1.9) translateY(-2px);
+      }
+      55% {
+        transform: scale(1.9) translateY(1px);
+      }
+    }
+
+    @keyframes miraRestBreath {
+      0%,
+      100% {
+        transform: scale(1.88);
+      }
+      50% {
+        transform: scale(1.96) translateY(1px);
+      }
+    }
+
+
+    .breath {
+      height: 96px;
+      display: grid;
+      place-items: center;
+    }
+
+    .breath span {
+      width: 54px;
+      height: 54px;
+      border-radius: 50%;
+      background: rgba(142, 223, 199, 0.42);
+      animation: breathe 4s ease-in-out infinite;
+    }
+
+    @keyframes breathe {
+      0%, 100% {
+        transform: scale(0.72);
+      }
+      50% {
+        transform: scale(1.25);
+      }
+    }
+
+    @media (max-width: 1180px) {
+      .dashboard {
+        grid-template-columns: 1fr 1fr;
+      }
+
+      .note-dashboard {
+        grid-template-columns: minmax(0, 1fr);
+      }
+
+      .daily-summary {
+        grid-template-columns: 1fr 1fr;
+      }
+
+      .metrics {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .right-column {
+        grid-column: 1 / -1;
+      }
+
+      .state-stage {
+        grid-template-columns: 1fr;
+        gap: 16px;
+        justify-items: start;
+      }
+
+      .stage-mira {
+        width: 132px;
+        justify-self: start;
+      }
+    }
+
+    @media (max-width: 860px) {
+      .app {
+        grid-template-columns: 1fr;
+      }
+
+      .sidebar {
+        min-height: auto;
+        padding: 16px 18px;
+        gap: 14px;
+      }
+
+      .nav {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 8px;
+      }
+
+      .nav button {
+        justify-content: center;
+      }
+
+      .sidebar-footer {
+        display: none;
+      }
+
+      main {
+        padding: 18px 18px 96px;
+      }
+
+      .topbar {
+        align-items: flex-start;
+        flex-direction: column;
+      }
+
+      .actions {
+        justify-content: flex-start;
+      }
+
+      .dashboard,
+      .intro,
+      .feature-grid,
+      .settings-grid,
+      .metrics,
+      .daily-summary,
+      .onboarding-plan,
+      .onboarding-grid,
+      .profile-grid,
+      .state-center,
+      .symptom-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .summary-card + .summary-card {
+        border-left: 0;
+        border-top: 1px solid var(--line);
+      }
+
+      .companion,
+      .pet-toast {
+        right: 10px;
+        bottom: 10px;
+      }
+
+      .companion {
+        width: min(330px, calc(100vw - 20px));
+        grid-template-columns: 58px 1fr;
+        padding: 10px;
+        transform: scale(0.84);
+        transform-origin: bottom right;
+      }
+
+      .companion .companion-actions {
+        display: none;
+      }
+
+      .companion.minimized {
+        width: auto;
+        grid-template-columns: 58px;
+      }
+
+      .companion.minimized .companion-body {
+        display: none;
+      }
+
+      .pet-toast {
+        bottom: 94px;
+      }
+
+      .history-item {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .stage-mira {
+        width: 138px;
+      }
+
+      .recovery-feedback .timer-controls {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .mira-intro,
+      .onboarding-load-main,
+      .onboarding-rhythm {
+        display: grid;
+        grid-template-columns: 1fr;
+      }
+
+      .mira-intro {
+        justify-items: start;
+      }
+
+      .reason-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .history-item {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <aside class="sidebar">
+      <div class="brand">
+        <div class="mark" aria-hidden="true"></div>
+        <div>
+          <h1>EyeFlow</h1>
+          <p>AI 护眼工作系统</p>
+        </div>
+      </div>
+
+      <nav class="nav" aria-label="主导航">
+        <button class="active" type="button" data-view-target="todayView">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M3 3v18h18"></path><path d="m7 14 3-3 3 2 5-7"></path></svg>
+          今天
+        </button>
+        <button type="button" data-view-target="rhythmView">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><path d="M12 7v5l3 3"></path></svg>
+          设置
+        </button>
+      </nav>
+
+      <div class="sidebar-footer">
+        默认轻提醒。不读取摄像头，不做医疗诊断。
+      </div>
+    </aside>
+
+    <main>
+      <section class="topbar">
+        <div>
+          <h2 id="pageTitle">今天</h2>
+          <p id="statusText">先看当下状态，再开始这一轮。</p>
+        </div>
+        <div class="actions" hidden="">
+          <button class="ghost" id="quickBreakBtn" type="button">
+            <svg class="small-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M12 2v6"></path><path d="M12 16v6"></path><path d="m4.93 4.93 4.24 4.24"></path><path d="m14.83 14.83 4.24 4.24"></path><path d="M2 12h6"></path><path d="M16 12h6"></path><path d="m4.93 19.07 4.24-4.24"></path><path d="m14.83 9.17 4.24-4.24"></path></svg>
+            立即休息
+          </button>
+        </div>
+      </section>
+
+      <div class="view" id="todayView">
+      <section class="state-center" aria-label="当前状态中心">
+        <div class="state-column">
+          <div class="state-hero">
+            <div class="state-stage">
+              <div class="stage-mira" id="stageMira" data-mood="calm" aria-hidden="true">
+                <div class="stage-orbit"></div>
+                <div class="stage-pet">
+                  <div class="pet-antenna"></div>
+                  <div class="pet-face"></div>
+                  <div class="pet-cheek left"></div>
+                  <div class="pet-cheek right"></div>
+                  <div class="pet-mouth"></div>
+                </div>
+                <span id="stageLoadValue">16</span>
+              </div>
+              <div class="state-copy">
+                <span class="state-label" id="stateBand" style="background: var(--mint-soft);">舒适区</span>
+                <strong id="stateHeadline">现在可以继续工作</strong>
+                <p id="stateAction">保持当前节奏。到提醒点时，Mira 会先轻轻提示你眨眼或远眺。</p>
+              </div>
+            </div>
+            <div class="today-flow" id="todayFlowCopy">
+              <span id="todayRhythmCopy">默认节奏 · 25 分钟 / 120 秒</span>
+              <span class="today-flow-divider" aria-hidden="true"></span>
+              <span id="todayModeCopy">安静 · Mira 轻提醒</span>
+            </div>
+            <div class="today-plan" id="todayPlanCopy">Mira 会根据今天评分和当前提醒方式，安排这一轮的专注与恢复。</div>
+            <div class="assessment-reminder" id="assessmentReminder" hidden="">
+              <strong>今天还没给眼睛打分</strong>
+              <p>可以先看界面。等你准备好了，Mira 会按此刻状态重新设置首轮节奏。</p>
+              <button class="ghost" id="assessmentReminderBtn" type="button">现在校准</button>
+            </div>
+            <div class="pending-reminder" id="pendingReminderCard" hidden="">
+              <strong id="pendingReminderTitle">Mira 在轻轻提醒</strong>
+              <p id="pendingReminderCopy">找一个自然断点，看远处 20 秒。</p>
+              <div class="actions">
+                <button class="primary" id="takeReminderBreakBtn" type="button">现在休息</button>
+                <button class="ghost" id="snoozeReminderInlineBtn" type="button">5 分钟后</button>
+              </div>
+            </div>
+            <div class="actions" style="justify-content: flex-start;">
+              <button class="primary" id="primaryActionBtn" type="button">开始专注</button>
+              <button class="ghost" id="explainBtn" type="button" hidden="">
+                <svg class="small-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><path d="M12 16v-4"></path><path d="M12 8h.01"></path></svg>
+                为什么
+              </button>
+            </div>
+            <details class="score-details">
+              <summary>为什么是这个状态</summary>
+              <div class="reason-grid">
+                <div class="reason">
+                  <span>连续盯屏</span>
+                  <b id="reasonFocus">3 分钟</b>
+                </div>
+                <div class="reason">
+                  <span>主要不适</span>
+                  <b id="reasonSymptom">酸胀 2/10</b>
+                </div>
+                <div class="reason">
+                  <span>休息抵消</span>
+                  <b id="reasonBreaks">2 次</b>
+                </div>
+              </div>
+              <p id="reasonCopy">当前 16 分，主要来自连续盯屏 3 分钟、酸胀 2/10，以及今天已休息 2 次。</p>
+            </details>
+            <div class="quick-check" aria-label="快速打点">
+              <button class="ghost" type="button" data-quick-check="ok">眼睛还好</button>
+              <button class="ghost" type="button" data-quick-check="tired">有点累</button>
+              <button class="ghost" type="button" data-quick-check="bad">很不舒服</button>
+            </div>
+          </div>
+
+          <section class="metrics" aria-label="今日指标">
+            <div class="metric">
+              <span>用眼负荷</span>
+              <div class="metric-main">
+                <strong id="eyeLoad">16</strong>
+                <em class="load-band" id="loadBand">舒适区 · 0-47</em>
+              </div>
+              <div class="load-legend" aria-label="用眼负荷区间">
+                <span id="bandComfort" class="active">0-47<br>舒适区</span>
+                <span id="bandMedium">48-73<br>中等负荷</span>
+                <span id="bandHigh">74-100<br>高负荷</span>
+              </div>
+            </div>
+            <div class="metric">
+              <span>连续盯屏</span>
+              <strong id="focusMinutes">3m</strong>
+            </div>
+            <div class="metric">
+              <span>休息次数</span>
+              <strong id="breakCount">2</strong>
+            </div>
+            <div class="metric">
+              <span>今日记录</span>
+              <strong id="logCount">2</strong>
+            </div>
+          </section>
+        </div>
+
+        <div class="panel timer-card" id="sessionPanel">
+          <div class="session-card-head">
+            <h3>专注会话</h3>
+            <span class="session-state-pill" id="sessionStatePill" data-state="idle">未开始</span>
+          </div>
+          <div class="rhythm-space">
+            <div class="rhythm-guide" aria-hidden="true"></div>
+            <div class="timer-ring" id="timerRing" style="--progress: 18.666666666666668%;">
+              <div class="timer-inner">
+                <div class="time" id="timerText">03:44</div>
+                <span id="timerHint">建议 20 分钟后远眺 120 秒</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="timer-controls">
+            <button class="primary" id="startBtn" type="button">
+              <svg class="small-icon" id="startBtnIcon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5v14l11-7Z"></path></svg>
+              <span id="startBtnText">开始专注</span>
+            </button>
+            <button class="ghost" id="restSessionBtn" type="button">
+              <svg class="small-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M12 2v6"></path><path d="M12 16v6"></path><path d="M2 12h6"></path><path d="M16 12h6"></path></svg>
+              休息
+            </button>
+          </div>
+
+          <div class="session-settings">
+            <div class="field">
+              <div class="value-row">
+                <label for="focusTarget">专注提醒</label>
+                <span><output id="focusTargetValue">20</output> 分钟</span>
+              </div>
+              <input id="focusTarget" type="range" min="15" max="50" step="5" value="25">
+            </div>
+            <div class="field">
+              <div class="value-row">
+                <label for="breakTarget">休息长度</label>
+                <span><output id="breakTargetValue">120</output> 秒</span>
+              </div>
+              <input id="breakTarget" type="range" min="90" max="240" step="30" value="120">
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="dashboard note-dashboard">
+        <details class="panel quick-log-panel">
+          <summary>
+            <span class="quick-log-title">
+              <strong>记录一下当下状态</strong>
+              <span>不舒服、刚休息完或环境变化时再展开。</span>
+            </span>
+            <span class="quick-log-chip">可选</span>
+          </summary>
+          <div class="quick-log-body">
+          <div class="symptom-grid">
+            <div class="symptom">
+              <b>干涩</b>
+              <input data-symptom="dryness" type="range" min="0" max="10" value="2">
+              <output>1 / 10</output>
+            </div>
+            <div class="symptom">
+              <b>酸胀</b>
+              <input data-symptom="strain" type="range" min="0" max="10" value="3">
+              <output>2 / 10</output>
+            </div>
+            <div class="symptom">
+              <b>模糊</b>
+              <input data-symptom="blur" type="range" min="0" max="10" value="1">
+              <output>0 / 10</output>
+            </div>
+            <div class="symptom">
+              <b>畏光</b>
+              <input data-symptom="light" type="range" min="0" max="10" value="1">
+              <output>0 / 10</output>
+            </div>
+          </div>
+
+          <div class="field" style="margin-top: 14px;">
+            <label for="note">补充记录</label>
+            <textarea class="note-box" id="note" placeholder="比如：空调直吹、刚开完会、看远处有点糊、晚上屏幕太亮"></textarea>
+          </div>
+
+          <div class="actions" style="justify-content: flex-start; margin-top: 14px;">
+            <button class="primary" id="saveLogBtn" type="button">
+              <svg class="small-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l3 3v13a2 2 0 0 1-2 2Z"></path><path d="M17 21v-8H7v8"></path><path d="M7 3v5h8"></path></svg>
+              保存记录
+            </button>
+            <button class="ghost" id="fillPresetBtn" type="button">
+              <svg class="small-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M12 20h9"></path><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"></path></svg>
+              快速标记累了
+            </button>
+          </div>
+          </div>
+        </details>
+
+        <div hidden="">
+          <div id="mainInsight"><div>当前负荷偏低。开始会话后，系统会结合连续时长和症状评分生成建议。</div></div>
+          <div id="recommendations">
+        <div class="rec">
+          <svg class="small-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="m12 2 3 7h7l-5.5 4.2 2.2 7L12 16l-6.7 4.2 2.2-7L2 9h7Z"></path></svg>
+          <div><strong>保持节奏</strong><p>现在状态不错。继续用短会话推进，别等到眼睛抗议才休息。</p></div>
+        </div>
+      </div>
+          <div id="trend"><div class="bar" style="--h:29px"><span>23</span></div><div class="bar" style="--h:18px"><span>11</span></div><div class="bar" style="--h:20px"><span>16</span></div></div>
+        </div>
+      </section>
+
+      <section class="daily-summary" aria-label="今日总结">
+        <div class="summary-card primary-summary">
+          <span id="summaryDayLabel">今日总结 · 2026-06-03</span>
+          <strong id="dailySummaryTitle">今天整体还在可控区</strong>
+          <p id="dailySummaryCopy">当前负荷 16，已记录 2 条，用眼节奏还比较温和。</p>
+        </div>
+        <div class="summary-card">
+          <span>明天建议</span>
+          <strong id="tomorrowPlan">保持当前节奏</strong>
+          <p id="tomorrowCopy">继续用 Mira 轻提醒，先观察几天再调强度。</p>
+        </div>
+        <span id="responseRate" hidden="">暂无</span>
+        <span id="responseRateCopy" hidden="">今天还没有触发 L2/L3 提醒。</span>
+        <span id="recoveryScore" hidden="">2 次</span>
+        <span id="recoveryCopy" hidden="">主动或自动识别的休息都会计入。</span>
+      </section>
+
+      <div id="logs" hidden="">
+          <article class="log-item">
+            <header><span>18:14</span><span>用眼负荷 11</span></header>
+            <strong>完成一次护眼恢复</strong>
+            <p>干涩 1 / 酸胀 2 / 模糊 0 / 畏光 0</p>
+            <p>反馈：差不多。下一轮提醒会提前一点。</p>
+          </article>
+        
+          <article class="log-item">
+            <header><span>21:10</span><span>用眼负荷 23</span></header>
+            <strong>完成一次护眼休息</strong>
+            <p>干涩 2 / 酸胀 3 / 模糊 1 / 畏光 1</p>
+            <p>远眺和眨眼已记录。下一轮会重新计算连续盯屏时间。</p>
+          </article>
+        </div>
+      </div>
+
+      <div class="view" id="rhythmView" hidden="">
+        <section class="settings-grid" aria-label="设置">
+          <div class="settings-primary">
+            <div class="settings-card soft">
+              <strong>今天的节奏建议</strong>
+              <span class="state-label" id="rhythmPlanLabel">当前节奏可用</span>
+              <h3 id="rhythmPlanTitle">保持当前节奏</h3>
+              <p id="rhythmPlanCopy">当前证据还不多，先继续观察今天的节奏。</p>
+              <div class="reason-grid">
+                <div class="reason">
+                  <span>专注提醒</span>
+                  <b id="suggestFocusTarget">20 分钟</b>
+                </div>
+                <div class="reason">
+                  <span>休息长度</span>
+                  <b id="suggestBreakTarget">120 秒</b>
+                </div>
+                <div class="reason">
+                  <span>提醒强度</span>
+                  <b id="suggestIntensity">安静</b>
+                </div>
+              </div>
+              <p id="rhythmReasonCopy">当前负荷、提醒反馈和历史记录都还比较温和。</p>
+              <div class="actions" style="justify-content: flex-start;">
+                <button class="primary" id="applyRhythmBtn" type="button" disabled="">已是建议节奏</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="settings-secondary">
+            <div class="settings-card">
+              <strong>提醒方式</strong>
+              <div class="timer-controls">
+                <button class="ghost active-setting" type="button" data-intensity="quiet">安静</button>
+                <button class="ghost" type="button" data-intensity="standard">标准</button>
+                <button class="ghost" type="button" data-intensity="force">强制爱</button>
+              </div>
+              <p id="intensityCopy">默认只用 Mira 状态和轻提示，不主动弹出全屏休息。</p>
+              <div class="force-confirm" id="forceConfirm" hidden="">
+                <strong id="forceConfirmTitle">开启前确认</strong>
+                <p id="forceConfirmCopy">强制爱只会在你开始手动专注后接管；到点进入全屏恢复，倒计时结束前不会回到工作界面。</p>
+                <div class="actions">
+                  <button class="primary" id="enableForceBtn" type="button">开启强制爱</button>
+                  <button class="ghost" id="previewForceBreakBtn" type="button">预览 15 秒</button>
+                  <button class="ghost" id="cancelForceBtn" type="button">先不用</button>
+                </div>
+              </div>
+              <div class="recovery-mode">
+                <div class="value-row">
+                  <span>恢复方式</span>
+                  <span id="recoveryModeLabel">混合</span>
+                </div>
+                <div class="timer-controls">
+                  <button class="ghost" type="button" data-recovery-mode="light">轻量</button>
+                  <button class="ghost" type="button" data-recovery-mode="neck">肩颈</button>
+                  <button class="ghost" type="button" data-recovery-mode="exercise">眼保健操</button>
+                  <button class="ghost active-setting" type="button" data-recovery-mode="mixed">混合</button>
+                </div>
+                <p id="recoveryModeCopy">强制爱会组合远眺、眨眼、闭眼和肩颈放松。</p>
+              </div>
+              <div class="intervention-card">
+                <div class="intervention-top">
+                  <div class="intervention-level" id="interventionLevel">L1</div>
+                  <div class="intervention-copy">
+                    <strong id="interventionTitle">只让 Mira 轻轻变化</strong>
+                    <p id="interventionCopy">当前是安静模式，默认只用状态球和文字变化，不主动打断。</p>
+                  </div>
+                </div>
+                <div class="intervention-meter" aria-hidden="true">
+                  <span id="interventionBar1" class="active"></span>
+                  <span id="interventionBar2"></span>
+                  <span id="interventionBar3"></span>
+                  <span id="interventionBar4"></span>
+                </div>
+              </div>
+            </div>
+
+            <details class="panel advanced-settings">
+              <summary>更多设置</summary>
+              <div class="advanced-body">
+                <div class="feature-card">
+                  <strong>桌面权限</strong>
+                  <p id="permissionCopy">浏览器预览不会读取系统权限。桌面版会用辅助功能权限识别当前 App。</p>
+                  <div class="tag-row">
+                    <span class="tag" id="permissionTag">预览模式</span>
+                  </div>
+                  <div class="actions" style="justify-content: flex-start;">
+                    <button class="ghost" id="permissionBtn" type="button" disabled="">打开权限设置</button>
+                    <button class="ghost" id="showOnboardingBtn" type="button">重新校准今天</button>
+                    <button class="ghost" id="resetBtn" type="button">重置今日数据</button>
+                  </div>
+                </div>
+                <div class="feature-card">
+                  <strong>桌面启动</strong>
+                  <p id="desktopLaunchCopy">桌面版可以随电脑启动，Mira 会安静待命。</p>
+                  <div class="tag-row">
+                    <span class="tag" id="desktopVersionTag">EyeFlow 0.1.0</span>
+                    <span class="tag" id="launchAtLoginTag">手动启动</span>
+                  </div>
+                  <label><input type="checkbox" id="launchAtLoginToggle"> 开机自动启动 EyeFlow</label>
+                </div>
+                <div class="feature-card" hidden="">
+                  <strong>桌面感知</strong>
+                  <p id="activityCopy">浏览器预览不会读取桌面活动。Electron 版会显示当前 App 和活跃时间。</p>
+                  <div class="tag-row">
+                    <span class="tag" id="activityApp">当前 App 未知</span>
+                    <span class="tag" id="activityIdle">空闲 0 秒</span>
+                    <span class="tag" id="activityMode">手动计时</span>
+                    <span class="tag" id="naturalBreakTag">等待自然断点</span>
+                  </div>
+                </div>
+                <div class="feature-card" hidden="">
+                  <strong>提醒反馈</strong>
+                  <p id="reminderFeedbackCopy">Mira 会记录提醒有没有被接住，用来慢慢调低打扰感。</p>
+                  <div class="tag-row">
+                    <span class="tag">触发 <b id="reminderShown">0</b></span>
+                    <span class="tag">完成 <b id="reminderCompleted">0</b></span>
+                    <span class="tag">稍后 <b id="reminderSnoozed">0</b></span>
+                    <span class="tag">忽略 <b id="reminderIgnored">0</b></span>
+                    <span class="tag">自动休息 <b id="autoBreaks">0</b></span>
+                  </div>
+                </div>
+                <div class="feature-card">
+                  <strong>勿扰场景</strong>
+                  <label><input type="checkbox" id="quietFullscreenToggle" checked=""> 全屏时安静</label>
+                  <label><input type="checkbox" id="quietMeetingToggle" checked=""> 会议中安静</label>
+                  <label><input type="checkbox" id="deepWorkMiraOnlyToggle"> 深度工作时只显示 Mira</label>
+                </div>
+                <div class="feature-card">
+                  <strong>通知方式</strong>
+                  <label><input type="checkbox" id="miraStateToggle" checked=""> Mira 状态变化</label>
+                  <label><input type="checkbox" id="soundToggle"> 轻提示音</label>
+                  <label><input type="checkbox" id="systemNotifyToggle"> 系统通知</label>
+                </div>
+              </div>
+            </details>
+          </div>
+        </section>
+
+        <details class="panel">
+          <summary>查看提醒规则</summary>
+          <ul class="step-list" style="margin-top: 12px;">
+            <li><strong>L1：</strong>只变状态球、表情和文字，不自动展开气泡。</li>
+            <li><strong>L2：</strong>到点或自然断点时短暂展开气泡；中段只先变状态，不立刻打断。</li>
+            <li><strong>L3：</strong>负荷偏高或明显超时时才增强提醒；如果开启系统通知，会按冷却时间提醒。</li>
+            <li><strong>L4 强制爱：</strong>只在你主动选择后启用；到点进入全屏恢复，倒计时结束前不显示返回按钮。</li>
+            <li><strong>颜色：</strong>绿=在线，蓝=专注，黄=眨眼，粉=休息建议或强制爱恢复。</li>
+          </ul>
+        </details>
+      </div>
+
+      <div class="view" id="profileView" hidden="">
+        <section class="profile-grid">
+          <div class="panel">
+            <h3>眼睛档案</h3>
+            <div class="profile-score" id="profileLoad">16</div>
+            <p id="profileSummary" style="color: var(--muted); line-height: 1.55;">当前处于舒适区。今天最明显的信号是酸胀，评分 2 / 10。</p>
+            <div class="tag-row" id="profileTags" style="margin-top: 14px;"><span class="tag">酸胀 2/10</span><span class="tag">干涩 1/10</span><span class="tag">模糊 0/10</span><span class="tag">畏光 0/10</span></div>
+          </div>
+          <div class="panel">
+            <h3>画像判断</h3>
+            <div class="insight" style="margin-bottom: 12px;">
+              <svg class="small-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7-10-7-10-7Z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+              <div id="profileType">当前暂未形成明显画像。继续记录几次后，EyeFlow 会更清楚你属于哪类用眼负担。</div>
+            </div>
+            <div class="recommendations" id="profileRecommendations">
+        <div class="rec">
+          <svg class="small-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M12 2v6"></path><path d="M12 16v6"></path><path d="M2 12h6"></path><path d="M16 12h6"></path></svg>
+          <div><strong>保持节奏</strong><p>现在状态不错。继续用短会话推进，别等到眼睛抗议才休息。</p></div>
+        </div>
+      </div>
+          </div>
+        </section>
+
+        <section class="panel">
+          <h3>近 14 天回顾</h3>
+          <div class="history-list" id="historyList"><p class="history-empty">还没有跨天记录。明天打开 EyeFlow 后，今天会自动进入历史。</p></div>
+        </section>
+
+        <section class="panel">
+          <h3>档案会逐步记录什么</h3>
+          <div class="feature-grid">
+            <div class="feature-card">
+              <strong>主要不适类型</strong>
+              <p>识别你更偏干涩、酸胀、模糊还是畏光，避免所有人都用同一种提醒节奏。</p>
+            </div>
+            <div class="feature-card">
+              <strong>高风险时段</strong>
+              <p>记录一天中更容易眼累的时间段，未来用来动态调整提醒强度。</p>
+            </div>
+            <div class="feature-card">
+              <strong>环境线索</strong>
+              <p>如果长期酸胀或看远模糊，会先提示检查屏幕距离、字体大小和休息节奏。</p>
+            </div>
+          </div>
+        </section>
+      </div>
+    </main>
+  </div>
+
+  <div class="pet-toast" id="petToast" role="status" aria-live="polite"></div>
+
+  <div class="onboarding-overlay" id="onboardingOverlay" role="dialog" aria-modal="true" aria-labelledby="onboardingTitle">
+    <div class="onboarding-dialog">
+      <div class="mira-intro" aria-label="Mira 引导">
+        <div class="pet" aria-hidden="true">
+          <div class="pet-antenna"></div>
+          <div class="pet-face"></div>
+          <div class="pet-cheek left"></div>
+          <div class="pet-cheek right"></div>
+          <div class="pet-mouth"></div>
+        </div>
+        <div>
+          <strong>Mira 先看看你</strong>
+          <p>每天第一次打开 EyeFlow，我会先问问你此刻的眼睛状态，再陪你开始专注。</p>
+        </div>
+      </div>
+      <div>
+        <span class="state-label">今日状态校准</span>
+      </div>
+      <h3 id="onboardingTitle">今天先给眼睛打个分</h3>
+      <p>每天第一次打开时，先按你此刻的感觉打一个分。Mira 会从今天的状态开始陪你进入专注。</p>
+      <div class="symptom-grid" aria-label="初始眼睛状态打分">
+        <div class="symptom">
+          <b>干涩</b>
+          <input data-onboarding-symptom="dryness" type="range" min="0" max="10" value="2">
+          <output>1 / 10</output>
+        </div>
+        <div class="symptom">
+          <b>酸胀</b>
+          <input data-onboarding-symptom="strain" type="range" min="0" max="10" value="3">
+          <output>2 / 10</output>
+        </div>
+        <div class="symptom">
+          <b>模糊</b>
+          <input data-onboarding-symptom="blur" type="range" min="0" max="10" value="1">
+          <output>0 / 10</output>
+        </div>
+        <div class="symptom">
+          <b>畏光</b>
+          <input data-onboarding-symptom="light" type="range" min="0" max="10" value="1">
+          <output>0 / 10</output>
+        </div>
+      </div>
+      <div class="onboarding-load" aria-live="polite">
+        <div class="onboarding-load-main">
+          <div>
+            <strong>当前初始负荷</strong>
+            <span id="onboardingLoadBand">舒适区</span>
+          </div>
+          <div class="onboarding-load-value" id="onboardingLoadValue">16</div>
+        </div>
+        <div class="onboarding-bands" aria-label="用眼负荷区间">
+          <div class="onboarding-band active" data-onboarding-band="comfort">0-47<br>舒适区</div>
+          <div class="onboarding-band" data-onboarding-band="medium">48-73<br>中等负荷</div>
+          <div class="onboarding-band" data-onboarding-band="high">74-100<br>高负荷</div>
+        </div>
+        <div class="onboarding-rhythm">
+          <span id="onboardingRhythmCopy">首轮保持正常节奏。</span>
+          <strong id="onboardingRhythmValue">25 分钟 / 120 秒</strong>
+        </div>
+        <div class="onboarding-plan" aria-label="Mira 会这样开始">
+          <div class="onboarding-plan-item">
+            <span>1</span>
+            <strong>记录此刻状态</strong>
+            <p id="onboardingPlanLoad">当前估算为舒适区 16 分。</p>
+          </div>
+          <div class="onboarding-plan-item">
+            <span>2</span>
+            <strong>设置首轮节奏</strong>
+            <p id="onboardingPlanRhythm">先用 25 分钟专注，120 秒恢复。</p>
+          </div>
+          <div class="onboarding-plan-item">
+            <span>3</span>
+            <strong>Mira 陪你开始</strong>
+            <p id="onboardingPlanMira">先安静陪伴，到点再轻轻提醒。</p>
+          </div>
+        </div>
+      </div>
+      <div class="actions" style="justify-content: flex-start;">
+        <button class="primary" id="startOnboardingBtn" type="button">记录今天并开始专注</button>
+        <button class="ghost" id="skipOnboardingBtn" type="button">先看看界面</button>
+      </div>
+      <p class="onboarding-permission-note">
+        之后想让 EyeFlow 更懂你的工作节奏，可以在设置里
+        <button class="text-link" id="onboardingPermissionBtn" type="button">打开权限设置</button>。
+      </p>
+    </div>
+  </div>
+
+  <aside class="companion" id="companion" data-mood="calm" aria-label="EyeFlow companion">
+    <div class="pet" aria-hidden="true">
+      <div class="pet-antenna"></div>
+      <div class="pet-face"></div>
+      <div class="pet-cheek left"></div>
+      <div class="pet-cheek right"></div>
+      <div class="pet-mouth"></div>
+    </div>
+    <div class="companion-body">
+      <strong id="petTitle">Mira 很安静</strong>
+      <p id="petMessage">我会在旁边看着节奏，先轻轻提醒，不抢你的控制权。</p>
+    </div>
+    <div class="companion-actions">
+      <button class="icon-btn" id="petRestBtn" type="button" title="休息">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M12 2v6"></path><path d="M12 16v6"></path><path d="M2 12h6"></path><path d="M16 12h6"></path></svg>
+      </button>
+      <button class="icon-btn" id="petMinimizeBtn" type="button" title="最小化">
+        <svg id="petMinimizeIcon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M5 12h14"></path></svg>
+      </button>
+    </div>
+  </aside>
+
+  <div class="break-overlay" id="breakOverlay" role="dialog" aria-modal="true" aria-labelledby="breakTitle">
+    <div class="break-dialog">
+      <div class="break-mira" id="breakMira" aria-label="Mira 陪你恢复" hidden="">
+        <div class="pet" aria-hidden="true">
+          <div class="pet-antenna"></div>
+          <div class="pet-face"></div>
+          <div class="pet-cheek left"></div>
+          <div class="pet-cheek right"></div>
+          <div class="pet-mouth"></div>
+        </div>
+        <span class="break-mira-caption" id="breakMiraCaption">跟着 Mira 慢慢来</span>
+      </div>
+      <h3 id="breakTitle">该让眼睛离开屏幕了</h3>
+      <p id="breakCopy">看向 6 米外，慢慢眨眼 8 次。让眼睛重新湿润一点，再回来继续写。</p>
+      <div class="break-task" id="breakTask" aria-live="polite" hidden="">
+        <span id="breakTaskStep">第 1 步 / 4</span>
+        <strong id="breakTaskTitle">看向 6 米外</strong>
+        <p id="breakTaskCopy">找一个远处的点，轻轻看过去，不需要盯着屏幕。</p>
+      </div>
+      <div class="break-flow" id="breakFlow" aria-label="恢复流程" hidden=""></div>
+      <div class="break-mini-timer" id="breakMiniTimer" hidden="">
+        <span>剩余</span>
+        <strong id="breakMiniTimerText">01:30</strong>
+      </div>
+      <div class="breath" id="breakBreath" aria-hidden="true"><span></span></div>
+      <div class="timer-controls">
+        <button class="primary" id="finishBreakBtn" type="button">完成休息</button>
+        <button class="ghost" id="snoozeBtn" type="button">5 分钟后提醒</button>
+        <button class="primary" id="forceReturnBtn" type="button" hidden="">回到 EyeFlow</button>
+      </div>
+      <div class="recovery-feedback" id="recoveryFeedback" hidden="">
+        <p>现在感觉好一点了吗？Mira 会按你的反馈安排下一轮。</p>
+        <div class="timer-controls">
+          <button class="primary" type="button" data-recovery-feedback="better">好多了，开始下一轮</button>
+          <button class="ghost" type="button" data-recovery-feedback="same">差不多，提前提醒</button>
+          <button class="ghost" type="button" data-recovery-feedback="tired">还是累，继续休息</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const STORAGE_KEY = "eyeflow-v1";
+    const isDesktopShell = Boolean(window.eyeflowDesktop);
+    const forceOnboarding = new URLSearchParams(window.location.search).get("onboarding") === "1";
+    document.body.classList.toggle("desktop-shell", isDesktopShell);
+    const state = loadState();
+    rolloverDayIfNeeded(state);
+    let isRunning = false;
+    let startedAt = null;
+    let elapsedSeconds = state.elapsedSeconds || 0;
+    let ticker = null;
+    let lastNudgeAt = state.lastNudgeAt || 0;
+    let lastNaturalBreakNudgeAt = state.lastNaturalBreakNudgeAt || 0;
+    let lastActiveSecondsBeforeIdle = state.lastActiveSecondsBeforeIdle || 0;
+    let toastTimer = null;
+    let resetConfirmTimer = null;
+    let resetConfirmArmed = false;
+    let forceBreakActive = false;
+    let forceBreakPreview = false;
+    let forceBreakTimer = null;
+    let forceBreakEndsAt = 0;
+    let latestCompanionState = null;
+    let latestActivity = null;
+    let forceConfirmPending = false;
+    const SNOOZE_MINUTES = 5;
+    const recoveryModeMeta = {
+      light: {
+        label: "轻量",
+        copy: "强制爱会用远眺、慢眨眼和闭眼，恢复轻一点。"
+      },
+      neck: {
+        label: "肩颈",
+        copy: "强制爱会重点带你放松下巴、肩膀和颈侧。"
+      },
+      exercise: {
+        label: "眼保健操",
+        copy: "强制爱会加入轻按眼周骨缘的步骤，不按压眼球。"
+      },
+      mixed: {
+        label: "混合",
+        copy: "强制爱会组合远眺、眨眼、闭眼和肩颈放松。"
+      }
+    };
+    const recoveryTaskLibrary = {
+      gaze: {
+        mood: "gaze",
+        label: "远眺",
+        title: "跟 Mira 一起看远处",
+        copy: "把视线移到 6 米外。Mira 也看向远处，你不用盯着屏幕。",
+        caption: "先把视线放远"
+      },
+      blink: {
+        mood: "blink",
+        label: "慢眨眼",
+        title: "跟 Mira 慢慢眨眼",
+        copy: "跟着 Mira 的节奏眨 8 次，每一次都闭完整一点。",
+        caption: "慢慢眨，不要急"
+      },
+      close: {
+        mood: "close",
+        label: "闭眼",
+        title: "和 Mira 一起闭眼",
+        copy: "闭眼 10 秒，把眉心、下巴和屏幕里的紧张一起放下来。",
+        caption: "眼睛先休息"
+      },
+      neck: {
+        mood: "neck",
+        label: "肩颈",
+        title: "跟 Mira 放松肩颈",
+        copy: "下巴微收，肩膀慢慢沉下去，感觉后颈慢慢变长。",
+        caption: "肩膀慢慢沉下去"
+      },
+      sideNeck: {
+        mood: "neck",
+        label: "颈侧",
+        title: "把颈侧放松下来",
+        copy: "头轻轻偏向一侧，不要用力拉。换边时慢一点。",
+        caption: "颈侧也松一点"
+      },
+      brow: {
+        mood: "press",
+        label: "眉头",
+        title: "轻按眉头附近",
+        copy: "用舒服的力度按揉眉头上方的骨缘，不按压眼球。",
+        caption: "只按骨缘，不压眼球"
+      },
+      underEye: {
+        mood: "press",
+        label: "眼下",
+        title: "轻揉眼下骨缘",
+        copy: "沿着眼下方骨缘轻轻打圈，力度保持很轻。",
+        caption: "轻一点就够了"
+      },
+      temple: {
+        mood: "press",
+        label: "太阳穴",
+        title: "放松太阳穴周围",
+        copy: "用指腹在太阳穴附近慢慢打圈，保持呼吸平稳。",
+        caption: "慢慢打圈"
+      }
+    };
+    const recoveryModeTasks = {
+      light: ["gaze", "blink", "close"],
+      neck: ["gaze", "neck", "sideNeck", "close"],
+      exercise: ["gaze", "brow", "underEye", "temple", "close"],
+      mixed: ["gaze", "blink", "close", "neck"]
+    };
+    let activeRecoveryTasks = recoveryTasksForMode(state.settings.recoveryMode || "mixed");
+
+    const els = {
+      timerText: document.querySelector("#timerText"),
+      timerHint: document.querySelector("#timerHint"),
+      timerRing: document.querySelector("#timerRing"),
+      sessionPanel: document.querySelector("#sessionPanel"),
+      sessionStatePill: document.querySelector("#sessionStatePill"),
+      startBtn: document.querySelector("#startBtn"),
+      startBtnIcon: document.querySelector("#startBtnIcon"),
+      startBtnText: document.querySelector("#startBtnText"),
+      restSessionBtn: document.querySelector("#restSessionBtn"),
+      quickBreakBtn: document.querySelector("#quickBreakBtn"),
+      resetBtn: document.querySelector("#resetBtn"),
+      focusTarget: document.querySelector("#focusTarget"),
+      breakTarget: document.querySelector("#breakTarget"),
+      focusTargetValue: document.querySelector("#focusTargetValue"),
+      breakTargetValue: document.querySelector("#breakTargetValue"),
+      eyeLoad: document.querySelector("#eyeLoad"),
+      stateBand: document.querySelector("#stateBand"),
+      stateHeadline: document.querySelector("#stateHeadline"),
+      stateAction: document.querySelector("#stateAction"),
+      stageMira: document.querySelector("#stageMira"),
+      stageLoadValue: document.querySelector("#stageLoadValue"),
+      todayFlowCopy: document.querySelector("#todayFlowCopy"),
+      todayRhythmCopy: document.querySelector("#todayRhythmCopy"),
+      todayModeCopy: document.querySelector("#todayModeCopy"),
+      todayPlanCopy: document.querySelector("#todayPlanCopy"),
+      assessmentReminder: document.querySelector("#assessmentReminder"),
+      assessmentReminderBtn: document.querySelector("#assessmentReminderBtn"),
+      pendingReminderCard: document.querySelector("#pendingReminderCard"),
+      pendingReminderTitle: document.querySelector("#pendingReminderTitle"),
+      pendingReminderCopy: document.querySelector("#pendingReminderCopy"),
+      takeReminderBreakBtn: document.querySelector("#takeReminderBreakBtn"),
+      snoozeReminderInlineBtn: document.querySelector("#snoozeReminderInlineBtn"),
+      primaryActionBtn: document.querySelector("#primaryActionBtn"),
+      explainBtn: document.querySelector("#explainBtn"),
+      reasonFocus: document.querySelector("#reasonFocus"),
+      reasonSymptom: document.querySelector("#reasonSymptom"),
+      reasonBreaks: document.querySelector("#reasonBreaks"),
+      reasonCopy: document.querySelector("#reasonCopy"),
+      quickCheckButtons: document.querySelectorAll("[data-quick-check]"),
+      intensityButtons: document.querySelectorAll("[data-intensity]"),
+      recoveryModeButtons: document.querySelectorAll("[data-recovery-mode]"),
+      recoveryModeLabel: document.querySelector("#recoveryModeLabel"),
+      recoveryModeCopy: document.querySelector("#recoveryModeCopy"),
+      intensityCopy: document.querySelector("#intensityCopy"),
+      forceConfirm: document.querySelector("#forceConfirm"),
+      forceConfirmTitle: document.querySelector("#forceConfirmTitle"),
+      forceConfirmCopy: document.querySelector("#forceConfirmCopy"),
+      enableForceBtn: document.querySelector("#enableForceBtn"),
+      previewForceBreakBtn: document.querySelector("#previewForceBreakBtn"),
+      cancelForceBtn: document.querySelector("#cancelForceBtn"),
+      permissionCopy: document.querySelector("#permissionCopy"),
+      permissionTag: document.querySelector("#permissionTag"),
+      permissionBtn: document.querySelector("#permissionBtn"),
+      showOnboardingBtn: document.querySelector("#showOnboardingBtn"),
+      desktopLaunchCopy: document.querySelector("#desktopLaunchCopy"),
+      desktopVersionTag: document.querySelector("#desktopVersionTag"),
+      launchAtLoginTag: document.querySelector("#launchAtLoginTag"),
+      launchAtLoginToggle: document.querySelector("#launchAtLoginToggle"),
+      activityCopy: document.querySelector("#activityCopy"),
+      activityApp: document.querySelector("#activityApp"),
+      activityIdle: document.querySelector("#activityIdle"),
+      activityMode: document.querySelector("#activityMode"),
+      naturalBreakTag: document.querySelector("#naturalBreakTag"),
+      reminderShown: document.querySelector("#reminderShown"),
+      reminderCompleted: document.querySelector("#reminderCompleted"),
+      reminderSnoozed: document.querySelector("#reminderSnoozed"),
+      reminderIgnored: document.querySelector("#reminderIgnored"),
+      autoBreaks: document.querySelector("#autoBreaks"),
+      reminderFeedbackCopy: document.querySelector("#reminderFeedbackCopy"),
+      rhythmPlanLabel: document.querySelector("#rhythmPlanLabel"),
+      rhythmPlanTitle: document.querySelector("#rhythmPlanTitle"),
+      rhythmPlanCopy: document.querySelector("#rhythmPlanCopy"),
+      applyRhythmBtn: document.querySelector("#applyRhythmBtn"),
+      suggestFocusTarget: document.querySelector("#suggestFocusTarget"),
+      suggestBreakTarget: document.querySelector("#suggestBreakTarget"),
+      suggestIntensity: document.querySelector("#suggestIntensity"),
+      rhythmReasonCopy: document.querySelector("#rhythmReasonCopy"),
+      dailySummaryTitle: document.querySelector("#dailySummaryTitle"),
+      summaryDayLabel: document.querySelector("#summaryDayLabel"),
+      dailySummaryCopy: document.querySelector("#dailySummaryCopy"),
+      responseRate: document.querySelector("#responseRate"),
+      responseRateCopy: document.querySelector("#responseRateCopy"),
+      recoveryScore: document.querySelector("#recoveryScore"),
+      recoveryCopy: document.querySelector("#recoveryCopy"),
+      tomorrowPlan: document.querySelector("#tomorrowPlan"),
+      tomorrowCopy: document.querySelector("#tomorrowCopy"),
+      interventionLevel: document.querySelector("#interventionLevel"),
+      interventionTitle: document.querySelector("#interventionTitle"),
+      interventionCopy: document.querySelector("#interventionCopy"),
+      interventionBars: [
+        document.querySelector("#interventionBar1"),
+        document.querySelector("#interventionBar2"),
+        document.querySelector("#interventionBar3"),
+        document.querySelector("#interventionBar4")
+      ],
+      quietFullscreenToggle: document.querySelector("#quietFullscreenToggle"),
+      quietMeetingToggle: document.querySelector("#quietMeetingToggle"),
+      deepWorkMiraOnlyToggle: document.querySelector("#deepWorkMiraOnlyToggle"),
+      miraStateToggle: document.querySelector("#miraStateToggle"),
+      soundToggle: document.querySelector("#soundToggle"),
+      systemNotifyToggle: document.querySelector("#systemNotifyToggle"),
+      introWrap: document.querySelector("#introWrap"),
+      introToggle: document.querySelector("#introToggle"),
+      loadBand: document.querySelector("#loadBand"),
+      bandComfort: document.querySelector("#bandComfort"),
+      bandMedium: document.querySelector("#bandMedium"),
+      bandHigh: document.querySelector("#bandHigh"),
+      focusMinutes: document.querySelector("#focusMinutes"),
+      breakCount: document.querySelector("#breakCount"),
+      logCount: document.querySelector("#logCount"),
+      pageTitle: document.querySelector("#pageTitle"),
+      statusText: document.querySelector("#statusText"),
+      note: document.querySelector("#note"),
+      saveLogBtn: document.querySelector("#saveLogBtn"),
+      fillPresetBtn: document.querySelector("#fillPresetBtn"),
+      mainInsight: document.querySelector("#mainInsight div"),
+      recommendations: document.querySelector("#recommendations"),
+      trend: document.querySelector("#trend"),
+      logs: document.querySelector("#logs"),
+      navButtons: document.querySelectorAll("[data-view-target]"),
+      views: document.querySelectorAll(".view"),
+      profileLoad: document.querySelector("#profileLoad"),
+      profileSummary: document.querySelector("#profileSummary"),
+      profileTags: document.querySelector("#profileTags"),
+      profileType: document.querySelector("#profileType"),
+      profileRecommendations: document.querySelector("#profileRecommendations"),
+      historyList: document.querySelector("#historyList"),
+      companion: document.querySelector("#companion"),
+      pet: document.querySelector(".pet"),
+      petTitle: document.querySelector("#petTitle"),
+      petMessage: document.querySelector("#petMessage"),
+      petToast: document.querySelector("#petToast"),
+      onboardingOverlay: document.querySelector("#onboardingOverlay"),
+      onboardingLoadValue: document.querySelector("#onboardingLoadValue"),
+      onboardingLoadBand: document.querySelector("#onboardingLoadBand"),
+      onboardingRhythmCopy: document.querySelector("#onboardingRhythmCopy"),
+      onboardingRhythmValue: document.querySelector("#onboardingRhythmValue"),
+      onboardingPlanLoad: document.querySelector("#onboardingPlanLoad"),
+      onboardingPlanRhythm: document.querySelector("#onboardingPlanRhythm"),
+      onboardingPlanMira: document.querySelector("#onboardingPlanMira"),
+      startOnboardingBtn: document.querySelector("#startOnboardingBtn"),
+      onboardingPermissionBtn: document.querySelector("#onboardingPermissionBtn"),
+      skipOnboardingBtn: document.querySelector("#skipOnboardingBtn"),
+      petRestBtn: document.querySelector("#petRestBtn"),
+      petMinimizeBtn: document.querySelector("#petMinimizeBtn"),
+      petMinimizeIcon: document.querySelector("#petMinimizeIcon"),
+      breakOverlay: document.querySelector("#breakOverlay"),
+      breakTitle: document.querySelector("#breakTitle"),
+      breakCopy: document.querySelector("#breakCopy"),
+      breakTask: document.querySelector("#breakTask"),
+      breakTaskStep: document.querySelector("#breakTaskStep"),
+      breakTaskTitle: document.querySelector("#breakTaskTitle"),
+      breakTaskCopy: document.querySelector("#breakTaskCopy"),
+      breakFlow: document.querySelector("#breakFlow"),
+      breakMiniTimer: document.querySelector("#breakMiniTimer"),
+      breakMiniTimerText: document.querySelector("#breakMiniTimerText"),
+      breakBreath: document.querySelector("#breakBreath"),
+      breakMira: document.querySelector("#breakMira"),
+      breakMiraCaption: document.querySelector("#breakMiraCaption"),
+      recoveryFeedback: document.querySelector("#recoveryFeedback"),
+      finishBreakBtn: document.querySelector("#finishBreakBtn"),
+      forceReturnBtn: document.querySelector("#forceReturnBtn"),
+      snoozeBtn: document.querySelector("#snoozeBtn")
+    };
+
+    els.focusTarget.value = state.focusTarget || 25;
+    els.breakTarget.value = Math.max(
+      Number(els.breakTarget.min),
+      Math.min(Number(els.breakTarget.max), Number(state.breakTarget || 120))
+    );
+    state.breakTarget = Number(els.breakTarget.value);
+    [els.focusTarget, els.breakTarget].forEach(setRangeFill);
+    applySettingsToControls();
+
+    document.querySelectorAll("[data-symptom]").forEach((input) => {
+      const saved = state.symptoms[input.dataset.symptom];
+      if (typeof saved === "number") input.value = saved;
+      input.addEventListener("input", () => {
+        input.nextElementSibling.textContent = `${input.value} / 10`;
+        state.symptoms[input.dataset.symptom] = Number(input.value);
+        setRangeFill(input);
+        render();
+        persist();
+      });
+      input.nextElementSibling.textContent = `${input.value} / 10`;
+      setRangeFill(input);
+    });
+
+    document.querySelectorAll("[data-onboarding-symptom]").forEach((input) => {
+      const saved = state.symptoms[input.dataset.onboardingSymptom];
+      if (typeof saved === "number") input.value = saved;
+      input.addEventListener("input", () => {
+        input.nextElementSibling.textContent = `${input.value} / 10`;
+        setRangeFill(input);
+        renderOnboardingLoad();
+      });
+      input.nextElementSibling.textContent = `${input.value} / 10`;
+      setRangeFill(input);
+    });
+
+    els.startBtn.addEventListener("click", toggleSession);
+    els.primaryActionBtn.addEventListener("click", handlePrimaryAction);
+    els.explainBtn.addEventListener("click", () => showToast(els.reasonCopy.textContent));
+    els.restSessionBtn.addEventListener("click", () => showBreak("manual"));
+    els.quickBreakBtn.addEventListener("click", () => showBreak("manual"));
+    els.previewForceBreakBtn.addEventListener("click", previewForceBreak);
+    els.takeReminderBreakBtn.addEventListener("click", () => showBreak("scheduled"));
+    els.snoozeReminderInlineBtn.addEventListener("click", snoozeBreak);
+    if (!isDesktopShell) {
+      els.petRestBtn.addEventListener("click", () => showBreak("manual"));
+      els.petMinimizeBtn.addEventListener("click", toggleCompanion);
+      els.pet.addEventListener("click", expandCompanionFromPet);
+    }
+    els.finishBreakBtn.addEventListener("click", finishBreak);
+    els.forceReturnBtn.addEventListener("click", () => finishForceBreak({ preview: forceBreakPreview }));
+    els.snoozeBtn.addEventListener("click", snoozeBreak);
+    document.querySelectorAll("[data-recovery-feedback]").forEach((button) => {
+      button.addEventListener("click", () => completeRecovery(button.dataset.recoveryFeedback));
+    });
+    els.saveLogBtn.addEventListener("click", saveLog);
+    els.fillPresetBtn.addEventListener("click", fillFatiguePreset);
+    els.resetBtn.addEventListener("click", requestResetDay);
+    els.applyRhythmBtn.addEventListener("click", applyRhythmSuggestion);
+    els.startOnboardingBtn.addEventListener("click", completeInitialAssessment);
+    els.skipOnboardingBtn.addEventListener("click", dismissOnboarding);
+    els.onboardingPermissionBtn.addEventListener("click", openAccessibilitySettings);
+    els.permissionBtn.addEventListener("click", openAccessibilitySettings);
+    els.showOnboardingBtn.addEventListener("click", showOnboarding);
+    els.launchAtLoginToggle.addEventListener("change", setLaunchAtLogin);
+    els.assessmentReminderBtn.addEventListener("click", showOnboarding);
+    els.introToggle?.addEventListener("click", toggleIntro);
+    els.quickCheckButtons.forEach((button) => {
+      button.addEventListener("click", () => applyQuickCheck(button.dataset.quickCheck));
+    });
+    els.intensityButtons.forEach((button) => {
+      button.addEventListener("click", () => requestIntensity(button.dataset.intensity));
+    });
+    els.recoveryModeButtons.forEach((button) => {
+      button.addEventListener("click", () => setRecoveryMode(button.dataset.recoveryMode));
+    });
+    els.enableForceBtn.addEventListener("click", enableForceMode);
+    els.cancelForceBtn.addEventListener("click", cancelForceMode);
+    [
+      els.quietFullscreenToggle,
+      els.quietMeetingToggle,
+      els.deepWorkMiraOnlyToggle,
+      els.miraStateToggle,
+      els.soundToggle,
+      els.systemNotifyToggle
+    ].forEach((input) => {
+      input.addEventListener("change", () => {
+        state.settings[input.id] = input.checked;
+        persist();
+        renderActivity();
+      });
+    });
+    els.navButtons.forEach((button) => {
+      button.addEventListener("click", () => switchView(button.dataset.viewTarget));
+    });
+
+    [els.focusTarget, els.breakTarget].forEach((input) => {
+      input.addEventListener("input", () => {
+        state.focusTarget = Number(els.focusTarget.value);
+        state.breakTarget = Number(els.breakTarget.value);
+        state.rhythmSource = "manual";
+        setRangeFill(input);
+        render();
+        persist();
+      });
+    });
+
+    if (window.eyeflowDesktop?.onActivity) {
+      window.eyeflowDesktop.onActivity((activity) => {
+        latestActivity = activity;
+        maybeAutoCompleteBreak(activity);
+        if (!isRunning) {
+          elapsedSeconds = activity.isWorking ? activity.activeSeconds : 0;
+        }
+        renderActivity();
+        maybeNudgeAtNaturalBreak(activity);
+        render();
+        persist();
+      });
+    }
+    if (window.eyeflowDesktop?.onForceBreakDone) {
+      window.eyeflowDesktop.onForceBreakDone((payload) => finishForceBreak(payload));
+    }
+    refreshPermissionStatus();
+    refreshDesktopSettings();
+
+    function loadState() {
+      const fallback = {
+        currentDay: todayKey(),
+        summaryHistory: [],
+        elapsedSeconds: 0,
+        focusTarget: 25,
+        breakTarget: 120,
+        breaks: 0,
+        logs: [],
+        reminderStats: {
+          shown: 0,
+          completed: 0,
+          snoozed: 0,
+          ignored: 0,
+          autoBreaks: 0
+        },
+        pendingReminder: null,
+        snoozeUntil: 0,
+        lastReminderAt: 0,
+        lastAutoBreakAt: 0,
+        lastActiveSecondsBeforeIdle: 0,
+        settings: {
+          intensity: "quiet",
+          quietFullscreenToggle: true,
+          quietMeetingToggle: true,
+          deepWorkMiraOnlyToggle: false,
+          miraStateToggle: true,
+          soundToggle: false,
+          systemNotifyToggle: false,
+          recoveryMode: "mixed"
+        },
+        onboardingDismissed: false,
+        initialAssessmentDone: false,
+        lastAssessmentDay: "",
+        rhythmSource: "default",
+        symptoms: { dryness: 2, strain: 3, blur: 1, light: 1 }
+      };
+      try {
+        const saved = JSON.parse(localStorage.getItem(STORAGE_KEY) || "{}");
+        const loaded = {
+          ...fallback,
+          ...saved,
+          reminderStats: { ...fallback.reminderStats, ...(saved.reminderStats || {}) },
+          summaryHistory: Array.isArray(saved.summaryHistory) ? saved.summaryHistory : [],
+          settings: { ...fallback.settings, ...(saved.settings || {}) }
+        };
+        if (!saved.lastAssessmentDay) {
+          loaded.lastAssessmentDay = saved.logs?.some((log) => log.note === "Mira 初始打分")
+            ? loaded.currentDay
+            : "";
+        }
+        return loaded;
+      } catch {
+        return fallback;
+      }
+    }
+
+    function todayKey() {
+      const now = new Date();
+      const month = String(now.getMonth() + 1).padStart(2, "0");
+      const day = String(now.getDate()).padStart(2, "0");
+      return `${now.getFullYear()}-${month}-${day}`;
+    }
+
+    function hasDailyActivity(dayState) {
+      return Boolean(
+        dayState.elapsedSeconds
+        || dayState.breaks
+        || dayState.logs?.length
+        || dayState.reminderStats?.shown
+        || dayState.reminderStats?.autoBreaks
+      );
+    }
+
+    function rolloverDayIfNeeded(dayState) {
+      const today = todayKey();
+      if (!dayState.currentDay) dayState.currentDay = today;
+      if (dayState.currentDay === today) return;
+      if (hasDailyActivity(dayState)) {
+        dayState.summaryHistory = [
+          {
+            day: dayState.currentDay,
+            elapsedSeconds: dayState.elapsedSeconds || 0,
+            breaks: dayState.breaks || 0,
+            logs: dayState.logs || [],
+            reminderStats: dayState.reminderStats || {},
+            symptoms: dayState.symptoms || {}
+          },
+          ...(dayState.summaryHistory || [])
+        ].slice(0, 14);
+      }
+      dayState.currentDay = today;
+      dayState.elapsedSeconds = 0;
+      dayState.breaks = 0;
+      dayState.logs = [];
+      dayState.reminderStats = { shown: 0, completed: 0, snoozed: 0, ignored: 0, autoBreaks: 0 };
+      dayState.pendingReminder = null;
+      dayState.snoozeUntil = 0;
+      dayState.lastReminderAt = 0;
+      dayState.lastAutoBreakAt = 0;
+      dayState.lastNudgeAt = 0;
+      dayState.lastNaturalBreakNudgeAt = 0;
+      dayState.lastActiveSecondsBeforeIdle = 0;
+      dayState.symptoms = { dryness: 2, strain: 3, blur: 1, light: 1 };
+      dayState.onboardingDismissed = false;
+      dayState.initialAssessmentDone = false;
+      dayState.lastAssessmentDay = "";
+      dayState.rhythmSource = "default";
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(dayState));
+    }
+
+    function applySettingsToControls() {
+      setIntensity(state.settings.intensity || "quiet", { persistChange: false, renderChange: false });
+      setRecoveryMode(state.settings.recoveryMode || "mixed", { persistChange: false });
+      els.quietFullscreenToggle.checked = Boolean(state.settings.quietFullscreenToggle);
+      els.quietMeetingToggle.checked = Boolean(state.settings.quietMeetingToggle);
+      els.deepWorkMiraOnlyToggle.checked = Boolean(state.settings.deepWorkMiraOnlyToggle);
+      els.miraStateToggle.checked = Boolean(state.settings.miraStateToggle);
+      els.soundToggle.checked = Boolean(state.settings.soundToggle);
+      els.systemNotifyToggle.checked = Boolean(state.settings.systemNotifyToggle);
+    }
+
+    function persist() {
+      state.currentDay = state.currentDay || todayKey();
+      state.elapsedSeconds = elapsedSeconds;
+      state.lastNudgeAt = lastNudgeAt;
+      state.lastNaturalBreakNudgeAt = lastNaturalBreakNudgeAt;
+      state.lastActiveSecondsBeforeIdle = lastActiveSecondsBeforeIdle;
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+    }
+
+    function maybeShowOnboarding() {
+      const assessedToday = state.lastAssessmentDay === todayKey();
+      if (forceOnboarding || (!assessedToday && !state.onboardingDismissed)) {
+        showOnboarding();
+      }
+    }
+
+    function showOnboarding() {
+      if (isRunning) pauseSession();
+      syncOnboardingInputs();
+      renderOnboardingLoad();
+      els.onboardingOverlay.classList.add("show");
+    }
+
+    function dismissOnboarding() {
+      state.onboardingDismissed = true;
+      els.onboardingOverlay.classList.remove("show");
+      render();
+      persist();
+      showToast("Mira：可以先看界面，今天的校准入口会留在这里。");
+    }
+
+    function syncOnboardingInputs() {
+      document.querySelectorAll("[data-onboarding-symptom]").forEach((input) => {
+        const value = state.symptoms[input.dataset.onboardingSymptom] ?? Number(input.value);
+        input.value = value;
+        input.nextElementSibling.textContent = `${input.value} / 10`;
+        setRangeFill(input);
+      });
+      renderOnboardingLoad();
+    }
+
+    function setRangeFill(input) {
+      if (!input) return;
+      const min = Number(input.min || 0);
+      const max = Number(input.max || 100);
+      const value = Number(input.value || min);
+      const fill = max === min ? 0 : ((value - min) / (max - min)) * 100;
+      input.style.setProperty("--range-fill", `${Math.max(0, Math.min(100, fill))}%`);
+    }
+
+    function readOnboardingSymptoms() {
+      const symptoms = {};
+      document.querySelectorAll("[data-onboarding-symptom]").forEach((input) => {
+        symptoms[input.dataset.onboardingSymptom] = Number(input.value);
+      });
+      return symptoms;
+    }
+
+    function estimateInitialLoad(symptoms) {
+      const symptomScore = symptoms.dryness * 2.1 + symptoms.strain * 2.4 + symptoms.blur * 2 + symptoms.light * 1.4;
+      return Math.max(0, Math.min(100, Math.round(12 + symptomScore)));
+    }
+
+    function initialRhythmForLoad(load) {
+      if (load >= 74) {
+        return {
+          focus: 15,
+          rest: 180,
+          intensity: "standard",
+          copy: "首轮先压低连续盯屏时间，恢复留足肩颈放松。"
+        };
+      }
+      if (load >= 48) {
+        return {
+          focus: 20,
+          rest: 150,
+          intensity: "standard",
+          copy: "首轮稍微短一点，恢复时间也拉长一点。"
+        };
+      }
+      return {
+        focus: 25,
+        rest: 120,
+        intensity: "quiet",
+        copy: "首轮保持正常节奏，Mira 只轻轻看着。"
+      };
+    }
+
+    function intensityLabel(level) {
+      if (level === "force") return "强制爱";
+      if (level === "standard") return "标准";
+      return "安静";
+    }
+
+    function modeActionCopy(level) {
+      if (level === "force") return "到点进入全屏恢复，时间到才回到工作界面";
+      if (level === "standard") return "到点或自然断点才明确提醒，你可以休息或稍后处理";
+      return "到点先轻轻提醒，不抢你的控制权";
+    }
+
+    function renderOnboardingLoad() {
+      if (!els.onboardingLoadValue || !els.onboardingLoadBand) return;
+      const load = estimateInitialLoad(readOnboardingSymptoms());
+      const band = classifyLoad(load);
+      const rhythm = initialRhythmForLoad(load);
+      const shownIntensity = state.settings.intensity === "force" ? "force" : rhythm.intensity;
+      const tone = load >= 74
+        ? { color: "#d74f75", glow: "rgba(215, 79, 117, 0.18)" }
+        : load >= 48
+          ? { color: "#b97816", glow: "rgba(185, 120, 22, 0.18)" }
+          : { color: "#0f9f7a", glow: "rgba(15, 159, 122, 0.18)" };
+      els.onboardingLoadValue.textContent = load;
+      els.onboardingLoadBand.textContent = band;
+      els.onboardingRhythmCopy.textContent = rhythm.copy;
+      els.onboardingRhythmValue.textContent = `${rhythm.focus} 分钟 / ${rhythm.rest} 秒 · ${intensityLabel(shownIntensity)}提醒`;
+      els.onboardingPlanLoad.textContent = `当前估算为${band} ${load} 分。`;
+      els.onboardingPlanRhythm.textContent = `先用 ${rhythm.focus} 分钟专注，${rhythm.rest} 秒恢复。`;
+      els.onboardingPlanMira.textContent = shownIntensity === "force"
+        ? "强制爱已开启。开始手动专注后，到点才会进入全屏恢复。"
+        : load >= 74
+        ? "先把节奏放轻，到点明确提醒你休息。"
+        : load >= 48
+          ? "我会提前一点提醒，避免硬撑到很累。"
+          : "先安静陪伴，到点再轻轻提醒。";
+      document.querySelectorAll("[data-onboarding-symptom]").forEach((input) => {
+        input.style.setProperty("--range-color", tone.color);
+        input.style.setProperty("--range-glow", tone.glow);
+        setRangeFill(input);
+      });
+      document.querySelectorAll("[data-onboarding-band]").forEach((item) => {
+        const active = (item.dataset.onboardingBand === "comfort" && load < 48)
+          || (item.dataset.onboardingBand === "medium" && load >= 48 && load < 74)
+          || (item.dataset.onboardingBand === "high" && load >= 74);
+        item.classList.toggle("active", active);
+      });
+    }
+
+    function applySymptomsToMainControls(symptoms) {
+      state.symptoms = { ...state.symptoms, ...symptoms };
+      document.querySelectorAll("[data-symptom]").forEach((input) => {
+        input.value = state.symptoms[input.dataset.symptom];
+        input.nextElementSibling.textContent = `${input.value} / 10`;
+        setRangeFill(input);
+      });
+    }
+
+    function completeInitialAssessment() {
+      const onboardingSymptoms = readOnboardingSymptoms();
+      const initialLoad = estimateInitialLoad(onboardingSymptoms);
+      const initialRhythm = initialRhythmForLoad(initialLoad);
+      applySymptomsToMainControls(onboardingSymptoms);
+      state.focusTarget = initialRhythm.focus;
+      state.breakTarget = initialRhythm.rest;
+      elapsedSeconds = 0;
+      startedAt = null;
+      lastNudgeAt = 0;
+      state.pendingReminder = null;
+      if (state.settings.intensity !== "force") {
+        state.settings.intensity = initialRhythm.intensity;
+      }
+      state.rhythmSource = "assessment";
+      els.focusTarget.value = initialRhythm.focus;
+      els.breakTarget.value = initialRhythm.rest;
+      setRangeFill(els.focusTarget);
+      setRangeFill(els.breakTarget);
+      setIntensity(state.settings.intensity, { persistChange: false, renderChange: false });
+      const load = computeEyeLoad();
+      state.logs = state.logs.filter((log) => log.note !== "Mira 初始打分" && !String(log.note || "").startsWith("Mira 初始打分；"));
+      state.logs.unshift({
+        at: new Date().toISOString(),
+        load,
+        symptoms: currentSymptoms(),
+        note: `Mira 初始打分；首轮 ${initialRhythm.focus} 分钟 / ${initialRhythm.rest} 秒`,
+        label: classifyLoad(load)
+      });
+      state.logs = state.logs.slice(0, 20);
+      state.initialAssessmentDone = true;
+      state.onboardingDismissed = true;
+      state.lastAssessmentDay = todayKey();
+      els.onboardingOverlay.classList.remove("show");
+      render();
+      persist();
+      showToast(`Mira：初始状态已记录。首轮 ${initialRhythm.focus} 分钟后提醒休息。`);
+      startSession();
+    }
+
+    function startSession() {
+      if (isRunning) return;
+      isRunning = true;
+      startedAt = Date.now() - elapsedSeconds * 1000;
+      ticker = window.setInterval(tick, 1000);
+      tick();
+    }
+
+    function toggleSession() {
+      if (isRunning) {
+        pauseSession();
+        return;
+      }
+      startSession();
+    }
+
+    function pauseSession() {
+      if (!isRunning) return;
+      isRunning = false;
+      window.clearInterval(ticker);
+      ticker = null;
+      persist();
+      render();
+    }
+
+    function tick() {
+      elapsedSeconds = Math.floor((Date.now() - startedAt) / 1000);
+      const targetSeconds = Number(els.focusTarget.value) * 60;
+      if (elapsedSeconds >= targetSeconds) {
+        nudgeRest(targetSeconds);
+      }
+      render();
+      persist();
+    }
+
+    function nudgeRest(targetSeconds) {
+      if (state.settings.intensity === "force" || state.settings.intensity === "standard") return;
+      const now = Date.now();
+      if (now - lastNudgeAt < 3 * 60 * 1000) return;
+      lastNudgeAt = now;
+      showToast("Mira：这轮已经够久了。找一个自然断点，看远处 20 秒。");
+      if (elapsedSeconds >= targetSeconds + 10 * 60) {
+        showToast("Mira：你已经超时 10 分钟了。我建议现在休息一下。");
+      }
+    }
+
+    function formatBreakTime(seconds) {
+      const safeSeconds = Math.max(0, Number(seconds) || 0);
+      const mins = Math.floor(safeSeconds / 60);
+      const secs = safeSeconds % 60;
+      return `${String(mins).padStart(2, "0")}:${String(secs).padStart(2, "0")}`;
+    }
+
+    function isAutoTracking() {
+      return Boolean(!isRunning && latestActivity?.isWorking && elapsedSeconds > 0);
+    }
+
+    function requestLocalFullscreen() {
+      if (isDesktopShell || document.fullscreenElement) return;
+      document.documentElement.requestFullscreen?.().catch(() => {});
+    }
+
+    function exitLocalFullscreen() {
+      if (isDesktopShell || !document.fullscreenElement) return;
+      document.exitFullscreen?.().catch(() => {});
+    }
+
+    function recoveryStepLabel(task) {
+      return String(task?.label || task?.caption || task?.title || "恢复").slice(0, 8);
+    }
+
+    function renderRecoveryFlow(target, tasks, activeIndex) {
+      if (!target) return;
+      const fragment = document.createDocumentFragment();
+      tasks.forEach((task, index) => {
+        const step = document.createElement("span");
+        step.textContent = recoveryStepLabel(task);
+        step.classList.toggle("done", index < activeIndex);
+        step.classList.toggle("active", index === activeIndex);
+        fragment.append(step);
+      });
+      target.replaceChildren(fragment);
+    }
+
+    function renderForceRecoveryTask(progress, remaining) {
+      const tasks = activeRecoveryTasks.length ? activeRecoveryTasks : recoveryTasksForMode("mixed");
+      const taskIndex = Math.min(tasks.length - 1, Math.floor(progress / (100 / tasks.length)));
+      const task = tasks[taskIndex];
+      els.breakTaskStep.textContent = `第 ${taskIndex + 1} 步 / ${tasks.length}`;
+      els.breakTaskTitle.textContent = task.title;
+      els.breakTaskCopy.textContent = task.copy;
+      renderRecoveryFlow(els.breakFlow, tasks, taskIndex);
+      els.breakMiniTimerText.textContent = formatBreakTime(remaining);
+      els.breakOverlay.dataset.relax = task.mood;
+      els.breakMiraCaption.textContent = task.caption;
+    }
+
+    function showBreak(reason) {
+      if (reason !== "force") pauseSession();
+      els.breakTitle.textContent = reason === "force" ? "Mira 带你离开屏幕一下" : "该让眼睛离开屏幕了";
+      els.breakCopy.textContent = reason === "scheduled"
+        ? "这轮已经够久了。看向 6 米外，慢慢眨眼 8 次，再闭眼 10 秒。"
+        : reason === "extended"
+          ? "再给自己一点时间。看远处，放松眉心和肩颈，等眼睛真的缓下来。"
+        : reason === "force"
+          ? "不用盯着倒计时。我来守时间，你把视线交给远处。"
+        : "主动休息是很高级的工作能力。远眺、眨眼、放松眉心，然后再回来。";
+      els.recoveryFeedback.hidden = true;
+      els.finishBreakBtn.hidden = reason === "force";
+      els.snoozeBtn.hidden = reason === "extended" || reason === "force";
+      els.forceReturnBtn.hidden = true;
+      els.breakTask.hidden = reason !== "force";
+      els.breakFlow.hidden = reason !== "force";
+      els.breakMiniTimer.hidden = reason !== "force";
+      els.breakMira.hidden = reason !== "force";
+      els.breakOverlay.dataset.relax = reason === "force" ? "gaze" : "";
+      els.breakBreath.hidden = reason === "force";
+      els.breakOverlay.classList.add("show");
+    }
+
+    function startForceBreak(intervention, options = {}) {
+      if (forceBreakActive) return;
+      forceBreakActive = true;
+      forceBreakPreview = Boolean(options.preview);
+      isRunning = false;
+      window.clearInterval(ticker);
+      ticker = null;
+      const seconds = Number(options.seconds || els.breakTarget.value);
+      const payload = {
+        seconds,
+        preview: forceBreakPreview,
+        recoveryMode: state.settings.recoveryMode || "mixed",
+        tasks: recoveryTasksForMode(state.settings.recoveryMode || "mixed"),
+        title: "Mira 带你离开屏幕一下",
+        copy: options.preview
+          ? "这是 15 秒预览，不会计入今日休息。你可以感受一下恢复画面的节奏。"
+          : "不用盯着倒计时。我来守时间，你把视线交给远处。"
+      };
+      if (window.eyeflowDesktop?.startForceBreak) {
+        window.eyeflowDesktop.startForceBreak(payload);
+      } else {
+        startLocalForceBreak(payload);
+      }
+      persist();
+    }
+
+    function previewForceBreak() {
+      startForceBreak({
+        copy: "预览强制爱全屏恢复任务。"
+      }, {
+        preview: true,
+        seconds: 15
+      });
+    }
+
+    function startLocalForceBreak(payload) {
+      requestLocalFullscreen();
+      showBreak("force");
+      els.breakTitle.textContent = payload.title || "Mira 带你离开屏幕一下";
+      activeRecoveryTasks = normalizeRecoveryTasks(payload.tasks, payload.recoveryMode || state.settings.recoveryMode || "mixed");
+      const totalSeconds = Math.max(15, Number(payload.seconds) || Number(els.breakTarget.value) || 120);
+      forceBreakEndsAt = Date.now() + totalSeconds * 1000;
+      window.clearInterval(forceBreakTimer);
+      const tickForceBreak = () => {
+        const remaining = Math.max(0, Math.ceil((forceBreakEndsAt - Date.now()) / 1000));
+        const progress = totalSeconds <= 0 ? 100 : ((totalSeconds - remaining) / totalSeconds) * 100;
+        renderForceRecoveryTask(Math.max(0, Math.min(100, progress)), remaining);
+        els.breakCopy.textContent = payload.copy;
+        if (remaining <= 0) {
+          window.clearInterval(forceBreakTimer);
+          forceBreakTimer = null;
+          els.breakCopy.textContent = payload.preview
+            ? "强制爱预览结束。现在可以回到 EyeFlow。"
+            : "这轮恢复完成。现在可以回到 EyeFlow。";
+          renderForceRecoveryTask(100, 0);
+          els.forceReturnBtn.hidden = false;
+        }
+      };
+      forceBreakTimer = window.setInterval(tickForceBreak, 250);
+      tickForceBreak();
+    }
+
+    function finishForceBreak(payload = {}) {
+      window.clearInterval(forceBreakTimer);
+      forceBreakTimer = null;
+      forceBreakActive = false;
+      const isPreview = forceBreakPreview || Boolean(payload.preview);
+      if (isPreview) {
+        forceBreakPreview = false;
+        els.breakOverlay.classList.remove("show");
+        exitLocalFullscreen();
+        showToast("Mira：强制爱预览结束。");
+        render();
+        persist();
+        return;
+      }
+      els.breakOverlay.classList.remove("show");
+      exitLocalFullscreen();
+      completeRecovery("better");
+      addSystemLog("完成一次强制爱休息", "倒计时结束后回到 EyeFlow。");
+      showToast("Mira：强制爱完成。现在可以回来了。");
+      render();
+      persist();
+    }
+
+    function finishBreak() {
+      els.breakTitle.textContent = "该让眼睛离开屏幕了";
+      els.breakCopy.textContent = "这次恢复先记下来。现在感觉好一点了吗？";
+      els.finishBreakBtn.hidden = true;
+      els.snoozeBtn.hidden = true;
+      els.recoveryFeedback.hidden = false;
+    }
+
+    function snoozeBreak() {
+      const hadPendingReminder = closePendingReminder("snoozed");
+      state.snoozeUntil = Date.now() + SNOOZE_MINUTES * 60 * 1000;
+      elapsedSeconds = Math.max(0, elapsedSeconds - SNOOZE_MINUTES * 60);
+      startedAt = Date.now() - elapsedSeconds * 1000;
+      els.breakOverlay.classList.remove("show");
+      if (hadPendingReminder) {
+        addSystemLog("延后一次 Mira 提醒", `你选择 ${SNOOZE_MINUTES} 分钟后再处理，EyeFlow 已把本轮提醒往后放一点。`);
+      } else {
+        addSystemLog("先继续当前会话", `你暂时回到工作，EyeFlow 已把下一次提醒往后放 ${SNOOZE_MINUTES} 分钟。`);
+      }
+      showToast(`Mira：好，${SNOOZE_MINUTES} 分钟后我再看一次节奏。`);
+      startSession();
+      render();
+      persist();
+    }
+
+    function completeRecovery(feedback) {
+      state.breaks += 1;
+      elapsedSeconds = 0;
+      startedAt = null;
+      lastNudgeAt = 0;
+      closePendingReminder("completed");
+
+      if (feedback === "better") {
+        softenSymptoms(2);
+        addSystemLog("完成一次护眼恢复", "反馈：好多了。下一轮按当前提醒方式重新开始。");
+        els.breakOverlay.classList.remove("show");
+        showToast("Mira：太好了。我从新一轮开始看着节奏。");
+        startSession();
+      } else if (feedback === "same") {
+        softenSymptoms(1);
+        state.focusTarget = Math.max(15, Number(els.focusTarget.value) - 5);
+        els.focusTarget.value = state.focusTarget;
+        addSystemLog("完成一次护眼恢复", "反馈：差不多。下一轮提醒会提前一点。");
+        els.breakOverlay.classList.remove("show");
+        showToast("Mira：收到。下一轮我会提前一点，但还是先轻轻来。");
+        startSession();
+      } else {
+        state.breakTarget = Math.min(240, Number(els.breakTarget.value) + 30);
+        els.breakTarget.value = state.breakTarget;
+        addSystemLog("完成一次护眼恢复", "反馈：还是累。建议继续休息，不急着回到屏幕。");
+        render();
+        persist();
+        showToast("Mira：那就先不急。再休息一会儿，我在。");
+        showBreak("extended");
+        return;
+      }
+
+      els.recoveryFeedback.hidden = true;
+      els.finishBreakBtn.hidden = false;
+      els.snoozeBtn.hidden = false;
+      render();
+      persist();
+    }
+
+    function softenSymptoms(amount) {
+      document.querySelectorAll("[data-symptom]").forEach((input) => {
+        const next = Math.max(0, Number(input.value) - amount);
+        input.value = next;
+        input.nextElementSibling.textContent = `${input.value} / 10`;
+        state.symptoms[input.dataset.symptom] = next;
+      });
+    }
+
+    function saveLog() {
+      const symptoms = currentSymptoms();
+      const load = computeEyeLoad();
+      const label = classifyLoad(load);
+      const note = els.note.value.trim();
+      state.logs.unshift({
+        at: new Date().toISOString(),
+        load,
+        symptoms,
+        note,
+        label
+      });
+      state.logs = state.logs.slice(0, 20);
+      els.note.value = "";
+      render();
+      persist();
+    }
+
+    function addSystemLog(title, note) {
+      state.logs.unshift({
+        at: new Date().toISOString(),
+        load: computeEyeLoad(),
+        symptoms: currentSymptoms(),
+        note,
+        label: title
+      });
+      state.logs = state.logs.slice(0, 20);
+    }
+
+    function closePendingReminder(status) {
+      if (!state.pendingReminder || state.pendingReminder.status !== "pending") return false;
+      state.pendingReminder.status = status;
+      state.pendingReminder.respondedAt = new Date().toISOString();
+      if (status === "completed") state.reminderStats.completed += 1;
+      if (status === "snoozed") state.reminderStats.snoozed += 1;
+      if (status === "ignored") state.reminderStats.ignored += 1;
+      return true;
+    }
+
+    function shouldSurfaceReminder(intervention, load) {
+      const level = Number(intervention.level || 1);
+      if (level < 2) return false;
+      if (latestActivity && isNaturalBreak(latestActivity)) return true;
+      if (!isRunning) return false;
+      const targetSeconds = Number(els.focusTarget.value) * 60;
+      if (load >= 74) {
+        return elapsedSeconds >= Math.min(targetSeconds, 8 * 60);
+      }
+      return elapsedSeconds >= targetSeconds;
+    }
+
+    function maybeRecordReminder(intervention, load) {
+      const level = Number(intervention.level || 1);
+      const now = Date.now();
+      const pending = state.pendingReminder;
+      if (pending?.status === "pending" && now - Date.parse(pending.at) > 12 * 60 * 1000) {
+        closePendingReminder("ignored");
+        addSystemLog("忽略一次 Mira 提醒", "这次提醒没有被处理。EyeFlow 会用它来判断提醒是否太频繁。");
+      }
+      if (level < 2) return;
+      if (!shouldSurfaceReminder(intervention, load)) return;
+      const snoozeReady = Number(state.snoozeUntil || 0) > 0 && now >= Number(state.snoozeUntil || 0);
+      if (Number(state.snoozeUntil || 0) > 0 && !snoozeReady) return;
+      if (snoozeReady) state.snoozeUntil = 0;
+      const cooldown = level >= 3 ? 4 * 60 * 1000 : 8 * 60 * 1000;
+      if (pending?.status === "pending") {
+        const pendingLevel = Number(pending.level || 1);
+        if (level > pendingLevel) {
+          pending.level = level;
+          pending.title = intervention.title;
+          pending.copy = intervention.copy;
+          addSystemLog(`Mira 升级到 L${level} 提醒`, intervention.copy);
+        }
+        return;
+      }
+      if (!snoozeReady && now - (state.lastReminderAt || 0) < cooldown) return;
+      state.lastReminderAt = now;
+      state.pendingReminder = {
+        id: `reminder-${now}`,
+        at: new Date(now).toISOString(),
+        level,
+        title: intervention.title,
+        copy: intervention.copy,
+        status: "pending"
+      };
+      state.reminderStats.shown += 1;
+      addSystemLog(`Mira 触发 L${level} 提醒`, intervention.copy);
+    }
+
+    function maybeAutoCompleteBreak(activity) {
+      if (!activity || isRunning) return;
+      if (activity.isWorking) {
+        lastActiveSecondsBeforeIdle = activity.activeSeconds || lastActiveSecondsBeforeIdle;
+        return;
+      }
+      const breakSeconds = Number(els.breakTarget.value);
+      const now = Date.now();
+      if (activity.idleSeconds < breakSeconds) return;
+      if (lastActiveSecondsBeforeIdle < Number(els.focusTarget.value) * 60 * 0.5) return;
+      if (now - (state.lastAutoBreakAt || 0) < 12 * 60 * 1000) return;
+      state.lastAutoBreakAt = now;
+      state.breaks += 1;
+      state.reminderStats.autoBreaks += 1;
+      closePendingReminder("completed");
+      elapsedSeconds = 0;
+      lastNudgeAt = 0;
+      lastActiveSecondsBeforeIdle = 0;
+      addSystemLog("自动识别一次休息", `检测到你离开键鼠约 ${activity.idleSeconds} 秒，已记为护眼休息。`);
+      showToast("Mira：我看到你停下来了一会儿，已自动记录一次休息。");
+    }
+
+    function fillFatiguePreset() {
+      const values = { dryness: 6, strain: 7, blur: 4, light: 3 };
+      document.querySelectorAll("[data-symptom]").forEach((input) => {
+        input.value = values[input.dataset.symptom];
+        input.dispatchEvent(new Event("input"));
+      });
+      els.note.value = "长时间连续 coding 后明显疲劳";
+    }
+
+    function applyQuickCheck(kind) {
+      const presets = {
+        ok: { dryness: 1, strain: 2, blur: 0, light: 0, note: "快速打点：眼睛还好" },
+        tired: { dryness: 4, strain: 5, blur: 2, light: 2, note: "快速打点：有点累" },
+        bad: { dryness: 7, strain: 8, blur: 5, light: 4, note: "快速打点：很不舒服" }
+      };
+      const preset = presets[kind];
+      document.querySelectorAll("[data-symptom]").forEach((input) => {
+        input.value = preset[input.dataset.symptom];
+        input.dispatchEvent(new Event("input"));
+      });
+      els.note.value = preset.note;
+      saveLog();
+      showToast(`Mira：已记录“${preset.note.replace("快速打点：", "")}”。`);
+    }
+
+    function handlePrimaryAction() {
+      const load = computeEyeLoad();
+      if (load >= 74) {
+        showBreak("manual");
+        return;
+      }
+      focusSessionPanel();
+    }
+
+    function focusSessionPanel() {
+      els.sessionPanel.scrollIntoView({ behavior: "smooth", block: "center" });
+      els.sessionPanel.classList.remove("session-pulse");
+      window.requestAnimationFrame(() => {
+        els.sessionPanel.classList.add("session-pulse");
+      });
+      window.setTimeout(() => {
+        els.sessionPanel.classList.remove("session-pulse");
+        els.startBtn.focus({ preventScroll: true });
+      }, 860);
+    }
+
+    function requestIntensity(level) {
+      if (level === "force" && state.settings.intensity !== "force") {
+        forceConfirmPending = true;
+        syncForceConfirm();
+        return;
+      }
+      forceConfirmPending = false;
+      setIntensity(level);
+    }
+
+    function enableForceMode() {
+      forceConfirmPending = false;
+      setIntensity("force");
+      showToast("Mira：强制爱已开启。开始手动专注后，到点会进入全屏恢复。");
+    }
+
+    function cancelForceMode() {
+      if (state.settings.intensity === "force") {
+        forceConfirmPending = false;
+        setIntensity("quiet");
+        showToast("Mira：已切回安静提醒。");
+        return;
+      }
+      forceConfirmPending = false;
+      syncForceConfirm();
+    }
+
+    function syncForceConfirm() {
+      const forceActive = state.settings.intensity === "force";
+      const visible = forceActive || forceConfirmPending;
+      els.forceConfirm.hidden = !visible;
+      if (!visible) return;
+      els.forceConfirmTitle.textContent = forceActive ? "强制爱已开启" : "开启前确认";
+      els.forceConfirmCopy.textContent = forceActive
+        ? "开始手动专注后，到点会进入全屏恢复。你可以先预览，也可以随时切回安静提醒。"
+        : "强制爱只会在你开始手动专注后接管；到点进入全屏恢复，倒计时结束前不会回到工作界面。建议先预览一次。";
+      els.enableForceBtn.hidden = forceActive;
+      els.cancelForceBtn.textContent = forceActive ? "切回安静" : "先不用";
+    }
+
+    function recoveryTasksForMode(mode) {
+      const safeMode = recoveryModeMeta[mode] ? mode : "mixed";
+      return (recoveryModeTasks[safeMode] || recoveryModeTasks.mixed)
+        .map((key) => ({ ...recoveryTaskLibrary[key] }))
+        .filter((task) => task.title && task.copy);
+    }
+
+    function normalizeRecoveryTasks(tasks, mode = "mixed") {
+      if (!Array.isArray(tasks) || tasks.length === 0) return recoveryTasksForMode(mode);
+      const allowedMoods = new Set(["gaze", "blink", "close", "neck", "press"]);
+      const safeTasks = tasks.slice(0, 6).map((task) => ({
+        mood: allowedMoods.has(task?.mood) ? task.mood : "gaze",
+        label: String(task?.label || "").slice(0, 12),
+        title: String(task?.title || "").slice(0, 48),
+        copy: String(task?.copy || "").slice(0, 140),
+        caption: String(task?.caption || "").slice(0, 36)
+      })).filter((task) => task.title && task.copy);
+      return safeTasks.length ? safeTasks : recoveryTasksForMode(mode);
+    }
+
+    function setRecoveryMode(mode, options = {}) {
+      const safeMode = recoveryModeMeta[mode] ? mode : "mixed";
+      state.settings.recoveryMode = safeMode;
+      activeRecoveryTasks = recoveryTasksForMode(safeMode);
+      els.recoveryModeButtons.forEach((button) => {
+        button.classList.toggle("active-setting", button.dataset.recoveryMode === safeMode);
+      });
+      els.recoveryModeLabel.textContent = recoveryModeMeta[safeMode].label;
+      els.recoveryModeCopy.textContent = recoveryModeMeta[safeMode].copy;
+      if (options.persistChange !== false) persist();
+    }
+
+    function setIntensity(level, options = {}) {
+      if (level !== "force") forceConfirmPending = false;
+      els.intensityButtons.forEach((button) => {
+        button.classList.toggle("active-setting", button.dataset.intensity === level);
+      });
+      els.intensityCopy.textContent = level === "quiet"
+        ? "默认只用 Mira 状态和轻提示，不主动弹出全屏休息。"
+        : level === "force"
+          ? "开始手动专注后，到点进入全屏恢复。倒计时结束前不会显示完成按钮。"
+          : "到点或自然断点才出现轻提示；连续超时后，Mira 会更明确地建议休息。";
+      state.settings.intensity = level;
+      syncForceConfirm();
+      if (options.persistChange !== false) persist();
+      if (options.renderChange !== false) render();
+    }
+
+    function requestResetDay() {
+      if (!resetConfirmArmed) {
+        resetConfirmArmed = true;
+        els.resetBtn.textContent = "确认重置今日？";
+        els.resetBtn.classList.add("active-setting");
+        showToast("Mira：再点一次才会清空今天的数据。");
+        window.clearTimeout(resetConfirmTimer);
+        resetConfirmTimer = window.setTimeout(cancelResetConfirm, 5000);
+        return;
+      }
+      cancelResetConfirm();
+      resetDay();
+    }
+
+    function cancelResetConfirm() {
+      resetConfirmArmed = false;
+      window.clearTimeout(resetConfirmTimer);
+      resetConfirmTimer = null;
+      els.resetBtn.textContent = "重置今日数据";
+      els.resetBtn.classList.remove("active-setting");
+    }
+
+    function resetDay() {
+      pauseSession();
+      elapsedSeconds = 0;
+      lastNudgeAt = 0;
+      state.breaks = 0;
+      state.logs = [];
+      state.currentDay = todayKey();
+      state.reminderStats = { shown: 0, completed: 0, snoozed: 0, ignored: 0, autoBreaks: 0 };
+      state.pendingReminder = null;
+      state.snoozeUntil = 0;
+      state.lastReminderAt = 0;
+      state.lastAutoBreakAt = 0;
+      lastActiveSecondsBeforeIdle = 0;
+      state.symptoms = { dryness: 2, strain: 3, blur: 1, light: 1 };
+      state.onboardingDismissed = false;
+      state.initialAssessmentDone = false;
+      state.lastAssessmentDay = "";
+      state.rhythmSource = "default";
+      els.note.value = "";
+      document.querySelectorAll("[data-symptom]").forEach((input) => {
+        input.value = state.symptoms[input.dataset.symptom];
+        input.nextElementSibling.textContent = `${input.value} / 10`;
+      });
+      render();
+      persist();
+      showToast("Mira：今天的数据已重置。");
+    }
+
+    function renderActivity() {
+      if (!latestActivity) return;
+      const app = latestActivity.activeApp || "未知 App";
+      renderPermissionStatus({
+        accessibilityTrusted: latestActivity.accessibilityTrusted,
+        platform: latestActivity.platform || "darwin"
+      });
+      els.activityApp.textContent = app;
+      els.activityIdle.textContent = `空闲 ${latestActivity.idleSeconds || 0} 秒`;
+      els.activityMode.textContent = isRunning ? "手动计时" : latestActivity.isWorking ? "自动记录" : "自动感知";
+      els.naturalBreakTag.textContent = naturalBreakLabel(latestActivity);
+      if (!latestActivity.isWorking) {
+        els.activityCopy.textContent = "当前处于空闲状态。恢复操作后，EyeFlow 会重新计算连续活跃时间。";
+      } else if (state.settings.deepWorkMiraOnlyToggle && latestActivity.isDeepWorkApp) {
+        els.activityCopy.textContent = `检测到 ${app} 深度工作中。自然断点只更新 Mira，不弹出提示。`;
+      } else {
+        els.activityCopy.textContent = `检测到你正在使用 ${app}${latestActivity.isDeepWorkApp ? "，看起来像深度工作。" : "。"}`;
+      }
+    }
+
+    async function refreshPermissionStatus() {
+      if (!window.eyeflowDesktop?.getPermissionStatus) {
+        renderPermissionStatus({ accessibilityTrusted: null, platform: "browser" });
+        return;
+      }
+      const status = await window.eyeflowDesktop.getPermissionStatus();
+      renderPermissionStatus(status);
+    }
+
+    function renderPermissionStatus(status) {
+      if (status.platform === "browser") {
+        els.permissionTag.textContent = "预览模式";
+        els.permissionCopy.textContent = "浏览器预览不会读取系统权限。桌面版会用辅助功能权限识别当前 App。";
+        els.permissionBtn.disabled = true;
+        return;
+      }
+      if (status.platform !== "darwin") {
+        els.permissionTag.textContent = "无需 macOS 权限";
+        els.permissionCopy.textContent = "当前平台暂不需要 macOS 辅助功能权限。";
+        els.permissionBtn.disabled = true;
+        return;
+      }
+      if (status.accessibilityTrusted) {
+        els.permissionTag.textContent = "已授权";
+        els.permissionCopy.textContent = "EyeFlow 可以识别当前前台 App，用来判断深度工作和自然断点。";
+        els.permissionBtn.disabled = false;
+        return;
+      }
+      els.permissionTag.textContent = "需要授权";
+      els.permissionCopy.textContent = "如果当前 App 一直显示未知，请在系统设置里允许 EyeFlow/Electron 访问辅助功能。";
+      els.permissionBtn.disabled = false;
+    }
+
+    async function refreshDesktopSettings() {
+      if (!window.eyeflowDesktop?.getDesktopSettings) {
+        els.desktopLaunchCopy.textContent = "浏览器预览不会修改系统启动项。桌面版可以随电脑启动。";
+        els.desktopVersionTag.textContent = "浏览器预览";
+        els.launchAtLoginTag.textContent = "桌面版可用";
+        els.launchAtLoginToggle.checked = false;
+        els.launchAtLoginToggle.disabled = true;
+        return;
+      }
+      const settings = await window.eyeflowDesktop.getDesktopSettings();
+      renderDesktopSettings(settings);
+    }
+
+    function renderDesktopSettings(settings) {
+      els.desktopVersionTag.textContent = `EyeFlow ${settings.version || "0.1.0"}`;
+      els.launchAtLoginToggle.disabled = settings.platform !== "darwin";
+      els.launchAtLoginToggle.checked = Boolean(settings.launchAtLogin);
+      els.launchAtLoginTag.textContent = settings.launchAtLogin ? "已随电脑启动" : "手动启动";
+      els.desktopLaunchCopy.textContent = settings.launchAtLogin
+        ? "EyeFlow 会随电脑启动，Mira 会安静待命。"
+        : "打开后才会运行；你也可以让 EyeFlow 随电脑启动。";
+    }
+
+    async function setLaunchAtLogin() {
+      if (!window.eyeflowDesktop?.setLaunchAtLogin) return;
+      els.launchAtLoginToggle.disabled = true;
+      const settings = await window.eyeflowDesktop.setLaunchAtLogin(els.launchAtLoginToggle.checked);
+      renderDesktopSettings(settings);
+      showToast(settings.launchAtLogin ? "Mira：下次开机我会在。" : "Mira：好，我只在你打开 EyeFlow 后出现。");
+    }
+
+    function openAccessibilitySettings() {
+      if (window.eyeflowDesktop?.openAccessibilitySettings) {
+        window.eyeflowDesktop.openAccessibilitySettings();
+        showToast("Mira：打开系统设置后，给 EyeFlow/Electron 勾选辅助功能权限。");
+        return;
+      }
+      showToast("浏览器预览不能打开系统权限设置，请在桌面版里操作。");
+    }
+
+    function isNaturalBreak(activity) {
+      const targetSeconds = Number(els.focusTarget.value) * 60;
+      return !isRunning
+        && activity
+        && activity.activeSeconds >= targetSeconds
+        && activity.idleSeconds >= 8
+        && activity.idleSeconds <= 45;
+    }
+
+    function naturalBreakLabel(activity) {
+      if (!activity) return "等待自然断点";
+      if (isNaturalBreak(activity)) return "适合轻休息";
+      const targetSeconds = Number(els.focusTarget.value) * 60;
+      if (!isRunning && activity.activeSeconds >= targetSeconds) return "等你停一下";
+      if (isRunning) return "手动节奏";
+      return "等待自然断点";
+    }
+
+    function maybeNudgeAtNaturalBreak(activity) {
+      if (!isNaturalBreak(activity)) return;
+      const now = Date.now();
+      const cooldown = state.settings.intensity === "quiet" ? 15 * 60 * 1000 : 8 * 60 * 1000;
+      if (now - lastNaturalBreakNudgeAt < cooldown) return;
+      lastNaturalBreakNudgeAt = now;
+      const miraOnly = state.settings.deepWorkMiraOnlyToggle && activity.isDeepWorkApp;
+      if (!miraOnly && state.settings.intensity !== "quiet") {
+        showToast("Mira：现在像是一个自然断点。看远处 20 秒，我等你回来。");
+      }
+      if (!miraOnly && state.settings.soundToggle) {
+        playSoftBeep();
+      }
+      if (!miraOnly && state.settings.systemNotifyToggle && window.eyeflowDesktop?.notify) {
+        window.eyeflowDesktop.notify("现在像是一个自然断点。看远处 20 秒。");
+      }
+    }
+
+    function playSoftBeep() {
+      try {
+        const AudioContext = window.AudioContext || window.webkitAudioContext;
+        const ctx = new AudioContext();
+        const oscillator = ctx.createOscillator();
+        const gain = ctx.createGain();
+        oscillator.frequency.value = 660;
+        oscillator.type = "sine";
+        gain.gain.setValueAtTime(0.0001, ctx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.04, ctx.currentTime + 0.02);
+        gain.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + 0.22);
+        oscillator.connect(gain);
+        gain.connect(ctx.destination);
+        oscillator.start();
+        oscillator.stop(ctx.currentTime + 0.24);
+      } catch {
+        // Audio feedback is optional.
+      }
+    }
+
+    function showToast(message) {
+      window.clearTimeout(toastTimer);
+      els.petToast.textContent = message;
+      els.petToast.classList.add("show");
+      toastTimer = window.setTimeout(() => {
+        els.petToast.classList.remove("show");
+      }, 5600);
+    }
+
+    function toggleIntro() {
+      if (!els.introWrap || !els.introToggle) return;
+      const open = els.introWrap.classList.toggle("open");
+      els.introToggle.setAttribute("aria-expanded", String(open));
+    }
+
+    function switchView(targetId) {
+      els.views.forEach((view) => {
+        view.hidden = view.id !== targetId;
+      });
+      els.navButtons.forEach((button) => {
+        button.classList.toggle("active", button.dataset.viewTarget === targetId);
+      });
+      const copy = {
+        todayView: ["今天", statusCopy(computeEyeLoad(), isRunning)],
+        rhythmView: ["设置", "先选提醒方式，需要时再展开更多设置。"],
+        profileView: ["眼睛档案", "把每次不舒服记录下来，逐步看清你的主要用眼负担。"]
+      }[targetId];
+      els.pageTitle.textContent = copy[0];
+      els.statusText.textContent = copy[1];
+    }
+
+    function toggleCompanion() {
+      const minimized = els.companion.classList.toggle("minimized");
+      els.petMinimizeBtn.title = minimized ? "展开" : "最小化";
+      els.pet.title = minimized ? "展开 Mira" : "";
+      els.petMinimizeIcon.innerHTML = minimized
+        ? '<path d="M8 3H5a2 2 0 0 0-2 2v3"/><path d="M16 3h3a2 2 0 0 1 2 2v3"/><path d="M8 21H5a2 2 0 0 1-2-2v-3"/><path d="M16 21h3a2 2 0 0 0 2-2v-3"/>'
+        : '<path d="M5 12h14"/>';
+    }
+
+    function expandCompanionFromPet() {
+      if (!els.companion.classList.contains("minimized")) return;
+      toggleCompanion();
+    }
+
+    function currentSymptoms() {
+      const values = {};
+      document.querySelectorAll("[data-symptom]").forEach((input) => {
+        values[input.dataset.symptom] = Number(input.value);
+      });
+      return values;
+    }
+
+    function computeEyeLoad() {
+      const symptoms = currentSymptoms();
+      const symptomScore = symptoms.dryness * 2.1 + symptoms.strain * 2.4 + symptoms.blur * 2 + symptoms.light * 1.4;
+      const focusScore = Math.min(36, elapsedSeconds / 60 * 1.35);
+      const breakRelief = Math.min(18, state.breaks * 4);
+      return Math.max(0, Math.min(100, Math.round(12 + symptomScore + focusScore - breakRelief)));
+    }
+
+    function classifyLoad(load) {
+      if (load >= 74) return "高负荷";
+      if (load >= 48) return "中等负荷";
+      return "舒适区";
+    }
+
+    function recommendations(load) {
+      const symptoms = currentSymptoms();
+      const recs = [];
+      if (symptoms.dryness >= 5) {
+        recs.push(["眨眼与环境", "把下一次提醒设成 15-20 分钟，顺手检查空调直吹、湿度和眨眼频率。"]);
+      }
+      if (symptoms.strain >= 6 || symptoms.blur >= 4) {
+        recs.push(["屏幕距离", "把屏幕推远一点，放大字体，先减少近距离硬盯带来的酸胀。"]);
+      }
+      if (symptoms.light >= 5) {
+        recs.push(["亮度和眩光", "把屏幕亮度调到接近环境光，关掉直射反光，优先考虑抗反射镀膜。"]);
+      }
+      if (elapsedSeconds / 60 > Number(els.focusTarget.value) * 0.75) {
+        recs.push(["休息窗口", "这轮已经接近上限。找一个编译、测试或思考间隙，把视线移到远处。"]);
+      }
+      if (load >= 48 && recs.length === 0) {
+        recs.push(["缩短下一轮", "用眼负荷进入中等区间。下一轮可以缩短 5-10 分钟，并在开始前眨眼几次。"]);
+      }
+      if (load < 48 && recs.length === 0) {
+        recs.push(["保持节奏", "现在状态不错。继续用短会话推进，别等到眼睛抗议才休息。"]);
+      }
+      return recs.slice(0, 3);
+    }
+
+    function currentIntervention(load) {
+      const focusTargetMinutes = Number(els.focusTarget.value);
+      const elapsedMinutes = elapsedSeconds / 60;
+      const deepWorkMiraOnly = latestActivity
+        && state.settings.deepWorkMiraOnlyToggle
+        && latestActivity.isDeepWorkApp;
+
+      if (state.settings.intensity === "force") {
+        if (!isRunning) {
+          return {
+            level: 1,
+            title: "强制爱待命",
+            copy: isAutoTracking()
+              ? "正在自动记录连续盯屏。点开始手动专注后，强制爱才会接管到点全屏恢复。"
+              : "Mira 会先安静陪伴；开始手动专注后，到点才进入全屏恢复。"
+          };
+        }
+        if (elapsedMinutes >= focusTargetMinutes) {
+          return {
+            level: 4,
+            title: "强制爱：全屏休息",
+            copy: "这一轮已经到点。EyeFlow 会进入全屏休息，倒计时结束前不恢复工作界面。"
+          };
+        }
+        return {
+          level: 1,
+          title: "强制爱已开启",
+          copy: "Mira 会先安静陪伴；到点后直接进入全屏休息。"
+        };
+      }
+
+      if (state.settings.intensity === "quiet" || deepWorkMiraOnly) {
+        return {
+          level: 1,
+          title: "只让 Mira 轻轻变化",
+          copy: deepWorkMiraOnly
+            ? "检测到深度工作，暂时只更新 Mira 状态，不弹出提示。"
+            : "当前是安静模式，默认只用状态球和文字变化，不主动打断。"
+        };
+      }
+
+      if (elapsedMinutes >= focusTargetMinutes + 10) {
+        return {
+          level: 3,
+          title: "已经明显超时",
+          copy: "这轮已经超过目标时间较久，Mira 会更明确地建议你休息。"
+        };
+      }
+
+      if (load >= 74) {
+        return {
+          level: 3,
+          title: "负荷偏高，准备提醒",
+          copy: "眼睛信号偏高。Mira 会先观察节奏，持续一小段时间后再明确提醒。"
+        };
+      }
+
+      if (latestActivity && isNaturalBreak(latestActivity)) {
+        return {
+          level: 2,
+          title: "在自然断点轻提示",
+          copy: "你刚停下来一下，适合用轻提示提醒远眺，不打断正在输入的节奏。"
+        };
+      }
+
+      if (elapsedMinutes >= focusTargetMinutes) {
+        return {
+          level: 2,
+          title: "到点轻提醒",
+          copy: "这轮已经到点。找一个自然断点，看远处 20 秒。"
+        };
+      }
+
+      if (load >= 48 || elapsedMinutes >= focusTargetMinutes * 0.72) {
+        return {
+          level: 2,
+          title: "提前观察眨眼或远眺",
+          copy: "负荷进入中段。Mira 先只改变状态，不展开提醒；到点或自然断点再说清楚。"
+        };
+      }
+
+      return {
+        level: 1,
+        title: "保持在旁边陪伴",
+        copy: "当前负荷不高，Mira 只保持在线状态，不制造额外打扰。"
+      };
+    }
+
+    function renderInterventionStrategy(load) {
+      const intervention = currentIntervention(load);
+      maybeRecordReminder(intervention, load);
+      if (intervention.level >= 4) {
+        startForceBreak(intervention);
+        return true;
+      }
+      els.interventionLevel.textContent = `L${intervention.level}`;
+      els.interventionTitle.textContent = intervention.title;
+      els.interventionCopy.textContent = intervention.copy;
+      els.interventionBars.forEach((bar, index) => {
+        bar.classList.toggle("active", index < intervention.level);
+      });
+      return false;
+    }
+
+    function renderReminderFeedback() {
+      const stats = state.reminderStats;
+      els.reminderShown.textContent = stats.shown;
+      els.reminderCompleted.textContent = stats.completed;
+      els.reminderSnoozed.textContent = stats.snoozed;
+      els.reminderIgnored.textContent = stats.ignored;
+      els.autoBreaks.textContent = stats.autoBreaks;
+      if (stats.shown === 0) {
+        els.reminderFeedbackCopy.textContent = "Mira 会记录提醒有没有被接住，用来慢慢调低打扰感。";
+      } else if (stats.ignored > stats.completed + stats.snoozed) {
+        els.reminderFeedbackCopy.textContent = "今天忽略提醒偏多，后续可以降低提醒频率或更依赖自然断点。";
+      } else {
+        els.reminderFeedbackCopy.textContent = "今天的提醒已有反馈，EyeFlow 会用这些信号调整节奏。";
+      }
+    }
+
+    function renderDailySummary(load) {
+      const stats = state.reminderStats;
+      const [symptom, symptomValue] = topSymptom();
+      const focusMinutes = Math.floor(elapsedSeconds / 60);
+      const handled = stats.completed + stats.snoozed;
+      const responsePercent = stats.shown ? Math.round(handled / stats.shown * 100) : null;
+      const totalBreaks = state.breaks;
+      els.summaryDayLabel.textContent = `今日总结 · ${state.currentDay || todayKey()}`;
+
+      if (load >= 74) {
+        els.dailySummaryTitle.textContent = "今天眼睛已经在高负荷区";
+        els.dailySummaryCopy.textContent = `主要信号是${symptom} ${symptomValue}/10。先完成一次休息，再继续推进任务。`;
+      } else if (load >= 48) {
+        els.dailySummaryTitle.textContent = "今天需要缩短后半段节奏";
+        els.dailySummaryCopy.textContent = `当前是中等负荷，连续盯屏约 ${focusMinutes} 分钟，建议下一轮提前提醒。`;
+      } else if (state.logs.length || focusMinutes > 0 || totalBreaks > 0) {
+        els.dailySummaryTitle.textContent = "今天整体还在可控区";
+        els.dailySummaryCopy.textContent = `当前负荷 ${load}，已记录 ${state.logs.length} 条，用眼节奏还比较温和。`;
+      } else {
+        els.dailySummaryTitle.textContent = "还在建立今天的节奏";
+        els.dailySummaryCopy.textContent = "开始专注或保存一次打点后，这里会总结今天的用眼状态。";
+      }
+
+      els.responseRate.textContent = responsePercent === null ? "暂无" : `${responsePercent}%`;
+      if (stats.shown === 0) {
+        els.responseRateCopy.textContent = "今天还没有触发 L2/L3 提醒。";
+      } else if (stats.ignored > handled) {
+        els.responseRateCopy.textContent = `已触发 ${stats.shown} 次，忽略偏多，后续应该更少打扰。`;
+      } else {
+        els.responseRateCopy.textContent = `已触发 ${stats.shown} 次，其中 ${handled} 次被处理。`;
+      }
+
+      els.recoveryScore.textContent = `${totalBreaks} 次`;
+      els.recoveryCopy.textContent = stats.autoBreaks
+        ? `其中 ${stats.autoBreaks} 次来自自动识别。`
+        : "主动或自动识别的休息都会计入。";
+
+      if (load >= 74 || symptomValue >= 7) {
+        els.tomorrowPlan.textContent = "明天缩短专注轮次";
+        els.tomorrowCopy.textContent = `优先关注${symptom}，把专注提醒提前 5-10 分钟。`;
+      } else if (stats.ignored > handled && stats.shown >= 2) {
+        els.tomorrowPlan.textContent = "明天降低打扰频率";
+        els.tomorrowCopy.textContent = "更多依赖状态球和自然断点，少用主动气泡。";
+      } else if (totalBreaks === 0 && focusMinutes >= 15) {
+        els.tomorrowPlan.textContent = "明天至少安排一次短休息";
+        els.tomorrowCopy.textContent = "至少 120 秒，远眺之后也把肩颈放松做完。";
+      } else {
+        els.tomorrowPlan.textContent = "保持当前节奏";
+        els.tomorrowCopy.textContent = "继续用 Mira 轻提醒，先观察几天再调强度。";
+      }
+    }
+
+    function renderTodayRhythm() {
+      const focus = Number(els.focusTarget.value);
+      const rest = Number(els.breakTarget.value);
+      const assessedToday = state.lastAssessmentDay === todayKey();
+      const usesDefaultRhythm = focus === 25 && rest === 90;
+      let prefix = usesDefaultRhythm ? "默认节奏" : "当前节奏";
+
+      if (state.rhythmSource === "assessment" && assessedToday) {
+        prefix = "按今天评分";
+      } else if (state.rhythmSource === "suggestion") {
+        prefix = "Mira 建议";
+      } else if (state.rhythmSource === "manual") {
+        prefix = "手动调整";
+      } else if (assessedToday) {
+        prefix = "当前节奏";
+      }
+
+      els.todayRhythmCopy.textContent = `${prefix} · ${focus} 分钟 / ${rest} 秒`;
+    }
+
+    function modeCopy() {
+      if (state.settings.intensity === "force") {
+        return {
+          label: "当前模式：强制爱",
+          copy: "到点后进入全屏恢复任务，倒计时结束前不回到工作界面。",
+          timer: `${els.focusTarget.value} 分钟后全屏休息 · ${els.breakTarget.value} 秒`
+        };
+      }
+      if (state.settings.intensity === "standard") {
+        return {
+          label: "当前模式：标准提醒",
+          copy: "到点或自然断点才出现明确提醒；你可以休息，也可以稍后处理。",
+          timer: `${els.focusTarget.value} 分钟后远眺 · ${els.breakTarget.value} 秒`
+        };
+      }
+      return {
+        label: "当前模式：安静提醒",
+        copy: "Mira 主要用状态和轻提示陪伴，不主动弹出全屏休息。",
+        timer: `${els.focusTarget.value} 分钟后轻提醒 · ${els.breakTarget.value} 秒`
+      };
+    }
+
+    function sessionHintText() {
+      if (isAutoTracking()) {
+        if (state.settings.intensity === "force") {
+          return `自动记录中 · 开始手动专注后启用全屏恢复`;
+        }
+        return `自动记录中 · 开始手动专注后接管提醒`;
+      }
+      return modeCopy().timer;
+    }
+
+    function renderTodayMode() {
+      const text = state.settings.intensity === "force"
+        ? isAutoTracking()
+          ? "强制爱待命 · 手动专注后全屏恢复"
+          : "强制爱 · 到点全屏恢复"
+        : state.settings.intensity === "standard"
+          ? "标准 · 到点明确提醒"
+          : "安静 · Mira 轻提醒";
+      els.todayModeCopy.textContent = text;
+      els.todayFlowCopy.classList.toggle("force", state.settings.intensity === "force");
+    }
+
+    function renderTodayPlan(load) {
+      const focus = Number(els.focusTarget.value);
+      const rest = Number(els.breakTarget.value);
+      const assessedToday = state.lastAssessmentDay === todayKey();
+      const [symptom, value] = topSymptom();
+      const modeAction = state.settings.intensity === "force" && isAutoTracking()
+        ? "开始手动专注后才启用强制爱全屏恢复"
+        : modeActionCopy(state.settings.intensity);
+      const source = state.rhythmSource === "assessment" && assessedToday
+        ? "今天评分"
+        : state.rhythmSource === "suggestion"
+          ? "Mira 建议"
+          : state.rhythmSource === "manual"
+            ? "手动调整"
+            : assessedToday
+              ? "当前状态"
+              : "默认节奏";
+      if (!assessedToday) {
+        els.todayPlanCopy.innerHTML = `还没校准今天。现在先按 <strong>${focus} 分钟 / ${rest} 秒</strong> 运行；校准后 Mira 会按此刻状态重新安排首轮。`;
+        return;
+      }
+      els.todayPlanCopy.innerHTML = `按${source}：当前 <strong>${load} 分</strong>，主要信号是 <strong>${symptom} ${value}/10</strong>；这一轮 <strong>${focus} 分钟</strong> 后恢复 <strong>${rest} 秒</strong>，${modeAction}。`;
+    }
+
+    function renderAssessmentReminder() {
+      const assessedToday = state.lastAssessmentDay === todayKey();
+      els.assessmentReminder.hidden = assessedToday;
+    }
+
+    function renderPendingReminder() {
+      const pending = state.pendingReminder;
+      const visible = pending?.status === "pending";
+      els.pendingReminderCard.hidden = !visible;
+      if (!visible) return;
+      els.pendingReminderTitle.textContent = pending.title || "Mira 在轻轻提醒";
+      els.pendingReminderCopy.textContent = pending.copy || "找一个自然断点，看远处 20 秒。";
+    }
+
+    function render() {
+      const target = Number(els.focusTarget.value) * 60;
+      const progress = Math.min(100, elapsedSeconds / target * 100);
+      const load = computeEyeLoad();
+      const mins = Math.floor(elapsedSeconds / 60);
+      const secs = elapsedSeconds % 60;
+
+      els.timerText.textContent = `${String(mins).padStart(2, "0")}:${String(secs).padStart(2, "0")}`;
+      els.timerRing.style.setProperty("--progress", `${progress}%`);
+      els.timerHint.textContent = sessionHintText();
+      els.focusTargetValue.textContent = els.focusTarget.value;
+      els.breakTargetValue.textContent = els.breakTarget.value;
+      setRangeFill(els.focusTarget);
+      setRangeFill(els.breakTarget);
+      renderSessionControls();
+      els.eyeLoad.textContent = load;
+      renderLoadBand(load);
+      renderStateCenter(load);
+      els.focusMinutes.textContent = `${mins}m`;
+      els.breakCount.textContent = state.breaks;
+      els.logCount.textContent = state.logs.length;
+      renderActivity();
+      if (!document.querySelector("#todayView").hidden) {
+        els.statusText.textContent = statusCopy(load, isRunning);
+      }
+      els.mainInsight.textContent = insightCopy(load);
+
+      renderTodayRhythm();
+      renderTodayMode();
+      renderTodayPlan(load);
+      renderAssessmentReminder();
+      if (renderInterventionStrategy(load)) return;
+      renderPendingReminder();
+      renderReminderFeedback();
+      renderDailySummary(load);
+      renderRhythmSuggestion(load);
+      renderCompanion(load);
+      renderRecommendations(load);
+      renderProfile(load);
+      renderTrend(load);
+      renderLogs();
+    }
+
+    function renderSessionControls() {
+      if (isRunning) {
+        els.sessionStatePill.textContent = "手动专注";
+        els.sessionStatePill.dataset.state = "manual";
+        els.startBtnText.textContent = "暂停";
+        els.startBtn.title = "暂停当前专注";
+        els.startBtnIcon.innerHTML = '<path d="M8 5h3v14H8zM13 5h3v14h-3z"></path>';
+      } else {
+        const autoTracking = isAutoTracking();
+        const paused = !autoTracking && elapsedSeconds > 0;
+        els.sessionStatePill.textContent = autoTracking ? "自动记录" : paused ? "已暂停" : "未开始";
+        els.sessionStatePill.dataset.state = autoTracking ? "auto" : paused ? "paused" : "idle";
+        els.startBtnText.textContent = autoTracking ? "开始手动专注" : elapsedSeconds > 0 ? "继续专注" : "开始专注";
+        els.startBtn.title = autoTracking ? "接管当前自动记录的专注会话" : elapsedSeconds > 0 ? "继续当前专注" : "开始专注";
+        els.startBtnIcon.innerHTML = '<path d="M8 5v14l11-7Z"></path>';
+      }
+    }
+
+    function symptomName(key) {
+      return {
+        dryness: "干涩",
+        strain: "酸胀",
+        blur: "模糊",
+        light: "畏光"
+      }[key] || key;
+    }
+
+    function topSymptom() {
+      return Object.entries(currentSymptoms())
+        .map(([key, value]) => [symptomName(key), value])
+        .sort((a, b) => b[1] - a[1])[0];
+    }
+
+    function renderStateCenter(load) {
+      const label = classifyLoad(load);
+      const [symptom, value] = topSymptom();
+      const mins = Math.floor(elapsedSeconds / 60);
+      els.stateBand.textContent = label;
+      els.stateBand.style.background = load >= 74 ? "#ffe0e8" : load >= 48 ? "var(--amber-soft)" : "var(--mint-soft)";
+      els.stageLoadValue.textContent = load;
+      const stageMood = load >= 74
+        ? "rest"
+        : load >= 48 || value >= 5
+          ? "blink"
+          : isRunning || isAutoTracking()
+            ? "focus"
+            : "calm";
+      const stageTone = stageMood === "rest"
+        ? { color: "#d7658a", glow: "rgba(215, 101, 138, 0.22)" }
+        : stageMood === "blink"
+          ? { color: "#d8a537", glow: "rgba(216, 165, 55, 0.22)" }
+          : stageMood === "focus"
+            ? { color: "#4fb8d8", glow: "rgba(79, 184, 216, 0.2)" }
+            : { color: "#0f9f7a", glow: "rgba(15, 159, 122, 0.18)" };
+      els.stageMira.dataset.mood = stageMood;
+      els.sessionPanel.dataset.mood = stageMood;
+      [els.focusTarget, els.breakTarget].forEach((input) => {
+        input.style.setProperty("--range-color", stageTone.color);
+        input.style.setProperty("--range-glow", stageTone.glow);
+      });
+      els.reasonFocus.textContent = `${mins} 分钟`;
+      els.reasonSymptom.textContent = `${symptom} ${value}/10`;
+      els.reasonBreaks.textContent = `${state.breaks} 次`;
+      els.reasonCopy.textContent = `当前 ${load} 分，主要来自连续盯屏 ${mins} 分钟、${symptom} ${value}/10，以及今天已休息 ${state.breaks} 次。`;
+
+      if (load >= 74) {
+        els.stateHeadline.textContent = "现在更适合先休息";
+        els.stateAction.textContent = "用眼负荷已经进入高负荷。先远眺、眨眼，再回来继续。";
+        els.primaryActionBtn.hidden = false;
+        els.primaryActionBtn.textContent = "立即休息";
+      } else if (load >= 48) {
+        els.stateHeadline.textContent = "可以继续，但要缩短这一轮";
+        els.stateAction.textContent = state.settings.intensity === "force"
+          ? isAutoTracking()
+            ? "强制爱已开启，但现在只是自动记录。点开始手动专注后，到点才会全屏恢复。"
+            : "强制爱已开启。现在可以继续，到点后会直接进入全屏恢复任务。"
+          : "下一次提醒建议提前一点。Mira 会先轻提示，不会突然打断。";
+        els.primaryActionBtn.hidden = true;
+      } else {
+        els.stateHeadline.textContent = "现在可以继续工作";
+        els.stateAction.textContent = state.settings.intensity === "force"
+          ? isAutoTracking()
+            ? "强制爱已开启，但现在只是自动记录。点开始手动专注后，Mira 才会接管全屏恢复。"
+            : "强制爱已开启。到点前 Mira 保持安静，到点后会进入全屏恢复任务。"
+          : "保持当前节奏。到提醒点时，Mira 会先轻轻提示你眨眼或远眺。";
+        els.primaryActionBtn.hidden = true;
+      }
+    }
+
+    function renderProfile(load) {
+      const symptoms = currentSymptoms();
+      const entries = [
+        ["干涩", symptoms.dryness],
+        ["酸胀", symptoms.strain],
+        ["模糊", symptoms.blur],
+        ["畏光", symptoms.light]
+      ].sort((a, b) => b[1] - a[1]);
+      const top = entries[0];
+      const loadLabel = classifyLoad(load);
+      els.profileLoad.textContent = load;
+      els.profileSummary.textContent = `当前处于${loadLabel}。今天最明显的信号是${top[0]}，评分 ${top[1]} / 10。`;
+      els.profileTags.innerHTML = entries.map(([name, value]) => `<span class="tag">${name} ${value}/10</span>`).join("");
+      els.profileType.textContent = profileTypeCopy(symptoms);
+      els.profileRecommendations.innerHTML = recommendations(load).map(([title, copy]) => `
+        <div class="rec">
+          <svg class="small-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M12 2v6"/><path d="M12 16v6"/><path d="M2 12h6"/><path d="M16 12h6"/></svg>
+          <div><strong>${title}</strong><p>${copy}</p></div>
+        </div>
+      `).join("");
+      renderHistory();
+    }
+
+    function historyTopSymptom(symptoms = {}) {
+      return Object.entries({
+        dryness: symptoms.dryness ?? 0,
+        strain: symptoms.strain ?? 0,
+        blur: symptoms.blur ?? 0,
+        light: symptoms.light ?? 0
+      })
+        .map(([key, value]) => [symptomName(key), value])
+        .sort((a, b) => b[1] - a[1])[0];
+    }
+
+    function historyPeakLoad(day) {
+      const loads = (day.logs || []).map((log) => Number(log.load || 0));
+      return Math.max(0, ...loads);
+    }
+
+    function rhythmSuggestion(load = computeEyeLoad()) {
+      const stats = state.reminderStats;
+      const [, symptomValue] = topSymptom();
+      const ignoredDominates = stats.shown >= 2 && stats.ignored > stats.completed + stats.snoozed;
+      const historicalHighDays = (state.summaryHistory || []).filter((day) => historyPeakLoad(day) >= 74).length;
+      let focus = Number(els.focusTarget.value);
+      let rest = Number(els.breakTarget.value);
+      let intensity = state.settings.intensity || "quiet";
+      let title = "保持当前节奏";
+      let copy = "当前证据还不多，先继续观察今天的节奏。";
+      let reason = "当前负荷、提醒反馈和历史记录都还比较温和。";
+
+      if (load >= 74 || symptomValue >= 7 || historicalHighDays >= 2) {
+        focus = Math.max(15, focus - 5);
+        rest = Math.min(240, Math.max(rest, 180));
+        intensity = state.settings.intensity === "force" ? "force" : "standard";
+        title = "缩短下一轮专注";
+        copy = "负荷或主要不适偏高，下一轮更适合提前提醒，并把恢复时间留到能做完肩颈放松。";
+        reason = "依据：当前高负荷、症状评分偏高，或近期历史里高负荷天数较多。";
+      } else if (ignoredDominates) {
+        focus = Math.min(50, focus + 5);
+        rest = Math.max(90, rest);
+        intensity = state.settings.intensity === "force" ? "force" : "quiet";
+        title = "减少主动打扰";
+        copy = "今天忽略提醒偏多，明天应该更多依赖状态球和自然断点。";
+        reason = "依据：提醒被忽略的次数超过已处理次数，说明当前提醒可能太早或太频繁。";
+      } else if (state.breaks === 0 && elapsedSeconds >= 15 * 60) {
+        focus = Math.max(15, Math.min(focus, 20));
+        rest = Math.min(240, Math.max(rest, 120));
+        intensity = state.settings.intensity === "force" ? "force" : "standard";
+        title = "先补一个恢复节奏";
+        copy = "今天已经有连续盯屏，但还没有休息记录，下一轮建议提前一点，并留够恢复时间。";
+        reason = "依据：连续盯屏已经出现，但休息次数仍为 0。";
+      }
+
+      return { focus, rest, intensity, title, copy, reason };
+    }
+
+    function renderRhythmSuggestion(load) {
+      const suggestion = rhythmSuggestion(load);
+      els.rhythmPlanTitle.textContent = suggestion.title;
+      els.rhythmPlanCopy.textContent = suggestion.copy;
+      els.suggestFocusTarget.textContent = `${suggestion.focus} 分钟`;
+      els.suggestBreakTarget.textContent = `${suggestion.rest} 秒`;
+      els.suggestIntensity.textContent = intensityLabel(suggestion.intensity);
+      els.rhythmReasonCopy.textContent = suggestion.reason;
+      const unchanged = suggestion.focus === Number(els.focusTarget.value)
+        && suggestion.rest === Number(els.breakTarget.value)
+        && suggestion.intensity === state.settings.intensity;
+      els.rhythmPlanLabel.textContent = unchanged ? "当前节奏可用" : "建议调整";
+      els.applyRhythmBtn.disabled = unchanged;
+      els.applyRhythmBtn.textContent = unchanged ? "已是建议节奏" : "应用建议";
+    }
+
+    function applyRhythmSuggestion() {
+      const suggestion = rhythmSuggestion();
+      els.focusTarget.value = suggestion.focus;
+      els.breakTarget.value = suggestion.rest;
+      state.focusTarget = suggestion.focus;
+      state.breakTarget = suggestion.rest;
+      state.rhythmSource = "suggestion";
+      setIntensity(suggestion.intensity, { persistChange: false, renderChange: false });
+      render();
+      persist();
+      showToast("Mira：已应用新的节奏建议。下一轮会按这个节奏提醒。");
+    }
+
+    function renderHistory() {
+      const history = state.summaryHistory || [];
+      if (!history.length) {
+        els.historyList.innerHTML = `<p class="history-empty">还没有跨天记录。明天打开 EyeFlow 后，今天会自动进入历史。</p>`;
+        return;
+      }
+      els.historyList.innerHTML = history.map((day) => {
+        const stats = day.reminderStats || {};
+        const [symptom, value] = historyTopSymptom(day.symptoms);
+        const focusMinutes = Math.floor((day.elapsedSeconds || 0) / 60);
+        const peakLoad = historyPeakLoad(day);
+        return `
+          <article class="history-item">
+            <div><span>日期</span><strong>${escapeHtml(day.day || "未知")}</strong></div>
+            <div><span>峰值负荷</span><strong>${peakLoad || "暂无"}</strong></div>
+            <div><span>盯屏</span><strong>${focusMinutes}m</strong></div>
+            <div><span>休息</span><strong>${day.breaks || 0} 次</strong></div>
+            <div><span>提醒</span><strong>${stats.shown || 0} 次</strong></div>
+            <div><span>主要不适</span><strong>${symptom} ${value}/10</strong></div>
+          </article>
+        `;
+      }).join("");
+    }
+
+    function profileTypeCopy(symptoms) {
+      if (symptoms.strain >= 6 || symptoms.blur >= 4) {
+        return "当前更偏近距离负荷：酸胀或看远模糊比较明显，先重点观察屏幕距离、字号和连续盯屏时间。";
+      }
+      if (symptoms.dryness >= 5) {
+        return "当前更偏干涩型：屏幕工作时眨眼减少，下一步要重点关注眨眼频率和环境湿度。";
+      }
+      if (symptoms.light >= 5) {
+        return "当前更偏眩光敏感：屏幕亮度、反光和环境光可能是主要触发因素。";
+      }
+      return "当前暂未形成明显画像。继续记录几次后，EyeFlow 会更清楚你属于哪类用眼负担。";
+    }
+
+    function renderLoadBand(load) {
+      const bands = [
+        [els.bandComfort, load <= 47, "舒适区 · 0-47"],
+        [els.bandMedium, load >= 48 && load <= 73, "中等负荷 · 48-73"],
+        [els.bandHigh, load >= 74, "高负荷 · 74-100"]
+      ];
+      const activeBand = bands.find(([, active]) => active) || bands[0];
+      els.loadBand.textContent = activeBand[2];
+      bands.forEach(([el, active]) => {
+        el.classList.toggle("active", active);
+      });
+    }
+
+    function renderCompanion(load) {
+      const symptoms = currentSymptoms();
+      const focusTargetMinutes = Number(els.focusTarget.value);
+      const elapsedMinutes = elapsedSeconds / 60;
+      const intervention = currentIntervention(load);
+      let mood = "calm";
+      let title = "Mira 很安静";
+      let message = "我会在旁边看着节奏，先轻轻提醒，不抢你的控制权。";
+
+      if (latestActivity && isNaturalBreak(latestActivity)) {
+        mood = "blink";
+        title = "Mira 看到断点了";
+        message = "你刚停下来一下。现在适合看远处 20 秒，再继续。";
+      } else if (load >= 74 || elapsedMinutes >= focusTargetMinutes + 10) {
+        mood = "rest";
+        title = "Mira 想让你休息";
+        message = "不用立刻停下。找一个自然断点，看远处、眨眼，然后再回来。";
+      } else if (symptoms.dryness >= 5 || elapsedMinutes >= focusTargetMinutes * 0.72) {
+        mood = "blink";
+        title = "Mira 在提醒眨眼";
+        message = "轻轻眨几次眼，让眼睛重新湿润一点。";
+      } else if (isRunning) {
+        mood = "focus";
+        title = "Mira 陪你专注";
+        message = `这轮 ${Math.floor(elapsedMinutes)} 分钟。到点我先轻提醒，不会突然打断。`;
+      } else if (isAutoTracking()) {
+        mood = "focus";
+        title = state.settings.intensity === "force" ? "强制爱待命中" : "Mira 正在自动记录";
+        message = state.settings.intensity === "force"
+          ? "我先只记录节奏。点开始手动专注后，强制爱才会接管全屏恢复。"
+          : "我看到你已经在工作。需要手动控制时，可以点开始手动专注。";
+      }
+
+      els.companion.dataset.mood = mood;
+      els.petTitle.textContent = title;
+      els.petMessage.textContent = message;
+      publishCompanionState({
+        mood,
+        title,
+        message,
+        load,
+        isRunning,
+        interventionLevel: intervention.level,
+        interventionTitle: intervention.title,
+        interventionCopy: intervention.copy,
+        allowSystemNotify: Boolean(state.settings.systemNotifyToggle)
+      });
+    }
+
+    function publishCompanionState(nextState) {
+      latestCompanionState = nextState;
+      if (!state.settings.miraStateToggle) return;
+      if (!window.eyeflowDesktop?.publishState) return;
+      window.eyeflowDesktop.publishState(nextState);
+    }
+
+    function statusCopy(load, running) {
+      if (running) return `会话进行中。当前用眼负荷 ${load}，Mira 会轻轻看着节奏。`;
+      if (isAutoTracking()) {
+        const autoMinutes = Math.floor(elapsedSeconds / 60);
+        const autoDuration = autoMinutes > 0 ? `${autoMinutes} 分钟` : "不到 1 分钟";
+        return `已自动记录连续盯屏 ${autoDuration}。点开始手动专注后，可以暂停或休息。`;
+      }
+      if (load >= 74) return "先休息一轮，再继续。";
+      return "先看当下状态，再开始这一轮。";
+    }
+
+    function insightCopy(load) {
+      const symptoms = currentSymptoms();
+      if (load >= 74) return "当前用眼负荷偏高。先做一次完整远眺休息，再记录是否仍有干涩或模糊。";
+      if (symptoms.dryness >= 5) return "干涩是今天最明显的信号。屏幕工作会降低眨眼频率，下一轮建议缩短会话。";
+      if (symptoms.strain >= 6) return "酸胀偏高，可能和长时间近距离盯屏有关。先调远屏幕、放大字号，再缩短下一轮。";
+      if (elapsedSeconds > 15 * 60) return "你已经进入连续盯屏区间。现在适合找一个自然断点休息，而不是硬扛到不舒服。";
+      return "当前负荷偏低。开始会话后，系统会结合连续时长和症状评分生成建议。";
+    }
+
+    function renderRecommendations(load) {
+      els.recommendations.innerHTML = recommendations(load).map(([title, copy]) => `
+        <div class="rec">
+          <svg class="small-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="m12 2 3 7h7l-5.5 4.2 2.2 7L12 16l-6.7 4.2 2.2-7L2 9h7Z"/></svg>
+          <div><strong>${title}</strong><p>${copy}</p></div>
+        </div>
+      `).join("");
+    }
+
+    function renderTrend(currentLoad) {
+      const loads = [currentLoad, ...state.logs.map((log) => log.load)].slice(0, 7).reverse();
+      els.trend.innerHTML = loads.map((load) => {
+        const height = Math.max(18, Math.round(load / 100 * 128));
+        return `<div class="bar" style="--h:${height}px"><span>${load}</span></div>`;
+      }).join("");
+    }
+
+    function renderLogs() {
+      if (!state.logs.length) {
+        els.logs.innerHTML = `<div class="log-item"><strong>还没有记录</strong><p>保存一次状态打点后，这里会形成你的个人用眼档案。</p></div>`;
+        return;
+      }
+      els.logs.innerHTML = state.logs.map((log) => {
+        const at = new Date(log.at).toLocaleTimeString("zh-CN", { hour: "2-digit", minute: "2-digit" });
+        const detail = `干涩 ${log.symptoms.dryness} / 酸胀 ${log.symptoms.strain} / 模糊 ${log.symptoms.blur} / 畏光 ${log.symptoms.light}`;
+        return `
+          <article class="log-item">
+            <header><span>${at}</span><span>用眼负荷 ${log.load}</span></header>
+            <strong>${log.label}</strong>
+            <p>${detail}</p>
+            ${log.note ? `<p>${escapeHtml(log.note)}</p>` : ""}
+          </article>
+        `;
+      }).join("");
+    }
+
+    function escapeHtml(value) {
+      return value.replace(/[&<>"']/g, (char) => ({
+        "&": "&amp;",
+        "<": "&lt;",
+        ">": "&gt;",
+        '"': "&quot;",
+        "'": "&#039;"
+      }[char]));
+    }
+
+    render();
+    maybeShowOnboarding();
+  </script>
+
+</body>
+</html>

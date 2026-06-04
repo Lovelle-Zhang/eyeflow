@@ -1,0 +1,722 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Mira</title>
+  <style>
+    :root {
+      --ink: #18201f;
+      --muted: #68706d;
+      --line: #dce5df;
+      --mint: #0f9f7a;
+      --mint-soft: #d9f4eb;
+      --blue-soft: #e3ecff;
+      --amber-soft: #fff0d7;
+      --rose-soft: #ffe0e8;
+      --mira-mouth: rgba(126, 244, 216, 0.78);
+      --mira-antenna: rgba(15, 23, 21, 0.36);
+      --mira-antenna-glow: rgba(107, 224, 203, 0.26);
+      --mira-rest-mouth: rgba(255, 214, 225, 0.82);
+      --mira-signal: #77e2bf;
+      --mira-signal-glow: rgba(119, 226, 191, 0.95);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html,
+    body {
+      width: 100%;
+      height: 100%;
+      margin: 0;
+      overflow: hidden;
+      background: transparent;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      color: var(--ink);
+      user-select: none;
+    }
+
+    button {
+      border: 0;
+      font: inherit;
+      cursor: default;
+    }
+
+    .shell {
+      width: 100%;
+      height: 100%;
+      padding: 8px;
+      display: grid;
+      place-items: center;
+    }
+
+    .companion {
+      width: 70px;
+      height: 70px;
+      display: block;
+      border-radius: 22px;
+      background: transparent;
+      position: relative;
+      -webkit-app-region: no-drag;
+      transition: background 120ms ease, box-shadow 120ms ease;
+    }
+
+    .companion.booting {
+      opacity: 0;
+      transform: translateY(0) scale(0.98);
+    }
+
+    .companion.ready {
+      opacity: 1;
+      transition: opacity 160ms ease;
+    }
+
+    .companion::after {
+      display: none;
+    }
+
+    .companion.expanded {
+      width: 360px;
+      height: 118px;
+      padding: 0;
+      border: 0;
+      border-radius: 0;
+      background: transparent;
+      box-shadow: none;
+      backdrop-filter: none;
+    }
+
+    .companion.expanded::after {
+      display: none;
+    }
+
+    .companion.theme-day.expanded {
+      background: transparent;
+      box-shadow: none;
+    }
+
+    .pet {
+      width: 68px;
+      aspect-ratio: 1;
+      position: absolute;
+      left: 1px;
+      top: 1px;
+      border-radius: 23px 23px 20px 20px;
+      background:
+        radial-gradient(circle at 31% 18%, rgba(125, 196, 255, 0.34) 0 15px, transparent 26px),
+        linear-gradient(150deg, #142428 0%, #213c3f 46%, #132026 100%);
+      display: grid;
+      place-items: center;
+      overflow: hidden;
+      box-shadow:
+        inset 0 0 0 1px rgba(127, 241, 213, 0.1),
+        inset 0 -12px 24px rgba(3, 10, 12, 0.32);
+      cursor: grab;
+      -webkit-app-region: no-drag;
+      animation: idleFloat 4.8s ease-in-out infinite;
+      transition: transform 160ms ease, box-shadow 160ms ease, background 180ms ease;
+    }
+
+    .companion.settling .pet,
+    .companion.settling .pet:hover,
+    .companion.settling .pet:active {
+      animation: none;
+      transform: translateY(0) scale(1);
+      transition: none;
+    }
+
+    .companion.expanded .pet {
+      left: 7px;
+      top: 25px;
+    }
+
+    .companion.settling .pet::after,
+    .companion.settling .face::before,
+    .companion.settling .face::after {
+      animation: none;
+    }
+
+    .theme-day .pet {
+      background:
+        radial-gradient(circle at 30% 18%, rgba(196, 232, 255, 0.7) 0 16px, transparent 27px),
+        linear-gradient(150deg, #ffffff 0%, #eef8f4 50%, #dcecff 100%);
+      box-shadow:
+        inset 0 0 0 1px rgba(24, 32, 31, 0.06),
+        inset 0 -10px 20px rgba(15, 159, 122, 0.1);
+    }
+
+    .pet:hover {
+      transform: translateY(-2px);
+    }
+
+    .pet:active {
+      cursor: grabbing;
+      transform: translateY(0) scale(0.97);
+    }
+
+    .pet::before {
+      content: "";
+      position: absolute;
+      top: 22px;
+      left: 12px;
+      width: 44px;
+      height: 21px;
+      border-radius: 999px;
+      background:
+        linear-gradient(90deg, rgba(129, 239, 216, 0.28), rgba(108, 176, 255, 0.2)),
+        rgba(6, 13, 15, 0.92);
+      box-shadow:
+        inset 0 0 0 1px rgba(139, 246, 222, 0.16),
+        0 0 18px rgba(94, 229, 203, 0.16);
+    }
+
+    .theme-day .pet::before {
+      background:
+        linear-gradient(90deg, rgba(127, 232, 207, 0.22), rgba(104, 166, 232, 0.16)),
+        rgba(20, 34, 36, 0.88);
+      box-shadow:
+        inset 0 0 0 1px rgba(255, 255, 255, 0.12),
+        0 0 14px rgba(94, 207, 184, 0.16);
+    }
+
+    .pet::after {
+      content: "";
+      position: absolute;
+      top: 17px;
+      right: 9px;
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: var(--mira-signal);
+      box-shadow: 0 0 16px var(--mira-signal-glow);
+      animation: signalPulse 2.8s ease-in-out infinite;
+    }
+
+    .focus {
+      --mira-signal: #67d9ff;
+      --mira-signal-glow: rgba(103, 217, 255, 0.95);
+    }
+
+    .blink {
+      --mira-signal: #ffd66f;
+      --mira-signal-glow: rgba(255, 214, 111, 0.95);
+    }
+
+    .rest {
+      --mira-signal: #ff78a4;
+      --mira-signal-glow: rgba(255, 120, 164, 0.95);
+    }
+
+    .face {
+      position: absolute;
+      top: 28px;
+      left: 21px;
+      width: 26px;
+      height: 8px;
+      z-index: 1;
+    }
+
+    .face::before,
+    .face::after {
+      content: "";
+      position: absolute;
+      top: 0;
+      width: 5px;
+      height: 5px;
+      border-radius: 50%;
+      background: #ffffff;
+      animation: blink 5s ease-in-out infinite;
+    }
+
+    .face::before {
+      left: 1px;
+    }
+
+    .face::after {
+      right: 1px;
+    }
+
+    .mouth {
+      position: absolute;
+      top: 44px;
+      left: 50%;
+      width: 16px;
+      height: 8px;
+      transform: translateX(-50%);
+      border-bottom: 2px solid var(--mira-mouth);
+      border-radius: 0 0 999px 999px;
+      z-index: 1;
+    }
+
+    .antenna {
+      position: absolute;
+      top: 8px;
+      left: 21px;
+      width: 26px;
+      height: 14px;
+      border-top: 2px solid var(--mira-antenna);
+      filter: drop-shadow(0 0 5px var(--mira-antenna-glow));
+      border-radius: 50%;
+    }
+
+    .cheek {
+      position: absolute;
+      top: 41px;
+      width: 8px;
+      height: 3px;
+      border-radius: 999px;
+      background: rgba(255, 139, 176, 0.24);
+      z-index: 1;
+    }
+
+    .cheek.left {
+      left: 14px;
+    }
+
+    .cheek.right {
+      right: 14px;
+    }
+
+    .body {
+      display: none;
+      position: absolute;
+      left: 86px;
+      top: 7px;
+      min-width: 0;
+      cursor: default;
+    }
+
+    .companion.expanded .body {
+      display: grid;
+      align-content: center;
+      width: 258px;
+      min-height: 104px;
+      max-width: none;
+      padding: 16px 56px 16px 18px;
+      border-radius: 18px;
+      background: rgba(18, 29, 31, 0.9);
+      box-shadow:
+        0 18px 52px rgba(20, 31, 34, 0.24),
+        0 0 0 1px rgba(128, 241, 213, 0.12);
+      backdrop-filter: blur(14px);
+    }
+
+    .companion.expanded .body::before {
+      content: "";
+      position: absolute;
+      left: -7px;
+      top: 43px;
+      width: 16px;
+      height: 16px;
+      border-radius: 4px;
+      background: inherit;
+      transform: rotate(45deg);
+      box-shadow: -1px 1px 0 rgba(128, 241, 213, 0.08);
+    }
+
+    .companion.theme-day.expanded .body {
+      background: rgba(255, 255, 255, 0.94);
+      box-shadow:
+        0 18px 52px rgba(30, 44, 38, 0.15),
+        0 0 0 1px rgba(24, 32, 31, 0.08);
+    }
+
+    .companion.theme-day.expanded .body::before {
+      box-shadow: -1px 1px 0 rgba(24, 32, 31, 0.06);
+    }
+
+    strong {
+      display: block;
+      margin-bottom: 4px;
+      font-size: 13px;
+      color: #f3fffb;
+      overflow-wrap: anywhere;
+    }
+
+    .theme-day strong {
+      color: var(--ink);
+    }
+
+    p {
+      margin: 0;
+      color: rgba(232, 248, 242, 0.72);
+      font-size: 11px;
+      line-height: 1.38;
+      overflow-wrap: anywhere;
+    }
+
+    .theme-day p {
+      color: var(--muted);
+    }
+
+    .actions {
+      display: none;
+      position: absolute;
+      right: 13px;
+      top: 44px;
+    }
+
+    .companion.expanded .actions {
+      display: flex;
+      gap: 6px;
+    }
+
+    .icon-btn {
+      width: 30px;
+      height: 30px;
+      border-radius: 8px;
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(128, 241, 213, 0.14);
+      color: #eefbf7;
+      display: grid;
+      place-items: center;
+    }
+
+    .theme-day .icon-btn {
+      background: #f4f7f2;
+      border: 1px solid var(--line);
+      color: var(--ink);
+    }
+
+    .icon-btn svg {
+      width: 18px;
+      height: 18px;
+    }
+
+    .focus .pet {
+      background:
+        radial-gradient(circle at 31% 18%, rgba(120, 232, 209, 0.28) 0 16px, transparent 27px),
+        linear-gradient(150deg, #132734 0%, #1e4050 46%, #132029 100%);
+    }
+
+    .theme-day.focus .pet {
+      background:
+        radial-gradient(circle at 31% 18%, rgba(104, 224, 198, 0.32) 0 16px, transparent 27px),
+        linear-gradient(150deg, #ffffff 0%, #e8f6ff 50%, #dff8ef 100%);
+    }
+
+    .blink .pet {
+      background:
+        radial-gradient(circle at 31% 18%, rgba(118, 240, 204, 0.28) 0 16px, transparent 27px),
+        linear-gradient(150deg, #2b2818 0%, #3f3a22 48%, #142421 100%);
+      transform: translateY(-2px);
+    }
+
+    .theme-day.blink .pet {
+      background:
+        radial-gradient(circle at 31% 18%, rgba(104, 224, 198, 0.3) 0 16px, transparent 27px),
+        linear-gradient(150deg, #ffffff 0%, #fff6df 50%, #e4f8ef 100%);
+    }
+
+    .blink .face::before,
+    .blink .face::after {
+      height: 2px;
+      border-radius: 999px;
+      transform: translateY(2px);
+      animation-duration: 2.2s;
+    }
+
+    .blink .mouth {
+      width: 13px;
+      height: 6px;
+      top: 43px;
+      border: 0;
+      border-bottom: 2px solid rgba(255, 214, 111, 0.82);
+      border-radius: 0 0 999px 999px;
+      transform: translateX(-50%) scaleX(0.82);
+      box-shadow: 0 0 7px rgba(255, 214, 111, 0.18);
+    }
+
+    .theme-day.blink .mouth {
+      border-bottom-color: rgba(202, 143, 38, 0.78);
+      box-shadow: 0 1px 0 rgba(255, 255, 255, 0.62), 0 0 7px rgba(255, 214, 111, 0.22);
+    }
+
+    .rest .pet {
+      background:
+        radial-gradient(circle at 31% 18%, rgba(255, 220, 122, 0.24) 0 16px, transparent 27px),
+        linear-gradient(150deg, #321b24 0%, #4a2835 48%, #2e2218 100%);
+      animation: nudge 1.8s ease-in-out infinite;
+    }
+
+    .theme-day.rest .pet {
+      background:
+        radial-gradient(circle at 31% 18%, rgba(245, 202, 86, 0.28) 0 16px, transparent 27px),
+        linear-gradient(150deg, #ffffff 0%, #fff0f4 52%, #fff3dc 100%);
+    }
+
+    .rest .mouth {
+      width: 18px;
+      height: 19px;
+      top: 38px;
+      border: 0;
+      background: transparent;
+      transform: translateX(-50%);
+      display: grid;
+      place-items: center;
+      opacity: 0.95;
+    }
+
+    .rest .mouth::before {
+      content: "Ɛ";
+      font-family: ui-rounded, "SF Pro Rounded", Inter, system-ui, sans-serif;
+      font-size: 16px;
+      font-weight: 800;
+      line-height: 1;
+      color: var(--mira-rest-mouth);
+      text-shadow:
+        0 1px 0 rgba(255, 255, 255, 0.18),
+        0 0 9px rgba(255, 154, 188, 0.26);
+      transform: translateY(-1px) rotate(-4deg) scaleX(0.82);
+    }
+
+    .theme-day.rest .mouth::before {
+      color: rgba(214, 82, 125, 0.88);
+      text-shadow:
+        0 1px 0 rgba(255, 255, 255, 0.64),
+        0 0 1px rgba(68, 30, 44, 0.24),
+        0 0 9px rgba(255, 154, 188, 0.3);
+    }
+
+    @keyframes idleFloat {
+      0%, 100% {
+        transform: translateY(0) rotate(0deg);
+      }
+      50% {
+        transform: translateY(-3px) rotate(-1deg);
+      }
+    }
+
+    @keyframes signalPulse {
+      0%, 100% {
+        transform: scale(1);
+        opacity: 0.86;
+      }
+      50% {
+        transform: scale(1.24);
+        opacity: 1;
+      }
+    }
+
+    @keyframes blink {
+      0%, 88%, 100% {
+        transform: scaleY(1);
+      }
+      92%, 96% {
+        transform: scaleY(0.12);
+      }
+    }
+
+    @keyframes nudge {
+      0%, 100% {
+        transform: translateY(0);
+      }
+      50% {
+        transform: translateY(-4px);
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <aside class="companion booting settling" id="companion">
+      <div class="pet" aria-hidden="true">
+        <div class="antenna"></div>
+        <div class="face"></div>
+        <div class="cheek left"></div>
+        <div class="cheek right"></div>
+        <div class="mouth"></div>
+      </div>
+      <div class="body">
+        <strong id="title">Mira 很安静</strong>
+        <p id="message">我会在旁边看着节奏，先轻轻提醒。</p>
+      </div>
+      <div class="actions">
+        <button class="icon-btn" id="openBtn" type="button" title="打开 EyeFlow">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M15 3h6v6"/><path d="M10 14 21 3"/><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/></svg>
+        </button>
+        <button class="icon-btn" id="collapseBtn" type="button" title="收起 Mira">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M5 12h14"/></svg>
+        </button>
+      </div>
+    </aside>
+  </div>
+
+  <script>
+    const moods = [
+      ["", "Mira 很安静", "我会在旁边看着节奏，先轻轻提醒。"],
+      ["focus", "Mira 陪你专注", "到点我先轻提醒，不会突然打断。"],
+      ["blink", "Mira 在提醒眨眼", "轻轻眨几次眼，让眼睛重新湿润一点。"],
+      ["rest", "Mira 想让你休息", "找一个自然断点，看远处 20 秒。"]
+    ];
+    let moodIndex = 0;
+    let hasLiveState = false;
+    let isExpanded = false;
+    let dragState = null;
+    let theme = getTheme();
+    const previewMood = getPreviewMood();
+    const compactPreview = new URLSearchParams(window.location.search).get("compact") === "1";
+
+    const companion = document.querySelector("#companion");
+    const title = document.querySelector("#title");
+    const message = document.querySelector("#message");
+
+    function setMood(index) {
+      moodIndex = index % moods.length;
+      const [mood, label, copy] = moods[moodIndex];
+      applyState({ mood, title: label, message: copy });
+      if (mood === "rest" && window.eyeflowDesktop) {
+        window.eyeflowDesktop.notify(copy);
+      }
+    }
+
+    function applyState(state) {
+      const mood = state.mood === "calm" ? "" : state.mood || "";
+      const booting = companion.classList.contains("booting") ? "booting" : "";
+      const ready = companion.classList.contains("ready") ? "ready" : "";
+      const settling = companion.classList.contains("settling") ? "settling" : "";
+      const expanded = companion.classList.contains("expanded") ? "expanded" : "";
+      companion.className = `companion theme-${theme} ${mood} ${booting} ${ready} ${settling} ${expanded}`.trim();
+      title.textContent = state.title || "Mira 很安静";
+      message.textContent = state.message || "我会在旁边看着节奏，先轻轻提醒。";
+      if (state.mood === "rest" && window.eyeflowDesktop) {
+        window.eyeflowDesktop.notify(state.message || "找一个自然断点，看远处 20 秒。");
+      }
+    }
+
+    window.setInterval(() => {
+      if (hasLiveState) return;
+      setMood(moodIndex + 1);
+    }, 90 * 1000);
+
+    if (window.eyeflowDesktop?.onState) {
+      window.eyeflowDesktop.onState((state) => {
+        hasLiveState = true;
+        applyState(state);
+      });
+    }
+
+    if (previewMood) {
+      hasLiveState = true;
+      const previewIndex = moods.findIndex(([mood]) => mood === previewMood);
+      if (previewIndex >= 0) {
+        moodIndex = previewIndex;
+        const [mood, title, message] = moods[previewIndex];
+        applyState({ mood, title, message });
+      }
+    }
+
+    function getPreviewMood() {
+      const previewMood = new URLSearchParams(window.location.search).get("mood");
+      return ["focus", "blink", "rest"].includes(previewMood) ? previewMood : "";
+    }
+
+    function getTheme() {
+      const previewTheme = new URLSearchParams(window.location.search).get("theme");
+      if (previewTheme === "day" || previewTheme === "night") return previewTheme;
+      const hour = new Date().getHours();
+      return hour >= 7 && hour < 19 ? "day" : "night";
+    }
+
+    function refreshTheme() {
+      const nextTheme = getTheme();
+      if (nextTheme === theme) return;
+      theme = nextTheme;
+      companion.classList.toggle("theme-day", theme === "day");
+      companion.classList.toggle("theme-night", theme === "night");
+    }
+
+    companion.classList.add(`theme-${theme}`);
+    window.setInterval(refreshTheme, 60 * 1000);
+    window.setTimeout(() => {
+      companion.classList.remove("booting");
+      companion.classList.add("ready");
+      if (!window.eyeflowDesktop && !compactPreview) {
+        window.setTimeout(() => setExpanded(true), 80);
+      }
+      window.setTimeout(() => {
+        companion.classList.remove("settling");
+      }, 180);
+    }, 500);
+
+    function setExpanded(expanded) {
+      isExpanded = expanded;
+      companion.classList.add("settling");
+      if (window.eyeflowDesktop?.setCompanionExpanded) {
+        window.eyeflowDesktop.setCompanionExpanded(isExpanded);
+      } else {
+        companion.classList.toggle("expanded", isExpanded);
+      }
+      window.setTimeout(() => {
+        companion.classList.remove("settling");
+      }, 180);
+    }
+
+    function toggleExpanded() {
+      setExpanded(!isExpanded);
+    }
+
+    document.querySelector("#openBtn").addEventListener("click", () => {
+      openDashboard();
+    });
+
+    document.querySelector("#collapseBtn").addEventListener("click", () => {
+      setExpanded(false);
+    });
+
+    document.querySelector(".body").addEventListener("click", () => {
+      openDashboard();
+    });
+
+    companion.addEventListener("dblclick", () => {
+      openDashboard();
+    });
+
+    companion.addEventListener("mousedown", (event) => {
+      if (event.button !== 0) return;
+      dragState = {
+        startX: event.screenX,
+        startY: event.screenY,
+        lastX: event.screenX,
+        lastY: event.screenY,
+        moved: false
+      };
+    });
+
+    window.addEventListener("mousemove", (event) => {
+      if (!dragState) return;
+      const dx = event.screenX - dragState.lastX;
+      const dy = event.screenY - dragState.lastY;
+      const totalX = event.screenX - dragState.startX;
+      const totalY = event.screenY - dragState.startY;
+      if (Math.hypot(totalX, totalY) > 4) {
+        dragState.moved = true;
+      }
+      dragState.lastX = event.screenX;
+      dragState.lastY = event.screenY;
+      if (dragState.moved && window.eyeflowDesktop?.moveCompanionBy) {
+        window.eyeflowDesktop.moveCompanionBy({ x: dx, y: dy });
+      }
+    });
+
+    window.addEventListener("mouseup", (event) => {
+      if (!dragState) return;
+      const wasDrag = dragState.moved;
+      dragState = null;
+      if (!wasDrag && event.target.closest(".pet")) {
+        toggleExpanded();
+      }
+    });
+
+    function openDashboard() {
+      if (window.eyeflowDesktop) {
+        window.eyeflowDesktop.showDashboard();
+        return;
+      }
+      window.location.href = "index.html";
+    }
+  </script>
+</body>
+</html>

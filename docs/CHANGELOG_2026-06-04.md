@@ -1,0 +1,201 @@
+# EyeFlow Changelog - 2026-06-04
+
+## Flow Polish
+
+- Added a lightweight `今日节奏` line to the main state card so the user can see how today's focus/rest rhythm was chosen.
+- After Mira's daily eye-state assessment, the main dashboard now explicitly says the rhythm was set from today's eye score.
+- If the user manually adjusts focus or rest sliders, the rhythm line switches to a manual-adjustment message.
+- If the user applies Mira's rhythm suggestion, the rhythm line switches to a suggestion-applied message.
+- Added a lightweight pending reminder card inside the main state card when Mira has an active L2/L3 reminder.
+- The pending reminder card gives the user two clear actions: `现在休息` or `稍后`.
+- Active reminders can now upgrade from L2 to L3 if the user's load rises before they respond, keeping the visible copy aligned with the current state.
+- Added an opt-in L4 reminder intensity called `强制爱`.
+- In `强制爱` mode, EyeFlow stays quiet before the focus target time, then enters a full-screen forced rest when the session reaches the target.
+- The forced rest screen hides the return button until the rest countdown finishes.
+- Desktop forced rest uses a dedicated fullscreen always-on-top Electron window; browser preview uses a locked overlay fallback.
+- The forced rest screen now uses non-screen-focused recovery tasks instead of an eye-tracking game: look far away, blink slowly, close eyes, then relax shoulders and neck.
+- Today view now shows the current reminder mode directly under the daily rhythm, so `强制爱` is visible outside Settings.
+- Timer hint and main state copy now change by reminder mode, keeping `安静`, `标准`, and `强制爱` behavior clear on the main screen.
+- The Settings page title now matches the sidebar label instead of using the older `专注节律` wording.
+- Settings now shows a `预览强制爱 15 秒` button when `强制爱` is selected.
+- The force preview uses the same locked rest flow but does not count as a real daily break or recovery.
+- Desktop startup now relies on the daily assessment state instead of forcing `onboarding=1` every launch.
+- The Settings action `重新查看引导` was renamed to `重新校准今天` to match its real purpose.
+- Today page top actions were decluttered: duplicate `立即休息` was hidden because the timer card already has `休息`.
+- `重置今日` was moved from the Today header into Settings as `重置今日数据`.
+- Added a global `[hidden]` CSS rule so hidden controls cannot be accidentally displayed by component-level flex/grid styles.
+- `重置今日数据` is now a two-step confirmation: the first click arms the reset and explains it through Mira, and the second click clears today's data.
+- `强制爱` reaching its rest point now skips the ordinary toast path and stops the current UI render after launching the forced-rest flow, keeping the transition cleaner and avoiding stacked reminders.
+- Desktop forced-rest completion now carries an explicit `preview` flag back to the dashboard, so preview sessions and real recovery sessions are closed and recorded through separate paths.
+- Softened recommendation and Mira copy to stay within EyeFlow's product boundary: removed medical-sounding wording such as prescriptions, optometry plans, artificial tears, and blue-light shopping comparisons.
+- Blink and rest copy now uses gentler language such as helping the eyes feel moist again, instead of alarming tear-film phrasing.
+- Daily onboarding now shows a lightweight three-step Mira plan after the eye-state sliders: record current state, set the first focus/rest rhythm, then start with Mira's reminder style.
+- The onboarding plan updates live as the user changes initial symptoms, making the first-session rhythm feel connected to the score instead of appearing after the fact.
+- Skipping daily onboarding no longer marks the day as calibrated. EyeFlow now keeps a light `今天还没给眼睛打分` callout on Today with a `现在校准` action.
+- After the user skips onboarding once, EyeFlow does not reopen the calibration modal again that same day; the Today callout remains the non-intrusive way back.
+- Cross-day rollover and `重置今日数据` now reset calibration source state, so a new or reset day cannot incorrectly keep yesterday's assessment/manual/suggestion label.
+- Recalibrating the same day now replaces the previous `Mira 初始打分` log instead of stacking duplicate initial-assessment records.
+- Today rhythm copy now says `当前节奏` instead of `默认节奏` when the user has a non-default rhythm but has not calibrated today.
+- Enabled macOS `acceptFirstMouse` on the dashboard, Mira icon, Mira panel, and forced-rest window so the first click on an inactive EyeFlow window is received by the UI instead of only focusing the window.
+- Updated cursor behavior to feel more like a desktop app: ordinary buttons, sliders, details summaries, panels, and break controls use the default arrow; text links keep the pointer cursor; draggable Mira uses grab/grabbing.
+- Timer-ring hint copy is now shorter and constrained to the inner circle, preventing long reminder-mode text from overflowing the focus session card.
+- Broadened text wrapping and minimum-width safeguards across buttons, state cards, metrics, onboarding cards, Mira bubbles, and the forced-rest screen so long Chinese copy stays inside its container.
+- Tightened the Today metrics grid minimum widths to remove a small horizontal overflow at medium desktop widths.
+- Changed the main state-card action from a duplicate session starter into `去专注会话` / `查看当前会话`; the actual start/pause control now lives in the focus-session card.
+- Added a subtle pulse on the focus-session card when the state-card action sends the user there.
+- Browser preview of `强制爱` now mirrors the desktop lock flow more closely: `回到 EyeFlow` remains hidden during the countdown and appears only after the preview finishes.
+- The desktop app now stores and restores the dashboard window bounds, making the packaged app feel less like a reset-every-launch prototype.
+- Softened the main logging section wording from `眼疲劳打点` / `快速标记疲劳` to `当下状态打点` / `快速标记累了`.
+- Simplified the Today first screen: the left side now focuses on current state, while the focus-session timer sits directly beside it.
+- Moved the visible `分数来源` card into a folded `为什么是这个状态` details section, keeping the explanation available without making the page feel analytical by default.
+- Removed the redundant state-card start/why buttons in normal states; start/pause/rest now stays in the focus-session card, while the state card only shows `立即休息` when load is high.
+- Shortened the Today title and status copy to `今天` and `先看当下状态，再开始这一轮。`
+- Changed `记录一下当下状态` into a default-collapsed details panel so optional symptom logging no longer competes with the main state/session flow.
+- Softened the Today metrics row visually by reducing card shadow weight and using a lighter surface, while keeping the load bands visible.
+- Merged the Today rhythm and reminder-mode copy into one compact status strip, so the main state card reads as one flow instead of separate explanatory lines.
+- Shortened reminder-mode labels on Today to `安静 · Mira 轻提醒`, `标准 · 到点明确提醒`, and `强制爱 · 到点全屏恢复`; force mode keeps a slightly stronger visual treatment without adding another warning block.
+- Rebalanced the Today first screen: the current-state card and focus-session card now form the main working area, while today's metrics sit directly under the current state instead of occupying a separate dashboard row.
+- Restyled the Today summary into one quiet split band, reducing the sense of separate report cards at the bottom of the page.
+- Simplified Settings into a clearer two-column flow: today's rhythm suggestion on the left, reminder mode on the right, with permissions, do-not-disturb, notifications, and reset actions folded under `更多设置`.
+- Updated the Settings subtitle to match the new hierarchy and fixed short-page grid stretching so compact pages no longer create large vertical gaps.
+- Tightened collapsed `details.panel` behavior so folded rule/settings panels do not leave empty card space.
+- Added `L4 强制爱` to `查看提醒规则`, including the opt-in boundary and the rule that the return button stays hidden until the countdown finishes.
+- Updated the reminder color rule so pink includes both rest suggestions and force-rest recovery.
+- Restyled the forced-rest screen to feel more eye-friendly: softened the dark green palette, reduced the oversized countdown, made the recovery task the visual focus, and changed the title/copy to Mira's gentler guidance.
+- Updated the browser fallback forced-rest overlay to use the same lower-contrast recovery tone instead of a stark white dialog.
+- Brought the browser fallback forced-rest overlay closer to the desktop full-screen recovery flow by adding the same four-step recovery task card and a small remaining-time display.
+- Kept ordinary rest overlays visually simpler: they still use the breathing dot and regular finish/snooze actions instead of the force-rest task flow.
+- Added a concise Today plan sentence that ties together the rhythm source, current score, main eye signal, focus/rest timing, and the current reminder-mode boundary.
+- Daily assessment now adjusts reminder strength as well as timing: comfort stays quiet, medium/high load moves to standard reminders, and an already-selected `强制爱` mode is preserved instead of being silently downgraded.
+- Settings rhythm suggestion now displays `强制爱` when that opt-in mode is being preserved, so the suggestion card no longer hides the current force-rest boundary.
+- Split reminder state from reminder surfacing: medium load can show L2 `提前观察` in Settings/Mira state without immediately expanding a reminder card.
+- Standard mode no longer fires the ordinary toast at the focus target; the pending reminder card owns that moment, preventing duplicate reminders.
+- Updated reminder-rule copy so L2 says it surfaces at the focus target or a natural break, while mid-session medium load only changes state.
+- Changed reminder snooze copy from vague `稍后` to `5 分钟后` / `5 分钟后提醒`.
+- Added an explicit `snoozeUntil` state so the five-minute snooze promise is real and is not stretched by the ordinary reminder cooldown.
+- Split snooze logs into `延后一次 Mira 提醒` for real reminder deferrals and `先继续当前会话` for manual-rest deferrals.
+- Moved snooze logging before session restart and added immediate render/persist, so the UI reflects the snooze action right away instead of waiting for the next timer tick.
+- Clarified desktop auto-tracking vs manual focus: when Electron activity sensing is already counting continuous screen time but the user has not started manual focus, the primary button now says `开始手动专注` instead of `继续专注`.
+- Timer hint now says `自动记录中` during auto-tracked desktop activity, and Settings activity mode shows `自动记录` while the foreground app is active.
+- Mira copy now has an auto-recording state: `Mira 正在自动记录`, explaining that EyeFlow has detected work and the user can take manual control when needed.
+- Added an explicit confirmation card for `强制爱`: clicking the force mode now opens an inline confirmation/preview card instead of immediately switching modes.
+- The `强制爱` confirmation card includes `开启强制爱`, `预览 15 秒`, and `先不用`; after force mode is enabled, the card changes to an enabled state with `预览 15 秒` and `切回安静`.
+- Guarded `强制爱` against auto-recording surprises: if EyeFlow is only automatically tracking desktop activity, force mode now stays in `待命`; full-screen recovery is armed only after the user clicks `开始手动专注`.
+- Added a compact state label in the focus-session card: `自动记录`, `手动专注`, `已暂停`, or `未开始`.
+- During desktop auto-recording, the timer hint now says `开始手动专注后接管提醒` instead of implying that the reminder loop is already fully armed.
+- Clarified recovery feedback buttons: `好多了，开始下一轮`, `差不多，提前提醒`, and `还是累，继续休息`.
+- Updated recovery completion copy so it does not falsely promise a switch back to quiet reminders when the user is still in `标准` or `强制爱`.
+- Started UI texture polish v1 for Today: softened the app background, reduced hard white-card repetition, added gentler translucent surfaces, and gave the state card a calmer workbench treatment.
+- Refined the focus-session card: softer timer surface, improved primary button depth, and fixed stretched internal grid rows so controls no longer become oversized when the card matches the state column height.
+- Reworked the Today state card into a state stage: Mira, the eye-load score, the load band, headline, and recommendation now read as one main status space instead of a text-only card.
+- Added stage-specific Mira moods so the main stage shifts between calm/focus, blink, and rest colors based on current load and symptom state.
+- Reworked the focus-session card into a rhythm space with a softer timer field, subtle rhythm guide, and mood-matched timer color.
+- Synchronized the focus/rest slider rails with the current state mood, so high load uses the same soft rest color as the Mira stage.
+- Changed Today metrics from separate report cards into a lighter signal strip so they support the state stage instead of competing with it.
+- Let the focus-session card use its natural height instead of stretching to the full state-column height, removing the empty template-like bottom area.
+- Added a simple recovery-mode setting for `强制爱`: light, shoulder/neck, eye exercises, and mixed.
+- Built a reusable recovery task library so the browser fallback overlay and real Electron fullscreen recovery can share Mira-led steps.
+- Added gentle eye-exercise tasks for brow, under-eye orbital bone, and temple release, with a dedicated Mira expression state for light pressing.
+- Passed the selected recovery tasks through Electron IPC into the fullscreen lock window, so the real desktop rest screen matches the selected recovery mode.
+- Started recovery experience 2.0 by adding a short-label recovery flow strip to both the dashboard fallback overlay and the real fullscreen recovery page.
+- Added per-step labels such as `远眺`, `慢眨眼`, `闭眼`, `肩颈`, and eye-exercise labels, so users can understand the flow without staring at the countdown.
+- Preserved recovery step labels through the Electron forced-rest payload sanitizer.
+
+## Verification
+
+- Tested the onboarding close loop in the local browser: clicking `记录今天并开始专注` closes onboarding, starts the timer, and shows the assessment-based rhythm copy.
+- Tested manual rhythm adjustment in the local browser: changing `专注提醒` updates the rhythm copy immediately.
+- Tested the pending reminder loop in the local browser: L2 reminder appears, L2 can upgrade to L3, `稍后` hides the reminder and increments snooze count, and `现在休息` leads into the recovery feedback flow.
+- Tested the forced rest screen in the local browser: the return button stays hidden during the countdown and appears only after the timer reaches 00:00.
+- Tested the `强制爱` setting in the local browser: selecting it updates the reminder copy and keeps the intervention at L1 before the target time.
+- Tested the forced rest task sequence in the local browser: the screen starts with far-looking guidance, advances through the rest tasks, and reveals `回到 EyeFlow` only after completion.
+- Tested `强制爱` copy consistency in the local browser: Today view mode copy, timer hint, and state action all describe the same full-screen rest behavior.
+- Tested the force preview in the local browser: the preview button appears in force mode, opens the locked rest overlay, hides completion controls during countdown, and does not increase the daily break count.
+- Tested daily onboarding gating in the local browser: forced onboarding still works with `onboarding=1`, and reopening without the query after skipping today's calibration does not show onboarding again.
+- Tested Today/Settings action visibility in the local browser: top actions are actually hidden, while `重置今日数据` remains visible in Settings.
+- Tested the reset confirmation loop in the local browser: the first click only changes the button to `确认重置今日？` and keeps today's counts, while the second click resets breaks and logs to zero.
+- Tested the `强制爱` preview path in the local browser: the locked rest overlay appears without an extra ordinary toast, then closes after the preview countdown finishes.
+- Retested the `强制爱` preview after the desktop payload change: the preview still opens and closes correctly, and the daily break count stays unchanged.
+- Checked visible dashboard copy and source text after copy softening: old medical-sounding terms no longer appear in the local EyeFlow files.
+- Tested the new daily onboarding plan in the local browser: default, medium-load, and high-load states all update the plan copy and first-session rhythm correctly.
+- Tested completing onboarding after the plan update: the overlay closes, the timer starts, and Today shows the assessment-based rhythm copy.
+- Tested the skip-calibration path on a clean local preview origin: skipping closes the modal, keeps Today on the default rhythm, and shows the calibration callout.
+- Tested reopening after skip on the same day: the modal stays closed while the Today callout remains visible.
+- Tested calibrating from the Today callout: the modal opens, completion starts the timer, and the callout disappears after today's assessment is recorded.
+- Tested reset-state consistency in the local browser: after `重置今日数据`, Today returns to an uncalibrated state with the calibration callout visible, breaks/logs reset to zero, and no assessment-based rhythm copy.
+- Tested same-day recalibration in the local browser: completing calibration twice leaves only one initial-assessment log and keeps Today on the assessment-based rhythm.
+- Checked `main.js` after the first-click fix with `node --check`; desktop behavior needs to be verified manually because this is macOS window activation behavior, not browser DOM behavior.
+- Verified cursor styles in the local browser: main buttons, sliders, and summaries resolve to `default`, onboarding text links resolve to `pointer`, and the Mira avatar resolves to `grab`.
+- Verified the force-mode timer hint layout in the local browser: `25 分钟后全屏休息 · 90 秒` fits inside the 248px timer ring with no horizontal overflow.
+- Verified the daily onboarding entry in the local browser: `记录今天并开始专注` closes the modal, starts the timer, and leaves the main state-card action as `查看当前会话` while the session card owns `暂停` / `继续专注`.
+- Re-ran a horizontal overflow audit in the local browser after the layout changes; visible page elements no longer report horizontal overflow at the tested desktop viewport.
+- Tested the updated browser `强制爱` preview: the return button is hidden at the start of the 15-second countdown and appears after the preview ends.
+- Verified day and night Mira companion previews in the local browser; expanded bubbles have no horizontal overflow in both `rest` and `blink` states.
+- Checked `main.js` and `preload.js` with `node --check` after the desktop-window persistence change.
+- Verified the simplified Today layout in the local browser: current state and focus session align in the first screen, `为什么是这个状态` is folded by default, normal-state duplicate action buttons are hidden, and visible elements report no horizontal overflow.
+- Verified the quick-log panel in the local browser: it is truly collapsed by default, expands to show four symptom sliders and save actions, and visible page elements report no horizontal overflow.
+- Verified the merged Today status strip in the local browser across `安静`, `标准`, and `强制爱`; all three modes update the timer hint correctly and report no horizontal overflow at the tested desktop viewport.
+- Verified the rebalanced Today layout in the local browser: metrics now stay with the current-state column, the quick-log entry spans the content width, the summary remains a quiet split band, and the tested viewport reports no horizontal overflow.
+- Verified the simplified Settings page in the local browser: reminder modes switch correctly, `更多设置` expands without breaking layout, `查看提醒规则` stays compact when folded, Today copy stays synced after mode changes, and the tested viewport reports no horizontal overflow.
+- Verified the expanded reminder rules in the local browser: `L4 强制爱` appears, the forced-rest return-button boundary is visible, and the rules panel reports no horizontal overflow.
+- Verified the redesigned forced-rest page in the local browser: the countdown is smaller, the Mira recovery task is primary, the return button is hidden during the countdown and appears after completion, and the page reports no horizontal overflow.
+- Verified the browser fallback `强制爱` preview after the rest-screen redesign: the softer overlay appears, ordinary finish/snooze actions are hidden, and `回到 EyeFlow` appears only after the preview countdown ends.
+- Verified the improved browser fallback `强制爱` preview: it shows the recovery task, small countdown, hidden return button during countdown, and no horizontal overflow.
+- Verified ordinary rest still uses the simpler breathing overlay with `完成休息` and `稍后提醒`, so regular rest and force-rest remain visually distinct.
+- Verified forced daily onboarding in the local browser: the modal appears, preserves an already-selected `强制爱` mode, and shows `强制爱提醒` in the onboarding rhythm line.
+- Verified completing daily onboarding in the local browser: the modal closes, the focus session starts, Today shows the new plan sentence, the timer hint reflects `强制爱`, and the Settings suggestion card displays `强制爱`.
+- Verified the non-force onboarding entry in the local browser after switching back to quiet mode: default comfort scoring shows the quiet reminder plan.
+- Verified standard-mode reminder gating in the local browser: medium load shows L2 `提前观察眨眼或远眺` without creating a pending reminder or increasing reminder count.
+- Verified target-time surfacing in the local browser: after shortening the focus target below the current elapsed time, the pending reminder still stays hidden while paused, then appears only after the session starts.
+- Verified standard-mode target reminders do not also show a separate Mira toast, so the user receives one clear reminder surface instead of a stacked toast plus card.
+- Verified snooze copy in the local browser: pending reminder and rest overlay buttons now say `5 分钟后` / `5 分钟后提醒`.
+- Verified manual-rest snooze in the local browser: clicking `5 分钟后提醒` closes the overlay, shows the new Mira toast, records `先继续当前会话`, and keeps the page free of horizontal overflow.
+- Verified real reminder snooze logging in the local browser through existing test history: `延后一次 Mira 提醒` appears separately from the older vague snooze log.
+- Checked the auto-tracking fix with source inspection: `isAutoTracking()` now drives the start button label, timer hint, activity mode, top status copy, and Mira copy from the same condition.
+- Verified the new `强制爱` confirmation in the local browser: clicking the mode button leaves the active mode on `安静` and opens the confirmation card.
+- Verified confirming `强制爱` in the local browser: clicking `开启强制爱` switches the active mode to force, updates Today copy, hides the enable button, and keeps preview available.
+- Verified disabling `强制爱` in the local browser: clicking `切回安静` restores quiet mode, hides the confirmation card, and leaves the tested viewport with no horizontal overflow.
+- Checked the `强制爱` auto-recording guard with source inspection: `currentIntervention`, timer hint, Today plan copy, state copy, onboarding copy, settings copy, and Mira copy now all say force mode is standby until manual focus begins.
+- Retested the `强制爱` confirmation flow in the local browser after the standby copy update: from `安静`, clicking `强制爱` keeps quiet mode active and opens the confirmation card; clicking `开启强制爱` switches modes, updates the settings copy, and shows no horizontal overflow.
+- Checked the focus-session state label with source inspection: `renderSessionControls()` now derives the pill and primary button from the same `isAutoTracking()` condition.
+- Verified the focus-session state label in the local browser: the visible pill and primary button stay consistent in the paused state, and the tested viewport reports no horizontal overflow.
+- Verified the recovery feedback step in the local browser: after opening rest and clicking `完成休息`, the three consequence-aware feedback buttons appear and report no horizontal overflow.
+- Verified the UI texture pass in the local browser at the current desktop viewport: Today has no horizontal overflow, the focus-session buttons remain 48px tall, and the session card no longer reports internal overflow.
+- Verified the state-stage concept in the local browser at the current desktop viewport: the Mira stage renders with the current load score, high-load state uses the rest mood, headline wrapping is clean, and no horizontal overflow is reported.
+- Verified the final visual pass in the local browser at the current desktop viewport: no horizontal overflow, high-load state synchronizes the Mira stage, timer ring, and slider rails to the rest color, the focus-session button remains 48px tall, and the rhythm panel no longer has excess empty height.
+- Fixed daily calibration timing: opening Mira's daily assessment now pauses any active focus timer, and recording today's score starts the assessed first round from `00:00` instead of inheriting old elapsed time.
+- Verified daily assessment in the local browser after the timing fix: the onboarding modal appears, the timer stays frozen while the modal is open, `记录今天并开始专注` closes the modal, records one initial log, and starts the new round from the beginning.
+- Re-verified pause/resume in the local browser: `暂停` stops the timer with one click, `继续专注` resumes with one click, and the primary button text stays consistent with the timer state.
+- Re-verified `强制爱` preview in the local browser: return, finish, and snooze actions are hidden during the countdown; `回到 EyeFlow` appears only after `00:00`; the preview does not increase today's break count.
+- Re-ran Today and Settings overflow checks in the local browser after the v0.1 acceptance fixes: the tested desktop viewport reports no horizontal overflow, and the focus-session primary button remains 48px tall.
+- Increased recovery duration after user testing showed shoulder/neck relaxation could not finish before the timer ended: manual rest now ranges from 90-240 seconds, default rhythm is 120 seconds, medium-load assessment uses 150 seconds, and high-load assessment uses 180 seconds.
+- Updated rhythm suggestions to preserve longer recovery windows: high-load suggestions now target at least 180 seconds, and no-break recovery suggestions target at least 120 seconds.
+- Verified the recovery-duration UI in the local browser: the slider reports min 90 / max 240, the timer hint reflects the current longer rest value, and the tested desktop viewport reports no horizontal overflow.
+- Added Mira as the visual recovery companion in both the dashboard fallback rest overlay and the real Electron fullscreen recovery page.
+- Changed force-recovery tasks from plain title/copy pairs into step objects with Mira moods: gaze, blink, closed-eye rest, and shoulder/neck release.
+- Added step-specific Mira expressions and motion: Mira looks outward during gaze, blinks during blink practice, closes eyes for rest, and settles into a calmer shoulder/neck release state.
+- Checked inline JavaScript syntax for `index.html` and `break-lock.html` after the Mira recovery-stage change; both inline scripts parse successfully.
+- Checked `main.js` and `preload.js` with `node --check` after adding recovery-mode task payloads.
+- Checked inline JavaScript syntax for `index.html` and `break-lock.html` after the recovery-mode library update; both inline scripts parse successfully.
+- Rebuilt the packaged macOS app with `npm run build:mac` and launched `/Users/lovellezhang/Projects/codex-project/dist/mac/EyeFlow.app` for manual testing.
+- Checked `main.js` and `preload.js` with `node --check` after adding recovery flow labels.
+- Checked inline JavaScript syntax for `index.html` and `break-lock.html` after adding the recovery flow strip; both inline scripts parse successfully.
+- Rebuilt and relaunched `/Users/lovellezhang/Projects/codex-project/dist/mac/EyeFlow.app` after recovery experience 2.0 so the packaged app includes the new flow strip.
+- Stabilized macOS Dock behavior by explicitly showing the Dock icon on app startup and when opening the EyeFlow dashboard.
+- Upgraded the real desktop `强制爱` recovery window to kiosk-level fullscreen, with screen-saver always-on-top behavior, so the macOS menu bar and Dock are hidden during the recovery countdown.
+- Browser fallback `强制爱` preview now requests browser fullscreen when possible, but the packaged desktop app remains the source of truth for true no-cover fullscreen behavior.
+- Added productization controls for the desktop app: `关于 EyeFlow`, version display, and `开机自动启动` in both macOS menus/tray and Settings `更多设置`.
+- Added Electron IPC for reading desktop settings and toggling macOS login-item startup from the Settings page.
+- Rebuilt the application menu when startup-at-login changes so the macOS menu and tray stay in sync with Settings.
+- Checked `main.js`, `preload.js`, and inline page scripts after the productization controls, then rebuilt and relaunched `/Users/lovellezhang/Projects/codex-project/dist/mac/EyeFlow.app`.
+- Added DMG distribution to the macOS build target, with an `EyeFlow` app icon and `/Applications` install link.
+- Added `npm run build:dmg` for DMG-only packaging.
+- Added `docs/RELEASE_CHECKLIST.md` for private alpha release validation.
+
+## Release Packaging
+
+- Built the packaged macOS app and ZIP archive through `npm run build:mac`.
+- The electron-builder DMG step could not finish in this environment because the `dmg-builder` helper download failed: the configured mirror returned 404, and the direct download timed out.
+- Created a private-alpha DMG fallback with macOS `hdiutil`, containing `EyeFlow.app` and an `/Applications` install link.
+- Verified the fallback DMG with `hdiutil imageinfo`, mounted it read-only, confirmed `EyeFlow.app` and the `/Applications` symlink, then detached the volume.
+- Relaunched `/Users/lovellezhang/Projects/codex-project/dist/mac/EyeFlow.app` and confirmed the running process is the packaged app bundle.

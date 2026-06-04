@@ -1,0 +1,663 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>EyeFlow Rest</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --ink: #e7f1ec;
+      --soft: #c9d8d1;
+      --muted: rgba(231, 241, 236, 0.58);
+      --line: rgba(176, 218, 203, 0.18);
+      --mint: #8edfc7;
+      --mint-dim: rgba(142, 223, 199, 0.18);
+      --panel: rgba(230, 244, 238, 0.055);
+      --bg: #101b18;
+      --bg-2: #16231f;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      color: var(--ink);
+      background:
+        radial-gradient(circle at 50% 46%, rgba(142, 223, 199, 0.11), transparent 30%),
+        radial-gradient(circle at 50% 100%, rgba(212, 236, 222, 0.06), transparent 42%),
+        linear-gradient(180deg, var(--bg-2) 0%, var(--bg) 100%);
+      display: grid;
+      place-items: center;
+      padding: 32px 24px;
+    }
+
+    main {
+      width: min(760px, 100%);
+      display: grid;
+      gap: 20px;
+      text-align: center;
+      min-width: 0;
+      align-content: center;
+    }
+
+    .mira-stage {
+      height: 178px;
+      display: grid;
+      place-items: center;
+      position: relative;
+      margin-bottom: -4px;
+    }
+
+    .mira-stage::before {
+      content: "";
+      position: absolute;
+      width: 184px;
+      height: 184px;
+      border-radius: 50%;
+      background:
+        radial-gradient(circle, rgba(142, 223, 199, 0.18), rgba(142, 223, 199, 0.04) 54%, transparent 72%);
+      animation: guidePulse 3.6s ease-in-out infinite;
+    }
+
+    .pet {
+      width: 72px;
+      aspect-ratio: 1;
+      border-radius: 22px 22px 20px 20px;
+      background:
+        radial-gradient(circle at 50% 12%, rgba(255, 255, 255, 0.82) 0 11px, transparent 12px),
+        linear-gradient(160deg, #d9f4eb 0%, #f7fffb 52%, #dfeaff 100%);
+      display: grid;
+      place-items: center;
+      position: relative;
+      overflow: hidden;
+      transform: scale(1.72);
+      transform-origin: center;
+      box-shadow:
+        inset 0 0 0 1px rgba(231, 241, 236, 0.12),
+        inset 0 -10px 22px rgba(15, 159, 122, 0.16),
+        0 22px 54px rgba(0, 0, 0, 0.24);
+    }
+
+    .pet::before {
+      content: "";
+      position: absolute;
+      top: 24px;
+      left: 12px;
+      width: 48px;
+      height: 22px;
+      border-radius: 999px;
+      background: rgba(15, 23, 21, 0.86);
+      box-shadow: inset 0 0 0 2px rgba(255, 255, 255, 0.1);
+    }
+
+    .pet::after {
+      content: "";
+      position: absolute;
+      right: 10px;
+      top: 15px;
+      width: 11px;
+      height: 11px;
+      border-radius: 999px;
+      background: var(--mint);
+      box-shadow: 0 0 14px rgba(142, 223, 199, 0.72);
+    }
+
+    .pet-face {
+      position: absolute;
+      top: 30px;
+      left: 23px;
+      width: 27px;
+      height: 9px;
+      z-index: 1;
+      transition: transform 220ms ease;
+    }
+
+    .pet-face::before,
+    .pet-face::after {
+      content: "";
+      position: absolute;
+      top: 0;
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: #ffffff;
+      animation: petBlink 5s ease-in-out infinite;
+    }
+
+    .pet-face::before {
+      left: 1px;
+    }
+
+    .pet-face::after {
+      right: 1px;
+    }
+
+    .pet-mouth {
+      position: absolute;
+      top: 46px;
+      left: 50%;
+      width: 17px;
+      height: 8px;
+      transform: translateX(-50%);
+      border-bottom: 2px solid rgba(15, 23, 21, 0.78);
+      border-radius: 0 0 999px 999px;
+      z-index: 1;
+    }
+
+    .pet-cheek {
+      position: absolute;
+      top: 44px;
+      width: 8px;
+      height: 3px;
+      border-radius: 999px;
+      background: rgba(215, 79, 117, 0.22);
+      z-index: 1;
+    }
+
+    .pet-cheek.left {
+      left: 15px;
+    }
+
+    .pet-cheek.right {
+      right: 15px;
+    }
+
+    .pet-antenna {
+      position: absolute;
+      top: 9px;
+      left: 22px;
+      width: 28px;
+      height: 15px;
+      border-top: 2px solid rgba(15, 23, 21, 0.36);
+      border-radius: 50%;
+      z-index: 0;
+    }
+
+    .mira-caption {
+      position: absolute;
+      bottom: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      color: rgba(231, 241, 236, 0.52);
+      font-size: 13px;
+      font-weight: 720;
+      white-space: nowrap;
+    }
+
+    body[data-relax="gaze"] .pet-face {
+      transform: translateX(5px);
+    }
+
+    body[data-relax="blink"] .pet {
+      background:
+        radial-gradient(circle at 50% 12%, rgba(255, 255, 255, 0.82) 0 11px, transparent 12px),
+        linear-gradient(160deg, #fff0d7 0%, #ffffff 52%, #d9f4eb 100%);
+      animation: miraBlinkLead 1.8s ease-in-out infinite;
+    }
+
+    body[data-relax="blink"] .pet-face::before,
+    body[data-relax="blink"] .pet-face::after {
+      height: 2px;
+      border-radius: 999px;
+      transform: translateY(3px);
+      animation-duration: 1.8s;
+    }
+
+    body[data-relax="blink"] .pet-mouth {
+      border-bottom-color: rgba(202, 143, 38, 0.78);
+      transform: translateX(-50%) scaleX(0.82);
+    }
+
+    body[data-relax="close"] .pet-face::before,
+    body[data-relax="close"] .pet-face::after,
+    body[data-relax="neck"] .pet-face::before,
+    body[data-relax="neck"] .pet-face::after {
+      height: 2px;
+      border-radius: 999px;
+      transform: translateY(3px);
+      animation: none;
+    }
+
+    body[data-relax="close"] .pet,
+    body[data-relax="neck"] .pet {
+      animation: miraRestBreath 4s ease-in-out infinite;
+    }
+
+    body[data-relax="neck"] .pet-mouth {
+      width: 18px;
+      height: 5px;
+      border-radius: 999px;
+      border: 0;
+      background: rgba(142, 223, 199, 0.68);
+      transform: translateX(-50%) translateY(1px);
+    }
+
+    body[data-relax="press"] .pet {
+      background:
+        radial-gradient(circle at 50% 12%, rgba(255, 255, 255, 0.82) 0 11px, transparent 12px),
+        linear-gradient(160deg, #fff0d7 0%, #fff8fa 52%, #d9f4eb 100%);
+      animation: miraRestBreath 3.4s ease-in-out infinite;
+    }
+
+    body[data-relax="press"] .pet::after {
+      background: #ffd66f;
+      box-shadow: 0 0 18px rgba(255, 214, 111, 0.78);
+    }
+
+    body[data-relax="press"] .pet-face::before,
+    body[data-relax="press"] .pet-face::after {
+      height: 2px;
+      border-radius: 999px;
+      transform: translateY(3px);
+      animation: none;
+    }
+
+    body[data-relax="press"] .pet-mouth {
+      width: 14px;
+      height: 6px;
+      border: 0;
+      border-bottom: 2px solid rgba(202, 143, 38, 0.78);
+      border-radius: 0 0 999px 999px;
+      transform: translateX(-50%) scaleX(0.78);
+    }
+
+    .eyebrow {
+      width: fit-content;
+      max-width: 100%;
+      margin: 0 auto -4px;
+      padding: 7px 11px;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      color: var(--soft);
+      background: rgba(230, 244, 238, 0.045);
+      font-size: 13px;
+      font-weight: 720;
+      line-height: 1.2;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: clamp(30px, 5vw, 52px);
+      line-height: 1.08;
+      letter-spacing: 0;
+    }
+
+    p {
+      margin: 0;
+      color: var(--muted);
+      font-size: clamp(15px, 1.8vw, 20px);
+      line-height: 1.58;
+      overflow-wrap: anywhere;
+    }
+
+    .task {
+      min-width: 0;
+      display: grid;
+      gap: 12px;
+      width: min(640px, 100%);
+      margin: 0 auto;
+      padding: 22px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--panel);
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.12);
+    }
+
+    .task span {
+      color: rgba(231, 241, 236, 0.44);
+      font-size: 13px;
+      font-weight: 680;
+    }
+
+    .task strong {
+      font-size: clamp(28px, 4vw, 44px);
+      line-height: 1.12;
+      overflow-wrap: anywhere;
+    }
+
+    .task p {
+      max-width: 540px;
+      margin: 0 auto;
+    }
+
+    .step-flow {
+      width: min(640px, 100%);
+      min-width: 0;
+      margin: -4px auto 0;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(82px, 1fr));
+      gap: 8px;
+    }
+
+    .step-flow span {
+      min-width: 0;
+      min-height: 38px;
+      padding: 8px 10px;
+      border-radius: 8px;
+      border: 1px solid rgba(176, 218, 203, 0.14);
+      color: rgba(231, 241, 236, 0.48);
+      background: rgba(230, 244, 238, 0.04);
+      font-size: 12px;
+      font-weight: 760;
+      line-height: 1.25;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      overflow-wrap: anywhere;
+      transition:
+        color 180ms ease,
+        background 180ms ease,
+        border-color 180ms ease,
+        box-shadow 180ms ease;
+    }
+
+    .step-flow span.done {
+      color: rgba(231, 241, 236, 0.62);
+      border-color: rgba(142, 223, 199, 0.16);
+      background: rgba(142, 223, 199, 0.075);
+    }
+
+    .step-flow span.active {
+      color: #10201c;
+      border-color: rgba(142, 223, 199, 0.58);
+      background: rgba(142, 223, 199, 0.88);
+      box-shadow: 0 12px 30px rgba(142, 223, 199, 0.12);
+    }
+
+    .ring {
+      width: min(32vh, 220px);
+      aspect-ratio: 1;
+      margin: 4px auto 0;
+      border-radius: 50%;
+      display: grid;
+      place-items: center;
+      background: conic-gradient(var(--mint) var(--progress), rgba(230, 244, 238, 0.12) 0);
+      box-shadow: 0 22px 62px rgba(0, 0, 0, 0.14);
+    }
+
+    .timer-wrap {
+      width: calc(min(32vh, 220px) - 24px);
+      aspect-ratio: 1;
+      border-radius: 50%;
+      background: rgba(16, 27, 24, 0.94);
+      border: 1px solid var(--line);
+      display: grid;
+      place-items: center;
+    }
+
+    .timer-stack {
+      display: grid;
+      gap: 6px;
+    }
+
+    .timer-label {
+      color: rgba(231, 241, 236, 0.42);
+      font-size: 12px;
+      font-weight: 680;
+    }
+
+    .timer {
+      font-variant-numeric: tabular-nums;
+      color: var(--ink);
+      font-size: clamp(34px, 7vw, 52px);
+      font-weight: 780;
+      line-height: 1;
+    }
+
+    .done {
+      min-height: 46px;
+      padding: 0 18px;
+      border: 1px solid rgba(117, 232, 200, 0.36);
+      border-radius: 8px;
+      color: #10201c;
+      background: var(--mint);
+      font: inherit;
+      font-weight: 760;
+      cursor: default;
+      justify-self: center;
+      box-shadow: 0 16px 34px rgba(142, 223, 199, 0.16);
+    }
+
+    .done[hidden] {
+      display: none;
+    }
+
+    .hint {
+      color: rgba(231, 241, 236, 0.42);
+      font-size: 13px;
+    }
+
+    @keyframes guidePulse {
+      0%,
+      100% {
+        transform: scale(0.96);
+        opacity: 0.7;
+      }
+      50% {
+        transform: scale(1.04);
+        opacity: 1;
+      }
+    }
+
+    @keyframes petBlink {
+      0%,
+      91%,
+      100% {
+        transform: scaleY(1);
+      }
+      94% {
+        transform: scaleY(0.28);
+      }
+    }
+
+    @keyframes miraBlinkLead {
+      0%,
+      100% {
+        transform: scale(1.72) translateY(0);
+      }
+      42% {
+        transform: scale(1.72) translateY(-3px);
+      }
+      55% {
+        transform: scale(1.72) translateY(1px);
+      }
+    }
+
+    @keyframes miraRestBreath {
+      0%,
+      100% {
+        transform: scale(1.7);
+      }
+      50% {
+        transform: scale(1.78) translateY(1px);
+      }
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <div class="mira-stage" aria-label="Mira 陪你恢复">
+      <div class="pet" aria-hidden="true">
+        <div class="pet-antenna"></div>
+        <div class="pet-face"></div>
+        <div class="pet-cheek left"></div>
+        <div class="pet-cheek right"></div>
+        <div class="pet-mouth"></div>
+      </div>
+      <span class="mira-caption" id="miraCaption">跟着 Mira 慢慢来</span>
+    </div>
+    <div class="eyebrow" id="eyebrow">Mira 护眼恢复</div>
+    <div>
+      <h1 id="title">Mira 带你离开屏幕一下</h1>
+      <p id="copy">不用盯着倒计时。我来守时间，你把视线交给远处。</p>
+    </div>
+    <div class="task" aria-live="polite">
+      <span id="taskStep">第 1 步</span>
+      <strong id="taskTitle">看向 6 米外</strong>
+      <p id="taskCopy">找一个远处的点，轻轻看过去，不需要盯着屏幕。</p>
+    </div>
+    <div class="step-flow" id="stepFlow" aria-label="恢复流程"></div>
+    <div class="ring" id="ring" style="--progress: 0%;">
+      <div class="timer-wrap">
+        <div class="timer-stack">
+          <span class="timer-label">剩余</span>
+          <div class="timer" id="timer">01:30</div>
+        </div>
+      </div>
+    </div>
+    <button class="done" id="doneBtn" type="button" hidden="">回到 EyeFlow</button>
+    <p class="hint">倒计时结束前，EyeFlow 会安静守住这段恢复时间。</p>
+  </main>
+
+  <script>
+    const params = new URLSearchParams(window.location.search);
+    const els = {
+      title: document.querySelector("#title"),
+      copy: document.querySelector("#copy"),
+      taskStep: document.querySelector("#taskStep"),
+      taskTitle: document.querySelector("#taskTitle"),
+      taskCopy: document.querySelector("#taskCopy"),
+      timer: document.querySelector("#timer"),
+      ring: document.querySelector("#ring"),
+      eyebrow: document.querySelector("#eyebrow"),
+      doneBtn: document.querySelector("#doneBtn"),
+      miraCaption: document.querySelector("#miraCaption"),
+      stepFlow: document.querySelector("#stepFlow")
+    };
+    let totalSeconds = 90;
+    let endsAt = Date.now() + totalSeconds * 1000;
+    let ticker = null;
+    let previewSession = false;
+    const defaultTasks = [
+      {
+        mood: "gaze",
+        label: "远眺",
+        title: "跟 Mira 一起看远处",
+        copy: "把视线移到 6 米外。Mira 也看向远处，你不用盯着屏幕。",
+        caption: "先把视线放远"
+      },
+      {
+        mood: "blink",
+        label: "慢眨眼",
+        title: "跟 Mira 慢慢眨眼",
+        copy: "跟着 Mira 的节奏眨 8 次，每一次都闭完整一点。",
+        caption: "慢慢眨，不要急"
+      },
+      {
+        mood: "close",
+        label: "闭眼",
+        title: "和 Mira 一起闭眼",
+        copy: "闭眼 10 秒，把眉心、下巴和屏幕里的紧张一起放下来。",
+        caption: "眼睛先休息"
+      },
+      {
+        mood: "neck",
+        label: "肩颈",
+        title: "跟 Mira 放松肩颈",
+        copy: "下巴微收，肩膀慢慢沉下去。等提示出现后再回来。",
+        caption: "肩膀慢慢沉下去"
+      }
+    ];
+    let activeTasks = defaultTasks;
+
+    function formatTime(seconds) {
+      const mins = Math.floor(seconds / 60);
+      const secs = seconds % 60;
+      return `${String(mins).padStart(2, "0")}:${String(secs).padStart(2, "0")}`;
+    }
+
+    function normalizeBreakTasks(input) {
+      let tasks = input;
+      if (typeof tasks === "string" && tasks.trim()) {
+        try {
+          tasks = JSON.parse(tasks);
+        } catch (_error) {
+          tasks = null;
+        }
+      }
+      if (!Array.isArray(tasks) || tasks.length === 0) return defaultTasks;
+      const allowedMoods = new Set(["gaze", "blink", "close", "neck", "press"]);
+      const safeTasks = tasks.slice(0, 6).map((task) => ({
+        mood: allowedMoods.has(task?.mood) ? task.mood : "gaze",
+        label: String(task?.label || "").slice(0, 12),
+        title: String(task?.title || "").slice(0, 48),
+        copy: String(task?.copy || "").slice(0, 140),
+        caption: String(task?.caption || "").slice(0, 36)
+      })).filter((task) => task.title && task.copy);
+      return safeTasks.length ? safeTasks : defaultTasks;
+    }
+
+    function stepLabel(task) {
+      return String(task?.label || task?.caption || task?.title || "恢复").slice(0, 8);
+    }
+
+    function renderStepFlow(activeIndex) {
+      const fragment = document.createDocumentFragment();
+      activeTasks.forEach((task, index) => {
+        const step = document.createElement("span");
+        step.textContent = stepLabel(task);
+        step.classList.toggle("done", index < activeIndex);
+        step.classList.toggle("active", index === activeIndex);
+        fragment.append(step);
+      });
+      els.stepFlow.replaceChildren(fragment);
+    }
+
+    function applyPayload(payload = {}) {
+      totalSeconds = Math.max(15, Math.min(600, Number(payload.seconds) || totalSeconds));
+      endsAt = Date.now() + totalSeconds * 1000;
+      previewSession = payload.preview === true || payload.preview === "1";
+      activeTasks = normalizeBreakTasks(payload.tasks || params.get("tasks"));
+      els.eyebrow.textContent = previewSession ? "强制爱预览" : "强制爱恢复";
+      els.title.textContent = payload.title || "Mira 带你离开屏幕一下";
+      els.copy.textContent = payload.copy || "不用盯着倒计时。我来守时间，你把视线交给远处。";
+      els.doneBtn.hidden = true;
+      if (!ticker) ticker = window.setInterval(tick, 250);
+      tick();
+    }
+
+    function tick() {
+      const remaining = Math.max(0, Math.ceil((endsAt - Date.now()) / 1000));
+      const progress = totalSeconds <= 0 ? 100 : ((totalSeconds - remaining) / totalSeconds) * 100;
+      const taskIndex = Math.min(activeTasks.length - 1, Math.floor(progress / (100 / activeTasks.length)));
+      const task = activeTasks[taskIndex];
+      els.taskStep.textContent = `第 ${taskIndex + 1} 步 / ${activeTasks.length}`;
+      els.taskTitle.textContent = task.title;
+      els.taskCopy.textContent = task.copy;
+      els.miraCaption.textContent = task.caption;
+      renderStepFlow(taskIndex);
+      document.body.dataset.relax = task.mood;
+      els.timer.textContent = formatTime(remaining);
+      els.ring.style.setProperty("--progress", `${Math.max(0, Math.min(100, progress))}%`);
+      if (remaining <= 0) {
+        window.clearInterval(ticker);
+        ticker = null;
+        els.doneBtn.hidden = false;
+      }
+    }
+
+    els.doneBtn.addEventListener("click", () => {
+      window.eyeflowDesktop?.finishForceBreak?.({
+        preview: previewSession,
+        feedback: "better",
+        completedAt: new Date().toISOString()
+      });
+    });
+
+    window.eyeflowDesktop?.onForceBreakUpdate?.(applyPayload);
+    applyPayload({
+      seconds: params.get("seconds"),
+      title: params.get("title"),
+      copy: params.get("copy"),
+      tasks: params.get("tasks"),
+      preview: params.get("preview")
+    });
+  </script>
+</body>
+</html>

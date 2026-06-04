@@ -1,0 +1,60 @@
+{
+  "name": "eyeflow",
+  "version": "0.1.0",
+  "description": "A calm desktop eye-care companion for deep work.",
+  "author": "EyeFlow",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "install:mirror": "ELECTRON_MIRROR=https://npmmirror.com/mirrors/electron/ npm install",
+    "build:mac": "electron-builder --mac --publish never",
+    "build:dmg": "electron-builder --mac dmg --publish never"
+  },
+  "private": true,
+  "devDependencies": {
+    "electron": "^31.7.7",
+    "electron-builder": "^26.8.1"
+  },
+  "build": {
+    "appId": "com.eyeflow.app",
+    "productName": "EyeFlow",
+    "artifactName": "${productName}-${version}-${arch}.${ext}",
+    "asar": true,
+    "files": [
+      "index.html",
+      "companion.html",
+      "companion-panel.html",
+      "break-lock.html",
+      "main.js",
+      "preload.js",
+      "package.json",
+      "assets/icon.icns"
+    ],
+    "mac": {
+      "category": "public.app-category.productivity",
+      "icon": "assets/icon.icns",
+      "target": [
+        "dir",
+        "dmg",
+        "zip"
+      ]
+    },
+    "dmg": {
+      "title": "EyeFlow ${version}",
+      "icon": "assets/icon.icns",
+      "contents": [
+        {
+          "x": 140,
+          "y": 220,
+          "type": "file"
+        },
+        {
+          "x": 410,
+          "y": 220,
+          "type": "link",
+          "path": "/Applications"
+        }
+      ]
+    }
+  }
+}
