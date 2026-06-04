@@ -206,3 +206,4 @@
 - Fixed the feedback-panel Mira avatar overflow by removing inherited recovery animation scaling from the feedback state and tightening the avatar column.
 - Gave the ordinary-rest feedback panel its own calm Mira face instead of reusing the shoulder/neck recovery expression, so the feedback avatar no longer carries the crooked neck-release state.
 - Re-centered the feedback-panel Mira mask, eyes, and mouth together after resizing the avatar, fixing the mouth alignment.
+- Removed the inherited white head highlight from the feedback-panel Mira avatar so the small calm face reads cleaner.
