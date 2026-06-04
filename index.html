@@ -5576,6 +5576,7 @@
         if (!isRunning) {
           return {
             level: 1,
+            displayLevel: 4,
             title: "强制爱待命",
             copy: isAutoTracking()
               ? "正在自动记录连续盯屏。点开始手动专注后，强制爱才会接管到点全屏恢复。"
@@ -5591,6 +5592,7 @@
         }
         return {
           level: 1,
+          displayLevel: 4,
           title: "强制爱已开启",
           copy: "Mira 会先安静陪伴；到点后直接进入全屏休息。"
         };
@@ -5660,11 +5662,12 @@
         startForceBreak(intervention);
         return true;
       }
-      els.interventionLevel.textContent = `L${intervention.level}`;
+      const displayLevel = Number(intervention.displayLevel || intervention.level || 1);
+      els.interventionLevel.textContent = `L${displayLevel}`;
       els.interventionTitle.textContent = intervention.title;
       els.interventionCopy.textContent = intervention.copy;
       els.interventionBars.forEach((bar, index) => {
-        bar.classList.toggle("active", index < intervention.level);
+        bar.classList.toggle("active", index < displayLevel);
       });
       return false;
     }
@@ -6163,13 +6166,14 @@
       els.companion.dataset.mood = mood;
       els.petTitle.textContent = title;
       els.petMessage.textContent = message;
+      const displayLevel = Number(intervention.displayLevel || intervention.level || 1);
       publishCompanionState({
         mood,
         title,
         message,
         load,
         isRunning,
-        interventionLevel: intervention.level,
+        interventionLevel: displayLevel,
         interventionTitle: intervention.title,
         interventionCopy: intervention.copy,
         allowSystemNotify: Boolean(state.settings.systemNotifyToggle)
