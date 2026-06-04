@@ -202,3 +202,4 @@
 - Published `v0.1.0-alpha.1` as a GitHub pre-release with the DMG installer.
 - Installed the DMG into `/Applications`, launched `/Applications/EyeFlow.app`, confirmed the installed bundle is running, and smoke-tested the main dashboard, Mira, pause/resume, ordinary rest, and `强制爱` preview.
 - Redesigned the ordinary-rest completion feedback state: the feedback buttons now live inside one integrated recovery panel with Mira, instead of appearing as a separate floating strip over the rest dialog.
+- Simplified the ordinary-rest feedback panel again after visual review: switched it to a lighter compact card, reduced Mira's visual weight, removed repeated feedback copy, and shortened the three feedback actions.
