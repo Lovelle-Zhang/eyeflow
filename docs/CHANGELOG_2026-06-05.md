@@ -16,3 +16,4 @@
 - Added busy-friendly reminder surfacing: when the user is actively working, EyeFlow keeps the yellow state and in-place rest action but waits for a natural break or short idle moment before showing a reminder card.
 - Reminder cards now include `忙完再说`, which suppresses repeated prompts and waits until the next natural break before reminding again.
 - Lightened the floating Mira interaction: tapping the avatar now toggles the speech bubble open/closed, dragging only begins after a clear movement threshold, double-click no longer opens the dashboard in the desktop shell, and ordinary L1 startup no longer auto-expands Mira.
+- Added hover-to-open for floating Mira: resting the cursor on the avatar briefly opens the speech bubble, while tap-to-close still works.

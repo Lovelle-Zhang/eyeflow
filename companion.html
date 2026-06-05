@@ -555,13 +555,16 @@
     let hasLiveState = false;
     let isExpanded = false;
     let dragState = null;
+    let hoverOpenTimer = null;
     let theme = getTheme();
     const previewMood = getPreviewMood();
     const compactPreview = new URLSearchParams(window.location.search).get("compact") === "1";
     const isDesktopShell = Boolean(window.eyeflowDesktop);
     const tapMoveThreshold = 8;
+    const hoverOpenDelay = 120;
 
     const companion = document.querySelector("#companion");
+    const pet = document.querySelector(".pet");
     const title = document.querySelector("#title");
     const message = document.querySelector("#message");
 
@@ -676,6 +679,23 @@
       setExpanded(!isExpanded);
     }
 
+    function clearHoverOpenTimer() {
+      if (!hoverOpenTimer) return;
+      window.clearTimeout(hoverOpenTimer);
+      hoverOpenTimer = null;
+    }
+
+    function scheduleHoverOpen() {
+      if (isExpanded || dragState) return;
+      clearHoverOpenTimer();
+      hoverOpenTimer = window.setTimeout(() => {
+        hoverOpenTimer = null;
+        if (!isExpanded && !dragState) {
+          setExpanded(true);
+        }
+      }, hoverOpenDelay);
+    }
+
     document.querySelector("#openBtn").addEventListener("click", () => {
       openDashboard();
     });
@@ -698,6 +718,7 @@
 
     companion.addEventListener("mousedown", (event) => {
       if (event.button !== 0) return;
+      clearHoverOpenTimer();
       dragState = {
         startX: event.screenX,
         startY: event.screenY,
@@ -736,9 +757,13 @@
     });
 
     window.addEventListener("blur", () => {
+      clearHoverOpenTimer();
       dragState = null;
       companion.classList.remove("dragging");
     });
+
+    pet.addEventListener("mouseenter", scheduleHoverOpen);
+    pet.addEventListener("mouseleave", clearHoverOpenTimer);
 
     function openDashboard() {
       if (window.eyeflowDesktop) {
