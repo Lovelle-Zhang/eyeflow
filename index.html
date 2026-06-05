@@ -403,6 +403,12 @@
       background: #f4f7f4;
     }
 
+    .session-state-pill[data-state="due"] {
+      color: #8a5a10;
+      background: #fff2d1;
+      border-color: rgba(216, 165, 55, 0.34);
+    }
+
     .timer-card.session-pulse {
       animation: sessionPulse 820ms ease;
     }
@@ -519,6 +525,15 @@
     .timer-card > .timer-controls .ghost {
       background: rgba(255, 255, 255, 0.56);
       border-color: rgba(24, 32, 31, 0.065);
+    }
+
+    .timer-card.rest-due #restSessionBtn {
+      color: #1c211d;
+      background: linear-gradient(180deg, #f0cf72 0%, #d8a537 100%);
+      border-color: rgba(163, 112, 22, 0.2);
+      box-shadow:
+        0 14px 28px rgba(216, 165, 55, 0.22),
+        inset 0 1px 0 rgba(255, 255, 255, 0.32);
     }
 
     #forceReturnBtn {
@@ -6034,10 +6049,12 @@
       const load = computeEyeLoad();
       const mins = Math.floor(elapsedSeconds / 60);
       const secs = elapsedSeconds % 60;
+      const restDue = isRunning && elapsedSeconds >= target;
 
       els.timerText.textContent = `${String(mins).padStart(2, "0")}:${String(secs).padStart(2, "0")}`;
       els.timerRing.style.setProperty("--progress", `${progress}%`);
       els.timerHint.textContent = sessionHintText();
+      els.sessionPanel.classList.toggle("rest-due", restDue);
       els.focusTargetValue.textContent = els.focusTarget.value;
       els.breakTargetValue.textContent = els.breakTarget.value;
       setRangeFill(els.focusTarget);
@@ -6072,9 +6089,11 @@
     }
 
     function renderSessionControls() {
+      const targetSeconds = Number(els.focusTarget.value) * 60;
+      const restDue = isRunning && elapsedSeconds >= targetSeconds;
       if (isRunning) {
-        els.sessionStatePill.textContent = "手动专注";
-        els.sessionStatePill.dataset.state = "manual";
+        els.sessionStatePill.textContent = restDue ? "到点休息" : "手动专注";
+        els.sessionStatePill.dataset.state = restDue ? "due" : "manual";
         els.startBtnText.textContent = "暂停";
         els.startBtn.title = "暂停当前专注";
         els.startBtnIcon.innerHTML = '<path d="M8 5h3v14H8zM13 5h3v14h-3z"></path>';
@@ -6088,6 +6107,10 @@
         els.startBtn.title = !assessedToday ? "先让 Mira 记录今天的眼睛状态" : autoTracking ? "从 00:00 开始手动专注" : paused ? "继续当前专注" : "开始专注";
         els.startBtnIcon.innerHTML = '<path d="M8 5v14l11-7Z"></path>';
       }
+      els.restSessionBtn.innerHTML = restDue
+        ? `<svg class="small-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M12 2v6"></path><path d="M12 16v6"></path><path d="M2 12h6"></path><path d="M16 12h6"></path></svg><span>开始 ${els.breakTarget.value} 秒休息</span>`
+        : `<svg class="small-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M12 2v6"></path><path d="M12 16v6"></path><path d="M2 12h6"></path><path d="M16 12h6"></path></svg><span>休息</span>`;
+      els.restSessionBtn.title = restDue ? `开始 ${els.breakTarget.value} 秒休息` : "主动休息";
     }
 
     function symptomName(key) {

@@ -82,6 +82,7 @@ This file records product decisions that should survive code edits and rebuilds.
 - Fullscreen recovery steps should come from a small recovery task library. Settings may expose simple recovery modes: light, shoulder/neck, eye exercises, and mixed.
 - Eye-exercise guidance must stay gentle and non-medical: guide light pressure around the orbital bone only, never pressing the eyeball.
 - Recovery screens should reduce clock-watching. Show a gentle step flow with short labels so the user knows where they are, while Mira remains the main companion.
+- Yellow/mid-load states must answer "what should I do now?" directly. When a focus round reaches its target, the session card should show a due/rest state and make the rest action explicit, instead of relying on color alone.
 - The Today first screen should keep current state on the left and the focus-session timer on the right.
 - Today should feel like a calm eye-care workbench, not a generic SaaS dashboard. Prefer soft translucent surfaces, low-contrast borders, restrained depth, and fewer repeated white-card treatments.
 - Today needs a memorable state space, not only side-by-side cards: Mira, eye-load score, and the current recommendation should appear together in the main state stage so Mira feels like the product's state interpreter.
