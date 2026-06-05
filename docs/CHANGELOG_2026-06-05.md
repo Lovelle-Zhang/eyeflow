@@ -13,3 +13,5 @@
 - Added desktop lifecycle handling for lock screen, sleep, shutdown, and app quit. These events now hide Mira, complete the current visible session if one exists, record a system-detected rest, and reset the timer for the next round.
 - When a manual focus session passes its target time, the timer hint now explains that the round has reached or exceeded the target and recommends the current rest duration, so the yellow load state does not feel like a random jump.
 - The focus-session card now turns the yellow due state into an explicit next action: the state pill says `到点休息` and the rest button changes to `开始 N 秒休息`.
+- Added busy-friendly reminder surfacing: when the user is actively working, EyeFlow keeps the yellow state and in-place rest action but waits for a natural break or short idle moment before showing a reminder card.
+- Reminder cards now include `忙完再说`, which suppresses repeated prompts and waits until the next natural break before reminding again.

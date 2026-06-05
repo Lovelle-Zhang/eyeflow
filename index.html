@@ -3408,6 +3408,7 @@
               <div class="actions">
                 <button class="primary" id="takeReminderBreakBtn" type="button">现在休息</button>
                 <button class="ghost" id="snoozeReminderInlineBtn" type="button">5 分钟后</button>
+                <button class="ghost" id="busyReminderBtn" type="button">忙完再说</button>
               </div>
             </div>
             <div class="actions" style="justify-content: flex-start;">
@@ -4114,6 +4115,7 @@
       pendingReminderCopy: document.querySelector("#pendingReminderCopy"),
       takeReminderBreakBtn: document.querySelector("#takeReminderBreakBtn"),
       snoozeReminderInlineBtn: document.querySelector("#snoozeReminderInlineBtn"),
+      busyReminderBtn: document.querySelector("#busyReminderBtn"),
       primaryActionBtn: document.querySelector("#primaryActionBtn"),
       explainBtn: document.querySelector("#explainBtn"),
       reasonFocus: document.querySelector("#reasonFocus"),
@@ -4291,6 +4293,7 @@
     els.previewForceBreakBtn.addEventListener("click", previewForceBreak);
     els.takeReminderBreakBtn.addEventListener("click", () => showBreak("scheduled"));
     els.snoozeReminderInlineBtn.addEventListener("click", snoozeBreak);
+    els.busyReminderBtn.addEventListener("click", deferReminderUntilBreak);
     if (!isDesktopShell) {
       els.petRestBtn.addEventListener("click", () => showBreak("manual"));
       els.petMinimizeBtn.addEventListener("click", toggleCompanion);
@@ -4363,6 +4366,9 @@
         if (canUseActivity) {
           maybeAutoCompleteBreak(activity);
         }
+        if (state.deferReminderUntilBreak && state.deferReminderNeedsWork && activity.isWorking) {
+          state.deferReminderNeedsWork = false;
+        }
         if (!isRunning && sessionSource !== "manual-paused") {
           if (canUseActivity && activity.isWorking) {
             elapsedSeconds = activity.activeSeconds;
@@ -4411,6 +4417,8 @@
           autoBreaks: 0
         },
         pendingReminder: null,
+        deferReminderUntilBreak: false,
+        deferReminderNeedsWork: false,
         snoozeUntil: 0,
         lastReminderAt: 0,
         lastAutoBreakAt: 0,
@@ -4500,6 +4508,8 @@
       dayState.logs = [];
       dayState.reminderStats = { shown: 0, completed: 0, snoozed: 0, ignored: 0, autoBreaks: 0 };
       dayState.pendingReminder = null;
+      dayState.deferReminderUntilBreak = false;
+      dayState.deferReminderNeedsWork = false;
       dayState.snoozeUntil = 0;
       dayState.lastReminderAt = 0;
       dayState.lastAutoBreakAt = 0;
@@ -4607,6 +4617,8 @@
       state.reminderStats.autoBreaks += 1;
       state.lastAutoBreakAt = now;
       state.snoozeUntil = 0;
+      state.deferReminderUntilBreak = false;
+      state.deferReminderNeedsWork = false;
       closePendingReminder("completed");
       addSystemLog(
         "系统识别一次休息",
@@ -4786,6 +4798,8 @@
       sessionSource = "idle";
       lastNudgeAt = 0;
       state.pendingReminder = null;
+      state.deferReminderUntilBreak = false;
+      state.deferReminderNeedsWork = false;
       if (state.settings.intensity !== "force") {
         state.settings.intensity = initialRhythm.intensity;
       }
@@ -5139,6 +5153,19 @@
       persist();
     }
 
+    function deferReminderUntilBreak() {
+      const hadPendingReminder = closePendingReminder("snoozed");
+      state.deferReminderUntilBreak = true;
+      state.deferReminderNeedsWork = true;
+      state.lastReminderAt = Date.now();
+      if (hadPendingReminder) {
+        addSystemLog("忙完再说", "这次提醒被延后到下一个自然断点。EyeFlow 会先保持状态提示，不继续催。");
+      }
+      showToast("Mira：好，我先不打扰。等你停下来再提醒。");
+      render();
+      persist();
+    }
+
     function completeRecovery(feedback) {
       state.breaks += 1;
       elapsedSeconds = 0;
@@ -5146,6 +5173,8 @@
       sessionSource = "idle";
       lastNudgeAt = 0;
       closePendingReminder("completed");
+      state.deferReminderUntilBreak = false;
+      state.deferReminderNeedsWork = false;
 
       if (feedback === "better") {
         softenSymptoms(2);
@@ -5232,6 +5261,7 @@
     function shouldSurfaceReminder(intervention, load) {
       const level = Number(intervention.level || 1);
       if (level < 2) return false;
+      if (isBusyForReminder()) return false;
       if (latestActivity && isNaturalBreak(latestActivity)) return true;
       if (!isRunning) return false;
       const targetSeconds = Number(els.focusTarget.value) * 60;
@@ -5251,6 +5281,13 @@
       }
       if (level < 2) return;
       if (!shouldSurfaceReminder(intervention, load)) return;
+      const deferredUntilBreak = Boolean(state.deferReminderUntilBreak);
+      if (deferredUntilBreak && state.deferReminderNeedsWork) return;
+      if (deferredUntilBreak && !hasReminderOpening()) return;
+      if (!deferredUntilBreak && isBusyForReminder()) return;
+      if (deferredUntilBreak && hasReminderOpening()) {
+        state.deferReminderUntilBreak = false;
+      }
       const snoozeReady = Number(state.snoozeUntil || 0) > 0 && now >= Number(state.snoozeUntil || 0);
       if (Number(state.snoozeUntil || 0) > 0 && !snoozeReady) return;
       if (snoozeReady) state.snoozeUntil = 0;
@@ -5265,14 +5302,16 @@
         }
         return;
       }
-      if (!snoozeReady && now - (state.lastReminderAt || 0) < cooldown) return;
+      if (!deferredUntilBreak && !snoozeReady && now - (state.lastReminderAt || 0) < cooldown) return;
       state.lastReminderAt = now;
       state.pendingReminder = {
         id: `reminder-${now}`,
         at: new Date(now).toISOString(),
         level,
-        title: intervention.title,
-        copy: intervention.copy,
+        title: hasReminderOpening() ? "到断点了，要不要休息一下？" : intervention.title,
+        copy: hasReminderOpening()
+          ? `现在适合休息 ${els.breakTarget.value} 秒；也可以 5 分钟后，或忙完再说。`
+          : intervention.copy,
         status: "pending"
       };
       state.reminderStats.shown += 1;
@@ -5476,6 +5515,8 @@
       state.currentDay = todayKey();
       state.reminderStats = { shown: 0, completed: 0, snoozed: 0, ignored: 0, autoBreaks: 0 };
       state.pendingReminder = null;
+      state.deferReminderUntilBreak = false;
+      state.deferReminderNeedsWork = false;
       state.snoozeUntil = 0;
       state.lastReminderAt = 0;
       state.lastAutoBreakAt = 0;
@@ -5600,6 +5641,17 @@
         && activity.idleSeconds <= 45;
     }
 
+    function hasReminderOpening(activity = latestActivity) {
+      if (!activity) return true;
+      if (isNaturalBreak(activity)) return true;
+      return Number(activity.idleSeconds || 0) >= 8;
+    }
+
+    function isBusyForReminder(activity = latestActivity) {
+      if (!activity) return false;
+      return activity.isWorking && !hasReminderOpening(activity);
+    }
+
     function naturalBreakLabel(activity) {
       if (!activity) return "等待自然断点";
       if (isNaturalBreak(activity)) return "适合轻休息";
@@ -5616,9 +5668,6 @@
       if (now - lastNaturalBreakNudgeAt < cooldown) return;
       lastNaturalBreakNudgeAt = now;
       const miraOnly = state.settings.deepWorkMiraOnlyToggle && activity.isDeepWorkApp;
-      if (!miraOnly && state.settings.intensity !== "quiet") {
-        showToast("Mira：现在像是一个自然断点。看远处 20 秒，我等你回来。");
-      }
       if (!miraOnly && state.settings.soundToggle) {
         playSoftBeep();
       }

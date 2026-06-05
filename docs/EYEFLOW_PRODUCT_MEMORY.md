@@ -83,6 +83,8 @@ This file records product decisions that should survive code edits and rebuilds.
 - Eye-exercise guidance must stay gentle and non-medical: guide light pressure around the orbital bone only, never pressing the eyeball.
 - Recovery screens should reduce clock-watching. Show a gentle step flow with short labels so the user knows where they are, while Mira remains the main companion.
 - Yellow/mid-load states must answer "what should I do now?" directly. When a focus round reaches its target, the session card should show a due/rest state and make the rest action explicit, instead of relying on color alone.
+- Busy-friendly reminders are the default. When the user is actively working, EyeFlow should only change state and expose the rest action in-place; it should wait for a natural break or short idle moment before surfacing a reminder card.
+- Reminder cards should give choices, not commands: `现在休息`, `5 分钟后`, and `忙完再说`. Choosing `忙完再说` should suppress repeated prompts until the next natural break.
 - The Today first screen should keep current state on the left and the focus-session timer on the right.
 - Today should feel like a calm eye-care workbench, not a generic SaaS dashboard. Prefer soft translucent surfaces, low-contrast borders, restrained depth, and fewer repeated white-card treatments.
 - Today needs a memorable state space, not only side-by-side cards: Mira, eye-load score, and the current recommendation should appear together in the main state stage so Mira feels like the product's state interpreter.
