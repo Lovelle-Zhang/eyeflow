@@ -628,6 +628,17 @@ function broadcastActivity(activity) {
   }
 }
 
+function broadcastSystemLifecycle(reason) {
+  const payload = { reason, at: Date.now() };
+  if (reason !== "resume") {
+    hideCompanionPanel();
+    companionWindow?.hide();
+  }
+  if (dashboardWindow && !dashboardWindow.isDestroyed()) {
+    dashboardWindow.webContents.send("system:lifecycle", payload);
+  }
+}
+
 function getActiveAppName() {
   if (process.platform !== "darwin") {
     return Promise.resolve("当前应用");
@@ -703,6 +714,21 @@ function startActivityMonitor() {
   }, 5000);
 }
 
+function startSystemLifecycleMonitor() {
+  powerMonitor.on("lock-screen", () => {
+    broadcastSystemLifecycle("lock-screen");
+  });
+  powerMonitor.on("suspend", () => {
+    broadcastSystemLifecycle("suspend");
+  });
+  powerMonitor.on("shutdown", () => {
+    broadcastSystemLifecycle("shutdown");
+  });
+  powerMonitor.on("resume", () => {
+    broadcastSystemLifecycle("resume");
+  });
+}
+
 app.whenReady().then(() => {
   showDockIcon();
   updateApplicationMenu();
@@ -712,11 +738,13 @@ app.whenReady().then(() => {
   createCompanionPanelWindow();
   createTray();
   startActivityMonitor();
+  startSystemLifecycleMonitor();
 });
 
 app.on("activate", showDashboard);
 
 app.on("before-quit", () => {
+  broadcastSystemLifecycle("quit");
   app.isQuitting = true;
   stopVoice();
 });

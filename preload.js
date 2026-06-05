@@ -25,6 +25,11 @@ contextBridge.exposeInMainWorld("eyeflowDesktop", {
     ipcRenderer.on("activity:update", listener);
     return () => ipcRenderer.removeListener("activity:update", listener);
   },
+  onSystemLifecycle: (callback) => {
+    const listener = (_event, payload) => callback(payload);
+    ipcRenderer.on("system:lifecycle", listener);
+    return () => ipcRenderer.removeListener("system:lifecycle", listener);
+  },
   onPanelSide: (callback) => {
     const listener = (_event, side) => callback(side);
     ipcRenderer.on("panel:side", listener);

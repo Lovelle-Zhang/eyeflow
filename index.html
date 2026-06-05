@@ -3962,6 +3962,7 @@
     let isRunning = false;
     let startedAt = null;
     let elapsedSeconds = state.lastAssessmentDay === todayKey() ? state.elapsedSeconds || 0 : 0;
+    let sessionSource = state.sessionSource || (elapsedSeconds > 0 ? "manual-paused" : "idle");
     let ticker = null;
     let lastNudgeAt = state.lastNudgeAt || 0;
     let lastNaturalBreakNudgeAt = state.lastNaturalBreakNudgeAt || 0;
@@ -3976,6 +3977,7 @@
     let forceVoiceGuide = true;
     let forceVoiceTaskIndex = -1;
     let forceVoiceCompletionSpoken = false;
+    let lastSystemRestAt = 0;
     let latestCompanionState = null;
     let latestActivity = null;
     let forceConfirmPending = false;
@@ -4346,8 +4348,14 @@
         if (canUseActivity) {
           maybeAutoCompleteBreak(activity);
         }
-        if (!isRunning) {
-          elapsedSeconds = canUseActivity && activity.isWorking ? activity.activeSeconds : 0;
+        if (!isRunning && sessionSource !== "manual-paused") {
+          if (canUseActivity && activity.isWorking) {
+            elapsedSeconds = activity.activeSeconds;
+            sessionSource = "auto";
+          } else if (sessionSource === "auto") {
+            elapsedSeconds = 0;
+            sessionSource = "idle";
+          }
         }
         renderActivity();
         if (canUseActivity) {
@@ -4356,6 +4364,9 @@
         render();
         persist();
       });
+    }
+    if (window.eyeflowDesktop?.onSystemLifecycle) {
+      window.eyeflowDesktop.onSystemLifecycle(handleSystemLifecycle);
     }
     if (window.eyeflowDesktop?.onForceBreakDone) {
       window.eyeflowDesktop.onForceBreakDone((payload) => finishForceBreak(payload));
@@ -4404,6 +4415,7 @@
         initialAssessmentDone: false,
         lastAssessmentDay: "",
         rhythmSource: "default",
+        sessionSource: "idle",
         symptoms: { dryness: 2, strain: 3, blur: 1, light: 1 }
       };
       try {
@@ -4419,6 +4431,9 @@
           loaded.lastAssessmentDay = saved.logs?.some((log) => log.note === "Mira 初始打分")
             ? loaded.currentDay
             : "";
+        }
+        if (!saved.sessionSource) {
+          loaded.sessionSource = loaded.elapsedSeconds > 0 ? "manual-paused" : "idle";
         }
         return loaded;
       } catch {
@@ -4500,6 +4515,7 @@
     function persist() {
       state.currentDay = state.currentDay || todayKey();
       state.elapsedSeconds = hasAssessedToday() ? elapsedSeconds : 0;
+      state.sessionSource = hasAssessedToday() ? sessionSource : "idle";
       state.lastNudgeAt = lastNudgeAt;
       state.lastNaturalBreakNudgeAt = lastNaturalBreakNudgeAt;
       state.lastActiveSecondsBeforeIdle = lastActiveSecondsBeforeIdle;
@@ -4510,6 +4526,7 @@
       isRunning = false;
       startedAt = null;
       elapsedSeconds = 0;
+      sessionSource = "idle";
       window.clearInterval(ticker);
       ticker = null;
       lastNudgeAt = 0;
@@ -4541,6 +4558,63 @@
         render();
         persist();
       }
+    }
+
+    function lifecycleReasonLabel(reason) {
+      return {
+        "lock-screen": "锁屏或合上屏幕",
+        suspend: "电脑进入睡眠",
+        shutdown: "电脑关机或重启",
+        quit: "退出 EyeFlow"
+      }[reason] || "系统休息";
+    }
+
+    function completeSessionForSystemRest(reason) {
+      const now = Date.now();
+      if (now - lastSystemRestAt < 30000) return;
+      if (!hasAssessedToday()) {
+        resetSessionClock();
+        persist();
+        return;
+      }
+      const hadSession = isRunning || isAutoTracking() || elapsedSeconds > 0 || lastActiveSecondsBeforeIdle > 0;
+      if (!hadSession) {
+        resetSessionClock();
+        persist();
+        return;
+      }
+      lastSystemRestAt = now;
+      const minutes = Math.floor(elapsedSeconds / 60);
+      isRunning = false;
+      window.clearInterval(ticker);
+      ticker = null;
+      state.breaks += 1;
+      state.reminderStats.autoBreaks += 1;
+      state.lastAutoBreakAt = now;
+      state.snoozeUntil = 0;
+      closePendingReminder("completed");
+      addSystemLog(
+        "系统识别一次休息",
+        `${lifecycleReasonLabel(reason)}，已结束这一轮${minutes > 0 ? ` ${minutes} 分钟` : ""}专注并记录为休息。`
+      );
+      startedAt = null;
+      elapsedSeconds = 0;
+      sessionSource = "idle";
+      lastNudgeAt = 0;
+      lastNaturalBreakNudgeAt = 0;
+      lastActiveSecondsBeforeIdle = 0;
+      window.eyeflowDesktop?.hideCompanion?.();
+      render();
+      persist();
+    }
+
+    function handleSystemLifecycle(payload = {}) {
+      const reason = payload.reason || "system";
+      if (reason === "resume") {
+        handleResumeCheck();
+        return;
+      }
+      completeSessionForSystemRest(reason);
     }
 
     function maybeShowOnboarding() {
@@ -4694,6 +4768,7 @@
       state.breakTarget = initialRhythm.rest;
       elapsedSeconds = 0;
       startedAt = null;
+      sessionSource = "idle";
       lastNudgeAt = 0;
       state.pendingReminder = null;
       if (state.settings.intensity !== "force") {
@@ -4734,7 +4809,14 @@
         return;
       }
       if (isRunning) return;
+      if (sessionSource === "auto") {
+        elapsedSeconds = 0;
+        startedAt = null;
+        lastNudgeAt = 0;
+        lastNaturalBreakNudgeAt = 0;
+      }
       isRunning = true;
+      sessionSource = "manual";
       startedAt = Date.now() - elapsedSeconds * 1000;
       ticker = window.setInterval(tick, 1000);
       tick();
@@ -4753,6 +4835,7 @@
       isRunning = false;
       window.clearInterval(ticker);
       ticker = null;
+      sessionSource = elapsedSeconds > 0 ? "manual-paused" : "idle";
       persist();
       render();
     }
@@ -4791,7 +4874,7 @@
     }
 
     function isAutoTracking() {
-      return Boolean(hasAssessedToday() && !isRunning && latestActivity?.isWorking && elapsedSeconds > 0);
+      return Boolean(hasAssessedToday() && !isRunning && sessionSource === "auto" && elapsedSeconds > 0);
     }
 
     function requestLocalFullscreen() {
@@ -5045,6 +5128,7 @@
       state.breaks += 1;
       elapsedSeconds = 0;
       startedAt = null;
+      sessionSource = "idle";
       lastNudgeAt = 0;
       closePendingReminder("completed");
 
@@ -5196,6 +5280,7 @@
       state.reminderStats.autoBreaks += 1;
       closePendingReminder("completed");
       elapsedSeconds = 0;
+      sessionSource = "idle";
       lastNudgeAt = 0;
       lastActiveSecondsBeforeIdle = 0;
       addSystemLog("自动识别一次休息", `检测到你离开键鼠约 ${activity.idleSeconds} 秒，已记为护眼休息。`);
@@ -5369,6 +5454,7 @@
     function resetDay() {
       pauseSession();
       elapsedSeconds = 0;
+      sessionSource = "idle";
       lastNudgeAt = 0;
       state.breaks = 0;
       state.logs = [];
@@ -5651,7 +5737,7 @@
             displayLevel: 4,
             title: "强制爱待命",
             copy: isAutoTracking()
-              ? "正在自动记录连续盯屏。点开始手动专注后，强制爱才会接管到点全屏恢复。"
+              ? "正在自动记录连续盯屏。点开始手动专注后，会从 00:00 开始并启用到点全屏恢复。"
               : "Mira 会先安静陪伴；开始手动专注后，到点才进入全屏恢复。"
           };
         }
@@ -5877,9 +5963,9 @@
       }
       if (isAutoTracking()) {
         if (state.settings.intensity === "force") {
-          return `自动记录中 · 开始手动专注后启用全屏恢复`;
+          return `自动记录中 · 手动专注会从 00:00 开始`;
         }
-        return `自动记录中 · 开始手动专注后接管提醒`;
+        return `自动记录中 · 手动专注会从 00:00 开始`;
       }
       return modeCopy().timer;
     }
@@ -5989,11 +6075,11 @@
       } else {
         const assessedToday = hasAssessedToday();
         const autoTracking = isAutoTracking();
-        const paused = !autoTracking && elapsedSeconds > 0;
+        const paused = sessionSource === "manual-paused" && elapsedSeconds > 0;
         els.sessionStatePill.textContent = !assessedToday ? "待校准" : autoTracking ? "自动记录" : paused ? "已暂停" : "未开始";
         els.sessionStatePill.dataset.state = !assessedToday ? "idle" : autoTracking ? "auto" : paused ? "paused" : "idle";
-        els.startBtnText.textContent = !assessedToday ? "先校准今天" : autoTracking ? "开始手动专注" : elapsedSeconds > 0 ? "继续专注" : "开始专注";
-        els.startBtn.title = !assessedToday ? "先让 Mira 记录今天的眼睛状态" : autoTracking ? "接管当前自动记录的专注会话" : elapsedSeconds > 0 ? "继续当前专注" : "开始专注";
+        els.startBtnText.textContent = !assessedToday ? "先校准今天" : autoTracking ? "开始手动专注" : paused ? "继续专注" : "开始专注";
+        els.startBtn.title = !assessedToday ? "先让 Mira 记录今天的眼睛状态" : autoTracking ? "从 00:00 开始手动专注" : paused ? "继续当前专注" : "开始专注";
         els.startBtnIcon.innerHTML = '<path d="M8 5v14l11-7Z"></path>';
       }
     }
@@ -6054,7 +6140,7 @@
         els.stateHeadline.textContent = "可以继续，但要缩短这一轮";
         els.stateAction.textContent = state.settings.intensity === "force"
           ? isAutoTracking()
-            ? "强制爱已开启，但现在只是自动记录。点开始手动专注后，到点才会全屏恢复。"
+            ? "强制爱已开启，但现在只是自动记录。点开始手动专注后，会从 00:00 开始并启用全屏恢复。"
             : "强制爱已开启。现在可以继续，到点后会直接进入全屏恢复任务。"
           : "下一次提醒建议提前一点。Mira 会先轻提示，不会突然打断。";
         els.primaryActionBtn.hidden = true;
@@ -6062,7 +6148,7 @@
         els.stateHeadline.textContent = "现在可以继续工作";
         els.stateAction.textContent = state.settings.intensity === "force"
           ? isAutoTracking()
-            ? "强制爱已开启，但现在只是自动记录。点开始手动专注后，Mira 才会接管全屏恢复。"
+            ? "强制爱已开启，但现在只是自动记录。点开始手动专注后，会从新一轮启用全屏恢复。"
             : "强制爱已开启。到点前 Mira 保持安静，到点后会进入全屏恢复任务。"
           : "保持当前节奏。到提醒点时，Mira 会先轻轻提示你眨眼或远眺。";
         els.primaryActionBtn.hidden = true;
@@ -6257,8 +6343,8 @@
         mood = "focus";
         title = state.settings.intensity === "force" ? "强制爱待命中" : "Mira 正在自动记录";
         message = state.settings.intensity === "force"
-          ? "我先只记录节奏。点开始手动专注后，强制爱才会接管全屏恢复。"
-          : "我看到你已经在工作。需要手动控制时，可以点开始手动专注。";
+          ? "我先只记录节奏。点开始手动专注后，会从新一轮开始并启用全屏恢复。"
+          : "我看到你已经在工作。点开始手动专注后，会从新一轮开始。";
       }
 
       els.companion.dataset.mood = mood;
@@ -6291,7 +6377,7 @@
       if (isAutoTracking()) {
         const autoMinutes = Math.floor(elapsedSeconds / 60);
         const autoDuration = autoMinutes > 0 ? `${autoMinutes} 分钟` : "不到 1 分钟";
-        return `已自动记录连续盯屏 ${autoDuration}。点开始手动专注后，可以暂停或休息。`;
+        return `已自动记录连续盯屏 ${autoDuration}。点开始手动专注后，会从 00:00 开始一轮。`;
       }
       if (load >= 74) return "先休息一轮，再继续。";
       return "先看当下状态，再开始这一轮。";

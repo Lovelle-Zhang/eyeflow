@@ -71,9 +71,11 @@ This file records product decisions that should survive code edits and rebuilds.
 - The Today state-card action should guide the user to the focus-session card instead of duplicating the start button.
 - The focus-session card owns start, pause, and rest controls.
 - Desktop activity sensing may auto-record continuous screen time before the user starts a manual focus session, but the UI must label that state clearly as automatic recording. The primary button should say `开始手动专注`, not `继续专注`, until the user explicitly starts manual control.
+- Automatic recording is background sensing only. When the user clicks `开始手动专注` from an auto-recorded state, the manual session starts as a fresh round from `00:00`; it should not inherit the auto-recorded elapsed time.
 - The focus-session card should show whether the current timer is `自动记录`, `手动专注`, `已暂停`, or `未开始`; this keeps the running timer from feeling like EyeFlow secretly started a manual session.
 - Daily calibration should pause any previous focus timer while Mira asks for the current eye state. After the user records today's score, the first focus round starts fresh from `00:00`.
 - A calendar-day boundary is a hard timer boundary. If the app stays open overnight or the Mac wakes from sleep on a new day, EyeFlow must stop the previous session, clear visible elapsed time, and wait for today's Mira assessment before recording manual or automatic focus time.
+- Screen lock, sleep, shutdown, or app quit should be treated as a natural rest boundary: hide Mira, complete the current visible session if one exists, record one system-detected rest, and clear the timer for the next round.
 - Force-love preview is a product boundary test only: it must hide return/finish/snooze actions during the countdown, show `回到 EyeFlow` only after time ends, and not count as a real break.
 - Recovery duration should be long enough for eyes and shoulders/neck, not just a blink break. Keep the manual rest range at 90-240 seconds; default comfort/medium/high rhythms should be 120/150/180 seconds.
 - Fullscreen recovery should feel like Mira is doing the recovery with the user. Mira's face should be visible in the recovery screen and change with the current step: gaze, blink, close eyes, and shoulder/neck release.
