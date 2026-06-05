@@ -18,3 +18,4 @@
 - Lightened the floating Mira interaction: tapping the avatar now toggles the speech bubble open/closed, dragging only begins after a clear movement threshold, double-click no longer opens the dashboard in the desktop shell, and ordinary L1 startup no longer auto-expands Mira.
 - Added hover-to-open for floating Mira: resting the cursor on the avatar briefly opens the speech bubble, while tap-to-close still works.
 - Added a calmer hover boundary for floating Mira: the speech bubble now stays open while the cursor moves between the avatar and bubble, then closes after a short delay once both areas are left.
+- Slowed Mira's hover auto-close delay to about 1.6 seconds so the bubble recedes more gently.

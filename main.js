@@ -46,7 +46,7 @@ const companionSizes = {
   compact: { width: 86, height: 86 },
   panel: { width: 272, height: 116 }
 };
-const hoverCloseDelay = 950;
+const hoverCloseDelay = 1600;
 
 function settingsPath() {
   return path.join(app.getPath("userData"), "settings.json");
