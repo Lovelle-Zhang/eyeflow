@@ -57,6 +57,7 @@ This file records product decisions that should survive code edits and rebuilds.
 - L2: short speech bubble only when timing is fair, such as at the focus target or a natural break; mid-session medium load should first change state without expanding a reminder.
 - L3: stronger rest suggestion for high load or clear overtime, still gentle; high load can be observed briefly before surfacing a reminder so the app does not punish the user immediately after assessment.
 - L4 `强制爱`: opt-in only; stay quiet before the focus target time, then use a full-screen forced rest whose return button appears only after the rest countdown finishes.
+- The floating Mira avatar should feel light: one gentle tap toggles the speech bubble open, and one gentle tap closes it. Dragging is still available, but only after a clear movement threshold. Normal L1 startup should not auto-open the speech bubble.
 - Settings should let users choose the reminder ceiling directly as L1/L2/L3/L4. Do not hide L2/L3 behind vague labels like `标准`; the card may show the selected ceiling while the internal trigger still waits for the right timing.
 - L4 `强制爱` must not trigger from desktop auto-recording alone. If EyeFlow is only auto-recording screen time, `强制爱` should show as pending/standby; full-screen recovery is armed only after the user explicitly starts manual focus.
 - Enabling L4 `强制爱` requires an explicit confirmation step. Clicking the `强制爱` mode button should first show a confirmation/preview card and must not immediately change the active reminder mode.

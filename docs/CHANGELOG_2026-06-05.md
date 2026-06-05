@@ -15,3 +15,4 @@
 - The focus-session card now turns the yellow due state into an explicit next action: the state pill says `到点休息` and the rest button changes to `开始 N 秒休息`.
 - Added busy-friendly reminder surfacing: when the user is actively working, EyeFlow keeps the yellow state and in-place rest action but waits for a natural break or short idle moment before showing a reminder card.
 - Reminder cards now include `忙完再说`, which suppresses repeated prompts and waits until the next natural break before reminding again.
+- Lightened the floating Mira interaction: tapping the avatar now toggles the speech bubble open/closed, dragging only begins after a clear movement threshold, double-click no longer opens the dashboard in the desktop shell, and ordinary L1 startup no longer auto-expands Mira.

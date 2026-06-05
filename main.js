@@ -210,6 +210,11 @@ function sendPanelSide() {
   companionPanelWindow.webContents.send("panel:side", latestPanelSide);
 }
 
+function sendCompanionExpanded() {
+  if (!companionWindow || companionWindow.isDestroyed()) return;
+  companionWindow.webContents.send("companion:expanded", companionExpanded);
+}
+
 function positionCompanionPanel() {
   if (!companionPanelWindow || companionPanelWindow.isDestroyed()) return;
   companionPanelWindow.setBounds(panelBoundsForCompanion(), false);
@@ -225,6 +230,7 @@ function showCompanionPanel() {
   companionWindow.show();
   companionPanelWindow.show();
   companionPanelWindow.moveTop();
+  sendCompanionExpanded();
 }
 
 function hideCompanionPanel() {
@@ -234,6 +240,7 @@ function hideCompanionPanel() {
     autoPanelTimer = null;
   }
   companionPanelWindow?.hide();
+  sendCompanionExpanded();
 }
 
 function keepCompanionVisible() {
@@ -330,10 +337,11 @@ function createCompanionWindow() {
   companionWindow.setVisibleOnAllWorkspaces(true, { visibleOnFullScreen: false });
   companionWindow.webContents.once("did-finish-load", () => {
     companionWindow.webContents.send("state:update", latestState);
+    sendCompanionExpanded();
     keepCompanionVisible();
     companionWindow.show();
     companionWindow.moveTop();
-    if (!startupPanelShown) {
+    if (!startupPanelShown && Number(latestState.interventionLevel || 1) > 1) {
       startupPanelShown = true;
       setTimeout(() => {
         showCompanionPanel();
@@ -342,6 +350,8 @@ function createCompanionWindow() {
           if (Number(latestState.interventionLevel || 1) <= 1) hideCompanionPanel();
         }, 7000);
       }, 450);
+    } else {
+      startupPanelShown = true;
     }
   });
   companionWindow.on("moved", () => {
@@ -757,6 +767,7 @@ ipcMain.handle("companion:hide", () => {
   companionWindow?.hide();
   companionPanelWindow?.hide();
   companionExpanded = false;
+  sendCompanionExpanded();
 });
 
 ipcMain.handle("companion:moveBy", (_event, delta) => {
@@ -773,16 +784,17 @@ ipcMain.handle("companion:moveBy", (_event, delta) => {
 });
 
 ipcMain.handle("companion:setExpanded", (_event, expanded) => {
-  if (!companionWindow || companionWindow.isDestroyed()) return;
-  if (companionExpanded === expanded) return;
-  companionExpanded = expanded;
+  const shouldExpand = Boolean(expanded);
+  if (!companionWindow || companionWindow.isDestroyed()) return { expanded: false };
+  if (companionExpanded === shouldExpand) return { expanded: companionExpanded };
   if (!companionPanelWindow || companionPanelWindow.isDestroyed()) createCompanionPanelWindow();
-  if (expanded) {
+  if (shouldExpand) {
     showCompanionPanel();
   } else {
     hideCompanionPanel();
   }
   saveCompanionBounds();
+  return { expanded: companionExpanded };
 });
 
 ipcMain.handle("companion:notify", (_event, message) => {

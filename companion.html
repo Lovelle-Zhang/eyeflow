@@ -112,7 +112,7 @@
       box-shadow:
         inset 0 0 0 1px rgba(127, 241, 213, 0.08),
         inset 0 -12px 24px rgba(3, 10, 12, 0.3);
-      cursor: grab;
+      cursor: pointer;
       -webkit-app-region: no-drag;
       animation: idleFloat 4.8s ease-in-out infinite;
       transition: transform 160ms ease, box-shadow 160ms ease, background 180ms ease;
@@ -151,8 +151,12 @@
     }
 
     .pet:active {
-      cursor: grabbing;
       transform: translateY(0) scale(0.97);
+    }
+
+    .companion.dragging .pet,
+    .companion.dragging .pet:active {
+      cursor: grabbing;
     }
 
     .pet::before {
@@ -554,6 +558,8 @@
     let theme = getTheme();
     const previewMood = getPreviewMood();
     const compactPreview = new URLSearchParams(window.location.search).get("compact") === "1";
+    const isDesktopShell = Boolean(window.eyeflowDesktop);
+    const tapMoveThreshold = 8;
 
     const companion = document.querySelector("#companion");
     const title = document.querySelector("#title");
@@ -594,6 +600,12 @@
       });
     }
 
+    if (window.eyeflowDesktop?.onCompanionExpanded) {
+      window.eyeflowDesktop.onCompanionExpanded((expanded) => {
+        syncExpanded(expanded);
+      });
+    }
+
     if (previewMood) {
       hasLiveState = true;
       const previewIndex = moods.findIndex(([mood]) => mood === previewMood);
@@ -629,7 +641,7 @@
     window.setTimeout(() => {
       companion.classList.remove("booting");
       companion.classList.add("ready");
-      if (!window.eyeflowDesktop && !compactPreview) {
+      if (!isDesktopShell && !compactPreview) {
         window.setTimeout(() => setExpanded(true), 80);
       }
       window.setTimeout(() => {
@@ -637,13 +649,23 @@
       }, 180);
     }, 500);
 
-    function setExpanded(expanded) {
-      isExpanded = expanded;
+    function syncExpanded(expanded) {
+      isExpanded = Boolean(expanded);
+      companion.classList.toggle("expanded", !isDesktopShell && isExpanded);
+    }
+
+    async function setExpanded(expanded) {
+      const nextExpanded = Boolean(expanded);
       companion.classList.add("settling");
-      if (window.eyeflowDesktop?.setCompanionExpanded) {
-        window.eyeflowDesktop.setCompanionExpanded(isExpanded);
+      if (isDesktopShell && window.eyeflowDesktop?.setCompanionExpanded) {
+        try {
+          const result = await window.eyeflowDesktop.setCompanionExpanded(nextExpanded);
+          syncExpanded(result?.expanded ?? nextExpanded);
+        } catch {
+          syncExpanded(nextExpanded);
+        }
       } else {
-        companion.classList.toggle("expanded", isExpanded);
+        syncExpanded(nextExpanded);
       }
       window.setTimeout(() => {
         companion.classList.remove("settling");
@@ -666,7 +688,11 @@
       openDashboard();
     });
 
-    companion.addEventListener("dblclick", () => {
+    companion.addEventListener("dblclick", (event) => {
+      if (isDesktopShell) {
+        event.preventDefault();
+        return;
+      }
       openDashboard();
     });
 
@@ -687,8 +713,9 @@
       const dy = event.screenY - dragState.lastY;
       const totalX = event.screenX - dragState.startX;
       const totalY = event.screenY - dragState.startY;
-      if (Math.hypot(totalX, totalY) > 4) {
+      if (Math.hypot(totalX, totalY) > tapMoveThreshold) {
         dragState.moved = true;
+        companion.classList.add("dragging");
       }
       dragState.lastX = event.screenX;
       dragState.lastY = event.screenY;
@@ -701,9 +728,16 @@
       if (!dragState) return;
       const wasDrag = dragState.moved;
       dragState = null;
+      companion.classList.remove("dragging");
       if (!wasDrag && event.target.closest(".pet")) {
+        event.preventDefault();
         toggleExpanded();
       }
+    });
+
+    window.addEventListener("blur", () => {
+      dragState = null;
+      companion.classList.remove("dragging");
     });
 
     function openDashboard() {
