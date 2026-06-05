@@ -556,12 +556,14 @@
     let isExpanded = false;
     let dragState = null;
     let hoverOpenTimer = null;
+    let hoverCloseTimer = null;
     let theme = getTheme();
     const previewMood = getPreviewMood();
     const compactPreview = new URLSearchParams(window.location.search).get("compact") === "1";
     const isDesktopShell = Boolean(window.eyeflowDesktop);
     const tapMoveThreshold = 8;
     const hoverOpenDelay = 120;
+    const hoverCloseDelay = 950;
 
     const companion = document.querySelector("#companion");
     const pet = document.querySelector(".pet");
@@ -685,15 +687,42 @@
       hoverOpenTimer = null;
     }
 
+    function clearHoverCloseTimer() {
+      if (!hoverCloseTimer) return;
+      window.clearTimeout(hoverCloseTimer);
+      hoverCloseTimer = null;
+    }
+
+    function setHovering(hovering) {
+      if (isDesktopShell) {
+        window.eyeflowDesktop?.setCompanionHover?.("avatar", hovering);
+      }
+    }
+
     function scheduleHoverOpen() {
-      if (isExpanded || dragState) return;
       clearHoverOpenTimer();
+      clearHoverCloseTimer();
+      setHovering(true);
+      if (isExpanded || dragState) return;
       hoverOpenTimer = window.setTimeout(() => {
         hoverOpenTimer = null;
         if (!isExpanded && !dragState) {
           setExpanded(true);
         }
       }, hoverOpenDelay);
+    }
+
+    function scheduleHoverClose() {
+      clearHoverOpenTimer();
+      setHovering(false);
+      if (isDesktopShell || !isExpanded || dragState) return;
+      clearHoverCloseTimer();
+      hoverCloseTimer = window.setTimeout(() => {
+        hoverCloseTimer = null;
+        if (isExpanded && !dragState) {
+          setExpanded(false);
+        }
+      }, hoverCloseDelay);
     }
 
     document.querySelector("#openBtn").addEventListener("click", () => {
@@ -719,6 +748,7 @@
     companion.addEventListener("mousedown", (event) => {
       if (event.button !== 0) return;
       clearHoverOpenTimer();
+      clearHoverCloseTimer();
       dragState = {
         startX: event.screenX,
         startY: event.screenY,
@@ -758,12 +788,24 @@
 
     window.addEventListener("blur", () => {
       clearHoverOpenTimer();
+      clearHoverCloseTimer();
+      setHovering(false);
       dragState = null;
       companion.classList.remove("dragging");
     });
 
     pet.addEventListener("mouseenter", scheduleHoverOpen);
-    pet.addEventListener("mouseleave", clearHoverOpenTimer);
+    pet.addEventListener("mouseleave", () => {
+      if (isDesktopShell) {
+        scheduleHoverClose();
+      } else {
+        clearHoverOpenTimer();
+      }
+    });
+    companion.addEventListener("mouseenter", () => {
+      if (!isDesktopShell) clearHoverCloseTimer();
+    });
+    companion.addEventListener("mouseleave", scheduleHoverClose);
 
     function openDashboard() {
       if (window.eyeflowDesktop) {

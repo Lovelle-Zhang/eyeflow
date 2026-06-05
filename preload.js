@@ -5,6 +5,7 @@ contextBridge.exposeInMainWorld("eyeflowDesktop", {
   hideCompanion: () => ipcRenderer.invoke("companion:hide"),
   moveCompanionBy: (delta) => ipcRenderer.invoke("companion:moveBy", delta),
   setCompanionExpanded: (expanded) => ipcRenderer.invoke("companion:setExpanded", expanded),
+  setCompanionHover: (source, hovering) => ipcRenderer.invoke("companion:hover", source, hovering),
   notify: (message) => ipcRenderer.invoke("companion:notify", message),
   publishState: (state) => ipcRenderer.invoke("state:publish", state),
   startForceBreak: (payload) => ipcRenderer.invoke("breakLock:start", payload),

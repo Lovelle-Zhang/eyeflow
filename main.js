@@ -10,11 +10,13 @@ let breakLockWindow;
 let tray;
 let breakLockCanClose = false;
 let companionExpanded = false;
+let companionHoverState = { avatar: false, panel: false };
 let latestPanelSide = "right";
 let lastAutoPanelAt = 0;
 let lastAutoNotifyAt = 0;
 let lastInterventionLevel = 1;
 let autoPanelTimer = null;
+let hoverCloseTimer = null;
 let startupPanelShown = false;
 let voiceProcess = null;
 let latestState = {
@@ -44,6 +46,7 @@ const companionSizes = {
   compact: { width: 86, height: 86 },
   panel: { width: 272, height: 116 }
 };
+const hoverCloseDelay = 950;
 
 function settingsPath() {
   return path.join(app.getPath("userData"), "settings.json");
@@ -215,6 +218,33 @@ function sendCompanionExpanded() {
   companionWindow.webContents.send("companion:expanded", companionExpanded);
 }
 
+function clearHoverCloseTimer() {
+  if (!hoverCloseTimer) return;
+  clearTimeout(hoverCloseTimer);
+  hoverCloseTimer = null;
+}
+
+function scheduleHoverClose() {
+  if (!companionExpanded || companionHoverState.avatar || companionHoverState.panel) return;
+  clearHoverCloseTimer();
+  hoverCloseTimer = setTimeout(() => {
+    hoverCloseTimer = null;
+    if (companionExpanded && !companionHoverState.avatar && !companionHoverState.panel) {
+      hideCompanionPanel();
+    }
+  }, hoverCloseDelay);
+}
+
+function updateCompanionHover(source, hovering) {
+  if (source !== "avatar" && source !== "panel") return;
+  companionHoverState[source] = Boolean(hovering);
+  if (hovering) {
+    clearHoverCloseTimer();
+  } else {
+    scheduleHoverClose();
+  }
+}
+
 function positionCompanionPanel() {
   if (!companionPanelWindow || companionPanelWindow.isDestroyed()) return;
   companionPanelWindow.setBounds(panelBoundsForCompanion(), false);
@@ -225,6 +255,7 @@ function showCompanionPanel() {
   if (!companionWindow || companionWindow.isDestroyed()) createCompanionWindow();
   if (!companionPanelWindow || companionPanelWindow.isDestroyed()) createCompanionPanelWindow();
   companionExpanded = true;
+  clearHoverCloseTimer();
   keepCompanionVisible();
   positionCompanionPanel();
   companionWindow.show();
@@ -235,6 +266,8 @@ function showCompanionPanel() {
 
 function hideCompanionPanel() {
   companionExpanded = false;
+  companionHoverState.panel = false;
+  clearHoverCloseTimer();
   if (autoPanelTimer) {
     clearTimeout(autoPanelTimer);
     autoPanelTimer = null;
@@ -767,6 +800,8 @@ ipcMain.handle("companion:hide", () => {
   companionWindow?.hide();
   companionPanelWindow?.hide();
   companionExpanded = false;
+  companionHoverState = { avatar: false, panel: false };
+  clearHoverCloseTimer();
   sendCompanionExpanded();
 });
 
@@ -794,6 +829,11 @@ ipcMain.handle("companion:setExpanded", (_event, expanded) => {
     hideCompanionPanel();
   }
   saveCompanionBounds();
+  return { expanded: companionExpanded };
+});
+
+ipcMain.handle("companion:hover", (_event, source, hovering) => {
+  updateCompanionHover(source, hovering);
   return { expanded: companionExpanded };
 });
 

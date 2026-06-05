@@ -184,6 +184,10 @@
     refreshTheme();
     window.setInterval(refreshTheme, 60 * 1000);
 
+    function setPanelHovering(hovering) {
+      window.eyeflowDesktop?.setCompanionHover?.("panel", hovering);
+    }
+
     if (window.eyeflowDesktop?.onState) {
       window.eyeflowDesktop.onState((state) => {
         title.textContent = state.title || "Mira 在这里";
@@ -203,8 +207,13 @@
     });
 
     document.querySelector("#collapseBtn").addEventListener("click", () => {
+      setPanelHovering(false);
       window.eyeflowDesktop?.setCompanionExpanded(false);
     });
+
+    panel.addEventListener("mouseenter", () => setPanelHovering(true));
+    panel.addEventListener("mouseleave", () => setPanelHovering(false));
+    window.addEventListener("blur", () => setPanelHovering(false));
   </script>
 </body>
 </html>
