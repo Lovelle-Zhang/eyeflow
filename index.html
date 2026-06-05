@@ -3961,7 +3961,7 @@
     rolloverDayIfNeeded(state);
     let isRunning = false;
     let startedAt = null;
-    let elapsedSeconds = state.elapsedSeconds || 0;
+    let elapsedSeconds = state.lastAssessmentDay === todayKey() ? state.elapsedSeconds || 0 : 0;
     let ticker = null;
     let lastNudgeAt = state.lastNudgeAt || 0;
     let lastNaturalBreakNudgeAt = state.lastNaturalBreakNudgeAt || 0;
@@ -4341,12 +4341,18 @@
     if (window.eyeflowDesktop?.onActivity) {
       window.eyeflowDesktop.onActivity((activity) => {
         latestActivity = activity;
-        maybeAutoCompleteBreak(activity);
+        ensureCurrentDay({ toast: true });
+        const canUseActivity = hasAssessedToday() && !forceBreakActive && !els.onboardingOverlay.classList.contains("show");
+        if (canUseActivity) {
+          maybeAutoCompleteBreak(activity);
+        }
         if (!isRunning) {
-          elapsedSeconds = activity.isWorking ? activity.activeSeconds : 0;
+          elapsedSeconds = canUseActivity && activity.isWorking ? activity.activeSeconds : 0;
         }
         renderActivity();
-        maybeNudgeAtNaturalBreak(activity);
+        if (canUseActivity) {
+          maybeNudgeAtNaturalBreak(activity);
+        }
         render();
         persist();
       });
@@ -4356,6 +4362,11 @@
     }
     refreshPermissionStatus();
     refreshDesktopSettings();
+    window.addEventListener("focus", handleResumeCheck);
+    window.addEventListener("pageshow", handleResumeCheck);
+    document.addEventListener("visibilitychange", () => {
+      if (!document.hidden) handleResumeCheck();
+    });
 
     function loadState() {
       const fallback = {
@@ -4422,6 +4433,10 @@
       return `${now.getFullYear()}-${month}-${day}`;
     }
 
+    function hasAssessedToday(dayState = state) {
+      return dayState.lastAssessmentDay === todayKey();
+    }
+
     function hasDailyActivity(dayState) {
       return Boolean(
         dayState.elapsedSeconds
@@ -4435,7 +4450,7 @@
     function rolloverDayIfNeeded(dayState) {
       const today = todayKey();
       if (!dayState.currentDay) dayState.currentDay = today;
-      if (dayState.currentDay === today) return;
+      if (dayState.currentDay === today) return false;
       if (hasDailyActivity(dayState)) {
         dayState.summaryHistory = [
           {
@@ -4467,6 +4482,7 @@
       dayState.lastAssessmentDay = "";
       dayState.rhythmSource = "default";
       localStorage.setItem(STORAGE_KEY, JSON.stringify(dayState));
+      return true;
     }
 
     function applySettingsToControls() {
@@ -4483,15 +4499,52 @@
 
     function persist() {
       state.currentDay = state.currentDay || todayKey();
-      state.elapsedSeconds = elapsedSeconds;
+      state.elapsedSeconds = hasAssessedToday() ? elapsedSeconds : 0;
       state.lastNudgeAt = lastNudgeAt;
       state.lastNaturalBreakNudgeAt = lastNaturalBreakNudgeAt;
       state.lastActiveSecondsBeforeIdle = lastActiveSecondsBeforeIdle;
       localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
     }
 
+    function resetSessionClock() {
+      isRunning = false;
+      startedAt = null;
+      elapsedSeconds = 0;
+      window.clearInterval(ticker);
+      ticker = null;
+      lastNudgeAt = 0;
+      lastNaturalBreakNudgeAt = 0;
+      lastActiveSecondsBeforeIdle = 0;
+    }
+
+    function ensureCurrentDay(options = {}) {
+      const rolledOver = rolloverDayIfNeeded(state);
+      if (!rolledOver) return false;
+      resetSessionClock();
+      if (options.toast) {
+        showToast("Mira：新的一天开始了，先重新看看眼睛状态。");
+      }
+      if (options.showOnboarding !== false) {
+        showOnboarding();
+      }
+      return true;
+    }
+
+    function handleResumeCheck() {
+      if (ensureCurrentDay({ toast: true })) {
+        render();
+        persist();
+        return;
+      }
+      if (!hasAssessedToday()) {
+        resetSessionClock();
+        render();
+        persist();
+      }
+    }
+
     function maybeShowOnboarding() {
-      const assessedToday = state.lastAssessmentDay === todayKey();
+      const assessedToday = hasAssessedToday();
       if (forceOnboarding || (!assessedToday && !state.onboardingDismissed)) {
         showOnboarding();
       }
@@ -4499,6 +4552,9 @@
 
     function showOnboarding() {
       if (isRunning) pauseSession();
+      if (!hasAssessedToday()) {
+        resetSessionClock();
+      }
       syncOnboardingInputs();
       renderOnboardingLoad();
       els.onboardingOverlay.classList.add("show");
@@ -4670,6 +4726,13 @@
     }
 
     function startSession() {
+      if (!hasAssessedToday()) {
+        resetSessionClock();
+        showOnboarding();
+        render();
+        persist();
+        return;
+      }
       if (isRunning) return;
       isRunning = true;
       startedAt = Date.now() - elapsedSeconds * 1000;
@@ -4695,6 +4758,11 @@
     }
 
     function tick() {
+      if (ensureCurrentDay({ toast: true })) {
+        render();
+        persist();
+        return;
+      }
       elapsedSeconds = Math.floor((Date.now() - startedAt) / 1000);
       const targetSeconds = Number(els.focusTarget.value) * 60;
       if (elapsedSeconds >= targetSeconds) {
@@ -4723,7 +4791,7 @@
     }
 
     function isAutoTracking() {
-      return Boolean(!isRunning && latestActivity?.isWorking && elapsedSeconds > 0);
+      return Boolean(hasAssessedToday() && !isRunning && latestActivity?.isWorking && elapsedSeconds > 0);
     }
 
     function requestLocalFullscreen() {
@@ -5160,6 +5228,10 @@
     }
 
     function handlePrimaryAction() {
+      if (!hasAssessedToday()) {
+        showOnboarding();
+        return;
+      }
       const load = computeEyeLoad();
       if (load >= 74) {
         showBreak("manual");
@@ -5325,15 +5397,18 @@
     function renderActivity() {
       if (!latestActivity) return;
       const app = latestActivity.activeApp || "未知 App";
+      const assessedToday = hasAssessedToday();
       renderPermissionStatus({
         accessibilityTrusted: latestActivity.accessibilityTrusted,
         platform: latestActivity.platform || "darwin"
       });
       els.activityApp.textContent = app;
       els.activityIdle.textContent = `空闲 ${latestActivity.idleSeconds || 0} 秒`;
-      els.activityMode.textContent = isRunning ? "手动计时" : latestActivity.isWorking ? "自动记录" : "自动感知";
+      els.activityMode.textContent = isRunning ? "手动计时" : !assessedToday ? "等待校准" : latestActivity.isWorking ? "自动记录" : "自动感知";
       els.naturalBreakTag.textContent = naturalBreakLabel(latestActivity);
-      if (!latestActivity.isWorking) {
+      if (!assessedToday) {
+        els.activityCopy.textContent = "今天还没完成 Mira 校准，EyeFlow 暂不记录专注时间。";
+      } else if (!latestActivity.isWorking) {
         els.activityCopy.textContent = "当前处于空闲状态。恢复操作后，EyeFlow 会重新计算连续活跃时间。";
       } else if (state.settings.deepWorkMiraOnlyToggle && latestActivity.isDeepWorkApp) {
         els.activityCopy.textContent = `检测到 ${app} 深度工作中。自然断点只更新 Mira，不弹出提示。`;
@@ -5797,6 +5872,9 @@
     }
 
     function sessionHintText() {
+      if (!hasAssessedToday()) {
+        return "先完成今天的 Mira 打分";
+      }
       if (isAutoTracking()) {
         if (state.settings.intensity === "force") {
           return `自动记录中 · 开始手动专注后启用全屏恢复`;
@@ -5838,7 +5916,7 @@
               ? "当前状态"
               : "默认节奏";
       if (!assessedToday) {
-        els.todayPlanCopy.innerHTML = `还没校准今天。现在先按 <strong>${focus} 分钟 / ${rest} 秒</strong> 运行；校准后 Mira 会按此刻状态重新安排首轮。`;
+        els.todayPlanCopy.innerHTML = `还没校准今天。Mira 会先让你给当前眼睛状态打分，完成后再开始这一轮。`;
         return;
       }
       els.todayPlanCopy.innerHTML = `按${source}：当前 <strong>${load} 分</strong>，主要信号是 <strong>${symptom} ${value}/10</strong>；这一轮 <strong>${focus} 分钟</strong> 后恢复 <strong>${rest} 秒</strong>，${modeAction}。`;
@@ -5909,12 +5987,13 @@
         els.startBtn.title = "暂停当前专注";
         els.startBtnIcon.innerHTML = '<path d="M8 5h3v14H8zM13 5h3v14h-3z"></path>';
       } else {
+        const assessedToday = hasAssessedToday();
         const autoTracking = isAutoTracking();
         const paused = !autoTracking && elapsedSeconds > 0;
-        els.sessionStatePill.textContent = autoTracking ? "自动记录" : paused ? "已暂停" : "未开始";
-        els.sessionStatePill.dataset.state = autoTracking ? "auto" : paused ? "paused" : "idle";
-        els.startBtnText.textContent = autoTracking ? "开始手动专注" : elapsedSeconds > 0 ? "继续专注" : "开始专注";
-        els.startBtn.title = autoTracking ? "接管当前自动记录的专注会话" : elapsedSeconds > 0 ? "继续当前专注" : "开始专注";
+        els.sessionStatePill.textContent = !assessedToday ? "待校准" : autoTracking ? "自动记录" : paused ? "已暂停" : "未开始";
+        els.sessionStatePill.dataset.state = !assessedToday ? "idle" : autoTracking ? "auto" : paused ? "paused" : "idle";
+        els.startBtnText.textContent = !assessedToday ? "先校准今天" : autoTracking ? "开始手动专注" : elapsedSeconds > 0 ? "继续专注" : "开始专注";
+        els.startBtn.title = !assessedToday ? "先让 Mira 记录今天的眼睛状态" : autoTracking ? "接管当前自动记录的专注会话" : elapsedSeconds > 0 ? "继续当前专注" : "开始专注";
         els.startBtnIcon.innerHTML = '<path d="M8 5v14l11-7Z"></path>';
       }
     }
@@ -6155,7 +6234,10 @@
       let title = "Mira 很安静";
       let message = "我会在旁边看着节奏，先轻轻提醒，不抢你的控制权。";
 
-      if (latestActivity && isNaturalBreak(latestActivity)) {
+      if (!hasAssessedToday()) {
+        title = "Mira 先看看你";
+        message = "今天还没校准。先给当前眼睛状态打分，再开始这一轮。";
+      } else if (latestActivity && isNaturalBreak(latestActivity)) {
         mood = "blink";
         title = "Mira 看到断点了";
         message = "你刚停下来一下。现在适合看远处 20 秒，再继续。";
@@ -6204,6 +6286,7 @@
     }
 
     function statusCopy(load, running) {
+      if (!hasAssessedToday()) return "今天还没校准。先让 Mira 看看当前眼睛状态。";
       if (running) return `会话进行中。当前用眼负荷 ${load}，Mira 会轻轻看着节奏。`;
       if (isAutoTracking()) {
         const autoMinutes = Math.floor(elapsedSeconds / 60);

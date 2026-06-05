@@ -73,6 +73,7 @@ This file records product decisions that should survive code edits and rebuilds.
 - Desktop activity sensing may auto-record continuous screen time before the user starts a manual focus session, but the UI must label that state clearly as automatic recording. The primary button should say `开始手动专注`, not `继续专注`, until the user explicitly starts manual control.
 - The focus-session card should show whether the current timer is `自动记录`, `手动专注`, `已暂停`, or `未开始`; this keeps the running timer from feeling like EyeFlow secretly started a manual session.
 - Daily calibration should pause any previous focus timer while Mira asks for the current eye state. After the user records today's score, the first focus round starts fresh from `00:00`.
+- A calendar-day boundary is a hard timer boundary. If the app stays open overnight or the Mac wakes from sleep on a new day, EyeFlow must stop the previous session, clear visible elapsed time, and wait for today's Mira assessment before recording manual or automatic focus time.
 - Force-love preview is a product boundary test only: it must hide return/finish/snooze actions during the countdown, show `回到 EyeFlow` only after time ends, and not count as a real break.
 - Recovery duration should be long enough for eyes and shoulders/neck, not just a blink break. Keep the manual rest range at 90-240 seconds; default comfort/medium/high rhythms should be 120/150/180 seconds.
 - Fullscreen recovery should feel like Mira is doing the recovery with the user. Mira's face should be visible in the recovery screen and change with the current step: gaze, blink, close eyes, and shoulder/neck release.
@@ -110,4 +111,5 @@ This file records product decisions that should survive code edits and rebuilds.
 
 - 2026-06-03 changes are recorded in `docs/CHANGELOG_2026-06-03.md`.
 - 2026-06-04 changes are recorded in `docs/CHANGELOG_2026-06-04.md`.
+- 2026-06-05 changes are recorded in `docs/CHANGELOG_2026-06-05.md`.
 - Release checks are recorded in `docs/RELEASE_CHECKLIST.md`.
