@@ -5961,6 +5961,12 @@
       if (!hasAssessedToday()) {
         return "先完成今天的 Mira 打分";
       }
+      const targetSeconds = Number(els.focusTarget.value) * 60;
+      if (isRunning && elapsedSeconds >= targetSeconds) {
+        const overMinutes = Math.floor((elapsedSeconds - targetSeconds) / 60);
+        const prefix = overMinutes > 0 ? `已超过目标 ${overMinutes} 分钟` : "已到提醒点";
+        return `${prefix} · 建议休息 ${els.breakTarget.value} 秒`;
+      }
       if (isAutoTracking()) {
         if (state.settings.intensity === "force") {
           return `自动记录中 · 手动专注会从 00:00 开始`;
