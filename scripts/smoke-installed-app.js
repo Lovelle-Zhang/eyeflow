@@ -45,11 +45,15 @@ function main() {
   const indexHtml = read("index.html");
   const coreJs = read("eyeflow-core.js");
   const recoveryDataJs = read("eyeflow-recovery-data.js");
+  const sessionFlowJs = read("eyeflow-session-flow.js");
+  const restFlowJs = read("eyeflow-rest-flow.js");
   const companionHtml = read("companion.html");
   const companionPanelHtml = read("companion-panel.html");
   const mainJs = read("main.js");
   parseScriptFile("eyeflow-core.js");
   parseScriptFile("eyeflow-recovery-data.js");
+  parseScriptFile("eyeflow-session-flow.js");
+  parseScriptFile("eyeflow-rest-flow.js");
 
   const scriptCounts = [
     ["index.html", parseInlineScripts("index.html")],
@@ -60,10 +64,16 @@ function main() {
   assertIncludes(indexHtml, "Mira 在做什么", "installed onboarding role section");
   assertIncludes(indexHtml, '<script src="eyeflow-core.js"></script>', "installed core script include");
   assertIncludes(indexHtml, '<script src="eyeflow-recovery-data.js"></script>', "installed recovery data script include");
+  assertIncludes(indexHtml, '<script src="eyeflow-session-flow.js"></script>', "installed session flow script include");
+  assertIncludes(indexHtml, '<script src="eyeflow-rest-flow.js"></script>', "installed rest flow script include");
   assertIncludes(coreJs, "window.EyeFlowCore", "installed core export");
   assertIncludes(coreJs, "computeEyeLoadScore", "installed core eye-load scorer");
   assertIncludes(recoveryDataJs, "window.EyeFlowRecoveryData", "installed recovery data export");
   assertIncludes(recoveryDataJs, "recoveryTaskLibrary", "installed recovery task library");
+  assertIncludes(sessionFlowJs, "window.EyeFlowSessionFlow", "installed session flow export");
+  assertIncludes(sessionFlowJs, "stageMiraView", "installed stage Mira helper");
+  assertIncludes(restFlowJs, "window.EyeFlowRestFlow", "installed rest flow export");
+  assertIncludes(restFlowJs, "recoveryCompletionPlan", "installed recovery completion helper");
   assertIncludes(indexHtml, "眼睛状态检查", "installed onboarding check section");
   assertIncludes(indexHtml, "下一步怎么用 Mira", "installed onboarding next section");
   assertIncludes(indexHtml, "保存状态，开始第一轮", "installed onboarding button");
@@ -85,6 +95,8 @@ function main() {
   console.log(`  - app: ${appPath}`);
   console.log("  - eyeflow-core.js: parse OK");
   console.log("  - eyeflow-recovery-data.js: parse OK");
+  console.log("  - eyeflow-session-flow.js: parse OK");
+  console.log("  - eyeflow-rest-flow.js: parse OK");
   scriptCounts.forEach(([file, count]) => {
     console.log(`  - ${file}: ${count} inline script(s) parse OK`);
   });

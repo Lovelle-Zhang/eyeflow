@@ -3241,6 +3241,70 @@
       line-height: 1.5;
     }
 
+    .break-micro {
+      display: grid;
+      gap: 10px;
+      padding: 13px;
+      border: 1px solid rgba(176, 218, 203, 0.16);
+      border-radius: var(--radius);
+      background: rgba(230, 244, 238, 0.045);
+    }
+
+    .break-micro[hidden] {
+      display: none;
+    }
+
+    .break-micro strong {
+      color: rgba(248, 252, 250, 0.92);
+      font-size: 15px;
+      line-height: 1.35;
+    }
+
+    .break-micro p {
+      color: rgba(231, 241, 236, 0.56);
+      font-size: 12.5px;
+      line-height: 1.5;
+    }
+
+    .break-companion-line {
+      margin: -2px 0 0;
+      padding: 10px 12px;
+      border-radius: var(--radius);
+      color: rgba(231, 241, 236, 0.66);
+      background: rgba(231, 241, 236, 0.052);
+      border: 1px solid rgba(176, 218, 203, 0.12);
+      font-size: 13px;
+      line-height: 1.45;
+    }
+
+    .break-companion-line[hidden] {
+      display: none;
+    }
+
+    .break-color-grid {
+      display: grid;
+      grid-template-columns: repeat(5, minmax(0, 1fr));
+      gap: 7px;
+    }
+
+    .break-color-grid button {
+      min-width: 0;
+      min-height: 36px;
+      padding: 0 8px;
+      border-radius: 999px;
+      border: 1px solid rgba(231, 241, 236, 0.14);
+      color: rgba(248, 252, 250, 0.88);
+      background: rgba(231, 241, 236, 0.08);
+      font: inherit;
+      font-size: 12px;
+      font-weight: 760;
+      cursor: pointer;
+    }
+
+    .break-color-grid button:hover {
+      background: rgba(231, 241, 236, 0.14);
+    }
+
     .break-flow {
       min-width: 0;
       display: grid;
@@ -4578,6 +4642,19 @@
         <strong id="breakTaskTitle">看向 6 米外</strong>
         <p id="breakTaskCopy">找一个远处的点，轻轻看过去，不需要盯着屏幕。</p>
       </div>
+      <div class="break-micro" id="breakMicroTask" aria-live="polite" hidden="">
+        <strong id="breakMicroTitle">看一下窗外最远的那个东西</strong>
+        <p id="breakMicroCopy">告诉 Mira 它大概是什么颜色。只选颜色，不需要输入内容。</p>
+        <div class="break-color-grid" aria-label="告诉 Mira 远处颜色">
+          <button type="button" data-break-color="蓝色">蓝</button>
+          <button type="button" data-break-color="绿色">绿</button>
+          <button type="button" data-break-color="白色">白</button>
+          <button type="button" data-break-color="灰色">灰</button>
+          <button type="button" data-break-color="其他颜色">其他</button>
+        </div>
+        <p id="breakMicroReply">Mira 在等一个很小的答案。</p>
+      </div>
+      <p class="break-companion-line" id="breakCompanionLine" hidden="">Mira 在这里守时间。</p>
       <div class="break-flow" id="breakFlow" aria-label="恢复流程" hidden=""></div>
       <div class="break-mini-timer" id="breakMiniTimer" hidden="">
         <span>剩余</span>
@@ -4602,6 +4679,8 @@
 
   <script src="eyeflow-core.js"></script>
   <script src="eyeflow-recovery-data.js"></script>
+  <script src="eyeflow-session-flow.js"></script>
+  <script src="eyeflow-rest-flow.js"></script>
   <script>
     const STORAGE_KEY = "eyeflow-v1";
     const isDesktopShell = Boolean(window.eyeflowDesktop);
@@ -4649,9 +4728,29 @@
     const {
       recoveryModeMeta,
       recoveryTaskLibrary,
-      recoveryModeTasks
+      recoveryModeTasks,
+      lightReminderLines,
+      restCompanionLines,
+      relationshipLines
     } = window.EyeFlowRecoveryData;
+    const {
+      computeRestDue,
+      sessionControlView,
+      stageMiraView
+    } = window.EyeFlowSessionFlow;
+    const {
+      safeBreakColor,
+      restBreakView,
+      recoveryFeedbackView,
+      breakMicroReplyView,
+      recoveryCompletionPlan
+    } = window.EyeFlowRestFlow;
     let activeRecoveryTasks = recoveryTasksForMode(state.settings.recoveryMode || "mixed");
+    const sessionIcons = {
+      pause: '<path d="M8 5h3v14H8zM13 5h3v14h-3z"></path>',
+      play: '<path d="M8 5v14l11-7Z"></path>'
+    };
+    const restButtonIcon = '<svg class="small-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M12 2v6"></path><path d="M12 16v6"></path><path d="M2 12h6"></path><path d="M16 12h6"></path></svg>';
 
     const els = {
       timerText: document.querySelector("#timerText"),
@@ -4837,6 +4936,12 @@
       breakTaskStep: document.querySelector("#breakTaskStep"),
       breakTaskTitle: document.querySelector("#breakTaskTitle"),
       breakTaskCopy: document.querySelector("#breakTaskCopy"),
+      breakMicroTask: document.querySelector("#breakMicroTask"),
+      breakMicroTitle: document.querySelector("#breakMicroTitle"),
+      breakMicroCopy: document.querySelector("#breakMicroCopy"),
+      breakMicroReply: document.querySelector("#breakMicroReply"),
+      breakColorButtons: document.querySelectorAll("[data-break-color]"),
+      breakCompanionLine: document.querySelector("#breakCompanionLine"),
       breakFlow: document.querySelector("#breakFlow"),
       breakMiniTimer: document.querySelector("#breakMiniTimer"),
       breakMiniTimerText: document.querySelector("#breakMiniTimerText"),
@@ -4909,6 +5014,9 @@
     els.finishBreakBtn.addEventListener("click", finishBreak);
     els.forceReturnBtn.addEventListener("click", () => finishForceBreak({ preview: forceBreakPreview }));
     els.snoozeBtn.addEventListener("click", snoozeBreak);
+    els.breakColorButtons.forEach((button) => {
+      button.addEventListener("click", () => answerBreakMicroTask(button.dataset.breakColor));
+    });
     document.querySelectorAll("[data-recovery-feedback]").forEach((button) => {
       button.addEventListener("click", () => completeRecovery(button.dataset.recoveryFeedback));
     });
@@ -5056,6 +5164,15 @@
         lastAssessmentDay: "",
         rhythmSource: "default",
         sessionSource: "idle",
+        miraMemory: {
+          firstAssessment: null,
+          modeSignals: {},
+          lastQuietMercyAt: 0,
+          lastMicroReplyAt: 0,
+          lastStreakLineAt: 0,
+          returningGapDays: 0,
+          returningAt: ""
+        },
         symptoms: { dryness: 2, strain: 3, blur: 1, light: 1 }
       };
       try {
@@ -5064,6 +5181,7 @@
           ...fallback,
           ...saved,
           reminderStats: { ...fallback.reminderStats, ...(saved.reminderStats || {}) },
+          miraMemory: { ...fallback.miraMemory, ...(saved.miraMemory || {}) },
           summaryHistory: Array.isArray(saved.summaryHistory) ? saved.summaryHistory : [],
           settings: { ...fallback.settings, ...(saved.settings || {}) }
         };
@@ -5088,6 +5206,18 @@
       return `${now.getFullYear()}-${month}-${day}`;
     }
 
+    function dateKeyToTime(key) {
+      const time = Date.parse(`${key}T00:00:00`);
+      return Number.isNaN(time) ? 0 : time;
+    }
+
+    function dayGap(fromKey, toKey = todayKey()) {
+      const from = dateKeyToTime(fromKey);
+      const to = dateKeyToTime(toKey);
+      if (!from || !to) return 0;
+      return Math.max(0, Math.round((to - from) / 86400000));
+    }
+
     function hasAssessedToday(dayState = state) {
       return dayState.lastAssessmentDay === todayKey();
     }
@@ -5106,6 +5236,21 @@
       const today = todayKey();
       if (!dayState.currentDay) dayState.currentDay = today;
       if (dayState.currentDay === today) return false;
+      const gap = dayGap(dayState.currentDay, today);
+      if (gap >= 2) {
+        dayState.miraMemory = {
+          firstAssessment: null,
+          modeSignals: {},
+          lastQuietMercyAt: 0,
+          lastMicroReplyAt: 0,
+          lastStreakLineAt: 0,
+          returningGapDays: 0,
+          returningAt: "",
+          ...(dayState.miraMemory || {})
+        };
+        dayState.miraMemory.returningGapDays = gap;
+        dayState.miraMemory.returningAt = new Date().toISOString();
+      }
       if (hasDailyActivity(dayState)) {
         dayState.summaryHistory = [
           {
@@ -5181,7 +5326,8 @@
       if (!rolledOver) return false;
       resetSessionClock();
       if (options.toast) {
-        showToast("Mira：新的一天开始了，先重新看看眼睛状态。");
+        const back = returningLine();
+        showToast(back ? `Mira：${back}` : "Mira：新的一天开始了，先重新看看眼睛状态。");
       }
       if (options.showOnboarding !== false) {
         showOnboarding();
@@ -5236,6 +5382,7 @@
       state.snoozeUntil = 0;
       state.deferReminderUntilBreak = false;
       state.deferReminderNeedsWork = false;
+      const streakToast = feedback === "tired" ? "" : gentleStreakLine();
       closePendingReminder("completed");
       addSystemLog(
         "系统识别一次休息",
@@ -5401,6 +5548,15 @@
       state.initialAssessmentDone = true;
       state.onboardingDismissed = true;
       state.lastAssessmentDay = todayKey();
+      if (!state.miraMemory.firstAssessment) {
+        const entries = Object.entries(onboardingSymptoms)
+          .filter(([, value]) => Number(value) >= 4)
+          .map(([key]) => symptomName(key));
+        state.miraMemory.firstAssessment = {
+          at: new Date().toISOString(),
+          summary: entries.length ? entries.slice(0, 2).join("、") : "还算舒服"
+        };
+      }
       els.onboardingOverlay.classList.remove("show");
       render();
       persist();
@@ -5470,7 +5626,18 @@
       const now = Date.now();
       if (now - lastNudgeAt < 3 * 60 * 1000) return;
       lastNudgeAt = now;
-      showToast("Mira：这轮已经够久了。找一个恢复断点，看远处 20 秒。");
+      if (state.breaks === 0) recordMiraModeSignal("overrun");
+      const load = computeEyeLoad();
+      if (shouldHoldMiraSilence(load)) {
+        const memory = ensureMiraMemory();
+        if (now - Number(memory.lastQuietMercyAt || 0) > 45 * 60 * 1000) {
+          memory.lastQuietMercyAt = now;
+          showToast("Mira：今天先不说休息的事了。你看起来在赶什么，专注完再说。");
+        }
+        return;
+      }
+      const group = lightReminderGroup(load);
+      showToast(modeMemoryLine("overrun") || `Mira：${lightReminderLine(group, "nudge") || "看一眼远处，再回来。"}`);
       if (elapsedSeconds >= targetSeconds + 10 * 60) {
         showToast("Mira：你已经超时 10 分钟了。我建议现在休息一下。");
       }
@@ -5593,25 +5760,32 @@
       if (reason !== "force" && !hasAssessedToday()) {
         restStartedBeforeAssessment = true;
       }
-      els.breakOverlay.classList.remove("feedback-mode");
-      els.breakTitle.textContent = reason === "force" ? "Mira 带你离开屏幕一下" : "该让眼睛离开屏幕了";
-      els.breakCopy.textContent = reason === "scheduled"
-        ? "这轮已经够久了。看向 6 米外，慢慢眨眼 8 次，再闭眼 10 秒。"
-        : reason === "extended"
-          ? "再给自己一点时间。看远处，放松眉心和肩颈，等眼睛真的缓下来。"
-        : reason === "force"
-          ? "不用盯着倒计时。我来守时间，你把视线交给远处。"
-        : "主动休息是很高级的工作能力。远眺、眨眼、放松眉心，然后再回来。";
-      els.recoveryFeedback.hidden = true;
-      els.finishBreakBtn.hidden = reason === "force";
-      els.snoozeBtn.hidden = reason === "extended" || reason === "force";
-      els.forceReturnBtn.hidden = true;
-      els.breakTask.hidden = reason !== "force";
-      els.breakFlow.hidden = reason !== "force";
-      els.breakMiniTimer.hidden = reason !== "force";
-      els.breakMira.hidden = reason !== "force";
-      els.breakOverlay.dataset.relax = reason === "force" ? "gaze" : "";
-      els.breakBreath.hidden = reason === "force";
+      const view = restBreakView({
+        reason,
+        companionLine: restCompanionLine(reason),
+        openingCompanionLine: restCompanionLine(`${reason}:open`),
+        microTask: restMicroTaskForReason(reason)
+      });
+      els.breakOverlay.classList.toggle("feedback-mode", view.feedbackMode);
+      els.breakTitle.textContent = view.title;
+      els.breakCopy.textContent = view.copy;
+      els.breakMicroTitle.textContent = view.microTitle;
+      els.breakMicroCopy.textContent = view.microCopy;
+      els.breakMicroReply.textContent = view.microReply;
+      els.breakCompanionLine.textContent = view.companionLine;
+      els.breakCompanionLine.hidden = !view.showCompanionLine;
+      els.recoveryFeedback.hidden = !view.showRecoveryFeedback;
+      els.finishBreakBtn.hidden = !view.showFinishButton;
+      els.finishBreakBtn.textContent = view.finishButtonText;
+      els.snoozeBtn.hidden = !view.showSnoozeButton;
+      els.forceReturnBtn.hidden = !view.showForceReturnButton;
+      els.breakTask.hidden = !view.showForceTask;
+      els.breakMicroTask.hidden = !view.showMicroTask;
+      els.breakFlow.hidden = !view.showFlow;
+      els.breakMiniTimer.hidden = !view.showMiniTimer;
+      els.breakMira.hidden = !view.showMira;
+      els.breakOverlay.dataset.relax = view.relax;
+      els.breakBreath.hidden = !view.showBreath;
       els.breakOverlay.classList.add("show");
     }
 
@@ -5633,8 +5807,8 @@
         copy: options.preview
           ? "这是 15 秒预览，不会计入今日休息。你可以感受一下恢复画面的节奏。"
           : state.settings.forceVoiceGuideToggle === false
-            ? "不用盯着倒计时。我来守时间，你把视线交给远处。"
-            : "可以不用看屏幕。Mira 会用声音带你完成这段恢复。"
+            ? restCompanionLine("force")
+            : `${restCompanionLine("voice")} Mira 会用声音带你完成这段恢复。`
       };
       if (window.eyeflowDesktop?.startForceBreak) {
         window.eyeflowDesktop.startForceBreak(payload);
@@ -5716,16 +5890,34 @@
     }
 
     function finishBreak() {
-      els.breakOverlay.classList.add("feedback-mode");
-      els.breakOverlay.dataset.relax = "feedback";
-      els.breakTitle.textContent = "恢复得怎么样？";
-      els.breakCopy.textContent = "告诉 Mira 现在的感觉，下一轮会按你的反馈调整。";
-      els.breakMira.hidden = false;
-      els.breakMiraCaption.textContent = "Mira 在";
-      els.breakBreath.hidden = true;
-      els.finishBreakBtn.hidden = true;
-      els.snoozeBtn.hidden = true;
-      els.recoveryFeedback.hidden = false;
+      const view = recoveryFeedbackView();
+      els.breakOverlay.classList.toggle("feedback-mode", view.feedbackMode);
+      els.breakOverlay.dataset.relax = view.relax;
+      els.breakTitle.textContent = view.title;
+      els.breakCopy.textContent = view.copy;
+      els.breakMira.hidden = !view.showMira;
+      els.breakMiraCaption.textContent = view.miraCaption;
+      els.breakMicroTask.hidden = !view.showMicroTask;
+      els.breakCompanionLine.hidden = !view.showCompanionLine;
+      els.breakBreath.hidden = !view.showBreath;
+      els.finishBreakBtn.hidden = !view.showFinishButton;
+      els.snoozeBtn.hidden = !view.showSnoozeButton;
+      els.recoveryFeedback.hidden = !view.showRecoveryFeedback;
+    }
+
+    function answerBreakMicroTask(color) {
+      const safeColor = safeBreakColor(color);
+      const memory = ensureMiraMemory();
+      const view = breakMicroReplyView({
+        color: safeColor,
+        companionLine: restCompanionLine(`reply:${safeColor}`)
+      });
+      memory.lastMicroReplyAt = Date.now();
+      els.breakMicroReply.textContent = view.reply;
+      els.breakCompanionLine.textContent = view.companionLine;
+      els.breakCompanionLine.hidden = !view.showCompanionLine;
+      els.finishBreakBtn.textContent = view.finishButtonText;
+      persist();
     }
 
     function snoozeBreak() {
@@ -5761,6 +5953,12 @@
 
     function completeRecovery(feedback) {
       const shouldReturnToAssessment = restStartedBeforeAssessment && !hasAssessedToday();
+      const plan = recoveryCompletionPlan({
+        feedback,
+        returnToAssessment: shouldReturnToAssessment,
+        focusTarget: Number(els.focusTarget.value),
+        breakTarget: Number(els.breakTarget.value)
+      });
       restStartedBeforeAssessment = false;
       state.breaks += 1;
       elapsedSeconds = 0;
@@ -5771,40 +5969,31 @@
       state.deferReminderUntilBreak = false;
       state.deferReminderNeedsWork = false;
 
-      if (feedback === "better") {
-        softenSymptoms(2);
-        addSystemLog("完成一次护眼恢复", "反馈：好多了。下一轮按当前打扰边界重新开始。");
-        els.breakOverlay.classList.remove("feedback-mode");
-        els.breakOverlay.classList.remove("show");
-        if (shouldReturnToAssessment) {
-          showToast("Mira：休息完成。回来后给今天打个分，我再按状态安排节奏。");
-        } else {
-          showToast("Mira：太好了。我从新一轮开始看着节奏。");
-          startSession();
-        }
-      } else if (feedback === "same") {
-        softenSymptoms(1);
-        state.focusTarget = Math.max(15, Number(els.focusTarget.value) - 5);
+      if (plan.symptomRelief) softenSymptoms(plan.symptomRelief);
+      if (plan.nextFocusTarget) {
+        state.focusTarget = plan.nextFocusTarget;
         els.focusTarget.value = state.focusTarget;
-        addSystemLog("完成一次护眼恢复", "反馈：差不多。下一轮提醒会提前一点。");
-        els.breakOverlay.classList.remove("feedback-mode");
-        els.breakOverlay.classList.remove("show");
-        if (shouldReturnToAssessment) {
-          showToast("Mira：休息完成。先给今天打个分，我会把下一轮安排轻一点。");
-        } else {
-          showToast("Mira：收到。下一轮我会提前一点，但还是先轻轻来。");
-          startSession();
-        }
-      } else {
-        state.breakTarget = Math.min(240, Number(els.breakTarget.value) + 30);
+      }
+      if (plan.nextBreakTarget) {
+        state.breakTarget = plan.nextBreakTarget;
         els.breakTarget.value = state.breakTarget;
-        addSystemLog("完成一次护眼恢复", "反馈：还是累。建议继续休息，不急着回到屏幕。");
+      }
+      addSystemLog(plan.logTitle, plan.logCopy);
+
+      if (plan.kind === "extend") {
         render();
         persist();
-        showToast("Mira：那就先不急。再休息一会儿，我在。");
+        showToast(plan.toast);
         showBreak("extended");
         return;
       }
+
+      if (plan.closeOverlay) {
+        els.breakOverlay.classList.remove("feedback-mode");
+        els.breakOverlay.classList.remove("show");
+      }
+      showToast(streakToast ? `Mira：${streakToast}` : plan.toast);
+      if (plan.restartSession) startSession();
 
       els.recoveryFeedback.hidden = true;
       els.finishBreakBtn.hidden = false;
@@ -5880,6 +6069,7 @@
       const pending = state.pendingReminder;
       if (pending?.status === "pending" && now - Date.parse(pending.at) > 12 * 60 * 1000) {
         closePendingReminder("ignored");
+        recordMiraModeSignal("overrun");
         addSystemLog("忽略一次 Mira 提醒", "这次提醒没有被处理。EyeFlow 会用它来判断提醒是否太频繁。");
       }
       if (level < 2) return;
@@ -6709,9 +6899,254 @@
       return recs.slice(0, 3);
     }
 
+    function weekdayName(input) {
+      const date = new Date(input);
+      if (Number.isNaN(date.getTime())) return "之前";
+      return ["周日", "周一", "周二", "周三", "周四", "周五", "周六"][date.getDay()];
+    }
+
+    function timeBucket(input = new Date()) {
+      const date = new Date(input);
+      const hour = date.getHours();
+      if (hour < 11) return "上午";
+      if (hour < 14) return "中午";
+      if (hour < 18) return "下午";
+      return "晚上";
+    }
+
+    function modeSignalKey(kind, input = new Date()) {
+      return `${timeBucket(input)}:${kind}`;
+    }
+
+    function ensureMiraMemory() {
+      state.miraMemory = {
+        firstAssessment: null,
+        modeSignals: {},
+        lastQuietMercyAt: 0,
+        lastMicroReplyAt: 0,
+        lastStreakLineAt: 0,
+        returningGapDays: 0,
+        returningAt: "",
+        ...(state.miraMemory || {})
+      };
+      state.miraMemory.modeSignals = state.miraMemory.modeSignals || {};
+      return state.miraMemory;
+    }
+
+    function recordMiraModeSignal(kind) {
+      const memory = ensureMiraMemory();
+      const now = new Date();
+      const key = modeSignalKey(kind, now);
+      const previous = memory.modeSignals[key] || {};
+      const previousAt = Date.parse(previous.lastAt || "");
+      const shouldCount = !previousAt || Date.now() - previousAt > 2 * 60 * 60 * 1000;
+      memory.modeSignals[key] = {
+        kind,
+        bucket: timeBucket(now),
+        count: Number(previous.count || 0) + (shouldCount ? 1 : 0),
+        lastAt: now.toISOString()
+      };
+    }
+
+    function modeMemoryLine(kind) {
+      const memory = ensureMiraMemory();
+      const signal = memory.modeSignals[modeSignalKey(kind)];
+      if (!signal || Number(signal.count || 0) < 2) return "";
+      const lastAt = Date.parse(signal.lastAt || "");
+      const daysAgo = lastAt ? Math.round((Date.now() - lastAt) / 86400000) : 0;
+      const prefix = daysAgo >= 6 && daysAgo <= 8
+        ? `上${weekdayName(signal.lastAt)}`
+        : `之前的${weekdayName(signal.lastAt)}`;
+      const boundary = relationshipLine("pattern", "boundary") || "Mira 只记这个模式，不记你做了什么。";
+      return `${prefix}${signal.bucket}你也容易撑过去不休息。${boundary}`;
+    }
+
+    function highWorkStreak(load) {
+      const targetSeconds = Number(els.focusTarget.value) * 60;
+      const currentHigh = load >= 48 || elapsedSeconds >= targetSeconds * 0.85;
+      const historicalHighDays = (state.summaryHistory || [])
+        .slice(0, 2)
+        .filter((day) => historyPeakLoad(day) >= 48 || Number(day.elapsedSeconds || 0) >= targetSeconds * 0.85)
+        .length;
+      return (currentHigh ? 1 : 0) + historicalHighDays;
+    }
+
+    function shouldHoldMiraSilence(load) {
+      if (!hasAssessedToday() || state.settings.intensity === "force") return false;
+      const targetSeconds = Number(els.focusTarget.value) * 60;
+      const stats = state.reminderStats || {};
+      if (latestActivity?.isDeepWorkApp && elapsedSeconds >= targetSeconds * 0.55) return true;
+      if (Number(stats.ignored || 0) >= 2 && elapsedSeconds >= targetSeconds * 0.65) return true;
+      return highWorkStreak(load) >= 3 && (isRunning || isAutoTracking());
+    }
+
+    function anniversaryLine() {
+      const first = ensureMiraMemory().firstAssessment;
+      if (!first?.at) return "";
+      const firstAt = Date.parse(first.at);
+      if (!firstAt) return "";
+      const days = Math.floor((Date.now() - firstAt) / 86400000);
+      if (days < 365 || days > 371) return "";
+      return `你用 EyeFlow 一年了。第一天你说眼睛${first.summary || "有点累"}。今天呢？`;
+    }
+
+    function textHash(text) {
+      return String(text || "").split("").reduce((total, char) => total + char.charCodeAt(0), 0);
+    }
+
+    function lineFromList(list, seed) {
+      if (!Array.isArray(list) || list.length === 0) return "";
+      const index = Math.abs(textHash(seed)) % list.length;
+      return list[index];
+    }
+
+    function lightReminderGroup(load, symptoms = currentSymptoms()) {
+      const focusTargetMinutes = Number(els.focusTarget.value);
+      const elapsedMinutes = elapsedSeconds / 60;
+      if (symptoms.strain >= 6 || symptoms.blur >= 4 || load >= 74 || elapsedMinutes >= focusTargetMinutes) return "gaze";
+      if (elapsedMinutes >= focusTargetMinutes * 0.85 && state.breaks === 0) return "relax";
+      if (symptoms.dryness >= 4 || elapsedMinutes >= focusTargetMinutes * 0.55) return "blink";
+      return "blink";
+    }
+
+    function lightReminderLine(group, seed = "") {
+      const lines = lightReminderLines?.[group] || lightReminderLines?.blink || [];
+      return lineFromList(lines, `${todayKey()}:${timeBucket()}:${group}:${seed}`);
+    }
+
+    function restCompanionLine(seed = "") {
+      return lineFromList(restCompanionLines, `${todayKey()}:rest:${seed}`) || "慢慢来，不急。";
+    }
+
+    function formatGentleDays(days) {
+      const names = ["零", "一", "二", "三", "四", "五", "六", "七", "八", "九", "十"];
+      const safeDays = Math.max(1, Math.min(30, Number(days) || 1));
+      if (safeDays <= 10) return `${names[safeDays]}天`;
+      if (safeDays < 20) return `十${names[safeDays - 10]}天`;
+      if (safeDays === 20) return "二十天";
+      if (safeDays < 30) return `二十${names[safeDays - 20]}天`;
+      return "三十天";
+    }
+
+    function relationshipLine(group, seed = "", replacements = {}) {
+      const line = lineFromList(relationshipLines?.[group] || [], `${todayKey()}:${group}:${seed}`);
+      return Object.entries(replacements).reduce(
+        (copy, [key, value]) => copy.replaceAll(`{${key}}`, value),
+        line
+      );
+    }
+
+    function daysHaveConsecutiveKeys(previousKey, nextKey) {
+      return dayGap(previousKey, nextKey) === 1;
+    }
+
+    function gentleStreakDays() {
+      if (!Number(state.breaks || 0)) return 0;
+      let streak = 1;
+      let cursor = state.currentDay || todayKey();
+      for (const day of state.summaryHistory || []) {
+        if (!Number(day.breaks || 0)) break;
+        if (!daysHaveConsecutiveKeys(day.day, cursor)) break;
+        streak += 1;
+        cursor = day.day;
+      }
+      return streak;
+    }
+
+    function gentleStreakLine() {
+      const streak = gentleStreakDays();
+      if (streak < 3) return "";
+      const memory = ensureMiraMemory();
+      const now = Date.now();
+      if (now - Number(memory.lastStreakLineAt || 0) < 20 * 60 * 60 * 1000) return "";
+      memory.lastStreakLineAt = now;
+      return relationshipLine("streak", streak, { days: formatGentleDays(streak) });
+    }
+
+    function returningLine() {
+      const memory = ensureMiraMemory();
+      const gap = Number(memory.returningGapDays || 0);
+      if (gap < 2) return "";
+      const returnedAt = Date.parse(memory.returningAt || "");
+      if (returnedAt && Date.now() - returnedAt > 18 * 60 * 60 * 1000) return "";
+      return relationshipLines?.returning?.[0] || "回来了。今天眼睛怎么样？";
+    }
+
+    function miraDialogue(kind, context = {}) {
+      const load = Number(context.load ?? computeEyeLoad());
+      const symptoms = context.symptoms || currentSymptoms();
+      const focusTargetMinutes = Number(els.focusTarget.value);
+      const elapsedMinutes = elapsedSeconds / 60;
+      const annual = anniversaryLine();
+      const reminderGroup = lightReminderGroup(load, symptoms);
+      const reminderLine = lightReminderLine(reminderGroup, Math.floor(elapsedMinutes / 5));
+
+      if (kind === "companion" && annual) {
+        return { mood: "calm", title: "Mira 记得第一天", message: annual };
+      }
+      if (kind === "companion") {
+        const back = returningLine();
+        if (back) return { mood: "calm", title: "Mira 看到你回来了", message: back };
+      }
+      if (shouldHoldMiraSilence(load)) {
+        return {
+          mood: "focus",
+          title: "Mira 先保持安静",
+          message: relationshipLine("silence", "hold") || "今天先不说休息的事了。你看起来在赶什么，专注完再说。"
+        };
+      }
+      if (kind === "companion") {
+        const memoryLine = elapsedMinutes >= focusTargetMinutes * 0.72 ? modeMemoryLine("overrun") : "";
+        if (memoryLine) {
+          return { mood: "focus", title: "Mira 记得这个时段", message: memoryLine };
+        }
+        if (!hasAssessedToday()) {
+          return { mood: "calm", title: "Mira 先看看你", message: "今天还没校准。先给当前眼睛状态打分，再开始这一轮。" };
+        }
+        if (latestActivity && isNaturalBreak(latestActivity)) {
+          return { mood: "blink", title: "Mira 看到断点了", message: lightReminderLine("gaze", "natural-break") || "你刚停下来一下。现在适合看远处 20 秒，再继续。" };
+        }
+        if (load >= 74 || elapsedMinutes >= focusTargetMinutes + 10) {
+          return { mood: "rest", title: "Mira 想让你休息", message: lightReminderLine("gaze", "rest") || "不用立刻停下。找一个恢复断点，看远处、眨眼，然后再回来。" };
+        }
+        if (symptoms.dryness >= 5 || elapsedMinutes >= focusTargetMinutes * 0.72) {
+          return { mood: "blink", title: reminderGroup === "relax" ? "Mira 提醒你松一下" : "Mira 在提醒眨眼", message: reminderLine || "轻轻眨几次眼，让眼睛重新湿润一点。" };
+        }
+        if (isRunning) {
+          return { mood: "focus", title: "Mira 陪你专注", message: `这轮 ${Math.floor(elapsedMinutes)} 分钟。到恢复断点我再轻提示，不会突然打断。` };
+        }
+        if (isAutoTracking()) {
+          return {
+            mood: "focus",
+            title: state.settings.intensity === "force" ? "强制爱待命中" : "Mira 正在自动记录",
+            message: state.settings.intensity === "force"
+              ? "我先只记录节奏。点开始手动专注后，会从新一轮开始并启用全屏恢复。"
+              : "我看到你已经在工作。点开始手动专注后，会从新一轮开始。"
+          };
+        }
+      }
+      return null;
+    }
+
+    function restMicroTaskForReason(reason) {
+      if (reason === "extended") {
+        return {
+          title: "找一个最不刺眼的颜色",
+          copy: "让视线停在那个颜色上。告诉 Mira 它大概是什么颜色。"
+        };
+      }
+      return {
+        title: "看一下窗外最远的那个东西",
+        copy: "告诉 Mira 它大概是什么颜色。只选颜色，不需要输入内容。"
+      };
+    }
+
     function currentIntervention(load) {
       const focusTargetMinutes = Number(els.focusTarget.value);
       const elapsedMinutes = elapsedSeconds / 60;
+      const symptoms = currentSymptoms();
+      const reminderGroup = lightReminderGroup(load, symptoms);
+      const reminderLine = lightReminderLine(reminderGroup, Math.floor(elapsedMinutes / 5));
       const deepWorkMiraOnly = latestActivity
         && state.settings.deepWorkMiraOnlyToggle
         && latestActivity.isDeepWorkApp;
@@ -6742,13 +7177,22 @@
         };
       }
 
+      if (shouldHoldMiraSilence(load)) {
+        return {
+          level: 1,
+          displayLevel: 1,
+          title: "Mira 先保持安静",
+          copy: "今天先不说休息的事了。你看起来在赶什么，专注完再说。"
+        };
+      }
+
       if (state.settings.intensity === "quiet" || deepWorkMiraOnly) {
         return {
           level: 1,
           title: "只让 Mira 轻轻变化",
             copy: deepWorkMiraOnly
               ? "检测到深度工作，暂时只更新 Mira 状态，不弹出提示。"
-            : "当前是安静模式，默认只用状态球和文字变化。看到 Mira 变色时先眨几下，不用停下。"
+            : `当前是安静模式，默认只用状态球和文字变化。${reminderLine || "看到 Mira 变色时先眨几下，不用停下。"}`
         };
       }
 
@@ -6777,7 +7221,7 @@
           level: 2,
           displayLevel: chosenDisplayLevel,
           title: "在恢复断点轻提示",
-          copy: "你刚停下来一下，Mira 会借这个空隙提醒远眺，不打断正在输入的节奏。"
+          copy: `你刚停下来一下，Mira 会借这个空隙提醒你：${lightReminderLine("gaze", "opening") || "看一眼远处，再回来。"}`
         };
       }
 
@@ -6786,7 +7230,7 @@
           level: 2,
           displayLevel: chosenDisplayLevel,
           title: "到恢复断点",
-          copy: "这轮已经到恢复断点。先眨几下，再看远处 20 秒。"
+          copy: lightReminderLine("gaze", "due") || "这轮已经到恢复断点。先眨几下，再看远处 20 秒。"
         };
       }
 
@@ -6795,7 +7239,7 @@
           level: 2,
           displayLevel: chosenDisplayLevel,
           title: "提前观察眨眼或远眺",
-          copy: "负荷进入中段。Mira 先只改变状态，提醒你眨眼；到恢复断点再说清楚。"
+          copy: reminderLine || "负荷进入中段。Mira 先只改变状态，提醒你眨眼；到恢复断点再说清楚。"
         };
       }
 
@@ -7020,7 +7464,11 @@
       const load = computeEyeLoad();
       const mins = Math.floor(elapsedSeconds / 60);
       const secs = elapsedSeconds % 60;
-      const restDue = isRunning && elapsedSeconds >= target;
+      const restDue = computeRestDue({
+        isRunning,
+        elapsedSeconds,
+        focusMinutes: Number(els.focusTarget.value)
+      });
 
       els.timerText.textContent = `${String(mins).padStart(2, "0")}:${String(secs).padStart(2, "0")}`;
       els.timerRing.style.setProperty("--progress", `${progress}%`);
@@ -7061,28 +7509,26 @@
     }
 
     function renderSessionControls() {
-      const targetSeconds = Number(els.focusTarget.value) * 60;
-      const restDue = isRunning && elapsedSeconds >= targetSeconds;
-      if (isRunning) {
-        els.sessionStatePill.textContent = restDue ? "恢复断点" : "手动专注";
-        els.sessionStatePill.dataset.state = restDue ? "due" : "manual";
-        els.startBtnText.textContent = "暂停";
-        els.startBtn.title = "暂停当前专注";
-        els.startBtnIcon.innerHTML = '<path d="M8 5h3v14H8zM13 5h3v14h-3z"></path>';
-      } else {
-        const assessedToday = hasAssessedToday();
-        const autoTracking = isAutoTracking();
-        const paused = sessionSource === "manual-paused" && elapsedSeconds > 0;
-        els.sessionStatePill.textContent = !assessedToday ? "待校准" : autoTracking ? "自动记录" : paused ? "已暂停" : "未开始";
-        els.sessionStatePill.dataset.state = !assessedToday ? "idle" : autoTracking ? "auto" : paused ? "paused" : "idle";
-        els.startBtnText.textContent = !assessedToday ? "先校准今天" : autoTracking ? "开始手动专注" : paused ? "继续专注" : "开始专注";
-        els.startBtn.title = !assessedToday ? "先让 Mira 记录今天的眼睛状态" : autoTracking ? "从 00:00 开始手动专注" : paused ? "继续当前专注" : "开始专注";
-        els.startBtnIcon.innerHTML = '<path d="M8 5v14l11-7Z"></path>';
-      }
-      els.restSessionBtn.innerHTML = restDue
-        ? `<svg class="small-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M12 2v6"></path><path d="M12 16v6"></path><path d="M2 12h6"></path><path d="M16 12h6"></path></svg><span>开始 ${els.breakTarget.value} 秒休息</span>`
-        : `<svg class="small-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M12 2v6"></path><path d="M12 16v6"></path><path d="M2 12h6"></path><path d="M16 12h6"></path></svg><span>休息</span>`;
-      els.restSessionBtn.title = restDue ? `开始 ${els.breakTarget.value} 秒休息` : "主动休息";
+      const controls = sessionControlView({
+        isRunning,
+        restDue: computeRestDue({
+          isRunning,
+          elapsedSeconds,
+          focusMinutes: Number(els.focusTarget.value)
+        }),
+        assessedToday: hasAssessedToday(),
+        autoTracking: isAutoTracking(),
+        paused: sessionSource === "manual-paused" && elapsedSeconds > 0,
+        restSeconds: Number(els.breakTarget.value)
+      });
+
+      els.sessionStatePill.textContent = controls.pillText;
+      els.sessionStatePill.dataset.state = controls.pillState;
+      els.startBtnText.textContent = controls.startText;
+      els.startBtn.title = controls.startTitle;
+      els.startBtnIcon.innerHTML = sessionIcons[controls.startIcon] || sessionIcons.play;
+      els.restSessionBtn.innerHTML = `${restButtonIcon}<span>${controls.restText}</span>`;
+      els.restSessionBtn.title = controls.restTitle;
     }
 
     function symptomName(key) {
@@ -7107,20 +7553,12 @@
       els.stateBand.textContent = label;
       els.stateBand.style.background = load >= 74 ? "#f7dde5" : load >= 48 ? "var(--amber-soft)" : "var(--mint-soft)";
       els.stageLoadValue.textContent = load;
-      const stageMood = load >= 74
-        ? "rest"
-        : load >= 48 || value >= 5
-          ? "blink"
-          : isRunning || isAutoTracking()
-            ? "focus"
-            : "calm";
-      const stageTone = stageMood === "rest"
-        ? { color: "#c9637f", glow: "rgba(201, 99, 127, 0.2)" }
-        : stageMood === "blink"
-          ? { color: "#c49a45", glow: "rgba(196, 154, 69, 0.2)" }
-          : stageMood === "focus"
-            ? { color: "#5fa9c1", glow: "rgba(95, 169, 193, 0.18)" }
-            : { color: "#2a927a", glow: "rgba(42, 146, 122, 0.17)" };
+      const { mood: stageMood, tone: stageTone } = stageMiraView({
+        load,
+        topSymptomValue: value,
+        isRunning,
+        autoTracking: isAutoTracking()
+      });
       els.stageMira.dataset.mood = stageMood;
       els.sessionPanel.dataset.mood = stageMood;
       [els.focusTarget, els.breakTarget].forEach((input) => {
@@ -7375,40 +7813,13 @@
     }
 
     function renderCompanion(load) {
-      const symptoms = currentSymptoms();
-      const focusTargetMinutes = Number(els.focusTarget.value);
-      const elapsedMinutes = elapsedSeconds / 60;
       const intervention = currentIntervention(load);
-      let mood = "calm";
-      let title = "Mira 很安静";
-      let message = "我会在旁边看着节奏，先低打扰陪伴，不抢你的控制权。";
-
-      if (!hasAssessedToday()) {
-        title = "Mira 先看看你";
-        message = "今天还没校准。先给当前眼睛状态打分，再开始这一轮。";
-      } else if (latestActivity && isNaturalBreak(latestActivity)) {
-        mood = "blink";
-        title = "Mira 看到断点了";
-        message = "你刚停下来一下。现在适合看远处 20 秒，再继续。";
-      } else if (load >= 74 || elapsedMinutes >= focusTargetMinutes + 10) {
-        mood = "rest";
-        title = "Mira 想让你休息";
-        message = "不用立刻停下。找一个恢复断点，看远处、眨眼，然后再回来。";
-      } else if (symptoms.dryness >= 5 || elapsedMinutes >= focusTargetMinutes * 0.72) {
-        mood = "blink";
-        title = "Mira 在提醒眨眼";
-        message = "轻轻眨几次眼，让眼睛重新湿润一点。";
-      } else if (isRunning) {
-        mood = "focus";
-        title = "Mira 陪你专注";
-        message = `这轮 ${Math.floor(elapsedMinutes)} 分钟。到恢复断点我再轻提示，不会突然打断。`;
-      } else if (isAutoTracking()) {
-        mood = "focus";
-        title = state.settings.intensity === "force" ? "强制爱待命中" : "Mira 正在自动记录";
-        message = state.settings.intensity === "force"
-          ? "我先只记录节奏。点开始手动专注后，会从新一轮开始并启用全屏恢复。"
-          : "我看到你已经在工作。点开始手动专注后，会从新一轮开始。";
-      }
+      const dialogue = miraDialogue("companion", { load, intervention }) || {
+        mood: "calm",
+        title: "Mira 很安静",
+        message: "我会在旁边看着节奏，先低打扰陪伴，不抢你的控制权。"
+      };
+      const { mood, title, message } = dialogue;
 
       els.companion.dataset.mood = mood;
       els.petTitle.textContent = title;

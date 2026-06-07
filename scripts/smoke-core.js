@@ -51,8 +51,8 @@ function main() {
 
   assertMatches(
     indexHtml,
-    /<script src="eyeflow-core\.js"><\/script>\s*<script src="eyeflow-recovery-data\.js"><\/script>/,
-    "core script loads before recovery data and inline app code"
+    /<script src="eyeflow-core\.js"><\/script>\s*<script src="eyeflow-recovery-data\.js"><\/script>\s*<script src="eyeflow-session-flow\.js"><\/script>\s*<script src="eyeflow-rest-flow\.js"><\/script>/,
+    "core script loads before recovery, session, rest, and inline app code"
   );
   assertIncludes(indexHtml, "computeEyeLoadScore({", "dashboard score wrapper uses core score");
   assertNotMatches(indexHtml, /function\s+estimateInitialLoad\(/, "initial load is extracted from index.html");
