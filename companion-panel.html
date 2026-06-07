@@ -6,9 +6,9 @@
   <title>Mira Panel</title>
   <style>
     :root {
-      --ink: #18201f;
-      --muted: #68706d;
-      --line: #dce5df;
+      --ink: #1b2622;
+      --muted: #64736b;
+      --line: #d8e2d6;
     }
 
     * {
@@ -72,6 +72,15 @@
       box-shadow: -1px 1px 0 rgba(128, 241, 213, 0.08);
     }
 
+    .panel.anchor-top .bubble::before {
+      top: 21px;
+    }
+
+    .panel.anchor-bottom .bubble::before {
+      top: auto;
+      bottom: 21px;
+    }
+
     .panel.side-left .bubble {
       inset: 6px 14px 6px 0;
     }
@@ -83,7 +92,7 @@
     }
 
     .panel.theme-day .bubble {
-      background: rgba(255, 255, 255, 0.94);
+      background: rgba(251, 252, 246, 0.95);
       box-shadow:
         0 18px 52px rgba(30, 44, 38, 0.15),
         0 0 0 1px rgba(24, 32, 31, 0.08);
@@ -135,8 +144,17 @@
       place-items: center;
     }
 
+    .icon-btn:focus {
+      outline: none;
+    }
+
+    .icon-btn:focus-visible {
+      outline: 2px solid rgba(15, 159, 122, 0.46);
+      outline-offset: 2px;
+    }
+
     .theme-day .icon-btn {
-      background: #f4f7f2;
+      background: #eef4ed;
       border: 1px solid var(--line);
       color: var(--ink);
     }
@@ -152,7 +170,7 @@
     <div class="bubble">
       <div>
         <strong id="title">Mira 在这里</strong>
-        <p id="message">我会轻轻看着节奏，先提醒，不打断。</p>
+        <p id="message">我会轻轻看着节奏，先低打扰陪伴。</p>
       </div>
       <div class="actions">
         <button class="icon-btn" id="openBtn" type="button" title="打开 EyeFlow">
@@ -188,25 +206,38 @@
       window.eyeflowDesktop?.setCompanionHover?.("panel", hovering);
     }
 
+    function releaseMouseFocus(event) {
+      if (event.detail > 0) event.currentTarget.blur();
+    }
+
     if (window.eyeflowDesktop?.onState) {
       window.eyeflowDesktop.onState((state) => {
         title.textContent = state.title || "Mira 在这里";
-        message.textContent = state.message || "我会轻轻看着节奏，先提醒，不打断。";
+        const mood = state.mood === "calm" ? "" : state.mood || "";
+        message.textContent = mood === "rest"
+          ? `${state.message || "找一个恢复断点，看远处 20 秒。"} 点 Mira 打开休息指引。`
+          : state.message || "我会轻轻看着节奏，先低打扰陪伴。";
       });
     }
 
     if (window.eyeflowDesktop?.onPanelSide) {
-      window.eyeflowDesktop.onPanelSide((side) => {
+      window.eyeflowDesktop.onPanelSide((payload) => {
+        const side = typeof payload === "string" ? payload : payload?.side;
+        const anchorY = typeof payload === "object" ? payload.anchorY : "center";
         panel.classList.toggle("side-left", side === "left");
         panel.classList.toggle("side-right", side !== "left");
+        panel.classList.toggle("anchor-top", anchorY === "top");
+        panel.classList.toggle("anchor-bottom", anchorY === "bottom");
       });
     }
 
-    document.querySelector("#openBtn").addEventListener("click", () => {
+    document.querySelector("#openBtn").addEventListener("click", (event) => {
+      releaseMouseFocus(event);
       window.eyeflowDesktop?.showDashboard();
     });
 
-    document.querySelector("#collapseBtn").addEventListener("click", () => {
+    document.querySelector("#collapseBtn").addEventListener("click", (event) => {
+      releaseMouseFocus(event);
       setPanelHovering(false);
       window.eyeflowDesktop?.setCompanionExpanded(false);
     });

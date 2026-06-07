@@ -1,7 +1,7 @@
 const { contextBridge, ipcRenderer } = require("electron");
 
 contextBridge.exposeInMainWorld("eyeflowDesktop", {
-  showDashboard: () => ipcRenderer.invoke("dashboard:show"),
+  showDashboard: (options) => ipcRenderer.invoke("dashboard:show", options),
   hideCompanion: () => ipcRenderer.invoke("companion:hide"),
   moveCompanionBy: (delta) => ipcRenderer.invoke("companion:moveBy", delta),
   setCompanionExpanded: (expanded) => ipcRenderer.invoke("companion:setExpanded", expanded),
@@ -16,6 +16,8 @@ contextBridge.exposeInMainWorld("eyeflowDesktop", {
   openAccessibilitySettings: () => ipcRenderer.invoke("permissions:openAccessibility"),
   getDesktopSettings: () => ipcRenderer.invoke("desktopSettings:get"),
   setLaunchAtLogin: (enabled) => ipcRenderer.invoke("desktopSettings:setLaunchAtLogin", enabled),
+  getDiagnostics: () => ipcRenderer.invoke("diagnostics:get"),
+  copyFeedbackText: (text) => ipcRenderer.invoke("feedback:copy", text),
   onState: (callback) => {
     const listener = (_event, state) => callback(state);
     ipcRenderer.on("state:update", listener);
@@ -50,5 +52,10 @@ contextBridge.exposeInMainWorld("eyeflowDesktop", {
     const listener = (_event, payload) => callback(payload);
     ipcRenderer.on("breakLock:update", listener);
     return () => ipcRenderer.removeListener("breakLock:update", listener);
+  },
+  onRestGuide: (callback) => {
+    const listener = (_event, payload) => callback(payload);
+    ipcRenderer.on("dashboard:restGuide", listener);
+    return () => ipcRenderer.removeListener("dashboard:restGuide", listener);
   }
 });

@@ -1,21 +1,23 @@
 # EyeFlow
 
-EyeFlow 是一个安静的桌面护眼工作系统。它面向长时间屏幕工作的人，用 Mira 这个桌面陪伴机器人记录当下用眼状态、安排专注和恢复节奏，并在用户允许的边界内做温和提醒。
+EyeFlow 是一个面向长期屏幕工作者的低打扰恢复系统。它通过 Mira 记录当下用眼状态、寻找自然断点，并用温和的方式带你完成眨眼、远眺和短休息。
 
-当前版本是 private alpha：核心体验已经可以在 macOS 桌面运行，但还没有签名、公证和自动更新。
+EyeFlow 不是提醒你休息，而是帮你用最低打扰完成恢复。
+
+当前版本正在推进公开 macOS 发布：核心体验已经可以在 macOS 桌面运行，公开发布前需要通过签名、公证和上线 preflight。
 
 ## 产品原则
 
 - App 叫 EyeFlow，机器人叫 Mira。
-- 目标是给眼睛和身体减负，所以功能保持简单、清楚、舒适。
+- 目标是给眼睛和身体减负，用低打扰的方式把恢复自然放进工作节奏。
 - Mira 不抢控制权，提醒要有边界。
-- `强制爱` 是用户明确开启的 L4 模式：到点进入全屏恢复，倒计时结束前不显示返回按钮。
+- `强制爱` 是用户明确开启的 L4 模式：到恢复断点进入全屏恢复，倒计时结束前不显示返回按钮。
 - 浏览器页面只用于预览；真正的全屏恢复以打包后的桌面 App 为准。
 
 ## 当前能力
 
 - 每天第一次打开，由 Mira 引导用户给当前眼睛状态打分。
-- 根据初始状态调整第一轮专注提醒、休息长度和提醒强度。
+- 根据初始状态调整第一轮恢复断点、休息长度和打扰边界。
 - 今日页面展示当前用眼负荷、专注会话、节奏来源和轻量记录入口。
 - Mira 桌面头像可拖动、可展开、可通过菜单找回。
 - 支持安静、标准、强制爱三种提醒边界。
@@ -41,13 +43,31 @@ npm run install:mirror
 npm run build:mac
 ```
 
+生成 ZIP：
+
+```bash
+npm run build:zip
+```
+
 只打 DMG：
 
 ```bash
 npm run build:dmg
 ```
 
-当前私测产物约定：
+成品包冒烟测试：
+
+```bash
+npm run smoke:app
+```
+
+正式上线前检查：
+
+```bash
+npm run launch:preflight
+```
+
+当前发布产物约定：
 
 - App bundle: `dist/mac/EyeFlow.app`
 - DMG installer: `dist/EyeFlow-0.1.0-x64.dmg`
@@ -60,6 +80,12 @@ npm run build:dmg
 - [产品记忆](docs/EYEFLOW_PRODUCT_MEMORY.md)
 - [2026-06-04 变更记录](docs/CHANGELOG_2026-06-04.md)
 - [发布检查表](docs/RELEASE_CHECKLIST.md)
+- [公开上线检查表](docs/LAUNCH_CHECKLIST.md)
+- [签名与公证](docs/CODESIGN_NOTARIZE.md)
+- [隐私说明](docs/PRIVACY.md)
+- [测试版安装说明](docs/BETA_INSTALL_GUIDE.md)
+- [下载页文案](docs/DOWNLOAD_PAGE_COPY.md)
+- [测试反馈表](docs/TESTER_FEEDBACK_FORM.md)
 
 ## Alpha 注意事项
 

@@ -10,8 +10,9 @@ This file records product decisions that should survive code edits and rebuilds.
 
 ## Product Direction
 
-- EyeFlow is a calm desktop eye-care assistant for people doing long screen-based work.
-- It should reduce burden for eyes and body, so the product must stay simple, quiet, and comfortable.
+- EyeFlow is a low-interruption recovery system for people doing long screen-based work.
+- It should reduce burden for eyes and body by helping users complete recovery with minimal disruption, so the product must stay simple, quiet, and comfortable.
+- The core positioning is: EyeFlow is not just reminding users to rest; it helps them complete recovery with the lowest reasonable interruption.
 - Keep only necessary features. Avoid adding complex dashboards, noisy gamification, or heavy workflows.
 
 ## Visual Identity Standards
@@ -60,7 +61,7 @@ This file records product decisions that should survive code edits and rebuilds.
 - The floating Mira avatar should feel light: hovering on Mira briefly opens the speech bubble, one gentle tap can still open/close it, and dragging is available only after a clear movement threshold. After the cursor leaves both Mira and the speech bubble, the bubble should wait about 1.5-1.8 seconds before closing so the interaction feels calm rather than twitchy. Normal L1 startup should not auto-open the speech bubble.
 - Settings should let users choose the reminder ceiling directly as L1/L2/L3/L4. Do not hide L2/L3 behind vague labels like `标准`; the card may show the selected ceiling while the internal trigger still waits for the right timing.
 - L4 `强制爱` must not trigger from desktop auto-recording alone. If EyeFlow is only auto-recording screen time, `强制爱` should show as pending/standby; full-screen recovery is armed only after the user explicitly starts manual focus.
-- Enabling L4 `强制爱` requires an explicit confirmation step. Clicking the `强制爱` mode button should first show a confirmation/preview card and must not immediately change the active reminder mode.
+- Enabling L4 `强制爱` requires an explicit confirmation step. Clicking the `强制爱` mode button should first show a confirmation/preview card and must not immediately change the active disturbance boundary.
 - `5 分钟后` should behave as a real five-minute snooze, not a vague dismissal; the snooze window should override the ordinary reminder cooldown when it expires.
 - The reminder rules panel must explicitly include L4 `强制爱`, including its opt-in boundary and hidden return button during countdown.
 - The full-screen forced-rest page must feel protective, not punitive: use an eye-friendly low-contrast palette, avoid oversized countdowns that invite staring, and make Mira's recovery action the main focus.
@@ -91,13 +92,13 @@ This file records product decisions that should survive code edits and rebuilds.
 - Today needs a memorable state space, not only side-by-side cards: Mira, eye-load score, and the current recommendation should appear together in the main state stage so Mira feels like the product's state interpreter.
 - The focus-session area should feel like a rhythm space, not a generic timer card. Its timer ring, controls, slider rails, and color state should visually follow the same mood as the Mira state stage.
 - Today metrics should behave like a light signal strip rather than a report-card grid. Keep them scannable, but avoid making them compete with the main state stage.
-- Today rhythm and reminder mode should read as one compact status strip inside the main state card, not as multiple explanatory blocks.
-- Today should include one short plan sentence explaining why this rhythm is being used, what the main eye signal is, and what boundary the current reminder mode will follow.
+- Today rhythm and disturbance boundary should read as one compact status strip inside the main state card, not as multiple explanatory blocks.
+- Today should include one short plan sentence explaining why this rhythm is being used, what the main eye signal is, and what boundary the current disturbance setting will follow.
 - Today metrics belong under the current-state card as a light status strip; avoid letting them feel like a separate analytics dashboard row.
 - Score reasoning belongs in a folded `为什么是这个状态` section, not as a permanently visible card.
 - In normal states, the Today state card should not duplicate start/pause controls; only high-load states show an immediate rest action there.
 - Optional symptom logging on Today should stay collapsed by default as `记录一下当下状态`.
-- Settings should stay low-burden: show today's rhythm suggestion and reminder mode first, while permissions, notification details, reset actions, and reminder rules stay folded unless needed.
+- Settings should stay low-burden: show today's rhythm suggestion and disturbance boundary first, while permissions, notification details, reset actions, and low-interruption rules stay folded unless needed.
 - UI text should wrap safely inside cards, buttons, Mira bubbles, and forced-rest screens.
 - The packaged desktop app should remember dashboard window bounds between launches.
 - Real desktop-product controls belong in Settings `更多设置` and macOS menus, not the main Today flow. Keep startup-at-login, About/version, tray, Dock, and window recovery controls available without making the eye-care workflow feel busy.

@@ -11,11 +11,11 @@
       --soft: #c9d8d1;
       --muted: rgba(231, 241, 236, 0.58);
       --line: rgba(176, 218, 203, 0.18);
-      --mint: #8edfc7;
-      --mint-dim: rgba(142, 223, 199, 0.18);
-      --panel: rgba(230, 244, 238, 0.055);
-      --bg: #101b18;
-      --bg-2: #16231f;
+      --mint: #8bd8c1;
+      --mint-dim: rgba(139, 216, 193, 0.17);
+      --panel: rgba(230, 244, 238, 0.052);
+      --bg: #0f1a17;
+      --bg-2: #17231e;
     }
 
     * {
@@ -28,8 +28,8 @@
       font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
       color: var(--ink);
       background:
-        radial-gradient(circle at 50% 46%, rgba(142, 223, 199, 0.11), transparent 30%),
-        radial-gradient(circle at 50% 100%, rgba(212, 236, 222, 0.06), transparent 42%),
+        linear-gradient(180deg, rgba(139, 216, 193, 0.09), transparent 36%),
+        linear-gradient(90deg, rgba(226, 236, 238, 0.04), transparent 42%, rgba(245, 234, 211, 0.045)),
         linear-gradient(180deg, var(--bg-2) 0%, var(--bg) 100%);
       display: grid;
       place-items: center;
@@ -69,7 +69,7 @@
       aspect-ratio: 1;
       border-radius: 22px 22px 20px 20px;
       background:
-        linear-gradient(160deg, #d9f4eb 0%, #f7fffb 52%, #dfeaff 100%);
+        linear-gradient(160deg, #dcefe5 0%, #f8faf3 52%, #e5edf1 100%);
       display: grid;
       place-items: center;
       position: relative;
@@ -124,7 +124,7 @@
       width: 6px;
       height: 6px;
       border-radius: 50%;
-      background: #ffffff;
+      background: #fbfcf6;
       animation: petBlink 5s ease-in-out infinite;
     }
 
@@ -194,7 +194,7 @@
 
     body[data-relax="blink"] .pet {
       background:
-        linear-gradient(160deg, #fff0d7 0%, #ffffff 52%, #d9f4eb 100%);
+        linear-gradient(160deg, #f5ead3 0%, #fbfcf6 52%, #dcefe5 100%);
       animation: miraBlinkLead 1.8s ease-in-out infinite;
     }
 
@@ -213,6 +213,8 @@
 
     body[data-relax="close"] .pet-face::before,
     body[data-relax="close"] .pet-face::after,
+    body[data-relax="breath"] .pet-face::before,
+    body[data-relax="breath"] .pet-face::after,
     body[data-relax="neck"] .pet-face::before,
     body[data-relax="neck"] .pet-face::after {
       height: 2px;
@@ -222,8 +224,24 @@
     }
 
     body[data-relax="close"] .pet,
+    body[data-relax="breath"] .pet,
     body[data-relax="neck"] .pet {
       animation: miraRestBreath 4s ease-in-out infinite;
+    }
+
+    body[data-relax="breath"] .pet::after {
+      background: #8bd8c1;
+      box-shadow: 0 0 18px rgba(139, 216, 193, 0.68);
+      animation-duration: 4s;
+    }
+
+    body[data-relax="breath"] .pet-mouth {
+      width: 18px;
+      height: 6px;
+      border: 0;
+      border-radius: 999px;
+      background: rgba(142, 223, 199, 0.62);
+      transform: translateX(-50%) translateY(1px) scaleX(0.8);
     }
 
     body[data-relax="neck"] .pet-mouth {
@@ -237,13 +255,13 @@
 
     body[data-relax="press"] .pet {
       background:
-        linear-gradient(160deg, #fff0d7 0%, #fff8fa 52%, #d9f4eb 100%);
+        linear-gradient(160deg, #f5ead3 0%, #fbf8f2 52%, #dcefe5 100%);
       animation: miraRestBreath 3.4s ease-in-out infinite;
     }
 
     body[data-relax="press"] .pet::after {
-      background: #ffd66f;
-      box-shadow: 0 0 18px rgba(255, 214, 111, 0.78);
+      background: #e9c979;
+      box-shadow: 0 0 18px rgba(233, 201, 121, 0.68);
     }
 
     body[data-relax="press"] .pet-face::before,
@@ -382,7 +400,7 @@
       width: calc(min(32vh, 220px) - 24px);
       aspect-ratio: 1;
       border-radius: 50%;
-      background: rgba(16, 27, 24, 0.94);
+      background: rgba(15, 26, 23, 0.94);
       border: 1px solid var(--line);
       display: grid;
       place-items: center;
@@ -419,6 +437,16 @@
       cursor: default;
       justify-self: center;
       box-shadow: 0 16px 34px rgba(142, 223, 199, 0.16);
+    }
+
+    .done:focus {
+      outline: none;
+    }
+
+    .done:focus-visible {
+      box-shadow:
+        0 0 0 4px rgba(142, 223, 199, 0.22),
+        0 16px 34px rgba(142, 223, 199, 0.18);
     }
 
     .done[hidden] {
@@ -489,7 +517,7 @@
       </div>
       <span class="mira-caption" id="miraCaption">跟着 Mira 慢慢来</span>
     </div>
-    <div class="eyebrow" id="eyebrow">Mira 护眼恢复</div>
+    <div class="eyebrow" id="eyebrow">低打扰恢复</div>
     <div>
       <h1 id="title">Mira 带你离开屏幕一下</h1>
       <p id="copy">不用盯着倒计时。我来守时间，你把视线交给远处。</p>
@@ -509,7 +537,7 @@
       </div>
     </div>
     <button class="done" id="doneBtn" type="button" hidden="">回到 EyeFlow</button>
-    <p class="hint">倒计时结束前，EyeFlow 会安静守住这段恢复时间。</p>
+    <p class="hint" id="hint">倒计时结束前，EyeFlow 会安静守住这段恢复时间。</p>
   </main>
 
   <script>
@@ -524,6 +552,7 @@
       ring: document.querySelector("#ring"),
       eyebrow: document.querySelector("#eyebrow"),
       doneBtn: document.querySelector("#doneBtn"),
+      hint: document.querySelector("#hint"),
       miraCaption: document.querySelector("#miraCaption"),
       stepFlow: document.querySelector("#stepFlow")
     };
@@ -534,34 +563,55 @@
     let voiceGuide = true;
     let spokenTaskIndex = -1;
     let completionSpoken = false;
+    let completionShown = false;
     const defaultTasks = [
       {
         mood: "gaze",
         label: "远眺",
         title: "跟 Mira 一起看远处",
         copy: "把视线移到 6 米外。Mira 也看向远处，你不用盯着屏幕。",
-        caption: "先把视线放远"
+        caption: "先把视线放远",
+        voiceCue: "把视线放到远处。不要盯屏幕，只是轻轻看过去。"
       },
       {
         mood: "blink",
         label: "慢眨眼",
         title: "跟 Mira 慢慢眨眼",
         copy: "跟着 Mira 的节奏眨 8 次，每一次都闭完整一点。",
-        caption: "慢慢眨，不要急"
+        caption: "慢慢眨，不要急",
+        voiceCue: "慢慢眨眼。每一次都闭完整一点，再自然睁开。"
+      },
+      {
+        mood: "breath",
+        label: "慢呼吸",
+        title: "跟 Mira 慢慢呼吸",
+        copy: "吸气时肩膀不要抬，呼气时让眼眶周围松一点。",
+        caption: "呼气时放松",
+        voiceCue: "吸气不用用力。呼气时，让眼眶周围松下来。"
       },
       {
         mood: "close",
         label: "闭眼",
         title: "和 Mira 一起闭眼",
         copy: "闭眼 10 秒，把眉心、下巴和屏幕里的紧张一起放下来。",
-        caption: "眼睛先休息"
+        caption: "眼睛先休息",
+        voiceCue: "现在闭眼。眉心放松，下巴也松一点。"
       },
       {
         mood: "neck",
         label: "肩颈",
         title: "跟 Mira 放松肩颈",
         copy: "下巴微收，肩膀慢慢沉下去。等提示出现后再回来。",
-        caption: "肩膀慢慢沉下去"
+        caption: "肩膀慢慢沉下去",
+        voiceCue: "下巴微收。肩膀慢慢沉下去，后颈变长一点。"
+      },
+      {
+        mood: "neck",
+        label: "下颌",
+        title: "把下颌松开一点",
+        copy: "牙齿轻轻分开，舌尖自然放松，别让脸部继续用力。",
+        caption: "脸也放松",
+        voiceCue: "牙齿轻轻分开。舌尖放松，让脸也休息一下。"
       }
     ];
     let activeTasks = defaultTasks;
@@ -582,13 +632,14 @@
         }
       }
       if (!Array.isArray(tasks) || tasks.length === 0) return defaultTasks;
-      const allowedMoods = new Set(["gaze", "blink", "close", "neck", "press"]);
+      const allowedMoods = new Set(["gaze", "blink", "close", "neck", "press", "breath"]);
       const safeTasks = tasks.slice(0, 6).map((task) => ({
         mood: allowedMoods.has(task?.mood) ? task.mood : "gaze",
         label: String(task?.label || "").slice(0, 12),
         title: String(task?.title || "").slice(0, 48),
         copy: String(task?.copy || "").slice(0, 140),
-        caption: String(task?.caption || "").slice(0, 36)
+        caption: String(task?.caption || "").slice(0, 36),
+        voiceCue: String(task?.voiceCue || "").slice(0, 120)
       })).filter((task) => task.title && task.copy);
       return safeTasks.length ? safeTasks : defaultTasks;
     }
@@ -651,7 +702,8 @@
       const prefix = index === 0
         ? "现在可以不用看屏幕了，我会用声音带你完成。第一步，"
         : `第 ${index + 1} 步，`;
-      return `${prefix}${task.label || task.title}。${task.copy}`;
+      const cue = task.voiceCue || task.copy;
+      return `${prefix}${task.label || task.title}。${cue}`;
     }
 
     function maybeSpeakTask(task, index) {
@@ -673,14 +725,40 @@
       voiceGuide = payload.voiceGuide !== false && payload.voiceGuide !== "0";
       spokenTaskIndex = -1;
       completionSpoken = false;
+      completionShown = false;
       stopVoiceGuide();
       activeTasks = normalizeBreakTasks(payload.tasks || params.get("tasks"));
-      els.eyebrow.textContent = previewSession ? "强制爱预览" : "强制爱恢复";
+      document.body.removeAttribute("data-complete");
+      els.eyebrow.textContent = previewSession ? "全屏恢复预览" : "低打扰恢复";
       els.title.textContent = payload.title || "Mira 带你离开屏幕一下";
       els.copy.textContent = payload.copy || "不用盯着倒计时。我来守时间，你把视线交给远处。";
+      els.hint.textContent = "倒计时结束前，EyeFlow 会安静守住这段恢复时间。";
       els.doneBtn.hidden = true;
       if (!ticker) ticker = window.setInterval(tick, 250);
       tick();
+    }
+
+    function showCompletion() {
+      if (completionShown) return;
+      completionShown = true;
+      document.body.dataset.complete = "true";
+      document.body.dataset.relax = "close";
+      els.eyebrow.textContent = previewSession ? "预览完成" : "恢复完成";
+      els.title.textContent = "可以慢慢回来了";
+      els.copy.textContent = previewSession
+        ? "全屏恢复预览结束。你已经看过恢复画面的节奏。"
+        : "这轮恢复完成。先眨眨眼、动一下肩膀，再回到 EyeFlow。";
+      els.taskStep.textContent = "完成";
+      els.taskTitle.textContent = "Mira 已经守完这段时间";
+      els.taskCopy.textContent = "不用急着立刻盯回屏幕。让视线自然回来，再继续。";
+      els.miraCaption.textContent = "慢慢回来";
+      els.hint.textContent = "按钮已经可以使用。回去后可以告诉 Mira 眼睛感觉如何。";
+      renderStepFlow(activeTasks.length);
+      els.timer.textContent = "00:00";
+      els.ring.style.setProperty("--progress", "100%");
+      els.doneBtn.hidden = false;
+      window.setTimeout(() => els.doneBtn.focus({ preventScroll: true }), 80);
+      maybeSpeakCompletion();
     }
 
     function tick() {
@@ -700,8 +778,7 @@
       if (remaining <= 0) {
         window.clearInterval(ticker);
         ticker = null;
-        els.doneBtn.hidden = false;
-        maybeSpeakCompletion();
+        showCompletion();
       }
     }
 

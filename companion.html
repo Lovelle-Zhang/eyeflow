@@ -6,20 +6,20 @@
   <title>Mira</title>
   <style>
     :root {
-      --ink: #18201f;
-      --muted: #68706d;
-      --line: #dce5df;
-      --mint: #0f9f7a;
-      --mint-soft: #d9f4eb;
-      --blue-soft: #e3ecff;
-      --amber-soft: #fff0d7;
-      --rose-soft: #ffe0e8;
+      --ink: #1b2622;
+      --muted: #64736b;
+      --line: #d8e2d6;
+      --mint: #2a927a;
+      --mint-soft: #dcefe5;
+      --blue-soft: #e5edf1;
+      --amber-soft: #f5ead3;
+      --rose-soft: #f7dde5;
       --mira-mouth: rgba(126, 244, 216, 0.78);
       --mira-antenna: rgba(15, 23, 21, 0.36);
       --mira-antenna-glow: rgba(107, 224, 203, 0.26);
       --mira-rest-mouth: rgba(255, 214, 225, 0.82);
-      --mira-signal: #77e2bf;
-      --mira-signal-glow: rgba(119, 226, 191, 0.95);
+      --mira-signal: #80d7bd;
+      --mira-signal-glow: rgba(128, 215, 189, 0.74);
     }
 
     * {
@@ -139,8 +139,8 @@
 
     .theme-day .pet {
       background:
-        radial-gradient(circle at 30% 18%, rgba(196, 232, 255, 0.7) 0 16px, transparent 27px),
-        linear-gradient(150deg, #ffffff 0%, #eef8f4 50%, #dcecff 100%);
+        radial-gradient(circle at 30% 18%, rgba(229, 237, 241, 0.74) 0 16px, transparent 27px),
+        linear-gradient(150deg, #fbfcf6 0%, #edf6ef 50%, #e5edf1 100%);
       box-shadow:
         inset 0 0 0 1px rgba(24, 32, 31, 0.06),
         inset 0 -10px 20px rgba(15, 159, 122, 0.1);
@@ -198,18 +198,18 @@
     }
 
     .focus {
-      --mira-signal: #67d9ff;
-      --mira-signal-glow: rgba(103, 217, 255, 0.95);
+      --mira-signal: #7cc6dd;
+      --mira-signal-glow: rgba(124, 198, 221, 0.72);
     }
 
     .blink {
-      --mira-signal: #edcc72;
-      --mira-signal-glow: rgba(237, 204, 114, 0.56);
+      --mira-signal: #e9c979;
+      --mira-signal-glow: rgba(233, 201, 121, 0.58);
     }
 
     .rest {
-      --mira-signal: #ff78a4;
-      --mira-signal-glow: rgba(255, 120, 164, 0.95);
+      --mira-signal: #e78da8;
+      --mira-signal-glow: rgba(231, 141, 168, 0.72);
     }
 
     .face {
@@ -229,7 +229,7 @@
       width: 5px;
       height: 5px;
       border-radius: 50%;
-      background: #ffffff;
+      background: #fbfcf6;
       animation: blink 5s ease-in-out infinite;
     }
 
@@ -377,8 +377,17 @@
       place-items: center;
     }
 
+    .icon-btn:focus {
+      outline: none;
+    }
+
+    .icon-btn:focus-visible {
+      outline: 2px solid rgba(15, 159, 122, 0.46);
+      outline-offset: 2px;
+    }
+
     .theme-day .icon-btn {
-      background: #f4f7f2;
+      background: #eef4ed;
       border: 1px solid var(--line);
       color: var(--ink);
     }
@@ -391,24 +400,25 @@
     .focus .pet {
       background:
         linear-gradient(150deg, #132b33 0%, #1d3d48 48%, #142329 100%);
+      animation: focusBreathe 5.2s ease-in-out infinite;
     }
 
     .theme-day.focus .pet {
       background:
-        radial-gradient(circle at 31% 18%, rgba(104, 224, 198, 0.32) 0 16px, transparent 27px),
-        linear-gradient(150deg, #ffffff 0%, #e8f6ff 50%, #dff8ef 100%);
+        radial-gradient(circle at 31% 18%, rgba(128, 215, 189, 0.26) 0 16px, transparent 27px),
+        linear-gradient(150deg, #fbfcf6 0%, #e5edf1 50%, #dcefe5 100%);
     }
 
     .blink .pet {
       background:
         linear-gradient(150deg, #202c27 0%, #303727 48%, #142421 100%);
-      transform: translateY(-2px);
+      animation: blinkCue 2.2s ease-in-out infinite;
     }
 
     .theme-day.blink .pet {
       background:
-        radial-gradient(circle at 31% 18%, rgba(104, 224, 198, 0.3) 0 16px, transparent 27px),
-        linear-gradient(150deg, #ffffff 0%, #fff6df 50%, #e4f8ef 100%);
+        radial-gradient(circle at 31% 18%, rgba(128, 215, 189, 0.24) 0 16px, transparent 27px),
+        linear-gradient(150deg, #fbfcf6 0%, #f5ead3 50%, #dcefe5 100%);
     }
 
     .blink .face::before,
@@ -443,8 +453,8 @@
 
     .theme-day.rest .pet {
       background:
-        radial-gradient(circle at 31% 18%, rgba(245, 202, 86, 0.28) 0 16px, transparent 27px),
-        linear-gradient(150deg, #ffffff 0%, #fff0f4 52%, #fff3dc 100%);
+        radial-gradient(circle at 31% 18%, rgba(233, 201, 121, 0.24) 0 16px, transparent 27px),
+        linear-gradient(150deg, #fbfcf6 0%, #f7dde5 52%, #f5ead3 100%);
     }
 
     .rest .mouth {
@@ -517,6 +527,38 @@
         transform: translateY(-4px);
       }
     }
+
+    @keyframes focusBreathe {
+      0%, 100% {
+        transform: translateY(0) scale(1);
+      }
+      50% {
+        transform: translateY(-2px) scale(1.015);
+      }
+    }
+
+    @keyframes blinkCue {
+      0%, 100% {
+        transform: translateY(0) scale(1);
+      }
+      42% {
+        transform: translateY(-2px) scale(1.025);
+      }
+      58% {
+        transform: translateY(0) scale(0.995);
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *,
+      *::before,
+      *::after {
+        animation-duration: 0.001ms !important;
+        animation-iteration-count: 1 !important;
+        scroll-behavior: auto !important;
+        transition-duration: 0.001ms !important;
+      }
+    }
   </style>
 </head>
 <body>
@@ -531,7 +573,7 @@
       </div>
       <div class="body">
         <strong id="title">Mira 很安静</strong>
-        <p id="message">我会在旁边看着节奏，先轻轻提醒。</p>
+        <p id="message">我会在旁边看着节奏，先低打扰陪伴。</p>
       </div>
       <div class="actions">
         <button class="icon-btn" id="openBtn" type="button" title="打开 EyeFlow">
@@ -546,10 +588,10 @@
 
   <script>
     const moods = [
-      ["", "Mira 很安静", "我会在旁边看着节奏，先轻轻提醒。"],
-      ["focus", "Mira 陪你专注", "到点我先轻提醒，不会突然打断。"],
+      ["", "Mira 很安静", "我会在旁边看着节奏，先低打扰陪伴。"],
+      ["focus", "Mira 陪你专注", "到恢复断点我再轻轻提示，不会突然打断。"],
       ["blink", "Mira 在提醒眨眼", "轻轻眨几次眼，让眼睛重新湿润一点。"],
-      ["rest", "Mira 想让你休息", "找一个自然断点，看远处 20 秒。"]
+      ["rest", "Mira 想让你恢复一下", "找一个恢复断点，看远处 20 秒。"]
     ];
     let moodIndex = 0;
     let hasLiveState = false;
@@ -557,8 +599,10 @@
     let dragState = null;
     let hoverOpenTimer = null;
     let hoverCloseTimer = null;
+    let isHoveringCompanion = false;
     let theme = getTheme();
     const previewMood = getPreviewMood();
+    let currentMood = previewMood || "";
     const compactPreview = new URLSearchParams(window.location.search).get("compact") === "1";
     const isDesktopShell = Boolean(window.eyeflowDesktop);
     const tapMoveThreshold = 8;
@@ -581,15 +625,18 @@
 
     function applyState(state) {
       const mood = state.mood === "calm" ? "" : state.mood || "";
+      currentMood = mood;
       const booting = companion.classList.contains("booting") ? "booting" : "";
       const ready = companion.classList.contains("ready") ? "ready" : "";
       const settling = companion.classList.contains("settling") ? "settling" : "";
       const expanded = companion.classList.contains("expanded") ? "expanded" : "";
       companion.className = `companion theme-${theme} ${mood} ${booting} ${ready} ${settling} ${expanded}`.trim();
       title.textContent = state.title || "Mira 很安静";
-      message.textContent = state.message || "我会在旁边看着节奏，先轻轻提醒。";
+      message.textContent = mood === "rest"
+        ? `${state.message || "找一个恢复断点，看远处 20 秒。"} 点我会打开休息指引。`
+        : state.message || "我会在旁边看着节奏，先低打扰陪伴。";
       if (state.mood === "rest" && window.eyeflowDesktop) {
-        window.eyeflowDesktop.notify(state.message || "找一个自然断点，看远处 20 秒。");
+        window.eyeflowDesktop.notify(state.message || "找一个恢复断点，看远处 20 秒。");
       }
     }
 
@@ -699,11 +746,19 @@
       }
     }
 
+    function releaseMouseFocus(event) {
+      if (event.detail > 0) event.currentTarget.blur();
+    }
+
     function scheduleHoverOpen() {
       clearHoverOpenTimer();
       clearHoverCloseTimer();
       setHovering(true);
-      if (isExpanded || dragState) return;
+      if (dragState) return;
+      if (isExpanded) {
+        if (isDesktopShell) setExpanded(true);
+        return;
+      }
       hoverOpenTimer = window.setTimeout(() => {
         hoverOpenTimer = null;
         if (!isExpanded && !dragState) {
@@ -725,11 +780,13 @@
       }, hoverCloseDelay);
     }
 
-    document.querySelector("#openBtn").addEventListener("click", () => {
+    document.querySelector("#openBtn").addEventListener("click", (event) => {
+      releaseMouseFocus(event);
       openDashboard();
     });
 
-    document.querySelector("#collapseBtn").addEventListener("click", () => {
+    document.querySelector("#collapseBtn").addEventListener("click", (event) => {
+      releaseMouseFocus(event);
       setExpanded(false);
     });
 
@@ -782,6 +839,10 @@
       companion.classList.remove("dragging");
       if (!wasDrag && event.target.closest(".pet")) {
         event.preventDefault();
+        if (isDesktopShell && currentMood === "rest") {
+          openDashboard({ restGuide: true });
+          return;
+        }
         toggleExpanded();
       }
     });
@@ -789,27 +850,32 @@
     window.addEventListener("blur", () => {
       clearHoverOpenTimer();
       clearHoverCloseTimer();
+      isHoveringCompanion = false;
       setHovering(false);
       dragState = null;
       companion.classList.remove("dragging");
     });
 
-    pet.addEventListener("mouseenter", scheduleHoverOpen);
-    pet.addEventListener("mouseleave", () => {
-      if (isDesktopShell) {
-        scheduleHoverClose();
-      } else {
-        clearHoverOpenTimer();
-      }
-    });
-    companion.addEventListener("mouseenter", () => {
-      if (!isDesktopShell) clearHoverCloseTimer();
-    });
-    companion.addEventListener("mouseleave", scheduleHoverClose);
+    function handleCompanionEnter() {
+      if (isHoveringCompanion) return;
+      isHoveringCompanion = true;
+      scheduleHoverOpen();
+    }
 
-    function openDashboard() {
+    function handleCompanionLeave() {
+      if (!isHoveringCompanion) return;
+      isHoveringCompanion = false;
+      scheduleHoverClose();
+    }
+
+    companion.addEventListener("mouseenter", handleCompanionEnter);
+    companion.addEventListener("pointerenter", handleCompanionEnter);
+    companion.addEventListener("mouseleave", handleCompanionLeave);
+    companion.addEventListener("pointerleave", handleCompanionLeave);
+
+    function openDashboard(options = {}) {
       if (window.eyeflowDesktop) {
-        window.eyeflowDesktop.showDashboard();
+        window.eyeflowDesktop.showDashboard(options);
         return;
       }
       window.location.href = "index.html";

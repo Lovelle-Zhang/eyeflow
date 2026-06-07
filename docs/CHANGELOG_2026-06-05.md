@@ -1,5 +1,44 @@
 # EyeFlow Changelog - 2026-06-05
 
+## Recovery Library
+
+- Expanded the forced-rest recovery library with slow breathing, palm-cover darkness, jaw release, and shoulder-blade release steps.
+- Added a `呼吸` recovery mode for users who want a quieter eyes-off-screen flow.
+- Updated the mixed recovery sequence so it now blends gaze, blinking, breathing, face release, neck release, and closed-eye rest.
+- Synced the desktop full-screen recovery fallback with the new breathing step and task whitelist.
+- Kept eye-exercise guidance non-medical and explicit about not pressing the eyeball.
+
+## Visual Polish
+
+- Reduced the Today metrics from card-like tiles into a lighter signal strip.
+- Changed the load-band legend into a small three-segment rail so it supports the current state without feeling like analytics.
+- Tightened Settings reminder and recovery-mode buttons so labels no longer break awkwardly on desktop or mobile widths.
+
+## Mira Motion
+
+- Added quieter state-aware motion for Mira: slow breathing in calm/focus states, a short blink cue for blink reminders, and a softer rest nudge.
+- Synced the main Today Mira and browser fallback companion with the same low-intensity motion language.
+- Added `prefers-reduced-motion` handling so Mira and UI transitions respect users who reduce motion at the system level.
+
+## Rest Guidance
+
+- When desktop Mira is in the pink rest state, clicking the avatar now opens EyeFlow and guides focus to the rest action instead of only toggling the speech bubble.
+- Added a short rest-guide toast so users understand that the `休息` button starts the guided recovery flow.
+
+## Distribution QA
+
+- Regenerated the finished `dist/mac/EyeFlow.app` bundle and ZIP for finished-app desktop QA.
+- Rebuilt the private-alpha DMG with the local `hdiutil` fallback after the electron-builder DMG helper download stalled.
+- Verified the fallback DMG image info, mounted contents, `EyeFlow.app` identity, `/Applications` link, and clean detach.
+
+## Mira Visibility
+
+- Added a unified Mira reveal path that clamps the floating avatar back onto the visible work area, restores always-on-top behavior, and brings it forward without stealing focus by default.
+- `显示 Mira`, `找回 Mira`, and Mira speech-bubble expansion now share the same reachability logic.
+- Added a lightweight periodic reachability check plus display-change handling so Mira is less likely to disappear after monitor or Spaces changes.
+- Sleep/lock lifecycle recovery now distinguishes system-hidden Mira from user-hidden Mira.
+- Hardened companion hide calls so lifecycle cleanup no longer calls `hide()` on destroyed Electron windows.
+
 ## Timer Reliability
 
 - Fixed a cross-day timer bug where EyeFlow could still show elapsed focus time after the Mac woke up or the app remained open overnight.

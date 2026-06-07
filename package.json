@@ -1,14 +1,26 @@
 {
   "name": "eyeflow",
   "version": "0.1.0",
-  "description": "A calm desktop eye-care companion for deep work.",
+  "description": "A low-interruption recovery system for screen-heavy work.",
   "author": "EyeFlow",
   "main": "main.js",
   "scripts": {
     "start": "electron .",
     "install:mirror": "ELECTRON_MIRROR=https://npmmirror.com/mirrors/electron/ npm install",
+    "build:app": "electron-builder --mac dir --publish never",
     "build:mac": "electron-builder --mac --publish never",
-    "build:dmg": "electron-builder --mac dmg --publish never"
+    "build:dmg": "electron-builder --mac dmg --publish never",
+    "build:zip": "electron-builder --mac zip --publish never",
+    "install:local": "node scripts/install-local-app.js",
+    "refresh:local": "node scripts/refresh-local-app.js",
+    "smoke:core": "node scripts/smoke-core.js",
+    "smoke:onboarding": "node scripts/smoke-onboarding-flow.js",
+    "smoke:retention": "node scripts/smoke-retention-moments.js",
+    "smoke:rest": "node scripts/smoke-rest-flow.js",
+    "smoke:release": "node scripts/smoke-release-flow.js",
+    "smoke:installed": "node scripts/smoke-installed-app.js",
+    "smoke:app": "node scripts/smoke-packaged-app.js",
+    "launch:preflight": "node scripts/launch-preflight.js"
   },
   "private": true,
   "devDependencies": {
@@ -22,6 +34,8 @@
     "asar": true,
     "files": [
       "index.html",
+      "eyeflow-core.js",
+      "eyeflow-recovery-data.js",
       "companion.html",
       "companion-panel.html",
       "break-lock.html",
@@ -33,6 +47,11 @@
     "mac": {
       "category": "public.app-category.productivity",
       "icon": "assets/icon.icns",
+      "hardenedRuntime": true,
+      "gatekeeperAssess": false,
+      "entitlements": "build/entitlements.mac.plist",
+      "entitlementsInherit": "build/entitlements.mac.inherit.plist",
+      "notarize": true,
       "target": [
         "dir",
         "dmg",
