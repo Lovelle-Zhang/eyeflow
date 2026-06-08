@@ -166,7 +166,7 @@ function diagnosticsSnapshot() {
   };
 }
 
-function captureDebugPage(win, label) {
+function captureDebugPage(win, label, delayMs = 600) {
   if (!debugCapture || !win || win.isDestroyed()) return;
   const outputPath = path.join(debugCaptureDir, `eyeflow-${label}-capture.png`);
   setTimeout(() => {
@@ -178,7 +178,7 @@ function captureDebugPage(win, label) {
     }).catch((error) => {
       console.warn(`[EyeFlow:${label}] capture failed`, error.message);
     });
-  }, 600);
+  }, delayMs);
 }
 
 function captureDebugDashboardView(viewName) {
@@ -255,17 +255,60 @@ function captureDebugOnboarding() {
     dashboardWindow.webContents.executeJavaScript(`(() => {
       if (typeof showOnboarding !== "function") return { ok: false, reason: "missing showOnboarding" };
       showOnboarding();
-      return {
-        ok: true,
-        onboardingVisible: document.querySelector("#onboardingOverlay")?.classList.contains("show") || false
-      };
+      return new Promise((resolve) => {
+        window.setTimeout(() => {
+          const overlay = document.querySelector("#onboardingOverlay");
+          const actions = document.querySelector(".onboarding-actions");
+          const primaryAction = document.querySelector("#startOnboardingBtn");
+          const pill = document.querySelector(".mira-intro .state-label");
+          const role = document.querySelector("#onboardingMiraRoleTitle");
+          const check = document.querySelector("#onboardingCheckTitle");
+          const next = document.querySelector("#onboardingNextTitle");
+          const rectFor = (element) => {
+            if (!element) return null;
+            const rect = element.getBoundingClientRect();
+            return {
+              left: Math.round(rect.left),
+              top: Math.round(rect.top),
+              right: Math.round(rect.right),
+              bottom: Math.round(rect.bottom),
+              width: Math.round(rect.width),
+              height: Math.round(rect.height)
+            };
+          };
+          const actionRect = rectFor(primaryAction);
+          const roleRect = rectFor(role);
+          const checkRect = rectFor(check);
+          const nextRect = rectFor(next);
+          resolve({
+            ok: true,
+            onboardingVisible: overlay?.classList.contains("show") || false,
+            pillText: pill?.textContent?.trim() || "",
+            primaryActionText: primaryAction?.textContent?.trim() || "",
+            primaryActionVisible: Boolean(actionRect)
+              && actionRect.left >= 0
+              && actionRect.top >= 0
+              && actionRect.right <= window.innerWidth
+              && actionRect.bottom <= window.innerHeight,
+            primaryActionSticky: window.getComputedStyle(actions || document.body).position === "sticky",
+            sectionsOrdered: Boolean(roleRect && checkRect && nextRect)
+              && roleRect.top < checkRect.top
+              && checkRect.top <= nextRect.top,
+            actionRect,
+            viewport: {
+              width: window.innerWidth,
+              height: window.innerHeight
+            }
+          });
+        }, 520);
+      });
     })()`).then((result) => {
-      console.log("[EyeFlow:debug] onboarding", result);
-      captureDebugPage(dashboardWindow, "dashboard-onboarding");
+      console.log("[EyeFlow:debug] onboarding", JSON.stringify(result));
+      captureDebugPage(dashboardWindow, "dashboard-onboarding", 120);
     }).catch((error) => {
       console.warn("[EyeFlow:debug] onboarding failed", error.message);
     });
-  }, 1200);
+  }, 1700);
 }
 
 function runDebugForcePreview() {
@@ -351,7 +394,7 @@ function runDebugRestClick() {
     if (!companionWindow || companionWindow.isDestroyed()) return;
     companionWindow.webContents.send("state:update", latestState);
     setTimeout(() => runDebugRestClickScript(), 350);
-  }, 1200);
+  }, debugOnboarding ? 5200 : 1200);
 }
 
 function runDebugRestClickScript() {

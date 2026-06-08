@@ -1,15 +1,34 @@
-# EyeFlow Release Checklist
+# EyeFlow Release Candidate Checklist
 
-This checklist is for private alpha builds before sharing EyeFlow with another tester.
+This checklist keeps EyeFlow ready while Apple Developer registration is blocked. Treat it as two gates: the unsigned RC gate we can run now, and the signed public gate that opens after Developer ID access is ready.
+
+## RC Gate While Waiting For Developer ID
+
+- Run `npm run release:rc` after product-facing changes.
+- Confirm the command passes source smoke checks, app bundle build, local install, installed-app smoke, and finished-app UI smoke.
+- Use `npm run release:rc:artifacts` only when you need fresh unsigned DMG/ZIP artifacts for trusted private testers; this path uses `hdiutil` for the temporary unsigned DMG.
+- Keep unsigned builds limited to trusted testers using `docs/BETA_INSTALL_GUIDE.md`.
+- Do not publish publicly until `npm run release:public` passes with Developer ID signing.
+
+## Public Gate After Developer ID
+
+- Apple Developer Program membership is active.
+- Developer ID Application certificate is available in the build keychain or CI secrets.
+- Notarization credentials are configured as described in `docs/CODESIGN_NOTARIZE.md`.
+- Run `npm run release:public`.
+- Confirm `npm run launch:preflight` passes without `--allow-unsigned`.
+- Upload `dist/release/v0.1.0` contents as the release candidate package.
 
 ## Build Artifacts
 
-- Build command: `npm run build:mac`
+- App RC command: `npm run release:rc`
+- Unsigned artifact RC command: `npm run release:rc:artifacts`
+- Public signed release command: `npm run release:public`
 - Packaged-app smoke command: `npm run smoke:app`
 - App bundle: `dist/mac/EyeFlow.app`
 - DMG installer: `dist/EyeFlow-0.1.0-x64.dmg`
 - ZIP archive: `dist/EyeFlow-0.1.0-x64.zip`
-- Current release notes: `docs/RELEASE_NOTES_v0.1.0-alpha.1.md`
+- Current release notes: `docs/RELEASE_NOTES_v0.1.0.md`
 - Desktop experience QA should use the finished EyeFlow app bundle, not `npm start` / the generic Electron development shell.
 
 ## Identity
@@ -26,7 +45,7 @@ This checklist is for private alpha builds before sharing EyeFlow with another t
 - Completing assessment starts the first focus round from `00:00`.
 - Skipping assessment leaves a quiet calibration callout on Today.
 - Mira appears as the desktop companion and can be restored with `找回 Mira`.
-- v0.1.0-alpha.1 installed-app smoke test confirmed EyeFlow opens from `/Applications` and Mira is visible.
+- Recent installed-app smoke test confirmed EyeFlow opens from `/Applications` and Mira is visible.
 
 ## Core Flow
 
@@ -39,7 +58,7 @@ This checklist is for private alpha builds before sharing EyeFlow with another t
 - Recovery modes change the Mira-led task sequence.
 - Strong rest voice guidance uses short task-specific voice cues and a slower macOS `say` rate for calmer pacing.
 - Full-screen recovery completion changes to a clear return state, focuses `回到 EyeFlow`, and avoids native blue/yellow focus rings.
-- v0.1.0-alpha.1 installed-app smoke test confirmed pause/resume, ordinary rest, and `强制爱` preview.
+- Recent installed-app smoke test confirmed pause/resume, ordinary rest, and `强制爱` preview.
 
 ## Desktop Product Controls
 
@@ -83,8 +102,8 @@ This checklist is for private alpha builds before sharing EyeFlow with another t
 - 2026-06-06 packaged-app debug hygiene QA confirmed `EYEFLOW_DEBUG_FORCE_PREVIEW=1` no longer mutates the persisted voice-guide setting; the return probe logged `voicePreserved: true`.
 - macOS `screencapture` can return wallpaper-only images in this environment; use EyeFlow internal `capturePage()` debug captures when screen-recording permissions make system screenshots unreliable.
 
-## Known Alpha Notes
+## Known Unsigned RC Notes
 
-- The app is unsigned in private alpha builds.
+- Unsigned RC builds must stay private until Developer ID signing and notarization pass.
 - Chrome/browser pages are preview fallbacks; the packaged desktop app is the source of truth for fullscreen recovery.
 - If electron-builder cannot download its DMG helper, use the simple `hdiutil` fallback DMG and verify it by running image info, mounting it, checking `EyeFlow.app` plus the `/Applications` link, and detaching the volume.

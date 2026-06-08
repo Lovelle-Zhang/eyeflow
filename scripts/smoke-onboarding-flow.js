@@ -66,6 +66,9 @@ function main() {
   assertIncludes(indexHtml, "保存状态，开始第一轮", "onboarding completion button");
   assertIncludes(indexHtml, "开始专注；Mira 变粉色时点它打开休息指引。", "onboarding next-step copy");
   assertIncludes(indexHtml, "第一轮已开始。Mira 变粉色时点它打开休息指引。", "first-round landing hint");
+  assertMatches(indexHtml, /\.mira-intro \.state-label\s*\{[\s\S]*color:\s*#17382f;[\s\S]*background:\s*rgba\(236,\s*255,\s*246,\s*0\.95\);[\s\S]*font-weight:\s*780;/, "onboarding status pill keeps readable contrast");
+  assertMatches(indexHtml, /\.onboarding-actions\s*\{[\s\S]*position:\s*sticky;[\s\S]*bottom:\s*-16px;/, "onboarding primary actions stay visible");
+  assertMatches(indexHtml, /class="onboarding-permission-note"[\s\S]*class="actions onboarding-actions"/, "onboarding permission note stays before sticky actions");
   assertMatches(indexHtml, /id="sessionPanel"\s+tabindex="-1"/, "session panel can receive first-round focus");
   assertMatches(indexHtml, /function\s+completeInitialAssessment\(\)[\s\S]*showFirstRoundLanding\(\);/, "assessment completion lands on first round");
   assertMatches(indexHtml, /function\s+showFirstRoundLanding\(\)[\s\S]*els\.sessionStartHint\.hidden\s*=\s*false;[\s\S]*focusSessionPanel\(\{\s*focusTarget:\s*"panel"\s*\}\);/, "first-round hint focuses session panel");

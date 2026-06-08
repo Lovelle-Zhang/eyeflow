@@ -19,9 +19,13 @@
     "smoke:onboarding": "node scripts/smoke-onboarding-flow.js",
     "smoke:retention": "node scripts/smoke-retention-moments.js",
     "smoke:rest": "node scripts/smoke-rest-flow.js",
+    "smoke:visual": "node scripts/smoke-visual-utils-test.js",
     "smoke:release": "node scripts/smoke-release-flow.js",
     "smoke:installed": "node scripts/smoke-installed-app.js",
     "smoke:app": "node scripts/smoke-packaged-app.js",
+    "release:rc": "node scripts/release-candidate-check.js",
+    "release:rc:artifacts": "node scripts/release-candidate-check.js --artifacts",
+    "release:public": "node scripts/release-candidate-check.js --artifacts --signed",
     "launch:preflight": "node scripts/launch-preflight.js"
   },
   "private": true,

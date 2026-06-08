@@ -1,6 +1,6 @@
 # EyeFlow Public Launch Checklist
 
-This checklist is for moving from private alpha to a public macOS release.
+This checklist is for moving from unsigned release-candidate builds to a public macOS release.
 
 ## Required Before Public Release
 
@@ -10,8 +10,8 @@ This checklist is for moving from private alpha to a public macOS release.
   - `APPLE_API_KEY`, `APPLE_API_KEY_ID`, and `APPLE_API_ISSUER`.
   - `APPLE_ID`, `APPLE_APP_SPECIFIC_PASSWORD`, and `APPLE_TEAM_ID`.
   - `APPLE_KEYCHAIN` and `APPLE_KEYCHAIN_PROFILE`.
-- `npm run build:mac` produces signed DMG and ZIP artifacts.
-- `npm run smoke:app` passes against `dist/mac/EyeFlow.app`.
+- `npm run release:rc` passes before requesting a public build.
+- `npm run release:public` produces signed DMG and ZIP artifacts and passes finished-app smoke.
 - `npm run launch:preflight` passes without `--allow-unsigned`.
 - `dist/EyeFlow-0.1.0-SHA256SUMS.txt` is uploaded with the release.
 - `docs/PRIVACY.md` is linked from the release page or website.
@@ -34,6 +34,8 @@ The public download page should include:
 ## While Waiting For Developer ID Access
 
 - Share only with trusted testers who understand this is an unsigned build.
+- Keep `npm run release:rc` green after every product-facing change.
+- Use `npm run release:rc:artifacts` only when you need fresh unsigned DMG/ZIP artifacts.
 - Use `docs/BETA_INSTALL_GUIDE.md` as the tester install instructions.
 - Use `docs/DOWNLOAD_PAGE_COPY.md` as the draft download page copy.
 - Use `docs/TESTER_FEEDBACK_FORM.md` as the feedback questionnaire.

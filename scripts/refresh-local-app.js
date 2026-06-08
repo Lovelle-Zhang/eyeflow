@@ -30,6 +30,7 @@ function main() {
   run("Check rest recovery flow", "npm", ["run", "smoke:rest"], { timeout: 30000 });
   run("Check source onboarding flow", "npm", ["run", "smoke:onboarding"], { timeout: 30000 });
   run("Check retention moments", "npm", ["run", "smoke:retention"], { timeout: 30000 });
+  run("Check visual smoke helper", "npm", ["run", "smoke:visual"], { timeout: 30000 });
   run("Check release wiring", "npm", ["run", "smoke:release"], { timeout: 30000 });
   run("Build local app bundle", "npm", ["run", "build:app"], { timeout: 180000 });
   run("Install /Applications/EyeFlow.app", "npm", ["run", "install:local"], { timeout: 180000 });

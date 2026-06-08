@@ -79,6 +79,9 @@ function main() {
   assertIncludes(indexHtml, "保存状态，开始第一轮", "installed onboarding button");
   assertIncludes(indexHtml, "第一轮已开始。Mira 变粉色时点它打开休息指引。", "installed first-round landing");
   assertIncludes(indexHtml, "点“休息”开始，Mira 会一步步带你。", "installed rest guide hint");
+  assertMatches(indexHtml, /\.mira-intro \.state-label\s*\{[\s\S]*color:\s*#17382f;[\s\S]*background:\s*rgba\(236,\s*255,\s*246,\s*0\.95\);[\s\S]*font-weight:\s*780;/, "installed onboarding pill keeps readable contrast");
+  assertMatches(indexHtml, /\.onboarding-actions\s*\{[\s\S]*position:\s*sticky;[\s\S]*bottom:\s*-16px;/, "installed onboarding actions stay visible");
+  assertMatches(indexHtml, /class="onboarding-permission-note"[\s\S]*class="actions onboarding-actions"/, "installed onboarding permission note stays before sticky actions");
   assertMatches(indexHtml, /id="sessionPanel"\s+tabindex="-1"/, "installed session panel focus target");
   assertMatches(indexHtml, /focusSessionPanel\(\{\s*focusTarget:\s*"panel"\s*\}\);/, "installed first-round panel focus");
   assertMatches(indexHtml, /function\s+toggleSession\(\)\s*\{[\s\S]*clearFirstRoundLanding\(\);/, "installed session action clears first-round hint");

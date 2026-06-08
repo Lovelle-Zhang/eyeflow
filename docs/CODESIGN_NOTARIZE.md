@@ -25,12 +25,24 @@ You should see a `Developer ID Application` identity for the Apple team that wil
 
 ## Release Build
 
+Before Apple credentials are available, keep the app release-candidate-ready with:
+
+```bash
+npm run release:rc
+```
+
+When you need to refresh unsigned DMG/ZIP artifacts for private testing:
+
+```bash
+npm run release:rc:artifacts
+```
+
+The unsigned artifact gate builds the ZIP with electron-builder and creates the private-test DMG with macOS `hdiutil`, so it does not depend on electron-builder's notarized DMG helper before Developer ID access is ready. These unsigned gates are useful for engineering QA, but they are not public launch clearance.
+
 After credentials are configured:
 
 ```bash
-npm run build:mac
-npm run smoke:app
-npm run launch:preflight
+npm run release:public
 ```
 
 `npm run launch:preflight` must pass without `--allow-unsigned`.

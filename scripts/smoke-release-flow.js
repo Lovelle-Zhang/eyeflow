@@ -48,6 +48,7 @@ function main() {
   const installLocalJs = read("scripts/install-local-app.js");
   const installedSmokeJs = read("scripts/smoke-installed-app.js");
   const packagedSmokeJs = read("scripts/smoke-packaged-app.js");
+  const visualSmokeJs = read("scripts/smoke-visual-utils.js");
   const launchPreflightJs = read("scripts/launch-preflight.js");
 
   [
@@ -61,6 +62,9 @@ function main() {
     "scripts/install-local-app.js",
     "scripts/smoke-installed-app.js",
     "scripts/smoke-packaged-app.js",
+    "scripts/smoke-visual-utils.js",
+    "scripts/smoke-visual-utils-test.js",
+    "scripts/release-candidate-check.js",
     "scripts/launch-preflight.js"
   ].forEach(assertScript);
   assertScript("eyeflow-session-flow.js");
@@ -75,9 +79,13 @@ function main() {
   assertPackageScript(pkg, "smoke:onboarding", "node scripts/smoke-onboarding-flow.js");
   assertPackageScript(pkg, "smoke:retention", "node scripts/smoke-retention-moments.js");
   assertPackageScript(pkg, "smoke:rest", "node scripts/smoke-rest-flow.js");
+  assertPackageScript(pkg, "smoke:visual", "node scripts/smoke-visual-utils-test.js");
   assertPackageScript(pkg, "smoke:release", "node scripts/smoke-release-flow.js");
   assertPackageScript(pkg, "smoke:installed", "node scripts/smoke-installed-app.js");
   assertPackageScript(pkg, "smoke:app", "node scripts/smoke-packaged-app.js");
+  assertPackageScript(pkg, "release:rc", "node scripts/release-candidate-check.js");
+  assertPackageScript(pkg, "release:rc:artifacts", "node scripts/release-candidate-check.js --artifacts");
+  assertPackageScript(pkg, "release:public", "node scripts/release-candidate-check.js --artifacts --signed");
   assertPackageScript(pkg, "launch:preflight", "node scripts/launch-preflight.js");
 
   [
@@ -100,6 +108,7 @@ function main() {
   assertMatches(refreshLocalJs, /run\("Check rest recovery flow",\s*"npm",\s*\["run",\s*"smoke:rest"\]/, "refresh checks rest smoke");
   assertMatches(refreshLocalJs, /run\("Check source onboarding flow",\s*"npm",\s*\["run",\s*"smoke:onboarding"\]/, "refresh checks onboarding smoke");
   assertMatches(refreshLocalJs, /run\("Check retention moments",\s*"npm",\s*\["run",\s*"smoke:retention"\]/, "refresh checks retention smoke");
+  assertMatches(refreshLocalJs, /run\("Check visual smoke helper",\s*"npm",\s*\["run",\s*"smoke:visual"\]/, "refresh checks visual helper smoke");
   assertMatches(refreshLocalJs, /run\("Check release wiring",\s*"npm",\s*\["run",\s*"smoke:release"\]/, "refresh checks release wiring");
   assertMatches(refreshLocalJs, /run\("Build local app bundle",\s*"npm",\s*\["run",\s*"build:app"\]/, "refresh builds app bundle");
   assertMatches(refreshLocalJs, /run\("Install \/Applications\/EyeFlow\.app",\s*"npm",\s*\["run",\s*"install:local"\]/, "refresh installs local app");
@@ -110,6 +119,7 @@ function main() {
   assertMatches(verifyJs, /\["Check rest recovery flow",\s*"smoke:rest"\]/, "verify checks rest smoke");
   assertMatches(verifyJs, /\["Check source onboarding flow",\s*"smoke:onboarding"\]/, "verify checks onboarding smoke");
   assertMatches(verifyJs, /\["Check retention moments",\s*"smoke:retention"\]/, "verify checks retention smoke");
+  assertMatches(verifyJs, /\["Check visual smoke helper",\s*"smoke:visual"\]/, "verify checks visual helper smoke");
   assertMatches(verifyJs, /\["Check release wiring",\s*"smoke:release"\]/, "verify checks release wiring");
 
   assertIncludes(installLocalJs, "/Applications/EyeFlow.app", "local install target");
@@ -123,9 +133,13 @@ function main() {
   assertIncludes(installedSmokeJs, "eyeflow-session-flow.js", "installed smoke checks session flow file");
   assertIncludes(installedSmokeJs, "eyeflow-rest-flow.js", "installed smoke checks rest flow file");
   assertIncludes(installedSmokeJs, "点我会打开休息指引。", "installed smoke checks pink Mira copy");
+  assertIncludes(installedSmokeJs, "installed onboarding pill keeps readable contrast", "installed smoke checks onboarding pill contrast CSS");
+  assertIncludes(installedSmokeJs, "installed onboarding actions stay visible", "installed smoke checks onboarding action visibility CSS");
+  assertIncludes(installedSmokeJs, "installed onboarding permission note stays before sticky actions", "installed smoke checks onboarding permission note order");
 
   [
     "eyeflow-dashboard-capture.png",
+    "eyeflow-dashboard-onboarding-capture.png",
     "eyeflow-dashboard-rhythmView-capture.png",
     "eyeflow-dashboard-rest-guide-capture.png",
     "eyeflow-companion-capture.png",
@@ -134,7 +148,21 @@ function main() {
     "eyeflow-break-lock-complete-capture.png",
     "eyeflow-dashboard-force-return-capture.png"
   ].forEach((captureName) => assertIncludes(packagedSmokeJs, captureName, `packaged smoke capture ${captureName}`));
+  assertIncludes(packagedSmokeJs, "runtimeErrorDiagnostics", "packaged smoke fails on runtime errors");
+  assertIncludes(packagedSmokeJs, "assertOnboardingDomProbe", "packaged smoke checks onboarding DOM layout");
+  assertIncludes(packagedSmokeJs, "smoke-visual-utils", "packaged smoke uses visual helper");
+  assertIncludes(visualSmokeJs, "assertOnboardingPillReadable", "visual helper checks onboarding pill readability");
+  assertIncludes(visualSmokeJs, "assertOnboardingPrimaryActionVisible", "visual helper checks onboarding primary action visibility");
+  assertIncludes(visualSmokeJs, "assertOnboardingVisualQuality", "visual helper exports onboarding quality check");
   assertIncludes(packagedSmokeJs, "voicePreserved", "packaged smoke observes force voice preservation");
+
+  const releaseCandidateJs = read("scripts/release-candidate-check.js");
+  assertIncludes(releaseCandidateJs, "Smoke finished app UI", "release candidate check runs finished app smoke");
+  assertIncludes(releaseCandidateJs, "build:zip", "release candidate artifact check builds unsigned ZIP");
+  assertIncludes(releaseCandidateJs, "Create unsigned DMG with hdiutil", "release candidate artifact check has hdiutil DMG fallback");
+  assertIncludes(releaseCandidateJs, "CSC_IDENTITY_AUTO_DISCOVERY", "release candidate artifact check can build unsigned before Developer ID");
+  assertIncludes(releaseCandidateJs, "--allow-unsigned", "release candidate artifact check uses unsigned preflight before Developer ID");
+  assertIncludes(releaseCandidateJs, "--signed", "release candidate check supports signed public gate");
 
   assertIncludes(launchPreflightJs, "Developer ID signature and hardened runtime", "preflight checks signing");
   assertIncludes(launchPreflightJs, "Gatekeeper assessment passes", "preflight checks Gatekeeper");

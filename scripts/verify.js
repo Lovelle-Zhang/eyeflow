@@ -11,6 +11,7 @@ const checks = [
   ["Check rest recovery flow", "smoke:rest"],
   ["Check source onboarding flow", "smoke:onboarding"],
   ["Check retention moments", "smoke:retention"],
+  ["Check visual smoke helper", "smoke:visual"],
   ["Check release wiring", "smoke:release"]
 ];
 
