@@ -1,0 +1,204 @@
+# EyeFlow Design System
+
+This document is the source of truth for new EyeFlow UI. Use the shared tokens in `eyeflow-design-system.css`; do not introduce one-off font sizes, gaps, padding, radius, or motion values unless there is a documented reason.
+
+## Design Intent
+
+EyeFlow should feel quiet, native to macOS, and low-interruption. UI density should support repeated daily use rather than marketing-style emphasis.
+
+EyeFlow / Mira should aim for the texture of an Apple-native macOS companion app: stable, preference-row driven, lightly grouped, and trustworthy enough to remain open beside daily work. For settings and configuration surfaces, prefer macOS preference page patterns over dashboard modules.
+
+Use:
+
+- Restrained type sizes.
+- Compact but breathable spacing.
+- Few visual layers.
+- 8px default radius for app surfaces.
+- Soft motion that confirms state without demanding attention.
+
+Avoid:
+
+- Random intermediate font sizes.
+- Nested cards inside cards.
+- Oversized headings in tool surfaces.
+- Heavy shadows, decorative glow, and loud color blocks.
+- Layout spacing chosen by eye without token reference.
+- Dashboard-style cards for preference pages.
+- Thick borders, large status-color containers, and module tiles when a preference row is enough.
+
+## Preference Page Patterns
+
+Use these structures for settings and configuration:
+
+- `ef-preference-section` for a lightly grouped section.
+- `ef-preference-row` for label / value / action rows.
+- `ef-segmented-control` for mutually exclusive modes such as L1-L4.
+- `ef-status-pill` only for compact state summaries.
+- `ef-disclosure-row` for collapsed advanced settings.
+- `ef-sidebar-selected` for low-weight sidebar selection.
+
+Rules:
+
+- Preference pages should be built from rows, segmented controls, and light disclosure rows, not dashboard cards.
+- A row should usually contain one label, one value, and at most one action.
+- Status color should be a small hint, never a large container.
+- Use spacing, alignment, and hierarchy before adding borders or background color.
+- Expanded advanced content should remain row/list based and should not reintroduce large cards.
+
+## Typography
+
+Use the token that matches the job:
+
+| Use | Token | Size | Line height |
+| --- | --- | ---: | ---: |
+| Tiny chart labels, dense metadata | `--ef-text-micro` | 11px | `--ef-line-compact` |
+| Secondary companion copy | `--ef-text-caption` | 11.5px | `--ef-line-compact` |
+| Labels, helper text, small buttons | `--ef-text-meta` | 12px | `--ef-line-body` |
+| Quiet descriptions | `--ef-text-helper` | 12.5px | `--ef-line-body` |
+| Dense body text | `--ef-text-body-sm` | 13px | `--ef-line-body` |
+| Standard app body | `--ef-text-body` | 14px | `--ef-line-body` |
+| Main reading body | `--ef-text-body-lg` | 15px | `--ef-line-body` |
+| Longer reading text | `--ef-text-reading` | 15.5px | `--ef-line-reading` |
+| Card titles | `--ef-text-title-sm` | 16px | `--ef-line-title` |
+| Section titles | `--ef-text-title-md` | 18px | `--ef-line-title` |
+| Page titles | `--ef-text-title-lg` | 22px | `--ef-line-tight` |
+| Empty-state or hero title | `--ef-text-display-sm` | 28px | `--ef-line-tight` |
+
+Rules:
+
+- Use `letter-spacing: 0` for normal text.
+- Reserve display sizes for welcome, empty, or lock screens.
+- Prefer 12px to 13px for labels; prefer 14px to 15px for normal controls.
+- Chinese body copy should usually use `--ef-line-body` or `--ef-line-reading`.
+
+## Spacing
+
+Use the shared 2px-based spacing scale:
+
+| Token | Value | Use |
+| --- | ---: | --- |
+| `--ef-space-1` | 4px | Icon/text micro gaps |
+| `--ef-space-2` | 6px | Tight text stacks |
+| `--ef-space-3` | 8px | Title/body gaps |
+| `--ef-space-4` | 10px | Compact component gaps |
+| `--ef-space-5` | 12px | Standard internal gaps |
+| `--ef-space-6` | 14px | Dense card padding |
+| `--ef-space-7` | 16px | Standard card padding |
+| `--ef-space-8` | 18px | Larger groups |
+| `--ef-space-9` | 20px | Section blocks |
+| `--ef-space-10` | 24px | Page padding |
+| `--ef-space-12` | 32px | Large screen padding |
+
+Rules:
+
+- Text title to body: 6-8px.
+- Component icon to label: 6-8px.
+- Card internal padding: 14-16px.
+- Form or setting row gap: 10-12px.
+- Section gap: 18-24px.
+- Page padding: 24-32px.
+
+## Radius
+
+| Token | Value | Use |
+| --- | ---: | --- |
+| `--ef-radius-xs` | 4px | Tiny badges, small pointers |
+| `--ef-radius-sm` | 6px | Pills, compact controls |
+| `--ef-radius-md` | 8px | Default cards, panels, inputs |
+| `--ef-radius-lg` | 12px | Modals and larger sheets |
+| `--ef-radius-xl` | 16px | Rare large calm surfaces |
+| `--ef-radius-pill` | 999px | Status pills, segmented markers, compact rounded chips |
+| `--ef-radius-companion` | 22px | Mira companion body |
+
+Rules:
+
+- Default to `--ef-radius-md`.
+- Do not use large rounded cards for ordinary app sections.
+- Use the companion radius only for Mira character surfaces.
+
+## Controls
+
+| Token | Value | Use |
+| --- | ---: | --- |
+| `--ef-control-sm` | 28px | Compact chips and small buttons |
+| `--ef-control-md` | 34px | Default buttons and inputs |
+| `--ef-control-lg` | 40px | Primary actions in setup or rest flows |
+| `--ef-hit-target` | 32px | Minimum comfortable click target |
+
+Rules:
+
+- Standard button text: 13-14px.
+- Use 8-12px horizontal icon/label spacing.
+- Primary actions should be calm, not visually loud.
+
+## Icons And Symbols
+
+Icons and symbols must have a consistent visual weight. A 14px label paired with a heavy 22px plus sign will make the UI feel web-like and noisy even if the text scale is correct.
+
+| Token | Value | Use |
+| --- | ---: | --- |
+| `--ef-icon-xs` | 12px | Dense metadata, tiny inline status |
+| `--ef-icon-sm` | 14px | Small controls, compact rows |
+| `--ef-icon-md` | 16px | Default buttons, settings rows |
+| `--ef-icon-lg` | 20px | Empty states, larger companion actions |
+| `--ef-icon-xl` | 24px | Rare hero or lock-screen symbols |
+| `--ef-icon-stroke-quiet` | 1.4 | Secondary or low-emphasis icons |
+| `--ef-icon-stroke-base` | 1.6 | Default icon stroke |
+| `--ef-icon-stroke-strong` | 1.8 | Primary actions or active states |
+| `--ef-symbol-weight-quiet` | 500 | Secondary glyphs such as small arrows |
+| `--ef-symbol-weight-base` | 600 | Default text glyph symbols |
+| `--ef-symbol-weight-strong` | 700 | Active plus/minus/check states |
+
+Rules:
+
+- Default UI icons should be 14-16px with stroke 1.4-1.6.
+- Use 20px+ icons only for empty states, rest screens, or companion moments.
+- Plus, minus, chevron, check, close, and alert symbols should match nearby text weight.
+- Avoid oversized `+`, `×`, `!`, and arrow glyphs in compact panels.
+- Prefer line icons over filled icons for quiet controls.
+- Active states may increase color contrast before increasing stroke weight.
+- If an icon sits beside 12px text, use a 12-14px icon; if it sits beside 14px text, use a 14-16px icon.
+- Symbol-only buttons still need a stable hit target, usually `--ef-hit-target`.
+
+## Mira Avatar Standard
+
+Mira is a product character, not decorative chrome. Use the shared 58-unit geometry tokens from `eyeflow-design-system.css` for the default face in the main window, Today stage, desktop companion, and calm onboarding states.
+
+Canonical default avatar:
+
+- Body: `--ef-mira-avatar-size`, `--ef-mira-avatar-radius`.
+- Visor: `--ef-mira-visor-*`.
+- Signal dot: `--ef-mira-signal-*`.
+- Eyes: `--ef-mira-face-*` and `--ef-mira-eye-size`.
+- Mouth: `--ef-mira-mouth-*`; default is a short soft smile, not a long horizontal line.
+- Cheeks and antenna: `--ef-mira-cheek-*` and `--ef-mira-antenna-*`.
+
+Rules:
+
+- Do not create a separate visor, eye, mouth, or antenna coordinate set for a new Mira surface.
+- Larger surfaces may scale the container or add a quiet orbit, but the face itself should stay on the canonical 58-unit proportions unless a state-specific expression requires a documented override.
+- Calm/default/focus states use the short soft smile. Blink/rest states may override eye height or mouth color, but should keep the same width discipline.
+- Stage or orbit decoration must be lower-emphasis than Mira's face. Avoid thick arcs, saturated halos, and large decorative rings that make Mira feel like a badge or game avatar.
+- App icons and tiny brand marks may stay simplified; they are not the expressive Mira avatar.
+
+## Motion
+
+Use:
+
+- `--ef-motion-fast`: hover, small state confirmations.
+- `--ef-motion-base`: panel open, companion reaction.
+- `--ef-motion-slow`: rest flow transitions.
+- `--ef-ease-calm`: default easing.
+
+Rules:
+
+- Motion should reduce uncertainty, not entertain.
+- Avoid looping UI motion outside Mira breathing/rest states.
+- Prefer opacity and small transforms over large movement.
+
+## Implementation Rules
+
+- New CSS must use `--ef-*` tokens for text, spacing, radius, controls, and motion.
+- Existing `--text-*` aliases are compatibility only. Do not add new ones.
+- If a value is missing, extend `eyeflow-design-system.css` first, then use it.
+- If a one-off value is necessary for an illustration or chart, keep it local to that component and explain the reason in the selector name or nearby comment.

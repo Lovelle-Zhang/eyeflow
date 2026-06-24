@@ -6,14 +6,26 @@ This file records product decisions that should survive code edits and rebuilds.
 
 - The app is called EyeFlow.
 - The companion robot is called Mira.
+- EyeFlow is the product container; Mira is the remembered subject and the user-facing protagonist.
 - Do not rename the app to Mira. Do not use old names from earlier prototypes.
 
 ## Product Direction
 
-- EyeFlow is a low-interruption recovery system for people doing long screen-based work.
-- It should reduce burden for eyes and body by helping users complete recovery with minimal disruption, so the product must stay simple, quiet, and comfortable.
-- The core positioning is: EyeFlow is not just reminding users to rest; it helps them complete recovery with the lowest reasonable interruption.
+- EyeFlow is a quiet macOS desktop companion experience for people doing long screen-based work.
+- It should reduce burden for eyes and body by letting Mira help users complete recovery with minimal disruption, so the product must stay simple, quiet, and comfortable.
+- The core positioning is: Mira is not a timer or a monitoring tool; she is a calm desktop companion who helps users remember to rest.
+- First-open and public-facing copy should sell the feeling before explaining mechanics: companion first, differentiation second, features third.
 - Keep only necessary features. Avoid adding complex dashboards, noisy gamification, or heavy workflows.
+
+## Professional Foundation
+
+- EyeFlow's surface can feel healing, but the professional layer must not be softened. Data analysis, eye-health reasoning, and future hardware collection should feel credible enough to support a serious product ecosystem.
+- Product decisions that involve eye health should reference `docs/EYEFLOW_KNOWLEDGE_BASE.md`, including evidence level, source, excluded populations, and claim boundary.
+- Data work should reference `docs/EYEFLOW_DATA_DICTIONARY.md`. Keep raw observations, user self-reports, inferred scores, desktop context, and future hardware signals separate.
+- The eye-load score should be explainable and confidence-aware. It may guide recovery timing and interruption boundaries, but it must not present itself as diagnosis, treatment, or disease prevention.
+- Future hardware support is a product requirement, not a decorative roadmap item. The data model should be ready for blink quality, gaze/viewing distance, ambient light, humidity, posture, signal quality, firmware version, and consent state.
+- Any biometric, eye image, high-frequency gaze, or hardware-derived ocular signal must require explicit opt-in, stricter privacy copy, export/delete controls, and review before it appears in the product.
+- Frontend copy should be calm and human, but professional claims should stay narrow: prefer behavioral terms like `load`, `signal`, `pattern`, `trend`, and `confidence`; avoid unsupported clinical wording.
 
 ## Visual Identity Standards
 

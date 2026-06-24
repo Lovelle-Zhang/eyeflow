@@ -14,12 +14,23 @@
       --blue-soft: #e5edf1;
       --amber-soft: #f5ead3;
       --rose-soft: #f7dde5;
-      --mira-mouth: rgba(126, 244, 216, 0.78);
-      --mira-antenna: rgba(15, 23, 21, 0.36);
-      --mira-antenna-glow: rgba(107, 224, 203, 0.26);
-      --mira-rest-mouth: rgba(255, 214, 225, 0.82);
+      --mira-mouth: rgba(126, 244, 216, 0.54);
+      --mira-antenna: rgba(15, 23, 21, 0.32);
+      --mira-antenna-glow: rgba(107, 224, 203, 0.14);
+      --mira-rest-mouth: rgba(255, 214, 225, 0.74);
       --mira-signal: #80d7bd;
-      --mira-signal-glow: rgba(128, 215, 189, 0.74);
+      --mira-signal-glow: rgba(128, 215, 189, 0.42);
+      --mira-line: calc(var(--ef-icon-stroke-base) * 1px);
+      --popover-bg: rgba(25, 31, 34, 0.82);
+      --popover-line: rgba(255, 255, 255, 0.075);
+      --popover-shadow:
+        0 10px 24px rgba(10, 18, 20, 0.16),
+        0 1px 2px rgba(10, 18, 20, 0.12);
+      --popover-text: rgba(247, 252, 249, 0.94);
+      --popover-muted: rgba(231, 242, 238, 0.68);
+      --popover-context: rgba(231, 242, 238, 0.46);
+      --popover-button-hover: rgba(255, 255, 255, 0.075);
+      --popover-focus: rgba(128, 215, 189, 0.42);
     }
 
     * {
@@ -36,6 +47,8 @@
       font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
       color: var(--ink);
       user-select: none;
+      -webkit-font-smoothing: antialiased;
+      text-rendering: optimizeLegibility;
     }
 
     button {
@@ -47,7 +60,7 @@
     .shell {
       width: 100%;
       height: 100%;
-      padding: 8px;
+      padding: var(--ef-space-3);
       display: grid;
       place-items: center;
     }
@@ -60,7 +73,9 @@
       background: transparent;
       position: relative;
       -webkit-app-region: no-drag;
-      transition: background 120ms ease, box-shadow 120ms ease;
+      transition:
+        background var(--ef-motion-fast) var(--ef-ease-calm),
+        box-shadow var(--ef-motion-fast) var(--ef-ease-calm);
     }
 
     .companion.booting {
@@ -73,19 +88,38 @@
       transition: opacity 160ms ease;
     }
 
+    .companion.speaking {
+      width: calc(100vw - var(--ef-space-6));
+      height: 76px;
+    }
+
     .companion::after {
       display: none;
     }
 
     .companion.expanded {
-      width: 360px;
-      height: 118px;
+      width: 354px;
+      height: 136px;
       padding: 0;
       border: 0;
       border-radius: 0;
       background: transparent;
       box-shadow: none;
       backdrop-filter: none;
+    }
+
+    .companion.expanded::before {
+      content: "";
+      position: absolute;
+      left: 80px;
+      top: 51px;
+      width: var(--ef-space-6);
+      height: var(--ef-space-6);
+      border-radius: var(--ef-radius-xs);
+      background: var(--popover-bg);
+      transform: rotate(45deg);
+      box-shadow: -1px 1px 0 var(--popover-line);
+      z-index: 0;
     }
 
     .companion.expanded::after {
@@ -95,6 +129,19 @@
     .companion.theme-day.expanded {
       background: transparent;
       box-shadow: none;
+    }
+
+    .companion.theme-day {
+      --popover-bg: rgba(251, 252, 246, 0.94);
+      --popover-line: rgba(24, 32, 31, 0.065);
+      --popover-shadow:
+        0 10px 24px rgba(30, 44, 38, 0.09),
+        0 1px 2px rgba(30, 44, 38, 0.06);
+      --popover-text: var(--ink);
+      --popover-muted: rgba(100, 115, 107, 0.76);
+      --popover-context: rgba(100, 115, 107, 0.58);
+      --popover-button-hover: rgba(24, 32, 31, 0.055);
+      --popover-focus: rgba(15, 159, 122, 0.34);
     }
 
     .pet {
@@ -110,12 +157,15 @@
       place-items: center;
       overflow: hidden;
       box-shadow:
-        inset 0 0 0 1px rgba(127, 241, 213, 0.08),
-        inset 0 -12px 24px rgba(3, 10, 12, 0.3);
+        inset 0 0 0 1px rgba(127, 241, 213, 0.07),
+        inset 0 -10px 20px rgba(3, 10, 12, 0.22);
       cursor: pointer;
       -webkit-app-region: no-drag;
       animation: idleFloat 4.8s ease-in-out infinite;
-      transition: transform 160ms ease, box-shadow 160ms ease, background 180ms ease;
+      transition:
+        transform var(--ef-motion-base) var(--ef-ease-calm),
+        box-shadow var(--ef-motion-base) var(--ef-ease-calm),
+        background var(--ef-motion-slow) var(--ef-ease-calm);
     }
 
     .companion.settling .pet,
@@ -131,6 +181,12 @@
       top: 25px;
     }
 
+    .companion.speaking .pet {
+      left: auto;
+      right: 1px;
+      top: 4px;
+    }
+
     .companion.settling .pet::after,
     .companion.settling .face::before,
     .companion.settling .face::after {
@@ -139,15 +195,14 @@
 
     .theme-day .pet {
       background:
-        radial-gradient(circle at 30% 18%, rgba(229, 237, 241, 0.74) 0 16px, transparent 27px),
         linear-gradient(150deg, #fbfcf6 0%, #edf6ef 50%, #e5edf1 100%);
       box-shadow:
         inset 0 0 0 1px rgba(24, 32, 31, 0.06),
-        inset 0 -10px 20px rgba(15, 159, 122, 0.1);
+        inset 0 -8px 18px rgba(15, 159, 122, 0.08);
     }
 
     .pet:hover {
-      transform: translateY(-2px);
+      transform: translateY(-1px);
     }
 
     .pet:active {
@@ -171,8 +226,7 @@
         linear-gradient(90deg, rgba(129, 239, 216, 0.18), rgba(108, 176, 255, 0.12)),
         rgba(6, 13, 15, 0.92);
       box-shadow:
-        inset 0 0 0 1px rgba(139, 246, 222, 0.16),
-        0 0 14px rgba(94, 229, 203, 0.1);
+        inset 0 0 0 1px rgba(139, 246, 222, 0.12);
     }
 
     .theme-day .pet::before {
@@ -180,8 +234,7 @@
         linear-gradient(90deg, rgba(127, 232, 207, 0.22), rgba(104, 166, 232, 0.16)),
         rgba(20, 34, 36, 0.88);
       box-shadow:
-        inset 0 0 0 1px rgba(255, 255, 255, 0.12),
-        0 0 14px rgba(94, 207, 184, 0.16);
+        inset 0 0 0 1px rgba(255, 255, 255, 0.12);
     }
 
     .pet::after {
@@ -193,23 +246,23 @@
       height: 10px;
       border-radius: 50%;
       background: var(--mira-signal);
-      box-shadow: 0 0 16px var(--mira-signal-glow);
+      box-shadow: 0 0 var(--ef-space-3) var(--mira-signal-glow);
       animation: signalPulse 2.8s ease-in-out infinite;
     }
 
     .focus {
       --mira-signal: #7cc6dd;
-      --mira-signal-glow: rgba(124, 198, 221, 0.72);
+      --mira-signal-glow: rgba(124, 198, 221, 0.4);
     }
 
     .blink {
       --mira-signal: #e9c979;
-      --mira-signal-glow: rgba(233, 201, 121, 0.58);
+      --mira-signal-glow: rgba(233, 201, 121, 0.34);
     }
 
     .rest {
       --mira-signal: #e78da8;
-      --mira-signal-glow: rgba(231, 141, 168, 0.72);
+      --mira-signal-glow: rgba(231, 141, 168, 0.42);
     }
 
     .face {
@@ -245,10 +298,10 @@
       position: absolute;
       top: 44px;
       left: 50%;
-      width: 16px;
-      height: 8px;
+      width: 9px;
+      height: 5px;
       transform: translateX(-50%);
-      border-bottom: 2px solid var(--mira-mouth);
+      border-bottom: var(--mira-line) solid var(--mira-mouth);
       border-radius: 0 0 999px 999px;
       z-index: 1;
     }
@@ -259,8 +312,8 @@
       left: 21px;
       width: 26px;
       height: 14px;
-      border-top: 2px solid var(--mira-antenna);
-      filter: drop-shadow(0 0 5px var(--mira-antenna-glow));
+      border-top: var(--mira-line) solid var(--mira-antenna);
+      filter: drop-shadow(0 0 var(--ef-space-1) var(--mira-antenna-glow));
       border-radius: 50%;
     }
 
@@ -294,87 +347,143 @@
     .companion.expanded .body {
       display: grid;
       align-content: center;
-      width: 258px;
-      min-height: 104px;
+      position: absolute;
+      z-index: 1;
+      overflow: hidden;
+      width: 260px;
+      min-height: 118px;
       max-width: none;
-      padding: 16px 56px 16px 18px;
-      border-radius: 18px;
-      background: rgba(18, 29, 31, 0.9);
-      box-shadow:
-        0 18px 52px rgba(20, 31, 34, 0.24),
-        0 0 0 1px rgba(128, 241, 213, 0.12);
-      backdrop-filter: blur(14px);
+      padding: var(--ef-space-6) calc(var(--ef-hit-target) + var(--ef-space-4)) var(--ef-space-6) var(--ef-space-7);
+      border: 1px solid var(--popover-line);
+      border-radius: var(--ef-radius-lg);
+      background: var(--popover-bg);
+      box-shadow: var(--popover-shadow);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      color: var(--popover-text);
     }
 
-    .companion.expanded .body::before {
+    .mira-bubble {
+      position: absolute;
+      right: 83px;
+      top: 8px;
+      width: min(268px, calc(100vw - 118px));
+      min-height: 58px;
+      padding: var(--ef-space-5) var(--ef-space-6);
+      border-radius: var(--ef-radius-lg);
+      border: 1px solid var(--popover-line);
+      background: var(--popover-bg);
+      color: var(--popover-text);
+      box-shadow: var(--popover-shadow);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      display: grid;
+      align-content: center;
+      opacity: 0;
+      transform: translateX(var(--ef-space-3)) scale(0.98);
+      pointer-events: none;
+      transition:
+        opacity var(--ef-motion-base) var(--ef-ease-calm),
+        transform var(--ef-motion-base) var(--ef-ease-calm);
+    }
+
+    .mira-bubble::after {
       content: "";
       position: absolute;
-      left: -7px;
-      top: 43px;
-      width: 16px;
-      height: 16px;
-      border-radius: 4px;
+      right: -7px;
+      top: 28px;
+      width: 14px;
+      height: 14px;
+      border-radius: var(--ef-radius-xs);
       background: inherit;
       transform: rotate(45deg);
-      box-shadow: -1px 1px 0 rgba(128, 241, 213, 0.08);
+      box-shadow: 1px -1px 0 var(--popover-line);
     }
 
-    .companion.theme-day.expanded .body {
-      background: rgba(255, 255, 255, 0.94);
-      box-shadow:
-        0 18px 52px rgba(30, 44, 38, 0.15),
-        0 0 0 1px rgba(24, 32, 31, 0.08);
+    .companion.speaking .mira-bubble {
+      opacity: 1;
+      transform: translateX(0) scale(1);
     }
 
-    .companion.theme-day.expanded .body::before {
-      box-shadow: -1px 1px 0 rgba(24, 32, 31, 0.06);
+    .mira-bubble span {
+      position: relative;
+      z-index: 1;
+      font-size: var(--ef-text-body);
+      line-height: var(--ef-line-body);
+      overflow-wrap: anywhere;
     }
 
     strong {
       display: block;
-      margin-bottom: 4px;
-      font-size: 13px;
-      color: #f3fffb;
+      margin: 0 0 var(--ef-space-2);
+      color: var(--popover-text);
+      font-size: var(--ef-text-body-sm);
+      line-height: var(--ef-line-title);
+      font-weight: 680;
       overflow-wrap: anywhere;
-    }
-
-    .theme-day strong {
-      color: var(--ink);
     }
 
     p {
       margin: 0;
-      color: rgba(232, 248, 242, 0.72);
-      font-size: 11px;
-      line-height: 1.38;
+      color: var(--popover-muted);
+      font-size: var(--ef-text-helper);
+      line-height: var(--ef-line-body);
       overflow-wrap: anywhere;
+      overflow: hidden;
+      display: -webkit-box;
+      -webkit-box-orient: vertical;
+      -webkit-line-clamp: 2;
     }
 
-    .theme-day p {
-      color: var(--muted);
+    .context-line {
+      display: block;
+      margin-top: var(--ef-space-2);
+      color: var(--popover-context);
+      font-size: var(--ef-text-caption);
+      line-height: var(--ef-line-compact);
+      font-weight: var(--ef-symbol-weight-quiet);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
 
     .actions {
       display: none;
       position: absolute;
-      right: 13px;
-      top: 44px;
+      right: var(--ef-space-5);
+      top: var(--ef-space-9);
     }
 
     .companion.expanded .actions {
       display: flex;
-      gap: 6px;
+      flex-direction: column;
+      gap: var(--ef-space-2);
     }
 
     .icon-btn {
-      width: 30px;
-      height: 30px;
-      border-radius: 8px;
-      background: rgba(255, 255, 255, 0.08);
-      border: 1px solid rgba(128, 241, 213, 0.14);
-      color: #eefbf7;
+      width: var(--ef-hit-target);
+      height: var(--ef-hit-target);
+      border-radius: var(--ef-radius-md);
+      background: transparent;
+      border: 1px solid transparent;
+      color: var(--popover-context);
       display: grid;
       place-items: center;
+      opacity: 0.86;
+      transition:
+        background var(--ef-motion-fast) var(--ef-ease-calm),
+        color var(--ef-motion-fast) var(--ef-ease-calm),
+        opacity var(--ef-motion-fast) var(--ef-ease-calm);
+    }
+
+    .icon-btn + .icon-btn {
+      opacity: 0.62;
+    }
+
+    .icon-btn:hover {
+      background: var(--popover-button-hover);
+      color: var(--popover-text);
+      opacity: 0.9;
     }
 
     .icon-btn:focus {
@@ -382,19 +491,14 @@
     }
 
     .icon-btn:focus-visible {
-      outline: 2px solid rgba(15, 159, 122, 0.46);
+      outline: 1px solid var(--popover-focus);
       outline-offset: 2px;
     }
 
-    .theme-day .icon-btn {
-      background: #eef4ed;
-      border: 1px solid var(--line);
-      color: var(--ink);
-    }
-
     .icon-btn svg {
-      width: 18px;
-      height: 18px;
+      width: var(--ef-icon-sm);
+      height: var(--ef-icon-sm);
+      stroke-width: var(--ef-icon-stroke-quiet);
     }
 
     .focus .pet {
@@ -405,7 +509,6 @@
 
     .theme-day.focus .pet {
       background:
-        radial-gradient(circle at 31% 18%, rgba(128, 215, 189, 0.26) 0 16px, transparent 27px),
         linear-gradient(150deg, #fbfcf6 0%, #e5edf1 50%, #dcefe5 100%);
     }
 
@@ -417,7 +520,6 @@
 
     .theme-day.blink .pet {
       background:
-        radial-gradient(circle at 31% 18%, rgba(128, 215, 189, 0.24) 0 16px, transparent 27px),
         linear-gradient(150deg, #fbfcf6 0%, #f5ead3 50%, #dcefe5 100%);
     }
 
@@ -430,19 +532,19 @@
     }
 
     .blink .mouth {
-      width: 13px;
-      height: 6px;
-      top: 43px;
+      width: 9px;
+      height: 5px;
+      top: 44px;
       border: 0;
-      border-bottom: 2px solid rgba(255, 214, 111, 0.82);
+      border-bottom: var(--mira-line) solid rgba(255, 214, 111, 0.66);
       border-radius: 0 0 999px 999px;
       transform: translateX(-50%) scaleX(0.82);
-      box-shadow: 0 0 7px rgba(255, 214, 111, 0.18);
+      box-shadow: 0 0 var(--ef-space-2) rgba(255, 214, 111, 0.12);
     }
 
     .theme-day.blink .mouth {
-      border-bottom-color: rgba(202, 143, 38, 0.78);
-      box-shadow: 0 1px 0 rgba(255, 255, 255, 0.62), 0 0 7px rgba(255, 214, 111, 0.22);
+      border-bottom-color: rgba(202, 143, 38, 0.62);
+      box-shadow: 0 1px 0 rgba(255, 255, 255, 0.5);
     }
 
     .rest .pet {
@@ -453,14 +555,13 @@
 
     .theme-day.rest .pet {
       background:
-        radial-gradient(circle at 31% 18%, rgba(233, 201, 121, 0.24) 0 16px, transparent 27px),
         linear-gradient(150deg, #fbfcf6 0%, #f7dde5 52%, #f5ead3 100%);
     }
 
     .rest .mouth {
-      width: 18px;
-      height: 19px;
-      top: 38px;
+      width: 14px;
+      height: 15px;
+      top: 40px;
       border: 0;
       background: transparent;
       transform: translateX(-50%);
@@ -472,22 +573,17 @@
     .rest .mouth::before {
       content: "Ɛ";
       font-family: ui-rounded, "SF Pro Rounded", Inter, system-ui, sans-serif;
-      font-size: 16px;
-      font-weight: 800;
+      font-size: var(--ef-text-body-sm);
+      font-weight: 700;
       line-height: 1;
       color: var(--mira-rest-mouth);
-      text-shadow:
-        0 1px 0 rgba(255, 255, 255, 0.18),
-        0 0 9px rgba(255, 154, 188, 0.26);
+      text-shadow: 0 1px 0 rgba(255, 255, 255, 0.14);
       transform: translateY(-1px) rotate(-4deg) scaleX(0.82);
     }
 
     .theme-day.rest .mouth::before {
-      color: rgba(214, 82, 125, 0.88);
-      text-shadow:
-        0 1px 0 rgba(255, 255, 255, 0.64),
-        0 0 1px rgba(68, 30, 44, 0.24),
-        0 0 9px rgba(255, 154, 188, 0.3);
+      color: rgba(214, 82, 125, 0.72);
+      text-shadow: 0 1px 0 rgba(255, 255, 255, 0.56);
     }
 
     @keyframes idleFloat {
@@ -560,10 +656,11 @@
       }
     }
   </style>
+  <link rel="stylesheet" href="./eyeflow-design-system.css">
 </head>
 <body>
   <div class="shell">
-    <aside class="companion booting settling" id="companion">
+    <aside class="companion booting settling" id="companion" title="双击隐藏 Mira">
       <div class="pet" aria-hidden="true">
         <div class="antenna"></div>
         <div class="face"></div>
@@ -571,16 +668,18 @@
         <div class="cheek right"></div>
         <div class="mouth"></div>
       </div>
+      <div class="mira-bubble" id="miraBubble" aria-live="polite"><span id="miraBubbleText"></span></div>
       <div class="body">
         <strong id="title">Mira 很安静</strong>
-        <p id="message">我会在旁边看着节奏，先低打扰陪伴。</p>
+        <p id="message">我会在旁边看着节奏，先轻提醒陪伴。</p>
+        <span class="context-line" id="contextLine">舒适区 · L1 安静</span>
       </div>
       <div class="actions">
         <button class="icon-btn" id="openBtn" type="button" title="打开 EyeFlow">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M15 3h6v6"/><path d="M10 14 21 3"/><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/></svg>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true"><path d="M15 3h6v6"/><path d="M10 14 21 3"/><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/></svg>
         </button>
         <button class="icon-btn" id="collapseBtn" type="button" title="收起 Mira">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M5 12h14"/></svg>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true"><path d="M5 12h14"/></svg>
         </button>
       </div>
     </aside>
@@ -588,7 +687,7 @@
 
   <script>
     const moods = [
-      ["", "Mira 很安静", "我会在旁边看着节奏，先低打扰陪伴。"],
+      ["", "Mira 很安静", "我会在旁边看着节奏，先轻提醒陪伴。"],
       ["focus", "Mira 陪你专注", "到恢复断点我再轻轻提示，不会突然打断。"],
       ["blink", "Mira 在提醒眨眼", "轻轻眨几次眼，让眼睛重新湿润一点。"],
       ["rest", "Mira 想让你恢复一下", "找一个恢复断点，看远处 20 秒。"]
@@ -608,19 +707,38 @@
     const tapMoveThreshold = 8;
     const hoverOpenDelay = 120;
     const hoverCloseDelay = 1600;
+    const restNotifyCooldown = 12 * 60 * 1000;
+    let lastRestNotifyAt = 0;
+    let lastRestNotifyKey = "";
+    let bubbleTimer = null;
+    let isMiraSpeaking = false;
 
     const companion = document.querySelector("#companion");
     const pet = document.querySelector(".pet");
     const title = document.querySelector("#title");
     const message = document.querySelector("#message");
+    const contextLine = document.querySelector("#contextLine");
+    const miraBubble = document.querySelector("#miraBubble");
+    const miraBubbleText = document.querySelector("#miraBubbleText");
 
     function setMood(index) {
       moodIndex = index % moods.length;
       const [mood, label, copy] = moods[moodIndex];
-      applyState({ mood, title: label, message: copy });
-      if (mood === "rest" && window.eyeflowDesktop) {
-        window.eyeflowDesktop.notify(copy);
-      }
+      applyState({ mood, title: label, message: copy, allowSystemNotify: true });
+    }
+
+    function shouldNotifyRest(state, mood) {
+      if (mood !== "rest" || !window.eyeflowDesktop) return false;
+      if (state.forceMode || state.forceBreakActive) return false;
+      if (state.allowSystemNotify !== true) return false;
+      if (Number(state.interventionLevel || 1) < 2) return false;
+      const now = Date.now();
+      const key = `${state.interventionLevel || 1}:${state.title || ""}:${state.message || ""}`;
+      if (key === lastRestNotifyKey && now - lastRestNotifyAt < restNotifyCooldown) return false;
+      if (now - lastRestNotifyAt < restNotifyCooldown) return false;
+      lastRestNotifyAt = now;
+      lastRestNotifyKey = key;
+      return true;
     }
 
     function applyState(state) {
@@ -630,12 +748,14 @@
       const ready = companion.classList.contains("ready") ? "ready" : "";
       const settling = companion.classList.contains("settling") ? "settling" : "";
       const expanded = companion.classList.contains("expanded") ? "expanded" : "";
-      companion.className = `companion theme-${theme} ${mood} ${booting} ${ready} ${settling} ${expanded}`.trim();
+      const speaking = companion.classList.contains("speaking") ? "speaking" : "";
+      companion.className = `companion theme-${theme} ${mood} ${booting} ${ready} ${settling} ${expanded} ${speaking}`.trim();
       title.textContent = state.title || "Mira 很安静";
       message.textContent = mood === "rest"
         ? `${state.message || "找一个恢复断点，看远处 20 秒。"} 点我会打开休息指引。`
-        : state.message || "我会在旁边看着节奏，先低打扰陪伴。";
-      if (state.mood === "rest" && window.eyeflowDesktop) {
+        : state.message || "我会在旁边看着节奏，先轻提醒陪伴。";
+      contextLine.textContent = state.continuityLine || `${state.loadZone || "舒适区"} · ${state.intensityLabel || "L1 安静"}`;
+      if (shouldNotifyRest(state, mood)) {
         window.eyeflowDesktop.notify(state.message || "找一个恢复断点，看远处 20 秒。");
       }
     }
@@ -655,6 +775,12 @@
     if (window.eyeflowDesktop?.onCompanionExpanded) {
       window.eyeflowDesktop.onCompanionExpanded((expanded) => {
         syncExpanded(expanded);
+      });
+    }
+
+    if (window.eyeflowDesktop?.onCompanionBubble) {
+      window.eyeflowDesktop.onCompanionBubble((payload) => {
+        setMiraBubble(payload);
       });
     }
 
@@ -706,8 +832,41 @@
       companion.classList.toggle("expanded", !isDesktopShell && isExpanded);
     }
 
+    function setMiraBubble(payload = {}) {
+      const visible = Boolean(payload.visible);
+      const text = String(payload.message || "").replace(/^Mira[：:]\s*/, "").trim();
+      if (bubbleTimer) {
+        window.clearTimeout(bubbleTimer);
+        bubbleTimer = null;
+      }
+      if (!visible || !text) {
+        isMiraSpeaking = false;
+        companion.classList.remove("speaking");
+        miraBubbleText.textContent = "";
+        return;
+      }
+      isMiraSpeaking = true;
+      clearHoverOpenTimer();
+      clearHoverCloseTimer();
+      isHoveringCompanion = false;
+      setHovering(false);
+      if (isExpanded) setExpanded(false);
+      miraBubbleText.textContent = text;
+      companion.classList.add("speaking");
+      bubbleTimer = window.setTimeout(() => {
+        isMiraSpeaking = false;
+        companion.classList.remove("speaking");
+        miraBubbleText.textContent = "";
+        bubbleTimer = null;
+      }, 5000);
+    }
+
     async function setExpanded(expanded) {
       const nextExpanded = Boolean(expanded);
+      if (nextExpanded && isMiraSpeaking) {
+        syncExpanded(false);
+        return;
+      }
       companion.classList.add("settling");
       if (isDesktopShell && window.eyeflowDesktop?.setCompanionExpanded) {
         try {
@@ -725,6 +884,7 @@
     }
 
     function toggleExpanded() {
+      if (isMiraSpeaking) return;
       setExpanded(!isExpanded);
     }
 
@@ -753,6 +913,10 @@
     function scheduleHoverOpen() {
       clearHoverOpenTimer();
       clearHoverCloseTimer();
+      if (isMiraSpeaking) {
+        setHovering(false);
+        return;
+      }
       setHovering(true);
       if (dragState) return;
       if (isExpanded) {
@@ -797,6 +961,13 @@
     companion.addEventListener("dblclick", (event) => {
       if (isDesktopShell) {
         event.preventDefault();
+        event.stopPropagation();
+        clearHoverOpenTimer();
+        clearHoverCloseTimer();
+        setHovering(false);
+        setExpanded(false);
+        window.eyeflowDesktop?.setCompanionVisible?.(false)
+          || window.eyeflowDesktop?.hideCompanion?.();
         return;
       }
       openDashboard();
@@ -839,6 +1010,7 @@
       companion.classList.remove("dragging");
       if (!wasDrag && event.target.closest(".pet")) {
         event.preventDefault();
+        if (isMiraSpeaking) return;
         if (isDesktopShell && currentMood === "rest") {
           openDashboard({ restGuide: true });
           return;
@@ -857,6 +1029,7 @@
     });
 
     function handleCompanionEnter() {
+      if (isMiraSpeaking) return;
       if (isHoveringCompanion) return;
       isHoveringCompanion = true;
       scheduleHoverOpen();

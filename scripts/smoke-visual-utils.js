@@ -135,10 +135,6 @@ function isLightMintPixel(r, g, b, a) {
   return a > 180 && r >= 188 && g >= 205 && b >= 188 && g >= r - 6 && g >= b - 6;
 }
 
-function isDeepTextPixel(r, g, b, a) {
-  return a > 180 && r <= 95 && g <= 120 && b <= 112 && g >= r - 10 && b >= r - 12;
-}
-
 function isDarkPrimaryButtonPixel(r, g, b, a) {
   return a > 180 && r <= 46 && g <= 68 && b <= 64 && g >= r && b >= r - 4;
 }
@@ -226,75 +222,25 @@ function findLargestComponent(image, bounds, pixelMatcher, componentMatcher = ()
   return best;
 }
 
-function findLargestReadablePillCandidate(image) {
-  return findLargestComponent(image, {
-    left: image.width * 0.18,
-    right: image.width * 0.82,
-    top: image.height * 0.03,
-    bottom: image.height * 0.32
-  }, isLightMintPixel, (candidate) => candidate.area > image.width * image.height * 0.0008
-    && candidate.boxWidth > image.width * 0.07
-    && candidate.boxHeight > image.height * 0.018
-    && candidate.boxHeight < image.height * 0.1
-    && candidate.aspectRatio > 2.2
-    && candidate.fillRatio > 0.45);
-}
-
-function assertOnboardingPillReadable(image) {
-  const candidate = findLargestReadablePillCandidate(image);
-  if (!candidate) {
-    throw new Error("onboarding status pill was not detected in the top hero area");
-  }
-
-  let darkPixels = 0;
-  let lightPixels = 0;
-  let darkLum = 0;
-  let lightLum = 0;
-
-  for (let y = candidate.minY; y <= candidate.maxY; y += 1) {
-    for (let x = candidate.minX; x <= candidate.maxX; x += 1) {
-      const [r, g, b, a] = samplePixel(image, x, y);
-      if (isLightMintPixel(r, g, b, a)) {
-        lightPixels += 1;
-        lightLum += luminance(r, g, b);
-      } else if (isDeepTextPixel(r, g, b, a)) {
-        darkPixels += 1;
-        darkLum += luminance(r, g, b);
-      }
-    }
-  }
-
-  const averageLight = lightPixels ? lightLum / lightPixels : 0;
-  const averageDark = darkPixels ? darkLum / darkPixels : 255;
-  const contrast = averageLight - averageDark;
-  const minimumDarkPixels = Math.max(120, Math.floor(candidate.area * 0.004));
-  const diagnostics = `light=${lightPixels}, dark=${darkPixels}, contrast=${contrast.toFixed(1)}, box=${candidate.boxWidth}x${candidate.boxHeight}`;
-
-  if (darkPixels < minimumDarkPixels || contrast < 95) {
-    throw new Error(`onboarding status pill text contrast is too low (${diagnostics})`);
-  }
-
-  return diagnostics;
-}
-
 function assertOnboardingPrimaryActionVisible(image) {
+  const isButtonShape = (candidate) => candidate.area > image.width * image.height * 0.0012
+    && candidate.boxWidth > image.width * 0.075
+    && candidate.boxWidth < image.width * 0.24
+    && candidate.boxHeight > image.height * 0.026
+    && candidate.boxHeight < image.height * 0.09
+    && candidate.aspectRatio > 2.2
+    && candidate.fillRatio > 0.42;
   const candidate = findLargestComponent(image, {
-    left: image.width * 0.18,
-    right: image.width * 0.54,
-    top: image.height * 0.76,
-    bottom: image.height * 0.98
-  }, isDarkPrimaryButtonPixel);
+    left: image.width * 0.22,
+    right: image.width * 0.58,
+    top: image.height * 0.48,
+    bottom: image.height * 0.96
+  }, isDarkPrimaryButtonPixel, isButtonShape);
   if (!candidate) {
     throw new Error("onboarding primary action button was not detected in the visible lower area");
   }
 
-  const isButtonLike = candidate.area > image.width * image.height * 0.0015
-    && candidate.boxWidth > image.width * 0.08
-    && candidate.boxWidth < image.width * 0.24
-    && candidate.boxHeight > image.height * 0.028
-    && candidate.boxHeight < image.height * 0.09
-    && candidate.aspectRatio > 2.4
-    && candidate.fillRatio > 0.42;
+  const isButtonLike = isButtonShape(candidate);
   if (!isButtonLike) {
     throw new Error(`onboarding primary action has unexpected shape (dark=${candidate.area}, box=${candidate.boxWidth}x${candidate.boxHeight}, fill=${candidate.fillRatio.toFixed(2)})`);
   }
@@ -328,7 +274,6 @@ function assertOnboardingPrimaryActionVisible(image) {
 
 function assertOnboardingVisualQualityImage(image) {
   return {
-    pill: assertOnboardingPillReadable(image),
     action: assertOnboardingPrimaryActionVisible(image)
   };
 }

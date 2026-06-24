@@ -140,8 +140,29 @@ function checkPublicUiCopy() {
 
 function checkDmg() {
   if (!exists(dmgPath) || process.platform !== "darwin") return;
-  const result = run("hdiutil", ["imageinfo", dmgPath]);
-  addCheck("DMG imageinfo passes", result.status === 0, oneLine(result.stderr || result.stdout).slice(0, 220));
+  const result = run("hdiutil", ["verify", dmgPath]);
+  addCheck("DMG verification passes", result.status === 0, oneLine(result.stderr || result.stdout).slice(0, 220));
+}
+
+function checkAutoUpdateMetadata() {
+  const latestPath = path.join(distDir, "latest-mac.yml");
+  const latestStat = exists(latestPath);
+  const zipStat = exists(zipPath);
+  if (!latestStat || !zipStat) return;
+  const latestText = fs.readFileSync(latestPath, "utf8");
+  const sizeMatch = latestText.match(/^\s*size:\s*(\d+)\s*$/m);
+  const pathMatch = latestText.match(/^\s*path:\s*(.+)\s*$/m);
+  const releaseDateMatch = latestText.match(/^\s*releaseDate:\s*['"]?([^'"\n]+)['"]?\s*$/m);
+  const metadataSize = sizeMatch ? Number(sizeMatch[1]) : 0;
+  const metadataPath = pathMatch ? pathMatch[1].trim() : "";
+  const releaseDateMs = releaseDateMatch ? Date.parse(releaseDateMatch[1]) : 0;
+  addCheck("latest-mac.yml points at current ZIP", metadataPath === path.basename(zipPath), metadataPath || "missing path");
+  addCheck("latest-mac.yml ZIP size is fresh", metadataSize === zipStat.size, `${metadataSize || "missing"} vs ${zipStat.size}`);
+  addCheck(
+    "latest-mac.yml release date is fresh",
+    Number.isFinite(releaseDateMs) && releaseDateMs >= zipStat.mtimeMs - 1000,
+    releaseDateMatch ? releaseDateMatch[1] : "missing releaseDate"
+  );
 }
 
 function checkSigning() {
@@ -150,11 +171,18 @@ function checkSigning() {
   const output = `${codeSign.stdout || ""}\n${codeSign.stderr || ""}`;
   const developerId = /Authority=Developer ID Application/.test(output);
   const hardened = /Runtime Version=/.test(output);
-  const signedOk = allowUnsigned || (codeSign.status === 0 && developerId && hardened);
+  const verify = run("codesign", ["--verify", "--deep", "--strict", "--verbose=4", appPath]);
+  const verifyOutput = `${verify.stdout || ""}\n${verify.stderr || ""}`;
+  const signedOk = allowUnsigned || (codeSign.status === 0 && verify.status === 0 && developerId && hardened);
   addCheck(
     "Developer ID signature and hardened runtime",
     signedOk,
-    allowUnsigned ? "allow-unsigned mode" : oneLine(output).slice(0, 240)
+    allowUnsigned ? "allow-unsigned mode" : oneLine(`${output} ${verifyOutput}`).slice(0, 240)
+  );
+  addCheck(
+    "App bundle strict signature verifies",
+    allowUnsigned || verify.status === 0,
+    allowUnsigned ? "allow-unsigned mode" : oneLine(verifyOutput).slice(0, 240)
   );
 
   if (!exists(dmgPath)) return;
@@ -234,6 +262,7 @@ checkDocs();
 checkPackageConfig();
 checkPublicUiCopy();
 checkDmg();
+checkAutoUpdateMetadata();
 checkSigning();
 writeChecksums();
 stageRelease();

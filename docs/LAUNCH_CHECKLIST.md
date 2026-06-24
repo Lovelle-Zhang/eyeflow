@@ -1,16 +1,20 @@
 # EyeFlow Public Launch Checklist
 
-This checklist is for moving from unsigned release-candidate builds to a public macOS release.
+This checklist is for maintaining the signed and notarized public macOS beta release.
 
 ## Required Before Public Release
 
 - Apple Developer Program membership is active.
 - Developer ID Application certificate is available in the build machine keychain or through CI secrets.
+- `security find-identity -v -p codesigning` shows a usable `Developer ID Application` identity for the release team.
+- CI signing secrets are configured if not building locally:
+  - `CSC_LINK` and `CSC_KEY_PASSWORD`, or an installed keychain identity plus `CSC_NAME`.
 - Notarization credentials are configured with one of the electron-builder-supported methods:
   - `APPLE_API_KEY`, `APPLE_API_KEY_ID`, and `APPLE_API_ISSUER`.
   - `APPLE_ID`, `APPLE_APP_SPECIFIC_PASSWORD`, and `APPLE_TEAM_ID`.
   - `APPLE_KEYCHAIN` and `APPLE_KEYCHAIN_PROFILE`.
 - `npm run release:rc` passes before requesting a public build.
+- `npm run release:rc:artifacts` passes for private unsigned artifact confidence.
 - `npm run release:public` produces signed DMG and ZIP artifacts and passes finished-app smoke.
 - `npm run launch:preflight` passes without `--allow-unsigned`.
 - `dist/EyeFlow-0.1.0-SHA256SUMS.txt` is uploaded with the release.
@@ -31,16 +35,17 @@ The public download page should include:
 - Note that EyeFlow is not medical software.
 - Short first-open instructions for Accessibility permission.
 
-## While Waiting For Developer ID Access
+## Public Beta Distribution
 
-- Share only with trusted testers who understand this is an unsigned build.
+- Share only with testers who understand this is still a beta product, even though the installer is Developer ID signed and notarized.
 - Keep `npm run release:rc` green after every product-facing change.
 - Use `npm run release:rc:artifacts` only when you need fresh unsigned DMG/ZIP artifacts.
+- Do not run public distribution from unsigned RC artifacts, even if `node scripts/launch-preflight.js --allow-unsigned` passes.
 - Use `docs/BETA_INSTALL_GUIDE.md` as the tester install instructions.
 - Use `docs/DOWNLOAD_PAGE_COPY.md` as the draft download page copy.
 - Use `docs/TESTER_FEEDBACK_FORM.md` as the feedback questionnaire.
 - Ask testers to paste the copied `反馈与诊断` template when reporting issues.
-- Keep the unsigned-build warning visible until `npm run launch:preflight` passes without `--allow-unsigned`.
+- Keep `npm run launch:preflight` green before widening the tester pool.
 
 ## Final Manual QA
 
@@ -60,7 +65,8 @@ The public download page should include:
 
 ## Launch Blockers
 
-- Unsigned or unnotarized DMG.
+- Unsigned, unstapled, or unnotarized DMG.
+- `node scripts/launch-preflight.js` fails on Developer ID signature or Gatekeeper assessment.
 - Old product names in release artifacts.
 - Broken Mira visibility or recovery return path.
 - Missing privacy note.

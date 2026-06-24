@@ -185,21 +185,22 @@
     }
 
     .app {
-      min-height: 100vh;
+      /* Fixed viewport shell: the sidebar stays pinned, only <main> scrolls.
+         (Mobile ≤860px reverts to normal page scroll — see media query.) */
+      height: 100vh;
       display: grid;
       grid-template-columns: 236px minmax(0, 1fr);
+      overflow: hidden;
     }
 
     .sidebar {
-      min-height: 100vh;
+      height: 100vh;
       padding: var(--ef-space-11) var(--ef-space-7) var(--ef-space-9);
       background: var(--sb-bg);
       color: var(--sb-text);
       display: flex;
       flex-direction: column;
       gap: var(--ef-space-9);
-      position: sticky;
-      top: 0;
       border-right: 0.5px solid var(--sb-border);
       transition: background var(--ef-motion-slow) var(--ef-ease-calm);
     }
@@ -386,10 +387,14 @@
     }
 
     main {
-      --page-frame-width: 100%;
-      width: min(1420px, 100%);
-      margin: 0 auto;
-      padding: var(--ef-space-12) var(--ef-space-10) 112px;
+      /* The only scroll surface; fills its grid cell so the scrollbar sits at
+         the window edge while content stays centered via --page-frame-width. */
+      --page-frame-width: min(1420px, 100%);
+      height: 100vh;
+      overflow-y: auto;
+      /* Bottom inset matches the sidebar's so both columns close flush at the
+         same line when scrolled to the end. */
+      padding: var(--ef-space-12) var(--ef-space-10) var(--ef-space-9);
       display: grid;
       gap: var(--ef-space-9);
       align-content: start;
@@ -737,6 +742,9 @@
     }
 
     .timer-card > .timer-controls {
+      /* Pause button hugs its label (it never needs the greedy 1fr here);
+         the rest button is content-sized so "休息 120 秒" fits without clipping. */
+      grid-template-columns: minmax(0, 1fr) auto;
       gap: var(--ef-space-4);
     }
 
@@ -757,7 +765,6 @@
     }
 
     #startBtn {
-      min-width: 148px;
       white-space: nowrap;
     }
 
@@ -1633,7 +1640,7 @@
 	      background: var(--panel);
 	      border-color: var(--group-line);
 	      box-shadow: var(--group-shadow);
-      grid-template-columns: minmax(184px, 0.25fr) minmax(0, 1fr) minmax(232px, 0.32fr);
+      grid-template-columns: minmax(184px, 0.25fr) minmax(0, 1fr) minmax(300px, 0.34fr);
       align-items: center;
 	      gap: var(--ef-space-5);
 	    }
@@ -3202,8 +3209,8 @@
       flex: 0 0 auto;
       padding: var(--ef-space-2) var(--ef-space-3);
       border-radius: var(--ef-radius-sm);
-      border: 1px solid rgba(24, 32, 31, 0.1);
-      background: rgba(255, 255, 255, 0.68);
+      border: 0.5px solid var(--line);
+      background: var(--pill-bg);
       color: var(--ink);
       font-size: var(--ef-text-meta);
       font-weight: 760;
@@ -3307,7 +3314,7 @@
       padding: var(--ef-space-3) var(--ef-space-4);
       border: 1px solid rgba(24, 32, 31, 0.08);
       border-radius: var(--ef-radius-md);
-      background: rgba(255, 255, 255, 0.56);
+      background: var(--pill-bg);
       display: grid;
       gap: var(--ef-space-1);
     }
@@ -3332,7 +3339,7 @@
       gap: var(--ef-space-0);
       border: 1px solid rgba(24, 32, 31, 0.08);
       border-radius: var(--ef-radius-md);
-      background: rgba(255, 255, 255, 0.5);
+      background: var(--pill-bg);
       overflow: hidden;
     }
 
@@ -3439,7 +3446,7 @@
       padding: var(--ef-space-2) var(--ef-space-3);
       border: 1px solid rgba(24, 32, 31, 0.1);
       border-radius: var(--ef-radius-sm);
-      background: rgba(255, 255, 255, 0.62);
+      background: var(--pill-bg);
       color: var(--ink);
       font-size: var(--ef-text-meta);
       font-weight: 760;
@@ -3451,7 +3458,7 @@
       gap: var(--ef-space-0);
       border: 1px solid var(--line);
       border-radius: var(--ef-radius-md);
-      background: rgba(255, 255, 255, 0.5);
+      background: var(--panel);
       overflow: hidden;
     }
 
@@ -3554,7 +3561,7 @@
       transform: translateX(-50%);
       padding: var(--ef-space-1) var(--ef-space-2);
       border-radius: var(--ef-radius-pill);
-      background: rgba(251, 252, 246, 0.9);
+      background: var(--pill-bg);
       border: 1px solid rgba(24, 32, 31, 0.08);
       color: var(--ink);
       font-size: var(--ef-text-micro);
@@ -3681,7 +3688,7 @@
     .history-table {
       border: 1px solid var(--line);
       border-radius: var(--ef-radius-md);
-      background: rgba(255, 255, 255, 0.58);
+      background: var(--panel);
       overflow: hidden;
     }
 
@@ -3697,7 +3704,7 @@
       min-height: var(--ef-control-md);
       padding: var(--ef-space-0) var(--ef-space-7);
       border-bottom: 1px solid rgba(24, 32, 31, 0.08);
-      background: rgba(242, 247, 241, 0.72);
+      background: var(--wash-2);
       color: rgba(73, 88, 82, 0.78);
       font-size: var(--ef-text-caption);
       font-weight: 760;
@@ -3710,7 +3717,7 @@
       padding: var(--ef-space-4) var(--ef-space-7);
       border-bottom: 1px solid rgba(24, 32, 31, 0.065);
       color: var(--ink);
-      background: rgba(255, 255, 255, 0.28);
+      background: transparent;
     }
 
     .history-row:last-child {
@@ -6141,11 +6148,11 @@
     }
 
     #profileView {
-      --profile-calm-line: rgba(24, 32, 31, 0.05);
-      --profile-calm-surface: rgba(255, 255, 255, 0.36);
-      --profile-archive-surface: rgba(251, 252, 246, 0.34);
-      --profile-share-line: rgba(24, 32, 31, 0.032);
-      --profile-share-surface: rgba(255, 255, 255, 0.26);
+      --profile-calm-line: var(--group-line);
+      --profile-calm-surface: var(--panel);
+      --profile-archive-surface: var(--panel);
+      --profile-share-line: var(--group-line);
+      --profile-share-surface: var(--panel);
       --profile-trend-comfort: rgba(34, 121, 104, 0.54);
       --profile-trend-medium: rgba(161, 122, 43, 0.5);
       --profile-trend-high: rgba(185, 87, 114, 0.5);
@@ -6162,7 +6169,7 @@
     #profileView .data-console-panel {
       border-color: var(--profile-calm-line);
       background: var(--profile-calm-surface);
-      box-shadow: none;
+      box-shadow: var(--group-shadow);
     }
 
     #profileView .profile-overview,
@@ -6277,6 +6284,11 @@
     }
 
     #profileView .share-art-card {
+      /* The card always renders as a fixed light "printed card" (and exports to
+         a light PNG), so pin ink/muted locally — otherwise dark theme flips them
+         to near-white and the text vanishes on the light background. */
+      --ink: #1f211f;
+      --muted: #494844;
       width: min(100%, 720px);
       min-height: 360px;
       padding: var(--ef-space-12);
@@ -7815,7 +7827,7 @@
       }
 
       main {
-        padding: 28px 24px 104px;
+        padding: 28px 24px var(--ef-space-9);
       }
 
       .dashboard {
@@ -7901,6 +7913,8 @@
     @media (max-width: 860px) {
       .app {
         grid-template-columns: 1fr;
+        height: auto;
+        overflow: visible;
       }
 
       #rhythmView {
@@ -7909,9 +7923,15 @@
       }
 
       .sidebar {
+        height: auto;
         min-height: auto;
         padding: var(--ef-space-7) var(--ef-space-8);
         gap: var(--ef-space-6);
+      }
+
+      main {
+        height: auto;
+        overflow-y: visible;
       }
 
       .nav {
@@ -12555,6 +12575,45 @@
       } else {
         stopDesktopSettingsWatch();
       }
+      scheduleSidebarFooterSync();
+    }
+
+    // Keep the sidebar's appearance toggle (margin-top:auto, so its bottom edge
+    // sits at sidebarHeight − paddingBottom) aligned with the bottom of the
+    // right column's content. When the active view is shorter than the scroll
+    // viewport, lift the toggle by the leftover gap so the two columns close on
+    // the same line; when content fills or overflows, it rests at the base inset.
+    function syncSidebarFooterAlignment() {
+      const sidebar = document.querySelector(".sidebar");
+      if (!sidebar) return;
+      // Below 860px the layout is single-column normal scroll — no alignment to do.
+      if (window.innerWidth <= 860) {
+        sidebar.style.paddingBottom = "";
+        return;
+      }
+      const baseInset = 20; // matches --ef-space-9 (sidebar/main bottom padding)
+      const activeView = Array.from(els.views).find((view) => !view.hidden);
+      if (!activeView) {
+        sidebar.style.paddingBottom = `${baseInset}px`;
+        return;
+      }
+      // The sidebar is 100vh, so the toggle's bottom edge sits at
+      // (innerHeight − paddingBottom). Lift it to the active view's content
+      // bottom; when content fills/overflows the viewport, fall back to the base
+      // inset. (scrollHeight is unusable here — it never drops below clientHeight.)
+      const contentBottom = activeView.getBoundingClientRect().bottom;
+      const lift = Math.max(baseInset, window.innerHeight - contentBottom);
+      sidebar.style.paddingBottom = `${lift}px`;
+    }
+
+    let sidebarFooterSyncQueued = false;
+    function scheduleSidebarFooterSync() {
+      if (sidebarFooterSyncQueued) return;
+      sidebarFooterSyncQueued = true;
+      window.requestAnimationFrame(() => {
+        sidebarFooterSyncQueued = false;
+        syncSidebarFooterAlignment();
+      });
     }
 
     function openTodayRhythmSettings() {
@@ -14894,6 +14953,16 @@
 
     render();
     maybeShowOnboarding();
+
+    // Recompute the toggle alignment whenever content height or the viewport
+    // changes. Observing each view catches data/state height changes and tab
+    // switches (a hidden view reports 0, then its real size when shown).
+    if (window.ResizeObserver) {
+      const sidebarFooterObserver = new ResizeObserver(scheduleSidebarFooterSync);
+      els.views.forEach((view) => sidebarFooterObserver.observe(view));
+    }
+    window.addEventListener("resize", scheduleSidebarFooterSync);
+    scheduleSidebarFooterSync();
   </script>
 
   <script>

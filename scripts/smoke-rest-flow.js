@@ -16,6 +16,12 @@ function assertIncludes(source, expected, label) {
   }
 }
 
+function assertNotIncludes(source, expected, label) {
+  if (source.includes(expected)) {
+    throw new Error(`${label}: unexpected "${expected}"`);
+  }
+}
+
 function assertEqual(actual, expected, label) {
   if (actual !== expected) {
     throw new Error(`${label}: expected ${JSON.stringify(expected)}, got ${JSON.stringify(actual)}`);
@@ -51,48 +57,81 @@ function main() {
   const indexHtml = read("index.html");
   const mainJs = read("main.js");
   const companionHtml = read("companion.html");
+  const breakLockHtml = read("break-lock.html");
   const restFlow = loadRestFlow();
 
   const inlineCount = parseInlineScripts("index.html");
+  const breakLockInlineCount = parseInlineScripts("break-lock.html");
 
   assertIncludes(indexHtml, '<script src="eyeflow-rest-flow.js"></script>', "rest flow script include");
   assertIncludes(indexHtml, "window.EyeFlowRestFlow", "dashboard reads rest flow helpers");
   assertIncludes(indexHtml, 'id="restSessionBtn"', "session rest button");
   assertIncludes(indexHtml, 'id="takeReminderBreakBtn"', "pending reminder rest button");
   assertIncludes(indexHtml, 'id="finishBreakBtn"', "finish rest button");
-  assertIncludes(indexHtml, 'id="breakMicroTask"', "micro rest task");
+  assertIncludes(indexHtml, 'id="forceEscapeBtn"', "force emergency exit button");
+  assertIncludes(indexHtml, 'id="breakMiniTimer"', "manual rest countdown");
+  assertIncludes(indexHtml, "看向远处", "rest overlay leads with distance gaze");
+  assertIncludes(indexHtml, "不用盯着屏幕，20 秒后再回来。", "rest overlay avoids reading work");
   assertIncludes(indexHtml, 'id="breakCompanionLine"', "rest companion line");
-  assertIncludes(indexHtml, 'data-break-color="蓝色"', "micro color answer");
+  assertIncludes(indexHtml, "我回来了", "manual rest return action");
+  assertIncludes(indexHtml, "稍后提醒", "manual rest snooze action");
+  assertIncludes(indexHtml, "可以回来了", "manual rest completion title");
+  assertIncludes(indexHtml, "慢慢回来，不用急着盯屏幕。", "manual rest completion copy");
+  assertIncludes(indexHtml, "formatBreakTime(remaining)", "manual rest timer renders as a live countdown");
+  assertIncludes(indexHtml, ".break-overlay.rest-ready", "manual rest has a clear completed visual state");
+  assertIncludes(indexHtml, "playRestCompletionBowl();", "manual rest completion plays a gentle bowl cue");
+  assertIncludes(indexHtml, "function playRestCompletionBowl()", "manual rest bowl cue is implemented locally");
+  assertIncludes(indexHtml, "frequency: 432", "manual rest bowl cue uses a soft fundamental tone");
+  assertIncludes(indexHtml, "grid-template-columns: repeat(2, minmax(0, 1fr));", "manual rest buttons share one action layout");
+  assertNotIncludes(indexHtml, "data-break-color=", "rest overlay removes color choice buttons");
   assertIncludes(indexHtml, 'data-recovery-feedback="better"', "better recovery feedback");
   assertIncludes(indexHtml, 'data-recovery-feedback="same"', "same recovery feedback");
   assertIncludes(indexHtml, 'data-recovery-feedback="tired"', "tired recovery feedback");
-  assertIncludes(indexHtml, "点“休息”开始，Mira 会一步步带你。", "rest guide hint copy");
+  assertIncludes(indexHtml, "点“休息”，Mira 带你。", "rest guide hint copy");
+  assertIncludes(indexHtml, "max-height: calc(100vh - var(--ef-space-12));", "break dialog stays inside short desktop windows");
+  assertIncludes(indexHtml, "overscroll-behavior: contain;", "break dialog scroll is contained");
 
   assertMatches(indexHtml, /els\.restSessionBtn\.addEventListener\("click",\s*\(\)\s*=>\s*showBreak\("manual"\)\);/, "session rest button opens manual break");
   assertMatches(indexHtml, /els\.takeReminderBreakBtn\.addEventListener\("click",\s*\(\)\s*=>\s*showBreak\("scheduled"\)\);/, "pending reminder rest button opens scheduled break");
   assertMatches(indexHtml, /els\.finishBreakBtn\.addEventListener\("click",\s*finishBreak\);/, "finish rest button asks feedback");
   assertMatches(indexHtml, /function\s+showBreak\(reason\)[\s\S]*restBreakView\(\{/, "showBreak uses extracted rest view");
   assertMatches(indexHtml, /function\s+finishBreak\(\)[\s\S]*recoveryFeedbackView\(\)/, "finishBreak uses extracted feedback view");
-  assertMatches(indexHtml, /function\s+answerBreakMicroTask\(color\)[\s\S]*breakMicroReplyView\(\{/, "micro task uses extracted reply view");
   assertMatches(indexHtml, /button\.addEventListener\("click",\s*\(\)\s*=>\s*completeRecovery\(button\.dataset\.recoveryFeedback\)\);/, "feedback buttons complete recovery");
   assertMatches(indexHtml, /function\s+completeRecovery\(feedback\)[\s\S]*state\.breaks\s*\+=\s*1;[\s\S]*elapsedSeconds\s*=\s*0;/, "completeRecovery records rest and resets timer");
   assertMatches(indexHtml, /function\s+completeRecovery\(feedback\)[\s\S]*recoveryCompletionPlan\(\{[\s\S]*showBreak\("extended"\);/, "completeRecovery uses extracted recovery plan");
+  assertIncludes(indexHtml, "firstRecoverySample", "recovery events mark first recovery sample");
+  assertIncludes(indexHtml, "第一条恢复样本已建立。", "first recovery completion explains sample value");
 
-  assertEqual(restFlow.restBreakView({ reason: "manual", companionLine: "慢慢来。" }).showMicroTask, true, "manual rest shows micro task");
+  assertEqual(restFlow.restBreakView({ reason: "manual", companionLine: "慢慢来。" }).showMicroTask, false, "manual rest does not show micro task");
+  assertEqual(restFlow.restBreakView({ reason: "manual" }).title, "看向远处", "manual rest has one clear instruction");
+  assertEqual(restFlow.restBreakView({ reason: "manual" }).finishButtonText, "我回来了", "manual rest return button");
+  assertEqual(restFlow.restBreakView({ reason: "manual" }).snoozeButtonText, "稍后提醒", "manual rest snooze button");
+  assertEqual(restFlow.restBreakView({ reason: "manual" }).timerLabel, "剩余", "manual rest timer label is countdown-oriented");
+  assertEqual(restFlow.restBreakView({ reason: "manual" }).timerSeconds, 20, "manual rest uses 20 second look-away timer");
   assertEqual(restFlow.restBreakView({ reason: "force" }).showForceTask, true, "force rest shows guided task");
   assertEqual(restFlow.restBreakView({ reason: "force" }).showFinishButton, false, "force rest hides ordinary finish button");
+  assertEqual(restFlow.restBreakView({ reason: "force" }).showForceEscapeButton, true, "force rest exposes emergency exit");
+  assertEqual(restFlow.restBreakView({ reason: "manual" }).showForceEscapeButton, false, "manual rest does not expose force exit");
   assertEqual(restFlow.recoveryFeedbackView().showRecoveryFeedback, true, "feedback view reveals choices");
-  assertEqual(restFlow.breakMicroReplyView({ color: "蓝色" }).reply, "Mira：收到，蓝色就够了。眼睛已经离开屏幕了。", "micro reply copy");
   assertEqual(restFlow.recoveryCompletionPlan({ feedback: "better" }).symptomRelief, 2, "better feedback relief");
   assertEqual(restFlow.recoveryCompletionPlan({ feedback: "same", focusTarget: 20 }).nextFocusTarget, 15, "same feedback shortens focus");
   assertEqual(restFlow.recoveryCompletionPlan({ feedback: "tired", breakTarget: 210 }).nextBreakTarget, 240, "tired feedback extends rest cap");
 
   assertMatches(companionHtml, /currentMood\s*===\s*"rest"[\s\S]*openDashboard\(\{\s*restGuide:\s*true\s*\}\);/, "pink Mira opens rest guide");
+  assertIncludes(companionHtml, "function shouldNotifyRest", "companion gates rest notifications");
+  assertIncludes(companionHtml, "restNotifyCooldown = 12 * 60 * 1000", "companion rest notifications have a cooldown");
+  assertMatches(companionHtml, /if \(state\.forceMode \|\| state\.forceBreakActive\) return false;/, "force mode suppresses companion rest notifications");
+  assertMatches(companionHtml, /state\.allowSystemNotify !== true/, "companion respects system notification setting");
+  assertMatches(mainJs, /const quietedByUser = Boolean\(state\.reminderDeferred\) \|\| snoozeUntil > now;[\s\S]*hideCompanionPanel\(\);[\s\S]*return;/, "desktop panel respects snooze and busy-later responses");
+  assertMatches(mainJs, /const hasReminderOpening = Boolean\(state\.isRunning \|\| state\.reminderOpening \|\| state\.naturalBreak \|\| state\.reminderPending\);/, "desktop panel requires an interruption opening");
+  assertIncludes(breakLockHtml, "再点一次确认退出", "break lock emergency exit requires confirmation");
+  assertIncludes(breakLockHtml, "interrupted: true", "break lock reports interrupted force exits");
   assertMatches(mainJs, /dashboardWindow\.webContents\.send\("dashboard:restGuide"/, "desktop forwards rest guide");
   assertMatches(indexHtml, /onRestGuide\?\.\(\(payload = \{\}\) => \{[\s\S]*focusSessionPanel\(\{\s*target:\s*"rest",\s*guideLevel:\s*level\s*\}\);/, "dashboard rest guide focuses rest button");
 
   console.log("[smoke:rest] PASSED. Rest guide and recovery flow are wired.");
   console.log(`  - index.html: ${inlineCount} inline script(s) parse OK`);
+  console.log(`  - break-lock.html: ${breakLockInlineCount} inline script(s) parse OK`);
 }
 
 try {

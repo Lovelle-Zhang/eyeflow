@@ -1,20 +1,23 @@
 # EyeFlow Release Candidate Checklist
 
-This checklist keeps EyeFlow ready while Apple Developer registration is blocked. Treat it as two gates: the unsigned RC gate we can run now, and the signed public gate that opens after Developer ID access is ready.
+This checklist keeps EyeFlow ready for signed and notarized public beta releases. Treat it as two gates: the engineering RC gate, and the public gate that must pass before sharing artifacts.
 
-## RC Gate While Waiting For Developer ID
+## Engineering RC Gate
 
 - Run `npm run release:rc` after product-facing changes.
 - Confirm the command passes source smoke checks, app bundle build, local install, installed-app smoke, and finished-app UI smoke.
-- Use `npm run release:rc:artifacts` only when you need fresh unsigned DMG/ZIP artifacts for trusted private testers; this path uses `hdiutil` for the temporary unsigned DMG.
-- Keep unsigned builds limited to trusted testers using `docs/BETA_INSTALL_GUIDE.md`.
-- Do not publish publicly until `npm run release:public` passes with Developer ID signing.
+- Use `npm run release:rc:artifacts` only when you need fresh unsigned DMG/ZIP artifacts for internal engineering confidence; this path uses `hdiutil` for the temporary unsigned DMG.
+- Confirm unsigned artifact preflight passes only with `--allow-unsigned`.
+- Do not share unsigned or unnotarized artifacts with beta testers.
+- Do not publish publicly until `npm run release:public` or the equivalent manual gate passes with Developer ID signing, notarization, staple, packaged UI smoke, and launch preflight.
 
-## Public Gate After Developer ID
+## Public Gate
 
 - Apple Developer Program membership is active.
 - Developer ID Application certificate is available in the build keychain or CI secrets.
-- Notarization credentials are configured as described in `docs/CODESIGN_NOTARIZE.md`.
+- Signing identity is visible as `Developer ID Application` in `security find-identity -v -p codesigning`.
+- CI builds have `CSC_LINK` and `CSC_KEY_PASSWORD`, or an installed keychain identity with `CSC_NAME`.
+- Notarization credentials are configured as described in `docs/CODESIGN_NOTARIZE.md`; local profile: `eyeflow-notary`.
 - Run `npm run release:public`.
 - Confirm `npm run launch:preflight` passes without `--allow-unsigned`.
 - Upload `dist/release/v0.1.0` contents as the release candidate package.
@@ -75,7 +78,7 @@ This checklist keeps EyeFlow ready while Apple Developer registration is blocked
 
 - Static checks passed: `node --check main.js`, `node --check preload.js`, and `git diff --check`.
 - Finished-app smoke test target: `dist/mac/EyeFlow.app`.
-- Finished-app window query confirmed the running process is `EyeFlow`, with `Mira` and `EyeFlow - 低打扰恢复系统` windows created.
+- Finished-app window query confirmed the running process is `EyeFlow`, with `Mira` and `EyeFlow - Mira 桌面伙伴` windows created.
 - `npm run build:mac` successfully regenerated `dist/mac/EyeFlow.app` and ZIP; DMG helper download stalled in this environment.
 - Fallback `hdiutil` DMG was generated from the current app bundle, image info passed, mounted contents showed `EyeFlow.app` plus `/Applications`, and the volume detached cleanly.
 - Final DMG smoke test launched `/Volumes/EyeFlow/EyeFlow.app`; `EYEFLOW_DEBUG_CAPTURE=1` internal captures confirmed dashboard, Mira, and the Mira panel render correctly from the packaged app.
@@ -102,8 +105,10 @@ This checklist keeps EyeFlow ready while Apple Developer registration is blocked
 - 2026-06-06 packaged-app debug hygiene QA confirmed `EYEFLOW_DEBUG_FORCE_PREVIEW=1` no longer mutates the persisted voice-guide setting; the return probe logged `voicePreserved: true`.
 - macOS `screencapture` can return wallpaper-only images in this environment; use EyeFlow internal `capturePage()` debug captures when screen-recording permissions make system screenshots unreliable.
 
-## Known Unsigned RC Notes
+## Known Public Beta RC Notes
 
-- Unsigned RC builds must stay private until Developer ID signing and notarization pass.
+- Unnotarized RC builds must stay internal and are not tester artifacts.
+- Current public beta artifacts are available at `dist/EyeFlow-0.1.0-x64.dmg` and `dist/EyeFlow-0.1.0-x64.zip`.
+- Current public preflight passes without `--allow-unsigned`; Gatekeeper accepts the DMG as `Notarized Developer ID`.
 - Chrome/browser pages are preview fallbacks; the packaged desktop app is the source of truth for fullscreen recovery.
 - If electron-builder cannot download its DMG helper, use the simple `hdiutil` fallback DMG and verify it by running image info, mounting it, checking `EyeFlow.app` plus the `/Applications` link, and detaching the volume.

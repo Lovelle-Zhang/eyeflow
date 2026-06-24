@@ -25,10 +25,10 @@ window.EyeFlowRecoveryData = {
     gaze: {
       mood: "gaze",
       label: "远眺",
-      title: "看一下远处的颜色",
-      copy: "看一下窗外或房间里最远的东西，记住它是什么颜色。",
-      caption: "先找最远的颜色",
-      voiceCue: "看一下窗外或房间里最远的东西。记住它是什么颜色，不用盯着屏幕。"
+      title: "看向远处",
+      copy: "不用盯着屏幕，看远处 20 秒再回来。",
+      caption: "看远处",
+      voiceCue: "不用盯着屏幕。看向远处，20 秒后再慢慢回来。"
     },
     blink: {
       mood: "blink",

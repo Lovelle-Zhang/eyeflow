@@ -31,13 +31,6 @@ function fillRect(image, x, y, width, height, color) {
 }
 
 function drawSyntheticOnboarding(image, options = {}) {
-  if (options.withPill !== false) {
-    fillRect(image, 300, 42, 180, 38, [236, 255, 246]);
-    for (let i = 0; i < 10; i += 1) {
-      fillRect(image, 318 + (i * 14), 54, 7, 14, options.pillTextColor || [23, 56, 47]);
-    }
-  }
-
   if (options.withAction !== false) {
     fillRect(image, 215, 542, 220, 48, options.actionColor || [18, 31, 28]);
     for (let i = 0; i < 12; i += 1) {
@@ -63,21 +56,9 @@ function main() {
   drawSyntheticOnboarding(good);
   const diagnostics = assertOnboardingVisualQualityImage(good);
 
-  if (!/contrast=/.test(diagnostics.pill) || !/contrast=/.test(diagnostics.action)) {
+  if (!/contrast=/.test(diagnostics.action)) {
     throw new Error(`visual diagnostics are incomplete: ${JSON.stringify(diagnostics)}`);
   }
-
-  const missingPill = createImage();
-  drawSyntheticOnboarding(missingPill, { withPill: false });
-  assertThrows("missing status pill", () => {
-    assertOnboardingVisualQualityImage(missingPill);
-  }, /status pill was not detected/);
-
-  const lowContrastPill = createImage();
-  drawSyntheticOnboarding(lowContrastPill, { pillTextColor: [210, 238, 226] });
-  assertThrows("low-contrast status pill", () => {
-    assertOnboardingVisualQualityImage(lowContrastPill);
-  }, /status pill text contrast is too low/);
 
   const missingAction = createImage();
   drawSyntheticOnboarding(missingAction, { withAction: false });
@@ -92,7 +73,6 @@ function main() {
   }, /primary action text is not readable enough/);
 
   console.log("[smoke:visual] PASSED. Onboarding visual helper detects readable, missing, and low-contrast states.");
-  console.log(`  - pill: ${diagnostics.pill}`);
   console.log(`  - action: ${diagnostics.action}`);
 }
 

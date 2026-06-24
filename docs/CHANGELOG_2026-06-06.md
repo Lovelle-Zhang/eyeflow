@@ -32,9 +32,9 @@
 - Added a `反馈与诊断` card in Settings. It copies a structured local diagnostic feedback template with version, platform, permission, launch-at-login, notification support, disturbance boundary, recovery mode, current load, focus time, and open-ended user questions.
 - Added a local recent-diagnostics summary to `反馈与诊断`: the copied template now includes the latest window load, renderer, main-process, and voice-guide issues kept in memory, without uploading anything automatically.
 - Preserved notification-support status when activity updates refresh permission copy, so Settings keeps reporting the correct notification channel after desktop activity events.
-- Repositioned public and in-app copy around `低打扰恢复系统`: Settings now says `打扰边界`, rhythm copy talks about `恢复断点`, and Mira's default language emphasizes low-interruption recovery instead of generic reminders.
+- Repositioned public and in-app copy around `轻提醒恢复系统`: Settings now says `提醒边界`, rhythm copy talks about `恢复断点`, and Mira's default language emphasizes light reminders instead of generic reminders.
 - Increased packaged-app smoke timeout so the combined pink-Mira rest path plus 15-second force-recovery preview has enough time to capture completion and return states.
-- Added a sidebar `复盘` entry and lightweight `7 天低打扰复盘` panel, summarizing active days, completed recoveries, handled interventions, peak load, and a short Mira recommendation.
+- Added a sidebar `复盘` entry and lightweight `7 天轻提醒复盘` panel, summarizing active days, completed recoveries, handled interventions, peak load, and a short Mira recommendation.
 - Packaged-app QA confirmed `EYEFLOW_DEBUG_CAPTURE=1 EYEFLOW_DEBUG_VIEW=rhythmView` opens the finished `EyeFlow.app` to Settings and saves `/private/tmp/eyeflow-dashboard-rhythmView-capture.png` with the readiness panel rendered correctly.
 - Reworked the visual palette around eye comfort: reduced pure-white surfaces, lowered high-saturation green/pink/amber states, softened dashboard surfaces, Mira avatars, and the full-screen recovery page so the product itself feels lower-glare and more aligned with eye-care positioning.
 

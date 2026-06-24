@@ -22,6 +22,12 @@ EyeFlow may ask for macOS Accessibility permission. This lets EyeFlow read limit
 
 System notifications are optional. If system notifications are unavailable or disabled, EyeFlow uses Mira state changes and optional light audio cues instead.
 
+## Future Hardware Data
+
+The current release does not collect blink rate, gaze distance, eye images, video, tear-film signals, or other biometric hardware data.
+
+If EyeFlow adds hardware support later, those signals require separate opt-in consent, clearer data labels, local export and delete controls, and a privacy review before release. Eye image, video, high-frequency gaze, or hardware-derived ocular signals must not be treated like ordinary product telemetry.
+
 ## Sharing Feedback
 
 The feedback template copies a text summary to your clipboard only when you press the copy button. It does not upload anything automatically. Review the text before sending it.

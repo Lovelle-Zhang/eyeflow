@@ -19,13 +19,14 @@ window.EyeFlowSessionFlow = (() => {
     paused = false,
     restSeconds = 120
   } = {}) {
-    const restText = restDue ? `开始 ${restSeconds} 秒休息` : "休息";
+    const restText = restDue ? `休息 ${restSeconds} 秒` : "休息";
     const restTitle = restDue ? `开始 ${restSeconds} 秒休息` : "主动休息";
 
-    if (isRunning) {
-      return {
-        pillText: restDue ? "恢复断点" : "手动专注",
-        pillState: restDue ? "due" : "manual",
+	    if (isRunning) {
+	      return {
+	        panelTitle: restDue ? "恢复断点" : "本轮节奏",
+	        pillText: restDue ? "恢复断点" : "手动专注",
+	        pillState: restDue ? "due" : "manual",
         startText: "暂停",
         startTitle: "暂停当前专注",
         startIcon: "pause",
@@ -34,17 +35,18 @@ window.EyeFlowSessionFlow = (() => {
       };
     }
 
-    return {
-      pillText: !assessedToday ? "待校准" : autoTracking ? "自动记录" : paused ? "已暂停" : "未开始",
+	    return {
+	      panelTitle: autoTracking ? "本轮节奏" : paused ? "这一轮已暂停" : "这一轮已安排",
+	      pillText: !assessedToday ? "已安排" : autoTracking ? "自动记录" : paused ? "已暂停" : "未开始",
       pillState: !assessedToday ? "idle" : autoTracking ? "auto" : paused ? "paused" : "idle",
-      startText: !assessedToday ? "先校准今天" : autoTracking ? "开始手动专注" : paused ? "继续专注" : "开始专注",
+      startText: !assessedToday ? "开始安静提醒" : autoTracking ? "手动专注" : paused ? "继续专注" : "开始安静提醒",
       startTitle: !assessedToday
-        ? "先让 Mira 记录今天的眼睛状态"
+        ? "开始安静提醒"
         : autoTracking
-          ? "从 00:00 开始手动专注"
+          ? "切到手动专注并从 00:00 计时"
           : paused
             ? "继续当前专注"
-            : "开始专注",
+            : "开始安静提醒",
       startIcon: "play",
       restText,
       restTitle
