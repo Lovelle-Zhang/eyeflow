@@ -627,12 +627,12 @@
 	      flex: 0 1 auto;
 	      width: fit-content;
 	      min-width: 0;
-	      border: 1px solid rgba(24, 32, 31, 0.06);
+	      border: 1px solid var(--line);
 	      border-radius: var(--ef-radius-pill);
 	      min-height: var(--ef-control-sm);
 	      padding: var(--ef-space-0) var(--ef-space-3);
 	      color: var(--muted);
-	      background: rgba(248, 251, 248, 0.78);
+	      background: var(--pill-bg);
 	      display: inline-flex;
       align-items: center;
       font-size: var(--ef-text-meta);
@@ -642,8 +642,8 @@
 
     .session-state-pill[data-state="auto"] {
       color: var(--muted);
-      background: #f1f8f4;
-      border-color: #d8e8df;
+      background: var(--pill-bg);
+      border-color: var(--line);
     }
 
 	    .session-state-pill[data-state="manual"] {
@@ -653,14 +653,28 @@
 	    }
 
     .session-state-pill[data-state="paused"] {
-      color: #68736e;
-      background: #f4f7f4;
+      color: var(--muted);
+      background: var(--pill-bg);
     }
 
     .session-state-pill[data-state="due"] {
       color: #8a5a10;
       background: #fff2d1;
       border-color: rgba(216, 165, 55, 0.34);
+    }
+
+    /* Semantic state pills (green / amber) get dark-friendly tints so they read
+       as tinted-on-dark instead of bright light pills at night. */
+    :root[data-theme="dark"] .session-state-pill[data-state="manual"] {
+      color: #5fcfa6;
+      background: rgba(79, 201, 156, 0.14);
+      border-color: rgba(79, 201, 156, 0.28);
+    }
+
+    :root[data-theme="dark"] .session-state-pill[data-state="due"] {
+      color: #f0c674;
+      background: rgba(240, 198, 116, 0.14);
+      border-color: rgba(240, 198, 116, 0.3);
     }
 
     .timer-card.session-pulse {
