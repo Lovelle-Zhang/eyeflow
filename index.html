@@ -1171,7 +1171,7 @@
       padding: var(--ef-space-6);
       border: 1px solid var(--group-line);
       border-radius: var(--ef-radius-md);
-      background: #fbfdf9;
+      background: var(--group-bg);
       display: grid;
       gap: var(--ef-space-4);
     }
@@ -1222,7 +1222,7 @@
     .intervention-meter span {
       height: var(--ef-space-2);
       border-radius: var(--ef-radius-pill);
-      background: #edf2ec;
+      background: var(--track-bg);
     }
 
     .intervention-meter span.active {
@@ -1416,9 +1416,9 @@
       min-width: 0;
       min-height: var(--ef-control-sm);
       padding: var(--ef-space-0) var(--ef-space-4);
-      border: 1px solid rgba(24, 32, 31, 0.06);
+      border: 1px solid var(--group-line);
       border-radius: var(--ef-radius-pill);
-      background: rgba(251, 252, 246, 0.68);
+      background: var(--group-bg);
       color: var(--muted);
       display: inline-flex;
       align-items: center;
@@ -1880,7 +1880,7 @@
       width: min(100%, 480px);
       padding: var(--ef-space-5);
       border-radius: var(--ef-radius-md);
-      background: rgba(251, 252, 246, 0.72);
+      background: var(--group-bg);
       border: 1px solid var(--group-line-soft);
     }
 
@@ -1945,7 +1945,7 @@
       min-width: 0;
       padding: var(--ef-space-4);
       border-radius: var(--ef-radius-md);
-      background: rgba(248, 250, 243, 0.54);
+      background: var(--group-bg);
       border: 1px solid var(--group-line-soft);
       box-shadow: none;
     }
@@ -2080,7 +2080,7 @@
     }
 
     .metric-pair + .metric-pair {
-      border-left: 1px solid rgba(24, 32, 31, 0.045);
+      border-left: 1px solid var(--group-line);
     }
 
     .metric-pair strong {
@@ -2229,9 +2229,9 @@
       max-height: calc(var(--ef-space-14) * 6);
       overflow: auto;
       padding: var(--ef-space-5);
-      border: 1px solid rgba(24, 32, 31, 0.08);
+      border: 1px solid var(--group-line);
       border-radius: var(--ef-radius-md);
-      background: rgba(247, 250, 246, 0.72);
+      background: var(--group-bg);
       color: var(--muted);
       font-size: var(--ef-text-meta);
       line-height: var(--ef-line-reading);
@@ -2287,8 +2287,8 @@
     }
 
     .readiness-status.preview {
-      background: rgba(245, 247, 246, 0.92);
-      border-color: rgba(24, 32, 31, 0.1);
+      background: var(--pill-bg);
+      border-color: var(--line);
       color: var(--muted);
     }
 
@@ -2345,8 +2345,8 @@
       gap: var(--ef-space-4);
       padding: var(--ef-space-5);
       border-radius: var(--ef-radius-md);
-      background: rgba(246, 251, 248, 0.78);
-      border: 1px solid rgba(16, 27, 24, 0.08);
+      background: var(--group-bg);
+      border: 1px solid var(--group-line);
     }
 
     .recovery-mode .timer-controls {
@@ -2595,9 +2595,9 @@
       min-height: var(--ef-control-sm);
       padding: var(--ef-space-0) var(--ef-space-4);
       border-radius: var(--ef-radius-pill);
-      border: 1px solid rgba(24, 32, 31, 0.07);
-      background: rgba(251, 252, 246, 0.66);
-      color: rgba(73, 88, 82, 0.82);
+      border: 1px solid var(--line);
+      background: var(--pill-bg);
+      color: var(--muted);
       font-size: var(--ef-text-meta);
       line-height: var(--ef-line-compact);
       font-weight: var(--ef-symbol-weight-quiet);
@@ -2785,7 +2785,7 @@
     .profile-symptom-track {
       height: var(--ef-space-2);
       border-radius: var(--ef-radius-pill);
-      background: rgba(226, 235, 229, 0.76);
+      background: var(--track-bg);
       overflow: hidden;
     }
 
@@ -2849,7 +2849,7 @@
       min-width: 70px;
       height: var(--ef-space-2);
       border-radius: var(--ef-radius-pill);
-      background: rgba(226, 235, 229, 0.84);
+      background: var(--track-bg);
       overflow: hidden;
     }
 
@@ -2891,8 +2891,8 @@
       padding: var(--ef-space-1) var(--ef-space-3);
       border-radius: var(--ef-radius-pill);
       border: 1px solid var(--group-line);
-      background: rgba(242, 247, 241, 0.72);
-      color: rgba(73, 88, 82, 0.8);
+      background: var(--pill-bg);
+      color: var(--muted);
       font-size: var(--ef-text-micro);
       line-height: var(--ef-line-compact);
       white-space: nowrap;
@@ -3011,7 +3011,7 @@
       margin: 0;
       padding: var(--ef-space-5);
       border-radius: var(--ef-radius-md);
-      border: 1px solid rgba(24, 32, 31, 0.08);
+      border: 1px solid var(--group-line);
       background: rgba(17, 33, 29, 0.92);
       color: #d9eee5;
       font-size: var(--ef-text-micro);
@@ -3050,8 +3050,8 @@
       align-items: baseline;
       gap: var(--ef-space-5);
       padding: var(--ef-space-4) 0;
-      border-bottom: 1px solid rgba(24, 32, 31, 0.045);
-      color: rgba(73, 88, 82, 0.72);
+      border-bottom: 1px solid var(--group-line);
+      color: var(--muted);
       font-size: var(--ef-text-meta);
       line-height: var(--ef-line-compact);
     }
@@ -3237,7 +3237,7 @@
       position: relative;
       min-height: calc(var(--ef-control-lg) * 4 + var(--ef-space-8));
       padding: var(--ef-space-5) var(--ef-space-14) var(--ef-space-8) var(--ef-space-6);
-      border: 1px solid rgba(24, 32, 31, 0.09);
+      border: 1px solid var(--group-line);
       border-radius: var(--ef-radius-md);
       background:
         repeating-linear-gradient(0deg, rgba(24, 32, 31, 0.045) 0 1px, transparent 1px calc(var(--ef-space-13) - 1px)),
@@ -3298,7 +3298,7 @@
       flex-direction: column-reverse;
       align-items: flex-end;
       justify-content: space-between;
-      color: rgba(73, 88, 82, 0.62);
+      color: var(--muted);
       font-size: var(--ef-text-micro);
       pointer-events: none;
     }
@@ -3328,7 +3328,7 @@
     .profile-mini-stat {
       min-width: 0;
       padding: var(--ef-space-3) var(--ef-space-4);
-      border: 1px solid rgba(24, 32, 31, 0.08);
+      border: 1px solid var(--group-line);
       border-radius: var(--ef-radius-md);
       background: var(--pill-bg);
       display: grid;
@@ -3353,7 +3353,7 @@
       display: grid;
       grid-template-columns: 1fr;
       gap: var(--ef-space-0);
-      border: 1px solid rgba(24, 32, 31, 0.08);
+      border: 1px solid var(--group-line);
       border-radius: var(--ef-radius-md);
       background: var(--pill-bg);
       overflow: hidden;
@@ -3362,7 +3362,7 @@
     .profile-event {
       min-width: 0;
       padding: var(--ef-space-3) var(--ef-space-4);
-      border-bottom: 1px solid rgba(24, 32, 31, 0.06);
+      border-bottom: 1px solid var(--group-line);
       background: transparent;
       display: grid;
       grid-template-columns: 116px minmax(0, 1fr);
@@ -3460,7 +3460,7 @@
     .archive-window-pill {
       flex: 0 0 auto;
       padding: var(--ef-space-2) var(--ef-space-3);
-      border: 1px solid rgba(24, 32, 31, 0.1);
+      border: 1px solid var(--line);
       border-radius: var(--ef-radius-sm);
       background: var(--pill-bg);
       color: var(--ink);
@@ -3477,7 +3477,7 @@
 
     .archive-metrics .reason {
       border: 0;
-      border-right: 1px solid rgba(24, 32, 31, 0.065);
+      border-right: 1px solid var(--group-line);
       border-radius: 0;
       background: transparent;
       padding: var(--ef-space-5) var(--ef-space-6);
@@ -3716,9 +3716,9 @@
     .history-header {
       min-height: var(--ef-control-md);
       padding: var(--ef-space-0) var(--ef-space-7);
-      border-bottom: 1px solid rgba(24, 32, 31, 0.08);
+      border-bottom: 1px solid var(--group-line);
       background: var(--wash-2);
-      color: rgba(73, 88, 82, 0.78);
+      color: var(--muted);
       font-size: var(--ef-text-caption);
       font-weight: 760;
       letter-spacing: 0;
@@ -3728,7 +3728,7 @@
       --history-accent: #227968;
       min-height: calc(var(--ef-control-lg) + var(--ef-space-7));
       padding: var(--ef-space-4) var(--ef-space-7);
-      border-bottom: 1px solid rgba(24, 32, 31, 0.065);
+      border-bottom: 1px solid var(--group-line);
       color: var(--ink);
       background: transparent;
     }
@@ -3805,7 +3805,7 @@
     .history-peak-track {
       height: var(--ef-space-1);
       border-radius: var(--ef-radius-pill);
-      background: rgba(226, 235, 229, 0.82);
+      background: var(--track-bg);
       overflow: hidden;
     }
 
@@ -3916,7 +3916,7 @@
       gap: var(--ef-space-3);
       padding: var(--ef-space-5);
       border-radius: var(--radius);
-      background: #fbfcfa;
+      background: var(--group-bg);
       border: 1px solid var(--line);
       box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.55);
     }
@@ -4213,7 +4213,7 @@
       width: 34px;
       height: 34px;
       border-radius: var(--radius);
-      background: #f6f8f4;
+      background: var(--group-bg);
       border: 1px solid var(--line);
       color: var(--ink);
       display: grid;
@@ -4741,9 +4741,9 @@
     .trust-item {
       min-width: 0;
       padding: 6px 7px;
-      border: 1px solid rgba(24, 32, 31, 0.08);
+      border: 1px solid var(--group-line);
       border-radius: var(--ef-radius-md);
-      background: rgba(251, 252, 246, 0.72);
+      background: var(--group-bg);
       display: grid;
       gap: 3px;
     }
@@ -6112,7 +6112,7 @@
     .feedback-template,
     .profile-evidence-grid,
     .data-console-grid {
-      border-color: rgba(24, 32, 31, 0.065);
+      border-color: var(--group-line);
     }
 
     .feedback-template {
@@ -6408,7 +6408,7 @@
       padding: var(--ef-space-2) var(--ef-space-4);
       border: 1px solid var(--profile-share-line);
       border-radius: var(--ef-radius-pill);
-      background: rgba(251, 252, 246, 0.42);
+      background: var(--group-bg);
       grid-template-columns: auto auto;
       align-items: baseline;
     }
@@ -6643,7 +6643,7 @@
     #profileView .history-peak-track {
       height: var(--ef-space-1);
       border-radius: var(--ef-radius-pill);
-      background: rgba(226, 235, 229, 0.54);
+      background: var(--track-bg);
     }
 
     #profileView .profile-analysis-track span,
@@ -6705,7 +6705,7 @@
     #profileView .profile-event-strip {
       border-radius: var(--ef-radius-md);
       border-color: var(--profile-calm-line);
-      background: rgba(255, 255, 255, 0.28);
+      background: var(--group-bg);
     }
 
     #profileView .profile-mini-stat {
@@ -6782,7 +6782,7 @@
     }
 
     #profileView .history-table {
-      background: rgba(255, 255, 255, 0.28);
+      background: var(--group-bg);
     }
 
     #profileView .history-header,
@@ -6793,7 +6793,7 @@
     #profileView .history-header {
       min-height: var(--ef-control-md);
       padding: var(--ef-space-0) var(--ef-space-7);
-      background: rgba(242, 247, 241, 0.3);
+      background: var(--group-bg);
       border-bottom-color: var(--profile-calm-line);
       font-weight: var(--ef-symbol-weight-base);
     }
@@ -6969,7 +6969,7 @@
     #rhythmView .settings-boundary-disclosure {
       margin-top: var(--ef-space-0);
       min-height: 0;
-      border-top: 1px solid rgba(24, 32, 31, 0.045);
+      border-top: 1px solid var(--group-line);
     }
 
     #rhythmView .settings-boundary-disclosure summary {
@@ -7126,7 +7126,7 @@
     #rhythmView .settings-preference-rows {
       display: grid;
       gap: var(--ef-space-0);
-      border-bottom: 1px solid rgba(24, 32, 31, 0.045);
+      border-bottom: 1px solid var(--group-line);
     }
 
     #rhythmView .settings-preference-rows .settings-row > .tag[data-state] {
@@ -7239,7 +7239,7 @@
     }
 
     #rhythmView .primary {
-      background: #1f2f29;
+      background: var(--btn-primary-bg);
     }
 
     #rhythmView .primary:hover,
@@ -7385,14 +7385,14 @@
     #rhythmView .force-confirm .primary {
       min-height: var(--ef-control-lg);
       color: #ffffff;
-      background: #1f2f29;
+      background: var(--btn-primary-bg);
       border-color: var(--ink);
     }
 
     #rhythmView #previewForceBreakBtn {
       color: #2f3f39;
-      background: rgba(251, 252, 246, 0.72);
-      border-color: rgba(24, 32, 31, 0.08);
+      background: var(--group-bg);
+      border-color: var(--group-line);
     }
 
     #rhythmView #cancelForceBtn {
@@ -7450,7 +7450,7 @@
       min-height: calc(var(--ef-control-lg) + var(--ef-space-8));
       background: transparent;
       border: 0;
-      border-top: 1px solid rgba(24, 32, 31, 0.045);
+      border-top: 1px solid var(--group-line);
       border-radius: 0;
       box-shadow: none;
     }
@@ -7587,8 +7587,8 @@
     #rhythmView .tag[data-state="preview"],
     #rhythmView .tag[data-state="checking"] {
       color: var(--muted);
-      background: rgba(245, 247, 246, 0.72);
-      border-color: rgba(24, 32, 31, 0.08);
+      background: var(--pill-bg);
+      border-color: var(--line);
     }
 
     #rhythmView .readiness-grid {
@@ -7686,8 +7686,8 @@
       width: 100%;
       padding-inline: var(--ef-space-3);
       color: var(--ink);
-      background: rgba(251, 252, 246, 0.42);
-      border-color: rgba(24, 32, 31, 0.045);
+      background: var(--btn-ghost-bg);
+      border-color: var(--group-line);
       font-size: var(--ef-text-body-sm);
       font-weight: var(--ef-symbol-weight-base);
       justify-content: center;
@@ -7790,8 +7790,8 @@
     }
 
     #rhythmView .system-diagnostic-card .feedback-template {
-      background: rgba(247, 250, 246, 0.62);
-      border-color: rgba(24, 32, 31, 0.07);
+      background: var(--group-bg);
+      border-color: var(--group-line);
     }
 
     #profileView .profile-overview,
@@ -7875,7 +7875,7 @@
       }
 
       .metrics .metric {
-        border-top: 1px solid rgba(24, 32, 31, 0.045);
+        border-top: 1px solid var(--group-line);
       }
 
       .metrics .metric:nth-child(-n + 1) {
@@ -8013,7 +8013,7 @@
 
       .metric-pair + .metric-pair {
         border-left: 0;
-        border-top: 1px solid rgba(24, 32, 31, 0.045);
+        border-top: 1px solid var(--group-line);
       }
 
       .profile-evidence-grid {
@@ -8072,8 +8072,8 @@
       }
 
       .data-console-stat:nth-child(n) {
-        border-right: 1px solid rgba(24, 32, 31, 0.065);
-        border-bottom: 1px solid rgba(24, 32, 31, 0.065);
+        border-right: 1px solid var(--group-line);
+        border-bottom: 1px solid var(--group-line);
       }
 
       .data-console-stat:nth-child(2n) {
@@ -8085,8 +8085,8 @@
       }
 
       .profile-evidence:nth-child(n) {
-        border-right: 1px solid rgba(24, 32, 31, 0.065);
-        border-bottom: 1px solid rgba(24, 32, 31, 0.065);
+        border-right: 1px solid var(--group-line);
+        border-bottom: 1px solid var(--group-line);
       }
 
       .profile-evidence:nth-child(2n) {
@@ -8163,7 +8163,7 @@
       }
 
       .metrics .metric:nth-child(n) {
-        border-top: 1px solid rgba(24, 32, 31, 0.045);
+        border-top: 1px solid var(--group-line);
       }
 
       .metrics .metric:first-child {
@@ -8241,7 +8241,7 @@
       }
 
       .archive-metrics .reason:nth-child(-n + 2) {
-        border-bottom: 1px solid rgba(24, 32, 31, 0.065);
+        border-bottom: 1px solid var(--group-line);
       }
 
       .profile-chart-metrics {
@@ -8298,7 +8298,7 @@
       .archive-metrics .reason,
       .archive-metrics .reason:nth-child(2n) {
         border-right: 0;
-        border-bottom: 1px solid rgba(24, 32, 31, 0.065);
+        border-bottom: 1px solid var(--group-line);
       }
 
       .archive-metrics .reason:last-child {
@@ -8328,7 +8328,7 @@
 
       .data-console-stat:nth-child(n) {
         border-right: 0;
-        border-bottom: 1px solid rgba(24, 32, 31, 0.065);
+        border-bottom: 1px solid var(--group-line);
       }
 
       .data-console-stat:last-child {
@@ -8337,7 +8337,7 @@
 
       .profile-evidence:nth-child(n) {
         border-right: 0;
-        border-bottom: 1px solid rgba(24, 32, 31, 0.065);
+        border-bottom: 1px solid var(--group-line);
       }
 
       .profile-evidence:last-child {
