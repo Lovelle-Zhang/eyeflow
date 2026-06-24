@@ -47,6 +47,32 @@ function assertArrayLiteralMinLength(source, name, minLength, label) {
   }
 }
 
+// Dark-mode guardrail (mirrors smoke-core): themed views must use theme tokens,
+// not hardcoded neutral surface/border/text colors. Allows the intentional set.
+function assertNoHardcodedNeutralSurfaces(html, label) {
+  const styles = [...html.matchAll(/<style>([\s\S]*?)<\/style>/g)].map((m) => m[1]).join("\n");
+  const THEMED = /#profileView|#rhythmView|\.metrics |\.metric-pair|\.state-cue|\.assessment-reminder|\.feedback-template|\.recovery-mode|\.trend\b|\.icon-btn|\.trust-item|\.reason\b|\.intervention|\.archive|\.history|\.data-console|\.profile-|\.readiness/;
+  const INTENTIONAL = /share-art|candle|weekly-(?:state|candle)|\bwick\b|kline|onboarding|break-|companion|\.pet|mira-|stage-|pending-reminder|recovery-feedback|data-console-pre|today-flow|session-start-hint|\.insight|symptom|note-box|force-/;
+  const NEUTRAL = [
+    /border(?:-(?:top|bottom|left|right|color))?\s*:\s*[^;]*?rgba\((?:24,\s*32,\s*31|16,\s*27,\s*24)[^)]*\)/,
+    /background(?:-color)?\s*:\s*(?:rgba\((?:251,\s*252,\s*246|245,\s*247,\s*246|242,\s*247,\s*241|248,\s*250,\s*243|246,\s*251,\s*248|247,\s*250,\s*246)[^)]*\)|#fbfdf9|#fbfcfa|#f6f8f4)/,
+    /background(?:-color)?\s*:\s*rgba\(226,\s*235,\s*229[^)]*\)/,
+    /color\s*:\s*rgba\(73,\s*88,\s*82[^)]*\)/,
+  ];
+  const violations = [];
+  for (const m of styles.matchAll(/([^{}]+)\{([^{}]*)\}/g)) {
+    const sel = m[1].replace(/\s+/g, " ").trim();
+    if (!THEMED.test(sel) || INTENTIONAL.test(sel)) continue;
+    for (const re of NEUTRAL) {
+      const hit = m[2].match(re);
+      if (hit) violations.push(`${sel.slice(0, 60)}  ::  ${hit[0].trim().slice(0, 48)}`);
+    }
+  }
+  if (violations.length) {
+    throw new Error(`${label}: ${violations.length} hardcoded neutral color(s) in themed views:\n  ${violations.slice(0, 15).join("\n  ")}`);
+  }
+}
+
 function parseInlineScripts(relativePath) {
   const html = read(relativePath);
   const scripts = [...html.matchAll(/<script(?:\s[^>]*)?>([\s\S]*?)<\/script>/gi)];
@@ -622,6 +648,8 @@ function main() {
   assertMatches(mainJs, /dashboardWindow\.webContents\.send\("dashboard:focus"/, "installed dashboard focus IPC");
   assertMatches(mainJs, /const quietedByUser = Boolean\(state\.reminderDeferred\) \|\| snoozeUntil > now;/, "installed desktop panel respects user quieting");
   assertMatches(mainJs, /fs\.mkdirSync\(debugCaptureDir,\s*\{\s*recursive:\s*true\s*\}\);/, "installed debug capture creates directory");
+
+  assertNoHardcodedNeutralSurfaces(indexHtml, "installed themed views use theme tokens, not hardcoded neutral surfaces");
 
   console.log("[smoke:installed] PASSED. Installed EyeFlow.app contains the current Mira onboarding flow.");
   console.log(`  - app: ${appPath}`);
