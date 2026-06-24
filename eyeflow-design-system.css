@@ -23,6 +23,33 @@
   --ef-line-body: 1.45;
   --ef-line-reading: 1.62;
 
+  /* 5-role type scale. Every text element resolves to exactly one role via the
+     .ef-role-* utility classes — no ad-hoc size/weight, no browser defaults. */
+  --ef-role-display-size: 28px;
+  --ef-role-display-weight: 600;
+  --ef-role-display-line: 1.12;
+  --ef-role-display-spacing: -0.022em;
+
+  --ef-role-title-size: 17px;
+  --ef-role-title-weight: 600;
+  --ef-role-title-line: 1.25;
+  --ef-role-title-spacing: -0.01em;
+
+  --ef-role-stat-size: 20px;
+  --ef-role-stat-weight: 600;
+  --ef-role-stat-line: 1.2;
+  --ef-role-stat-spacing: -0.01em;
+
+  --ef-role-body-size: 14px;
+  --ef-role-body-weight: 400;
+  --ef-role-body-line: 1.55;
+  --ef-role-body-spacing: 0;
+
+  --ef-role-label-size: 12px;
+  --ef-role-label-weight: 500;
+  --ef-role-label-line: 1.4;
+  --ef-role-label-spacing: 0;
+
   /* 2px-based spacing scale, biased toward quiet desktop density. */
   --ef-space-0: 0;
   --ef-space-1: 4px;

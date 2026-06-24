@@ -120,7 +120,7 @@ function main() {
   assertIncludes(designSystemCss, "--ef-mira-mouth-color: rgba(15, 159, 122, 0.58);", "installed design system defines canonical Mira mouth color");
   assertIncludes(indexHtml, "#rhythmView .settings-grid", "installed settings view uses a comfort layout");
   assertIncludes(indexHtml, ".settings-actions", "installed settings actions use a reusable alignment class");
-  assertIncludes(indexHtml, "--page-frame-width: 100%;", "installed app defines one shared full-width page frame");
+  assertIncludes(indexHtml, "--page-frame-width: min(1420px, 100%);", "installed app defines one shared centered page frame width");
   assertMatches(indexHtml, /\.topbar,\s*#todayView,\s*#rhythmView,\s*#profileView\s*\{[\s\S]*width:\s*min\(100%,\s*var\(--page-frame-width\)\);[\s\S]*justify-self:\s*center;/, "installed top-level pages share one centered page frame");
   assertMatches(indexHtml, /\.topbar h2\s*\{[\s\S]*font-size:\s*var\(--ef-text-title-lg\);[\s\S]*line-height:\s*var\(--ef-line-tight\);/, "installed top-level page titles use one tokenized scale");
   assertIncludes(indexHtml, "#rhythmView .settings-section {\n      min-width: 0;\n      gap: var(--ef-space-4);", "installed settings uses compact preference sections instead of card skeletons");
@@ -465,7 +465,7 @@ function main() {
   assertMatches(indexHtml, /\.onboarding-overlay\s*\{[\s\S]*position:\s*fixed;[\s\S]*inset:\s*0;[\s\S]*place-items:\s*center;/, "installed onboarding overlay centers the first-run dialog in the dashboard window");
   assertMatches(indexHtml, /\.onboarding-overlay\s*\{[\s\S]*background:\s*rgba\(15,\s*23,\s*21,\s*0\.68\);[\s\S]*backdrop-filter:\s*blur\(var\(--ef-space-6\)\) saturate\(0\.78\);/, "installed onboarding overlay darkens and blurs the background behind the first-run sheet");
   assertMatches(indexHtml, /body:has\(#onboardingOverlay\.show\) #primaryActionBtn\s*\{[\s\S]*opacity:\s*0;[\s\S]*pointer-events:\s*none;/, "installed onboarding hides the background start action while the first-run sheet is open");
-  assertMatches(indexHtml, /\.onboarding-dialog\s*\{[\s\S]*width:\s*min\(calc\(var\(--ef-space-14\) \* 9\.4\),\s*100%\);[\s\S]*padding:\s*var\(--ef-space-8\) var\(--ef-space-8\) var\(--ef-space-6\);[\s\S]*box-shadow:\s*0 0 0 0\.5px rgba\(0,\s*0,\s*0,\s*0\.06\),\s*0 12px 32px rgba\(0,\s*0,\s*0,\s*0\.12\);/, "installed onboarding keeps bottom whitespace restrained with a quieter ADA shadow");
+  assertMatches(indexHtml, /\.onboarding-dialog\s*\{[\s\S]*width:\s*min\(calc\(var\(--ef-space-14\) \* 9\.4\),\s*100%\);[\s\S]*padding:\s*var\(--ef-space-8\) var\(--ef-space-8\) var\(--ef-space-6\);[\s\S]*box-shadow:\s*var\(--group-shadow\),\s*0 12px 32px rgba\(0,\s*0,\s*0,\s*0\.12\);/, "installed onboarding keeps bottom whitespace restrained with a quieter ADA shadow");
   assertMatches(indexHtml, /\.mira-intro\s*\{[\s\S]*grid-template-columns:\s*minmax\(0,\s*1fr\);[\s\S]*justify-items:\s*center;[\s\S]*text-align:\s*center;[\s\S]*background:\s*transparent;[\s\S]*box-shadow:\s*none;[\s\S]*transform:\s*translateY\(calc\(var\(--ef-space-1\) \* -1\)\);/, "installed onboarding intro centers and subtly lifts the first-run card content");
   assertMatches(indexHtml, /\.mira-intro \.pet\s*\{[\s\S]*--mira-intro-avatar-scale:\s*1\.24;[\s\S]*width:\s*calc\(var\(--ef-space-14\) \+ var\(--ef-space-7\)\);[\s\S]*height:\s*calc\(var\(--ef-space-14\) \+ var\(--ef-space-7\)\);[\s\S]*border-radius:\s*var\(--ef-radius-pill\);[\s\S]*radial-gradient\(circle/, "installed onboarding Mira reads as a larger round avatar instead of an app icon tile");
   assertMatches(indexHtml, /\.mira-intro \.pet-mouth\s*\{[\s\S]*top:\s*42px;[\s\S]*width:\s*8px;[\s\S]*height:\s*5px;[\s\S]*border-bottom-width:\s*1\.5px;/, "installed onboarding Mira mouth stays as a soft short smile");
@@ -544,10 +544,12 @@ function main() {
   assertIncludes(indexHtml, "卡片已复制。", "installed profile share card confirms image-card copying");
   assertIncludes(indexHtml, "MIRA_DAILY_SHARE_LINES", "installed profile share card uses a local line library");
   assertArrayLiteralMinLength(indexHtml, "MIRA_DAILY_SHARE_LINES", 30, "installed profile share card keeps a month-sized daily line library");
-  assertMatches(indexHtml, /#profileView \.profile-overview-head h3\s*\{[\s\S]*font-size:\s*var\(--ef-text-body-lg\);[\s\S]*line-height:\s*var\(--ef-line-title\);/, "installed profile judgement title stays below the page-title scale");
-  assertMatches(indexHtml, /#profileView \.profile-overview > \.profile-overview-head p\s*\{[\s\S]*max-width:\s*46ch;[\s\S]*font-weight:\s*var\(--ef-symbol-weight-quiet\);/, "installed profile judgement subtitle stays quiet and bounded");
-  assertMatches(indexHtml, /#profileView \.profile-insight-title\s*\{[\s\S]*font-size:\s*var\(--ef-text-title-md\);[\s\S]*line-height:\s*var\(--ef-line-title\);/, "installed profile recommendation headline is the only strong line in the card");
-  assertMatches(indexHtml, /#profileView \.profile-insight-text\s*\{[\s\S]*max-width:\s*58ch;[\s\S]*font-size:\s*var\(--ef-text-body-sm\);[\s\S]*line-height:\s*var\(--ef-line-body\);/, "installed profile judgement body uses a quieter body scale");
+  assertIncludes(designSystemCss, "--ef-role-title-size: 17px;", "installed type scale defines the Title role token");
+  assertIncludes(designSystemCss, "--ef-role-stat-size: 20px;", "installed type scale defines the Stat role token");
+  assertMatches(indexHtml, /#profileView \.profile-overview-head h3,[\s\S]*?#profileView \.weekly-market-head h4,[\s\S]*?\{[\s\S]*?font-size:\s*var\(--ef-role-title-size\);/, "installed 复盘 card titles share one Title role");
+  assertMatches(indexHtml, /#profileView \.profile-insight-title,[\s\S]*?#profileView \.profile-evidence strong,[\s\S]*?\{[\s\S]*?font-size:\s*var\(--ef-role-stat-size\);/, "installed 复盘 stat values share one Stat role");
+  assertIncludes(indexHtml, "--ef-text-secondary: color-mix(in srgb, var(--ink) 60%, transparent);", "installed secondary text is primary ink at 60%");
+  assertMatches(indexHtml, /#profileView \.profile-insight-text\s*\{[\s\S]*max-width:\s*58ch;/, "installed profile judgement body stays bounded");
   assertMatches(indexHtml, /\.profile-insight-row p\s*\{[\s\S]*display:\s*none;/, "installed profile insight summary rows avoid repeated explanatory copy");
   assertMatches(indexHtml, /function\s+drawShareMiraMark\([\s\S]*iconGradient\.addColorStop\(0,\s*"#d8fff1"\);[\s\S]*iconGradient\.addColorStop\(0\.58,\s*"#bdeaff"\);[\s\S]*iconGradient\.addColorStop\(1,\s*"#f4efc7"\);[\s\S]*"#62d6ae"/, "installed profile share image draws the real app icon mark");
   assertMatches(indexHtml, /function\s+drawDailyShareCardCanvas\([\s\S]*canvas\.width = 1200;[\s\S]*canvas\.height = 720;[\s\S]*#f5f3ee[\s\S]*eyeflow\.app/, "installed profile share image draws a textured card artifact");

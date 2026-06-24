@@ -193,10 +193,20 @@ function main() {
   assertIncludes(indexHtml, "卡片已复制。", "profile share card confirms image-card copying");
   assertIncludes(indexHtml, "MIRA_DAILY_SHARE_LINES", "profile share card uses a local line library");
   assertArrayLiteralMinLength(indexHtml, "MIRA_DAILY_SHARE_LINES", 30, "profile share card keeps a month-sized daily line library");
-  assertMatches(indexHtml, /#profileView \.profile-overview-head h3\s*\{[\s\S]*font-size:\s*var\(--ef-text-body-lg\);[\s\S]*line-height:\s*var\(--ef-line-title\);/, "profile judgement title stays below the page-title scale");
-  assertMatches(indexHtml, /#profileView \.profile-overview > \.profile-overview-head p\s*\{[\s\S]*max-width:\s*46ch;[\s\S]*font-weight:\s*var\(--ef-symbol-weight-quiet\);/, "profile judgement subtitle stays quiet and bounded");
-  assertMatches(indexHtml, /#profileView \.profile-insight-title\s*\{[\s\S]*font-size:\s*var\(--ef-text-title-md\);[\s\S]*line-height:\s*var\(--ef-line-title\);/, "profile recommendation headline is the only strong line in the card");
-  assertMatches(indexHtml, /#profileView \.profile-insight-text\s*\{[\s\S]*max-width:\s*58ch;[\s\S]*font-size:\s*var\(--ef-text-body-sm\);[\s\S]*line-height:\s*var\(--ef-line-body\);/, "profile judgement body uses a quieter body scale");
+  // 5-role type scale: every 复盘 text element resolves to one of five roles.
+  assertIncludes(designSystemCss, "--ef-role-display-size: 28px;", "type scale defines the Display role token");
+  assertIncludes(designSystemCss, "--ef-role-title-size: 17px;", "type scale defines the Title role token");
+  assertIncludes(designSystemCss, "--ef-role-stat-size: 20px;", "type scale defines the Stat role token");
+  assertIncludes(designSystemCss, "--ef-role-label-size: 12px;", "type scale defines the Label role token");
+  // All card/section titles share ONE Title role (overview, chart, archive, history, weekly).
+  assertMatches(indexHtml, /#profileView \.profile-overview-head h3,[\s\S]*?#profileView \.weekly-market-head h4,[\s\S]*?\{[\s\S]*?font-size:\s*var\(--ef-role-title-size\);/, "all 复盘 card titles share one Title role (below the Display page title)");
+  // All numeric/stat values share ONE Stat role (insight, rows, memory, mini-stat, share, evidence).
+  assertMatches(indexHtml, /#profileView \.profile-insight-title,[\s\S]*?#profileView \.profile-evidence strong,[\s\S]*?\{[\s\S]*?font-size:\s*var\(--ef-role-stat-size\);/, "all 复盘 stat values share one Stat role");
+  // Secondary text derives from primary ink at 60%, not a separate gray.
+  assertIncludes(indexHtml, "--ef-text-secondary: color-mix(in srgb, var(--ink) 60%, transparent);", "secondary text is primary ink at 60% (theme-tracking)");
+  // Reading-width constraints on the judgement copy are preserved.
+  assertMatches(indexHtml, /#profileView \.profile-overview > \.profile-overview-head p\s*\{[\s\S]*max-width:\s*46ch;/, "profile judgement subtitle stays bounded");
+  assertMatches(indexHtml, /#profileView \.profile-insight-text\s*\{[\s\S]*max-width:\s*58ch;/, "profile judgement body stays bounded");
   assertMatches(indexHtml, /\.profile-insight-row p\s*\{[\s\S]*display:\s*none;/, "profile insight summary rows avoid repeated explanatory copy");
   assertMatches(indexHtml, /function\s+drawShareMiraMark\([\s\S]*iconGradient\.addColorStop\(0,\s*"#d8fff1"\);[\s\S]*iconGradient\.addColorStop\(0\.58,\s*"#bdeaff"\);[\s\S]*iconGradient\.addColorStop\(1,\s*"#f4efc7"\);[\s\S]*"#62d6ae"/, "profile share image draws the real app icon mark");
   assertMatches(indexHtml, /function\s+drawDailyShareCardCanvas\([\s\S]*canvas\.width = 1200;[\s\S]*canvas\.height = 720;[\s\S]*#f5f3ee[\s\S]*eyeflow\.app/, "profile share image draws a textured card artifact");

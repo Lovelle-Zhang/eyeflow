@@ -10,6 +10,9 @@
       /* Neutral system — single restrained palette, no mood-driven hue shifts. */
       --ink: #1d1d1f;
       --ink-soft: #38383b;
+      /* Secondary text = primary ink at 60% — derived, so it tracks light/dark
+         automatically instead of being a separate gray hex. */
+      --ef-text-secondary: color-mix(in srgb, var(--ink) 60%, transparent);
       --muted: #6b6b70;
       --muted-soft: #98989f;
       --line: rgba(0, 0, 0, 0.08);
@@ -430,10 +433,10 @@
 
     .topbar h2 {
       margin: 0;
-      font-size: var(--ef-text-display-sm);
-      line-height: var(--ef-line-tight);
-      font-weight: 640;
-      letter-spacing: -0.022em;
+      font-size: var(--ef-role-display-size);
+      line-height: var(--ef-role-display-line);
+      font-weight: var(--ef-role-display-weight);
+      letter-spacing: var(--ef-role-display-spacing);
       color: var(--ink);
     }
 
@@ -2610,9 +2613,6 @@
 
     .profile-insight-title {
       color: var(--ink);
-      font-size: var(--ef-text-title-md);
-      line-height: var(--ef-line-title);
-      font-weight: 740;
     }
 
     .profile-insight-text {
@@ -3212,8 +3212,6 @@
       border: 0.5px solid var(--line);
       background: var(--pill-bg);
       color: var(--ink);
-      font-size: var(--ef-text-meta);
-      font-weight: 760;
       white-space: nowrap;
     }
 
@@ -3448,9 +3446,6 @@
       border-radius: var(--ef-radius-sm);
       background: var(--pill-bg);
       color: var(--ink);
-      font-size: var(--ef-text-meta);
-      font-weight: 760;
-      line-height: var(--ef-line-title);
       white-space: nowrap;
     }
 
@@ -4423,9 +4418,12 @@
       overflow: auto;
       padding: var(--ef-space-8) var(--ef-space-8) var(--ef-space-6);
       border-radius: var(--ef-radius-lg);
-      border: 0.5px solid rgba(0, 0, 0, 0.06);
-      background: #fbfcf6;
-      box-shadow: 0 0 0 0.5px rgba(0, 0, 0, 0.06), 0 12px 32px rgba(0, 0, 0, 0.12);
+      border: 0.5px solid var(--group-line);
+      /* Theme-adaptive card: text already uses var(--ink)/--muted, so the card
+         must track the theme too — a hardcoded light bg made the title vanish
+         (light-on-light) in night mode. */
+      background: var(--panel);
+      box-shadow: var(--group-shadow), 0 12px 32px rgba(0, 0, 0, 0.12);
       display: grid;
       gap: var(--ef-space-6);
       min-width: 0;
@@ -5756,12 +5754,13 @@
       align-items: start;
       column-gap: var(--ef-space-7);
       row-gap: 9px;
-      /* Match the onboarding card: warm-white panel, neutral hairline, no green wash. */
-      background: #fbfcf6;
-      color: #15211e;
-      border: 0.5px solid rgba(0, 0, 0, 0.06);
+      /* Theme-adaptive card (matches the onboarding dialog): tracks light/dark
+         so text and ghost buttons stay readable instead of light-on-light. */
+      background: var(--panel);
+      color: var(--ink);
+      border: 0.5px solid var(--group-line);
       border-radius: var(--ef-radius-lg);
-      box-shadow: 0 0 0 0.5px rgba(0, 0, 0, 0.06), 0 24px 60px rgba(9, 20, 17, 0.22);
+      box-shadow: var(--group-shadow), 0 24px 60px rgba(9, 20, 17, 0.22);
     }
 
     .break-overlay.feedback-mode .break-mira {
@@ -5884,7 +5883,7 @@
     .break-overlay.feedback-mode .break-dialog h3 {
       grid-area: title;
       margin-top: 5px;
-      color: #15211e;
+      color: var(--ink);
       font-size: clamp(27px, 4vw, 34px);
       line-height: 1.08;
       letter-spacing: 0;
@@ -5892,7 +5891,7 @@
 
     .break-overlay.feedback-mode .break-dialog > p {
       grid-area: copy;
-      color: #63716b;
+      color: var(--muted);
       font-size: var(--ef-text-body);
       line-height: 1.55;
     }
@@ -5913,7 +5912,7 @@
     }
 
     .break-overlay.feedback-mode .recovery-feedback p {
-      color: #718078;
+      color: var(--muted);
       font-size: var(--ef-text-body-sm);
       font-weight: 500;
     }
@@ -6172,30 +6171,10 @@
       gap: var(--ef-space-7);
     }
 
-    #profileView .profile-overview-head h3 {
-      margin: 0;
-      font-size: var(--ef-text-body-lg);
-      line-height: var(--ef-line-title);
-      font-weight: 500;
-    }
-
-    #profileView .profile-overview-head p,
-    #profileView .profile-share-copy,
-    #profileView .profile-share-note,
-    #profileView .profile-insight-row p,
-    #profileView .profile-rhythm-reason,
-    #profileView .profile-next-copy,
-    #profileView .profile-method-row p,
-    #profileView .profile-lineage-copy,
-    #profileView .archive-copy,
-    #profileView .history-empty {
-      font-size: var(--ef-text-body-sm);
-      line-height: var(--ef-line-body);
-    }
-
+    /* Title / body typography now comes from the 5-role block below;
+       only the reading-width constraint remains here. */
     #profileView .profile-overview > .profile-overview-head p {
       max-width: 46ch;
-      font-weight: var(--ef-symbol-weight-quiet);
     }
 
     #profileView .profile-summary-chips {
@@ -6241,10 +6220,6 @@
       display: flex;
       align-items: center;
       gap: var(--ef-space-5);
-      color: rgba(73, 88, 82, 0.66);
-      font-size: var(--ef-text-body-sm);
-      line-height: var(--ef-line-body);
-      font-weight: var(--ef-symbol-weight-base);
     }
 
     #profileView .profile-share-bridge::before,
@@ -6420,20 +6395,6 @@
       align-items: baseline;
     }
 
-    #profileView .profile-share-metric span,
-    #profileView .profile-share-note {
-      color: var(--muted);
-      font-size: var(--ef-text-meta);
-      line-height: var(--ef-line-body);
-    }
-
-    #profileView .profile-share-metric strong {
-      color: var(--ink);
-      font-size: var(--ef-text-body);
-      line-height: var(--ef-line-compact);
-      font-weight: 500;
-    }
-
     #profileView .profile-share-actions {
       display: flex;
       align-items: center;
@@ -6452,10 +6413,7 @@
       min-height: var(--ef-control-sm);
       padding: var(--ef-space-0) var(--ef-space-4);
       border-radius: var(--ef-radius-pill);
-      font-size: var(--ef-text-meta);
-      line-height: var(--ef-line-compact);
-      font-weight: var(--ef-symbol-weight-quiet);
-      background: rgba(245, 247, 246, 0.64);
+      background: var(--pill-bg);
       border-color: var(--profile-calm-line);
       color: var(--muted);
       text-align: center;
@@ -6501,23 +6459,8 @@
       gap: var(--ef-space-3);
     }
 
-    #profileView .profile-insight-label {
-      font-size: var(--ef-text-meta);
-      line-height: var(--ef-line-body);
-      font-weight: var(--ef-symbol-weight-quiet);
-    }
-
-    #profileView .profile-insight-title {
-      font-size: var(--ef-text-title-md);
-      line-height: var(--ef-line-title);
-      font-weight: 500;
-    }
-
     #profileView .profile-insight-text {
       max-width: 58ch;
-      font-size: var(--ef-text-body-sm);
-      line-height: var(--ef-line-body);
-      font-weight: var(--ef-symbol-weight-quiet);
     }
 
     #profileView .profile-insight-row {
@@ -6584,11 +6527,89 @@
       background: transparent;
     }
 
+    /* ===== 5-role type scale (authoritative) =====
+       Every text element in 复盘 resolves to exactly one role below. These
+       #profileView rules are the single source of truth for size/weight/
+       line-height/letter-spacing; earlier ad-hoc declarations are superseded.
+       Display lives on .topbar h2 (shared page title). */
+
+    /* TITLE — all card / section titles, unified (was 15 / 16 / browser-default). */
+    #profileView .profile-overview-head h3,
+    #profileView .profile-chart-copy h3,
+    #profileView .archive-head h3,
+    #profileView .history-panel-head h3,
+    #profileView .weekly-market-head h4,
+    #profileView .archive-disclosure-title > strong,
+    #profileView .data-console-title > strong {
+      margin: 0;
+      color: var(--ink);
+      font-size: var(--ef-role-title-size);
+      font-weight: var(--ef-role-title-weight);
+      line-height: var(--ef-role-title-line);
+      letter-spacing: var(--ef-role-title-spacing);
+    }
+
+    /* STAT — all numeric / stat values, one size (was 18 / 16 / 15 / 14). */
+    #profileView .profile-insight-title,
+    #profileView .profile-insight-row strong,
+    #profileView .profile-memory-item strong,
+    #profileView .profile-mini-stat strong,
+    #profileView .profile-share-metric strong,
+    #profileView .reason b,
     #profileView .profile-evidence strong,
     #profileView .data-console-stat strong {
-      font-size: var(--ef-text-body);
-      line-height: var(--ef-line-title);
-      font-weight: 500;
+      color: var(--ink);
+      font-size: var(--ef-role-stat-size);
+      font-weight: var(--ef-role-stat-weight);
+      line-height: var(--ef-role-stat-line);
+      letter-spacing: var(--ef-role-stat-spacing);
+    }
+
+    /* BODY — sentences, subtitles, full-sentence captions. Secondary color. */
+    #profileView .profile-overview-head p,
+    #profileView .profile-insight-text,
+    #profileView .profile-insight-row p,
+    #profileView .profile-share-copy,
+    #profileView .profile-share-note,
+    #profileView .profile-share-bridge,
+    #profileView .profile-method-row p,
+    #profileView .profile-lineage-copy,
+    #profileView .profile-chart-copy span,
+    #profileView .profile-rhythm-reason,
+    #profileView .profile-next-copy,
+    #profileView .archive-head p,
+    #profileView .archive-copy,
+    #profileView .history-empty {
+      color: var(--ef-text-secondary);
+      font-size: var(--ef-role-body-size);
+      font-weight: var(--ef-role-body-weight);
+      line-height: var(--ef-role-body-line);
+      letter-spacing: var(--ef-role-body-spacing);
+    }
+
+    /* LABEL — all labels / eyebrows / pills / meta, unified. Secondary color. */
+    #profileView .profile-summary-chips span,
+    #profileView .profile-insight-label,
+    #profileView .profile-insight-row span,
+    #profileView .profile-trend-tag,
+    #profileView .profile-memory-item span,
+    #profileView .profile-mini-stat span,
+    #profileView .profile-share-metric span,
+    #profileView .reason span,
+    #profileView .profile-evidence span,
+    #profileView .history-window-label,
+    #profileView .weekly-market-head span,
+    #profileView .archive-window-pill,
+    #profileView .data-console-title small,
+    #profileView .profile-analysis-head span,
+    #profileView .profile-signal-chips span,
+    #profileView .profile-symptom-bar span,
+    #profileView .profile-symptom-bar strong {
+      color: var(--ef-text-secondary);
+      font-size: var(--ef-role-label-size);
+      font-weight: var(--ef-role-label-weight);
+      line-height: var(--ef-role-label-line);
+      letter-spacing: var(--ef-role-label-spacing);
     }
 
     #profileView .profile-analysis-block {
@@ -7524,8 +7545,8 @@
     #rhythmView .readiness-status[data-state="optional"],
     #rhythmView .tag[data-state="optional"] {
       color: var(--muted);
-      background: rgba(245, 247, 246, 0.78);
-      border-color: rgba(24, 32, 31, 0.08);
+      background: var(--pill-bg);
+      border-color: var(--line);
     }
 
     #rhythmView .readiness-status[data-state="action"],

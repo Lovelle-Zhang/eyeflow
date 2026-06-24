@@ -207,7 +207,7 @@ function main() {
   assertIncludes(installedSmokeJs, "installed core exposes baseline summary", "installed smoke checks baseline model");
   assertIncludes(installedSmokeJs, "installed app uses unified grouped surface tokens", "installed smoke checks visual system tokens");
   assertIncludes(installedSmokeJs, "installed settings view uses a comfort layout", "installed smoke checks comfort layout");
-  assertIncludes(installedSmokeJs, "installed app defines one shared full-width page frame", "installed smoke checks shared page frame token");
+  assertIncludes(installedSmokeJs, "installed app defines one shared centered page frame width", "installed smoke checks shared page frame token");
   assertIncludes(installedSmokeJs, "installed top-level pages share one centered page frame", "installed smoke checks top-level page alignment");
   assertIncludes(installedSmokeJs, "installed dashboard default bounds always use the target centered size", "installed smoke checks default dashboard bounds");
   assertIncludes(installedSmokeJs, "installed dashboard creation ignores stale saved window bounds", "installed smoke checks stale dashboard bounds are ignored");
