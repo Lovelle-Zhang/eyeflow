@@ -4423,7 +4423,7 @@
       overflow: auto;
       padding: var(--ef-space-8) var(--ef-space-8) var(--ef-space-6);
       border-radius: var(--ef-radius-lg);
-      border: 0.5px solid rgba(248, 252, 246, 0.76);
+      border: 0.5px solid rgba(0, 0, 0, 0.06);
       background: #fbfcf6;
       box-shadow: 0 0 0 0.5px rgba(0, 0, 0, 0.06), 0 12px 32px rgba(0, 0, 0, 0.12);
       display: grid;
@@ -5756,14 +5756,12 @@
       align-items: start;
       column-gap: var(--ef-space-7);
       row-gap: 9px;
-      background:
-        linear-gradient(180deg, rgba(252, 255, 252, 0.96), rgba(239, 248, 243, 0.94));
+      /* Match the onboarding card: warm-white panel, neutral hairline, no green wash. */
+      background: #fbfcf6;
       color: #15211e;
-      border-color: rgba(24, 32, 31, 0.08);
-      border-radius: 10px;
-      box-shadow:
-        0 28px 78px rgba(9, 20, 17, 0.24),
-        inset 0 1px 0 rgba(255, 255, 255, 0.86);
+      border: 0.5px solid rgba(0, 0, 0, 0.06);
+      border-radius: var(--ef-radius-lg);
+      box-shadow: 0 0 0 0.5px rgba(0, 0, 0, 0.06), 0 24px 60px rgba(9, 20, 17, 0.22);
     }
 
     .break-overlay.feedback-mode .break-mira {
@@ -5926,29 +5924,12 @@
     }
 
     .break-overlay.feedback-mode .recovery-feedback .timer-controls button {
-      min-height: 50px;
-      padding-inline: 12px;
-      border-radius: 9px;
+      /* Inherit the app's tokenized buttons (.primary = solid dark CTA,
+         .ghost = white + hairline) instead of the old glossy mint style. */
+      min-height: var(--ef-control-lg);
+      padding-inline: var(--ef-space-5);
       font-size: var(--ef-text-body);
-      font-weight: 760;
-    }
-
-    .break-overlay.feedback-mode .recovery-feedback .primary {
-      color: #10221f;
-      background: linear-gradient(180deg, #9fe6d5, #7bd0bd);
-      border: 1px solid rgba(15, 159, 122, 0.16);
-      box-shadow:
-        0 14px 28px rgba(15, 159, 122, 0.12),
-        inset 0 1px 0 rgba(255, 255, 255, 0.36);
-    }
-
-    .break-overlay.feedback-mode .recovery-feedback .ghost {
-      color: #26342f;
-      background: rgba(255, 255, 255, 0.72);
-      border-color: rgba(24, 32, 31, 0.08);
-      box-shadow:
-        inset 0 1px 0 rgba(255, 255, 255, 0.76),
-        0 8px 18px rgba(24, 32, 31, 0.04);
+      font-weight: 560;
     }
 
     @keyframes breathe {
