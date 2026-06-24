@@ -1,0 +1,329 @@
+:root {
+  /* Typography scale */
+  --ef-font-sans: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --ef-text-micro: 11px;
+  --ef-text-caption: 11.5px;
+  --ef-text-meta: 12px;
+  --ef-text-helper: 12.5px;
+  --ef-text-body-sm: 13px;
+  --ef-text-body: 14px;
+  --ef-text-body-lg: 15px;
+  --ef-text-reading: 15.5px;
+  --ef-text-title-sm: 16px;
+  --ef-text-title-md: 18px;
+  --ef-text-title-lg: 22px;
+  --ef-text-display-sm: 28px;
+  --ef-text-display-md: 34px;
+  --ef-text-display-lg: 44px;
+
+  /* Line-height scale */
+  --ef-line-tight: 1.12;
+  --ef-line-title: 1.22;
+  --ef-line-compact: 1.35;
+  --ef-line-body: 1.45;
+  --ef-line-reading: 1.62;
+
+  /* 2px-based spacing scale, biased toward quiet desktop density. */
+  --ef-space-0: 0;
+  --ef-space-1: 4px;
+  --ef-space-2: 6px;
+  --ef-space-3: 8px;
+  --ef-space-4: 10px;
+  --ef-space-5: 12px;
+  --ef-space-6: 14px;
+  --ef-space-7: 16px;
+  --ef-space-8: 18px;
+  --ef-space-9: 20px;
+  --ef-space-10: 24px;
+  --ef-space-11: 28px;
+  --ef-space-12: 32px;
+  --ef-space-13: 40px;
+  --ef-space-14: 48px;
+
+  /* Shape */
+  --ef-radius-xs: 4px;
+  --ef-radius-sm: 6px;
+  --ef-radius-md: 8px;
+  --ef-radius-lg: 12px;
+  --ef-radius-xl: 16px;
+  --ef-radius-pill: 999px;
+  --ef-radius-companion: 22px;
+
+  /* Controls */
+  --ef-control-sm: 28px;
+  --ef-control-md: 34px;
+  --ef-control-lg: 40px;
+  --ef-hit-target: 32px;
+
+  /* Icon and symbol weight */
+  --ef-icon-xs: 12px;
+  --ef-icon-sm: 14px;
+  --ef-icon-md: 16px;
+  --ef-icon-lg: 20px;
+  --ef-icon-xl: 24px;
+  --ef-icon-stroke-quiet: 1.4;
+  --ef-icon-stroke-base: 1.6;
+  --ef-icon-stroke-strong: 1.8;
+  --ef-symbol-weight-quiet: 500;
+  --ef-symbol-weight-base: 600;
+  --ef-symbol-weight-strong: 700;
+
+  /* Mira avatar geometry: 58-unit canonical face. */
+  --ef-mira-avatar-size: 58px;
+  --ef-mira-avatar-radius: 18px 18px 16px 16px;
+  --ef-mira-visor-top: 19px;
+  --ef-mira-visor-left: 10px;
+  --ef-mira-visor-width: 38px;
+  --ef-mira-visor-height: 18px;
+  --ef-mira-signal-top: 15px;
+  --ef-mira-signal-right: 8px;
+  --ef-mira-signal-size: 9px;
+  --ef-mira-face-top: 24px;
+  --ef-mira-face-left: 18px;
+  --ef-mira-face-width: 22px;
+  --ef-mira-face-height: 8px;
+  --ef-mira-eye-size: 5px;
+  --ef-mira-mouth-top: 38px;
+  --ef-mira-mouth-width: 8px;
+  --ef-mira-mouth-height: 5px;
+  --ef-mira-mouth-stroke: 1.5px;
+  --ef-mira-mouth-color: rgba(15, 159, 122, 0.58);
+  --ef-mira-cheek-top: 35px;
+  --ef-mira-cheek-size: 7px;
+  --ef-mira-cheek-height: 3px;
+  --ef-mira-cheek-offset: 12px;
+  --ef-mira-antenna-top: 7px;
+  --ef-mira-antenna-left: 18px;
+  --ef-mira-antenna-width: 22px;
+  --ef-mira-antenna-height: 12px;
+  --ef-mira-antenna-stroke: 2px;
+
+  /* Motion */
+  --ef-motion-fast: 120ms;
+  --ef-motion-base: 160ms;
+  --ef-motion-slow: 240ms;
+  --ef-ease-calm: cubic-bezier(0.2, 0, 0.2, 1);
+
+  /* Compatibility aliases used by the current main window. */
+  --text-xs: var(--ef-text-helper);
+  --text-sm: 13.5px;
+  --text-base: var(--ef-text-body-lg);
+  --text-reading: var(--ef-text-reading);
+  --line-reading: var(--ef-line-reading);
+  --line-compact: 1.42;
+  --text-stack-tight: var(--ef-space-2);
+  --text-stack: var(--ef-space-4);
+  --text-stack-loose: var(--ef-space-6);
+}
+
+.ef-type-micro {
+  font-size: var(--ef-text-micro);
+  line-height: var(--ef-line-compact);
+}
+
+.ef-type-caption {
+  font-size: var(--ef-text-caption);
+  line-height: var(--ef-line-compact);
+}
+
+.ef-type-meta {
+  font-size: var(--ef-text-meta);
+  line-height: var(--ef-line-body);
+}
+
+.ef-type-body-sm {
+  font-size: var(--ef-text-body-sm);
+  line-height: var(--ef-line-body);
+}
+
+.ef-type-body {
+  font-size: var(--ef-text-body);
+  line-height: var(--ef-line-body);
+}
+
+.ef-type-body-lg {
+  font-size: var(--ef-text-body-lg);
+  line-height: var(--ef-line-body);
+}
+
+.ef-type-title-sm {
+  font-size: var(--ef-text-title-sm);
+  line-height: var(--ef-line-title);
+  font-weight: 500;
+}
+
+.ef-type-title-md {
+  font-size: var(--ef-text-title-md);
+  line-height: var(--ef-line-title);
+  font-weight: 500;
+}
+
+.ef-type-title-lg {
+  font-size: var(--ef-text-title-lg);
+  line-height: var(--ef-line-tight);
+  font-weight: 500;
+  letter-spacing: -0.015em;
+}
+
+.ef-stack-tight {
+  display: grid;
+  gap: var(--ef-space-2);
+}
+
+.ef-stack {
+  display: grid;
+  gap: var(--ef-space-4);
+}
+
+.ef-stack-loose {
+  display: grid;
+  gap: var(--ef-space-7);
+}
+
+.ef-icon {
+  width: var(--ef-icon-md);
+  height: var(--ef-icon-md);
+  flex: 0 0 auto;
+  stroke-width: var(--ef-icon-stroke-base);
+}
+
+.ef-icon-quiet {
+  stroke-width: var(--ef-icon-stroke-quiet);
+}
+
+.ef-icon-strong {
+  stroke-width: var(--ef-icon-stroke-strong);
+}
+
+.ef-symbol {
+  font-weight: var(--ef-symbol-weight-base);
+  line-height: 1;
+}
+
+.ef-symbol-quiet {
+  font-weight: var(--ef-symbol-weight-quiet);
+}
+
+.ef-symbol-strong {
+  font-weight: var(--ef-symbol-weight-strong);
+}
+
+.ef-preference-section {
+  min-width: 0;
+  padding: var(--ef-space-9);
+  border: 0.5px solid var(--group-line, rgba(0, 0, 0, 0.07));
+  border-radius: 14px;
+  background: var(--panel, #ffffff);
+  display: grid;
+  gap: var(--ef-space-5);
+  align-content: start;
+  box-shadow: var(--group-shadow, 0 0 0 0.5px rgba(0, 0, 0, 0.04), 0 1px 2px rgba(0, 0, 0, 0.04));
+}
+
+.ef-preference-hero {
+  padding: var(--ef-space-9);
+}
+
+.ef-preference-section-title {
+  margin: 0;
+  font-size: var(--ef-text-title-sm);
+  line-height: var(--ef-line-title);
+  font-weight: 500;
+  letter-spacing: 0;
+}
+
+.ef-preference-row {
+  min-height: var(--ef-control-lg);
+  display: grid;
+  grid-template-columns:
+    minmax(calc(var(--ef-space-14) * 1.35), calc(var(--ef-space-14) * 1.7))
+    minmax(calc(var(--ef-space-14) * 1.5), 1fr)
+    minmax(calc(var(--ef-space-14) * 2), calc(var(--ef-space-14) * 2.45));
+  column-gap: var(--ef-space-5);
+  align-items: center;
+  padding: var(--ef-space-4) 0;
+  border-bottom: 0.5px solid var(--line-soft, rgba(0, 0, 0, 0.06));
+}
+
+.ef-preference-row:last-child {
+  border-bottom: 0;
+}
+
+.ef-preference-row-label {
+  color: var(--muted, #6b6b70);
+  font-size: var(--ef-text-meta);
+  line-height: var(--ef-line-compact);
+  font-weight: var(--ef-symbol-weight-quiet);
+}
+
+.ef-preference-row-value {
+  color: var(--ink, #1d1d1f);
+  font-size: var(--ef-text-body);
+  line-height: var(--ef-line-title);
+  font-weight: var(--ef-symbol-weight-quiet);
+}
+
+.ef-preference-row-action {
+  justify-self: stretch;
+}
+
+.ef-segmented-control {
+  min-height: var(--ef-control-md);
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: var(--ef-space-0);
+  padding: 2px;
+  border: 0.5px solid var(--line-soft, rgba(0, 0, 0, 0.06));
+  border-radius: var(--ef-radius-md);
+  background: var(--track-bg, rgba(0, 0, 0, 0.05));
+}
+
+.ef-segmented-control > button {
+  min-height: var(--ef-control-md);
+  padding: var(--ef-space-0) var(--ef-space-3);
+  border: 0.5px solid transparent;
+  border-radius: var(--ef-radius-sm);
+  background: transparent;
+  color: var(--ink, #1d1d1f);
+  font-size: var(--ef-text-body-sm);
+  line-height: var(--ef-line-title);
+  font-weight: var(--ef-symbol-weight-base);
+  box-shadow: none;
+  white-space: nowrap;
+}
+
+.ef-segmented-control > button.active-setting {
+  color: var(--ink, #1d1d1f);
+  background: var(--panel, #ffffff);
+  border-color: transparent;
+  box-shadow: 0 0 0 0.5px rgba(0, 0, 0, 0.04), 0 1px 2px rgba(0, 0, 0, 0.14);
+}
+
+.ef-status-pill {
+  min-height: var(--ef-control-sm);
+  display: inline-flex;
+  align-items: center;
+  gap: var(--ef-space-2);
+  padding: var(--ef-space-0) var(--ef-space-3);
+  border: 0.5px solid var(--line, rgba(0, 0, 0, 0.08));
+  border-radius: var(--ef-radius-pill);
+  color: var(--muted, #6b6b70);
+  background: var(--pill-bg, rgba(255, 255, 255, 0.7));
+  font-size: var(--ef-text-meta);
+  line-height: var(--ef-line-compact);
+  font-weight: var(--ef-symbol-weight-base);
+}
+
+.ef-disclosure-row {
+  min-height: calc(var(--ef-control-lg) + var(--ef-space-8));
+  border-top: 1px solid rgba(24, 32, 31, 0.045);
+  background: transparent;
+  box-shadow: none;
+}
+
+.ef-sidebar-selected {
+  color: rgba(233, 244, 239, 0.92);
+  background: rgba(231, 244, 236, 0.08);
+  box-shadow: none;
+  font-weight: var(--ef-symbol-weight-base);
+}
