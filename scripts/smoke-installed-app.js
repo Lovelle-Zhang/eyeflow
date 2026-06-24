@@ -409,7 +409,7 @@ function main() {
   assertMatches(indexHtml, /\.metrics \.metric\s*\{[\s\S]*padding:\s*var\(--ef-space-2\) var\(--ef-space-5\);[\s\S]*min-height:\s*calc\(var\(--ef-control-lg\) \+ var\(--ef-space-2\)\);/, "installed metrics cells use low-burden signal density");
   assertMatches(indexHtml, /\.metrics \.metric strong\s*\{[\s\S]*font-size:\s*var\(--ef-text-body\);[\s\S]*line-height:\s*var\(--ef-line-title\);/, "installed secondary metrics avoid KPI-scale type");
   assertMatches(indexHtml, /\.metric-main\s*\{[\s\S]*grid-template-columns:\s*repeat\(3,\s*minmax\(0,\s*1fr\)\);[\s\S]*gap:\s*var\(--ef-space-0\);/, "installed round progress groups focused, remaining, and target together");
-  assertMatches(indexHtml, /\.metric-pair \+ \.metric-pair\s*\{[\s\S]*border-left:\s*1px solid rgba\(24,\s*32,\s*31,\s*0\.045\);/, "installed round progress uses quiet internal dividers");
+  assertMatches(indexHtml, /\.metric-pair \+ \.metric-pair\s*\{[\s\S]*border-left:\s*1px solid var\(--group-line\);/, "installed round progress uses quiet internal dividers");
   assertIncludes(indexHtml, "els.focusMinutes.textContent = `${focusTargetMinutes} 分钟`;", "installed round target runtime unit stays Chinese");
   assertMatches(indexHtml, /els\.loadBand\.textContent = remainingMinutes > 0[\s\S]*`\$\{remainingMinutes\} 分钟`[\s\S]*:\s*"休息点";/, "installed remaining runtime unit stays Chinese");
   assertIncludes(indexHtml, "今日专注 0 分钟 · 你记录了 2 次", "installed summary separates focused time from user records");
