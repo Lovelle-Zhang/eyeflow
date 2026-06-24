@@ -178,7 +178,7 @@ function main() {
   assertIncludes(indexHtml, 'class="profile-score-inline" hidden=""', "profile review hides technical status signal from main flow");
   assertMatches(indexHtml, /<div class="profile-share-bridge"[^>]*><span>今天就到这里了。<\/span><\/div>\s*<section class="panel profile-share-card"/, "profile share card has a ritual transition after rhythm memory");
   assertMatches(indexHtml, /#profileView \.profile-share-bridge\s*\{[\s\S]*display:\s*flex;[\s\S]*font-size:\s*var\(--ef-text-body-sm\);[\s\S]*font-weight:\s*var\(--ef-symbol-weight-base\);/, "profile share transition uses quiet tokenized text");
-  assertMatches(indexHtml, /#profileView \.profile-share-bridge::before,[\s\S]*#profileView \.profile-share-bridge::after\s*\{[\s\S]*height:\s*1px;[\s\S]*background:\s*rgba\(24,\s*32,\s*31,\s*0\.055\);/, "profile share transition uses quiet divider lines");
+  assertMatches(indexHtml, /#profileView \.profile-share-bridge::before,[\s\S]*#profileView \.profile-share-bridge::after\s*\{[\s\S]*height:\s*1px;[\s\S]*background:\s*var\(--group-line\);/, "profile share transition uses quiet, theme-adaptive divider lines");
   assertMatches(indexHtml, /<div class="profile-share-head">[\s\S]*<div class="profile-share-quick-metrics"[\s\S]*id="shareFocusTime"[\s\S]*id="shareBreaks"[\s\S]*<span class="profile-trend-tag">可分享<\/span>[\s\S]*<\/div>\s*<\/div>/, "profile share card exposes focus and rest in the first row");
   assertIncludes(indexHtml, 'class="profile-share-preview"', "profile share card renders a visual card preview");
   assertIncludes(indexHtml, "background: #faf8f4;", "profile share card keeps a warm paper card surface");

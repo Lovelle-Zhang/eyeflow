@@ -411,7 +411,7 @@ function main() {
   assertIncludes(installedSmokeJs, "installed profile review hides technical status signal from main flow", "installed smoke checks profile signal hidden");
   assertIncludes(installedSmokeJs, "installed profile share card has a ritual transition after rhythm memory", "installed smoke checks profile share ritual transition");
   assertIncludes(installedSmokeJs, "installed profile share transition uses quiet tokenized text", "installed smoke checks profile share transition type");
-  assertIncludes(installedSmokeJs, "installed profile share transition uses quiet divider lines", "installed smoke checks profile share transition divider");
+  assertIncludes(installedSmokeJs, "installed profile share transition uses quiet, theme-adaptive divider lines", "installed smoke checks profile share transition divider");
   assertIncludes(installedSmokeJs, "installed profile share card exposes focus and rest in the first row", "installed smoke checks profile share first-row data");
   assertIncludes(installedSmokeJs, "installed profile share card renders a visual card preview", "installed smoke checks profile share visual card");
   assertIncludes(installedSmokeJs, "installed profile share card keeps a warm paper card surface", "installed smoke checks profile share paper background");
