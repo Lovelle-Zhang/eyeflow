@@ -1076,27 +1076,20 @@
       box-shadow: none;
     }
 
-    /* #startBtn as a MODE TOGGLE (手动专注 in auto-tracking) — render it as the
-       low-key mode pill, not solid primary, so it reads as state not action.
-       Class toggled in renderSessionControls by state, not fixed in markup. */
+    /* #startBtn as a MODE TOGGLE (手动专注 in auto-tracking) is still a real,
+       clickable action — render it as the ② tonal button (clearly pressable,
+       secondary emphasis), NOT the solid ① primary (too loud for a mode switch)
+       and NOT a flat mode/status pill (that reads as a dead label next to the
+       read-only 自动记录). Keeps the timer-control 40px geometry + icon, so it
+       reads as a sibling action to 休息. Toggled in renderSessionControls. */
     #startBtn.is-mode {
-      min-height: 28px;
-      align-self: center;
-      justify-self: start;
-      padding: 0 var(--ef-space-4);
-      border-radius: var(--ef-radius-md);
-      background: var(--mode-pill-bg);
-      color: var(--mode-pill-fg);
+      background: var(--btn-tonal-bg);
+      color: var(--btn-tonal-fg);
       box-shadow: none;
-      font-weight: 500;
     }
 
     #startBtn.is-mode:hover {
-      background: var(--mode-pill-bg);
-    }
-
-    #startBtn.is-mode .small-icon {
-      display: none;
+      background: var(--btn-tonal-bg-hover);
     }
 
     .timer-card.rest-due #restSessionBtn {
