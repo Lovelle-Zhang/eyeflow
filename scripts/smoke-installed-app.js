@@ -134,8 +134,11 @@ function main() {
   assertIncludes(coreJs, "window.EyeFlowCore", "installed core export");
   assertIncludes(coreJs, "computeEyeLoadScore", "installed core eye-load scorer");
   assertIncludes(coreJs, "baselineSummary", "installed core exposes baseline summary");
-  assertIncludes(indexHtml, "--group-bg:", "installed app uses unified grouped surface tokens");
-  assertIncludes(indexHtml, "--group-shadow:", "installed app uses unified quiet shadow token");
+  // Shared surface tokens now live in the design system (single source for all windows).
+  assertIncludes(designSystemCss, "--group-bg:", "installed app uses unified grouped surface tokens from the shared design system");
+  assertIncludes(designSystemCss, "--panel:", "installed shared design system owns the warm-paper surface tokens");
+  assertMatches(designSystemCss, /:root\[data-theme="dark"\]\s*\{[\s\S]*?--panel:\s*#212325;/, "installed shared design system carries the dark surface variants");
+  assertIncludes(designSystemCss, "--group-shadow:", "installed app uses unified quiet shadow token from the shared design system");
   assertIncludes(designSystemCss, "--ef-text-reading: 15.5px;", "installed design system provides eye-comfort reading text size");
   assertIncludes(designSystemCss, "--ef-line-reading: 1.62;", "installed design system provides eye-comfort reading line height");
   assertIncludes(designSystemCss, "--ef-radius-pill: 999px;", "installed design system provides shared pill radius");
@@ -574,7 +577,7 @@ function main() {
   assertIncludes(designSystemCss, "--ef-role-stat-size: 20px;", "installed type scale defines the Stat role token");
   assertMatches(indexHtml, /#profileView \.profile-overview-head h3,[\s\S]*?#profileView \.weekly-market-head h4,[\s\S]*?\{[\s\S]*?font-size:\s*var\(--ef-role-title-size\);/, "installed 复盘 card titles share one Title role");
   assertMatches(indexHtml, /#profileView \.profile-insight-title,[\s\S]*?#profileView \.profile-evidence strong,[\s\S]*?\{[\s\S]*?font-size:\s*var\(--ef-role-stat-size\);/, "installed 复盘 stat values share one Stat role");
-  assertIncludes(indexHtml, "--ef-text-secondary: color-mix(in srgb, var(--ink) 60%, transparent);", "installed secondary text is primary ink at 60%");
+  assertIncludes(designSystemCss, "--ef-text-secondary: color-mix(in srgb, var(--ink) 60%, transparent);", "installed secondary text is primary ink at 60%");
   assertMatches(indexHtml, /#profileView \.profile-insight-text\s*\{[\s\S]*max-width:\s*58ch;/, "installed profile judgement body stays bounded");
   assertMatches(indexHtml, /\.profile-insight-row p\s*\{[\s\S]*display:\s*none;/, "installed profile insight summary rows avoid repeated explanatory copy");
   assertMatches(indexHtml, /function\s+drawShareMiraMark\([\s\S]*iconGradient\.addColorStop\(0,\s*"#d8fff1"\);[\s\S]*iconGradient\.addColorStop\(0\.58,\s*"#bdeaff"\);[\s\S]*iconGradient\.addColorStop\(1,\s*"#f4efc7"\);[\s\S]*"#62d6ae"/, "installed profile share image draws the real app icon mark");

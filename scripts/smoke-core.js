@@ -315,7 +315,25 @@ function main() {
   // All numeric/stat values share ONE Stat role (insight, rows, memory, mini-stat, share, evidence).
   assertMatches(indexHtml, /#profileView \.profile-insight-title,[\s\S]*?#profileView \.profile-evidence strong,[\s\S]*?\{[\s\S]*?font-size:\s*var\(--ef-role-stat-size\);/, "all 复盘 stat values share one Stat role");
   // Secondary text derives from primary ink at 60%, not a separate gray.
-  assertIncludes(indexHtml, "--ef-text-secondary: color-mix(in srgb, var(--ink) 60%, transparent);", "secondary text is primary ink at 60% (theme-tracking)");
+  // (Token now lives in the shared design system, not inline in index.html.)
+  assertIncludes(designSystemCss, "--ef-text-secondary: color-mix(in srgb, var(--ink) 60%, transparent);", "secondary text is primary ink at 60% (theme-tracking)");
+
+  // ── Shared color system is the single source (moved out of index.html inline) ──
+  // The surface/button/status tokens now live in eyeflow-design-system.css so every
+  // window (index, companion, break-lock) shares one source. Assert they are defined
+  // there (light + dark) and NOT redefined inline in index.html.
+  ["--panel", "--wash", "--sb-bg", "--mira", "--mira-soft", "--btn-primary-bg",
+   "--btn-tonal-bg", "--btn-ghost-fg", "--status-pill-bg", "--mode-pill-bg",
+   "--group-shadow", "--line"].forEach((t) => {
+    const esc = t.replace(/-/g, "\\-");
+    assertMatches(designSystemCss, new RegExp("\\n\\s*" + esc + "\\s*:"), `shared token ${t} is defined in the design system (single source)`);
+    assertNotMatches(indexHtml, new RegExp("\\n\\s*" + esc + "\\s*:\\s*(#|rgba|color-mix|var\\()"), `${t} is no longer redefined inline in index.html`);
+  });
+  assertMatches(designSystemCss, /:root\[data-theme="dark"\]\s*\{[\s\S]*?--panel:\s*#212325;/, "design system carries the dark-theme surface variants");
+  // The bare dark token-BLOCK opener is gone from index.html (component dark
+  // overrides like `:root[data-theme="dark"] .foo {` legitimately remain inline).
+  assertNotMatches(indexHtml, /:root\[data-theme="dark"\]\s*\{/, "index.html no longer owns the dark-theme token block");
+  assertNotMatches(indexHtml, /color-scheme:\s*dark;/, "the dark token block (color-scheme) moved out of index.html");
   // Reading-width constraints on the judgement copy are preserved.
   assertMatches(indexHtml, /#profileView \.profile-overview > \.profile-overview-head p\s*\{[\s\S]*max-width:\s*46ch;/, "profile judgement subtitle stays bounded");
   assertMatches(indexHtml, /#profileView \.profile-insight-text\s*\{[\s\S]*max-width:\s*58ch;/, "profile judgement body stays bounded");

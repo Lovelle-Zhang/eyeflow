@@ -356,3 +356,183 @@
   box-shadow: none;
   font-weight: var(--ef-symbol-weight-base);
 }
+
+/* ============================================================================
+   Shared app color system — single source for ALL windows (index, companion,
+   break-lock). Moved here from index.html's inline :root so every window that
+   links this sheet gets the same warm-paper surfaces, button tiers, and pills.
+   index.html no longer redefines these inline (see pointer comment there).
+   ========================================================================== */
+:root {
+  color-scheme: light;
+  /* Neutral system — single restrained palette, no mood-driven hue shifts. */
+  --ink: #1d1d1f;
+  --ink-soft: #38383b;
+  /* Secondary text = primary ink at 60% — derived, so it tracks light/dark
+     automatically instead of being a separate gray hex. */
+  --ef-text-secondary: color-mix(in srgb, var(--ink) 60%, transparent);
+  --muted: #6b6b70;
+  --muted-soft: #98989f;
+  --line: rgba(46, 54, 40, 0.09);
+  --line-soft: rgba(0, 0, 0, 0.05);
+  --line-strong: rgba(0, 0, 0, 0.13);
+  --panel: #F7F8F0;
+  --wash: #E8E9DD;
+  --wash-2: #DDDED0;
+  --panel-strong: #FAFAF4;
+  --frost-line: rgba(46, 54, 40, 0.07);
+  /* Single quiet accent — Mira's color. Used sparingly, only for active and live moments. */
+  --mira: #1f7a5e;
+  --mira-strong: #1a6b52;
+  --mira-soft: rgba(31, 122, 94, 0.13);
+  --mira-line: rgba(31, 122, 94, 0.23);
+
+  /* Sidebar material — swap this one group to retheme the rail (light ⇄ dark).
+     Dark / Linear preset (kept here for one-line switch):
+       --sb-bg:#1b1c1e; --sb-border:rgba(255,255,255,.08); --sb-text:#f5f6f7;
+       --sb-text-muted:rgba(236,240,243,.56); --sb-icon:rgba(236,240,243,.42);
+       --sb-brand-sub:rgba(236,240,243,.5); --sb-active-text:#5fcfa6;
+       --sb-active-bg:rgba(95,207,166,.14); --sb-active-icon:#5fcfa6;
+       --sb-hover-bg:rgba(255,255,255,.06); --sb-hover-text:#fff;
+       --sb-hover-icon:rgba(236,240,243,.8); --sb-footer-bg:rgba(255,255,255,.04);
+       --sb-footer-border:rgba(255,255,255,.08); */
+  --sb-bg: #E1E2D5;
+  --sb-border: rgba(46, 54, 40, 0.10);
+  --sb-text: var(--ink);
+  --sb-text-muted: var(--muted);
+  --sb-icon: var(--muted-soft);
+  --sb-brand-sub: var(--muted);
+  --sb-active-text: var(--mira);
+  --sb-active-bg: rgba(31, 122, 94, 0.16);
+  --sb-active-icon: var(--mira);
+  --sb-hover-bg: rgba(0, 0, 0, 0.045);
+  --sb-hover-text: var(--ink);
+  --sb-hover-icon: var(--ink-soft);
+  --sb-footer-bg: rgba(247, 248, 240, 0.55);
+  --sb-footer-border: var(--line);
+  /* Legacy aliases — keep mint/sage pointing at the new restrained accent so existing selectors still work but no longer introduce a second hue. */
+  --mint: var(--mira);
+  --mint-soft: var(--mira-soft);
+  --sage: var(--muted);
+  --sky: var(--wash);
+  --blue: var(--ink);
+  --blue-soft: var(--wash);
+  --rose: var(--ink);
+  --amber: var(--ink-soft);
+  --amber-soft: var(--wash-2);
+  /* macOS-native shadow scale — no more 70px web drop shadows. */
+  --shadow: 0 0 0 0.5px rgba(46, 50, 38, 0.04), 0 1px 2px rgba(46, 50, 38, 0.05), 0 4px 12px rgba(46, 50, 38, 0.045);
+  --shadow-soft: 0 0 0 0.5px rgba(0, 0, 0, 0.04);
+  --shadow-lift: 0 0 0 0.5px rgba(46, 50, 38, 0.05), 0 8px 24px rgba(46, 50, 38, 0.07), 0 2px 6px rgba(46, 50, 38, 0.05);
+  --shadow-line: inset 0 0 0 0.5px rgba(0, 0, 0, 0.06);
+  --radius: 10px;
+  --radius-card: 14px;
+  --surface-tint: #F7F8F0;
+  --group-bg: #F7F8F0;
+  --group-bg-strong: #FAFAF4;
+  --group-line: rgba(46, 54, 40, 0.08);
+  --group-line-soft: rgba(46, 54, 40, 0.05);
+  --group-shadow: 0 0 0 0.5px rgba(46, 50, 38, 0.05), 0 1px 2px rgba(46, 50, 38, 0.045), 0 4px 14px rgba(46, 50, 38, 0.04);
+
+  /* Control surfaces — tokenized so buttons/tracks/pills flip in dark mode. */
+  --btn-primary-bg: #1f2f29;
+  --btn-primary-bg-hover: #2a3d36;
+  --btn-primary-fg: #f8fffb;
+  --btn-ghost-bg: #F2F3EB;
+  --btn-ghost-bg-hover: #FAFAF4;
+  --btn-ghost-border: rgba(27, 38, 34, 0.16);
+  --btn-ghost-border-hover: rgba(27, 38, 34, 0.24);
+  /* Button-tier system (②tonal ③ghost ④icon · mode-pill · status-pill). */
+  --btn-tonal-bg: rgba(31, 122, 94, 0.12);
+  --btn-tonal-bg-hover: rgba(31, 122, 94, 0.17);
+  --btn-tonal-fg: #1a6b52;
+  --btn-ghost-fg: #5a6358;
+  --btn-ghost-hover: rgba(31, 122, 94, 0.07);
+  --btn-icon-border: rgba(46, 54, 40, 0.12);
+  --mode-pill-bg: rgba(31, 122, 94, 0.08);
+  --mode-pill-fg: #5a6e63;
+  --status-pill-bg: rgba(31, 122, 94, 0.07);
+  --status-pill-fg: #5a6e63;
+  --track-bg: rgba(0, 0, 0, 0.05);
+  --pill-bg: rgba(250, 250, 244, 0.72);
+  --field-bg: #FCFCF6;
+  /* Share-card preview frame — the card stays light; only the frame around it retones. */
+  --share-frame-bg: #f5f3ee;
+  --share-frame-border: transparent;
+  /* High eye-load state band — semantic warning tint (dark variant below). */
+  --state-band-high: #f7dde5;
+}
+
+/* ── Dark theme ────────────────────────────────────────────────
+   Activated by data-theme="dark" on <html>. Overrides only the
+   token values; every component reads tokens, so the whole app flips. */
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --ink: #f3f4f6;
+  --ink-soft: #d3d5d9;
+  --muted: #9a9aa3;
+  --muted-soft: #6f6f78;
+  --line: rgba(255, 255, 255, 0.10);
+  --line-soft: rgba(255, 255, 255, 0.06);
+  --line-strong: rgba(255, 255, 255, 0.17);
+  --panel: #212325;
+  --wash: #161718;
+  --wash-2: #1d1f20;
+  --panel-strong: #26282b;
+  --frost-line: rgba(255, 255, 255, 0.06);
+
+  --mira: #4fc99c;
+  --mira-strong: #62d3aa;
+  --mira-soft: rgba(79, 201, 156, 0.16);
+  --mira-line: rgba(79, 201, 156, 0.30);
+
+  --sb-bg: #1b1c1e;
+  --sb-border: rgba(255, 255, 255, 0.08);
+  --sb-text: #f3f4f6;
+  --sb-text-muted: rgba(236, 240, 243, 0.56);
+  --sb-icon: rgba(236, 240, 243, 0.42);
+  --sb-brand-sub: rgba(236, 240, 243, 0.5);
+  --sb-active-text: #62d3aa;
+  --sb-active-bg: rgba(79, 201, 156, 0.16);
+  --sb-active-icon: #62d3aa;
+  --sb-hover-bg: rgba(255, 255, 255, 0.06);
+  --sb-hover-text: #ffffff;
+  --sb-hover-icon: rgba(236, 240, 243, 0.8);
+  --sb-footer-bg: rgba(255, 255, 255, 0.04);
+  --sb-footer-border: rgba(255, 255, 255, 0.08);
+
+  --shadow: 0 0 0 0.5px rgba(0, 0, 0, 0.55), 0 1px 2px rgba(0, 0, 0, 0.45);
+  --shadow-soft: 0 0 0 0.5px rgba(0, 0, 0, 0.45);
+  --shadow-lift: 0 0 0 0.5px rgba(0, 0, 0, 0.55), 0 8px 24px rgba(0, 0, 0, 0.55);
+  --shadow-line: inset 0 0 0 0.5px rgba(255, 255, 255, 0.06);
+  --surface-tint: #212325;
+  --group-bg: #212325;
+  --group-bg-strong: #26282b;
+  --group-line: rgba(255, 255, 255, 0.09);
+  --group-line-soft: rgba(255, 255, 255, 0.06);
+  --group-shadow: 0 0 0 0.5px rgba(0, 0, 0, 0.45), 0 1px 2px rgba(0, 0, 0, 0.4);
+
+  --btn-primary-bg: #34373b;
+  --btn-primary-bg-hover: #3f4247;
+  --btn-primary-fg: #f3f4f6;
+  --btn-ghost-bg: rgba(255, 255, 255, 0.07);
+  --btn-ghost-bg-hover: rgba(255, 255, 255, 0.11);
+  --btn-ghost-border: rgba(255, 255, 255, 0.14);
+  --btn-ghost-border-hover: rgba(255, 255, 255, 0.22);
+  --btn-tonal-bg: rgba(79, 201, 156, 0.16);
+  --btn-tonal-bg-hover: rgba(79, 201, 156, 0.22);
+  --btn-tonal-fg: #62d3aa;
+  --btn-ghost-fg: #9a9aa3;
+  --btn-ghost-hover: rgba(255, 255, 255, 0.06);
+  --btn-icon-border: rgba(255, 255, 255, 0.12);
+  --mode-pill-bg: rgba(79, 201, 156, 0.12);
+  --mode-pill-fg: #8fb3a4;
+  --status-pill-bg: rgba(79, 201, 156, 0.10);
+  --status-pill-fg: #9fb8ac;
+  --track-bg: rgba(255, 255, 255, 0.07);
+  --pill-bg: rgba(255, 255, 255, 0.08);
+  --field-bg: rgba(255, 255, 255, 0.05);
+  --share-frame-bg: #1c1e1f;
+  --share-frame-border: rgba(255, 255, 255, 0.06);
+  --state-band-high: rgba(225, 120, 150, 0.18);
+}
