@@ -132,6 +132,37 @@ Rules:
 - Use 8-12px horizontal icon/label spacing.
 - Primary actions should be calm, not visually loud.
 
+## Button Tiers
+
+Every action button shares ONE metric set — height 36px (timer controls go large
+at 40px), radius 10px, font 14/500, icon-to-label gap 6px. Tiers differ ONLY in
+fill, never in size/radius/type. Do not introduce new heights or radii for buttons.
+
+| Tier | Class | Fill | Use |
+| --- | --- | --- | --- |
+| ① Primary | `.primary` | solid `--btn-primary-bg`, `--btn-primary-fg` text | The one real action per view (e.g. 开始这一轮, 现在休息). At most one. |
+| ② Secondary | `.btn-tonal` | `--btn-tonal-bg` (sage), `--btn-tonal-fg` text, NO border | Parallel/secondary actions (休息, 开启增强感知). |
+| ③ Ghost | `.ghost` | none — text (+ optional icon), `--btn-ghost-fg`, faint tonal hover | Low-emphasis actions (为什么, 导出, 调整节奏, 退出 Mira). |
+| ④ Icon | `.icon-btn` | 36px square, hairline `--btn-icon-border`, icon only | Compact icon-only actions. |
+
+Roles are NOT styling. Classify each control by what it does, then pick the tier:
+
+- **Action** → tiers ①–④ above.
+- **Mode / state** (a toggle or a read-only state, NOT a real action) → the low-key
+  sage **mode pill** (`.session-state-pill`): 28px, `--mode-pill-bg` tonal, no border,
+  radius 8px. It must NOT wear action styling. A control whose role changes by state
+  (e.g. `#startBtn` = primary action when 暂停/继续/开始, but a mode toggle when 手动专注
+  during auto-tracking) switches treatment in JS by state, not via a fixed class.
+- **Status** (read-only) → the one **status pill** (`.readiness-status`, `.state-cue`,
+  `.profile-share-metric`): tonal, small, optional leading dot. Read-only labels must
+  NOT carry a border or solid fill that makes them look pressable.
+
+Segmented controls (白天/晚上, the L1–L4 rhythm selector) are their own single
+component each — do not rebuild them as button rows.
+
+All tier colors are tokenized (`--btn-*`, `--mode-pill-*`, `--status-pill-*`) with
+light and dark values, so tiers render correctly in both themes.
+
 ## Icons And Symbols
 
 Icons and symbols must have a consistent visual weight. A 14px label paired with a heavy 22px plus sign will make the UI feel web-like and noisy even if the text scale is correct.
