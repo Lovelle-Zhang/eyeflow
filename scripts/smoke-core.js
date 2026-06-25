@@ -47,8 +47,10 @@ function assertArrayLiteralMinLength(source, name, minLength, label) {
 
 // Dark-mode guardrail: themed views must use theme tokens, not hardcoded neutral
 // surface/border/text colors (those break in night mode). Scans <style> rules;
-// allows the intentional set (share-art printed card, chart glyphs, dead
-// onboarding CSS, semi-semantic reminders, dark code block).
+// allows the intentional set (share-art printed card, chart GLYPHS, dead
+// onboarding CSS, semi-semantic reminders, dark code block). NOTE: chart
+// plot-area BACKGROUNDS are surfaces, not glyphs — they are NOT exempt (the
+// weekly grids were un-allowlisted; a white-veil background is flagged below).
 function assertNoHardcodedNeutralSurfaces(html, label) {
   const styles = [...html.matchAll(/<style>([\s\S]*?)<\/style>/g)].map((m) => m[1]).join("\n");
   const THEMED = /#profileView|#rhythmView|\.metrics |\.metric-pair|\.state-cue|\.assessment-reminder|\.feedback-template|\.recovery-mode|\.trend\b|\.icon-btn|\.trust-item|\.reason\b|\.intervention|\.archive|\.history|\.data-console|\.profile-|\.readiness/;
@@ -58,6 +60,9 @@ function assertNoHardcodedNeutralSurfaces(html, label) {
     /background(?:-color)?\s*:\s*(?:rgba\((?:251,\s*252,\s*246|245,\s*247,\s*246|242,\s*247,\s*241|248,\s*250,\s*243|246,\s*251,\s*248|247,\s*250,\s*246)[^)]*\)|#fbfdf9|#fbfcfa|#f6f8f4)/,
     /background(?:-color)?\s*:\s*rgba\(226,\s*235,\s*229[^)]*\)/,
     /color\s*:\s*rgba\(73,\s*88,\s*82[^)]*\)/,
+    // A plot-area / surface background must never be a light white veil (renders
+    // lighter than the card in dark mode). Use a recessed token (--chart-plot-bg).
+    /background[^;]*:\s*[^;]*rgba\(255,\s*255,\s*255/,
   ];
   const violations = [];
   for (const m of styles.matchAll(/([^{}]+)\{([^{}]*)\}/g)) {
@@ -484,6 +489,19 @@ function main() {
   assertIncludes(core.modeActionCopy("clear"), "明确介入", "clear mode action copy");
 
   assertNoHardcodedNeutralSurfaces(indexHtml, "themed views use theme tokens, not hardcoded neutral surfaces");
+
+  // Chart plot-area backgrounds are recessed wells, not light veils. They use the
+  // shared --chart-plot-bg token (derived from --wash-2, always darker than the
+  // --panel card in both themes). Never a hardcoded rgba(255,255,255,…) veil.
+  assertMatches(designSystemCss, /--chart-plot-bg:\s*var\(--wash-2\);/, "chart plot-area well is a shared token derived from --wash-2 (recessed in both themes)");
+  ["profile-chart-shell", "weekly-state-grid", "weekly-candle-grid"].forEach((cls) => {
+    // No rule for this plot surface may use a white veil...
+    (indexHtml.match(new RegExp(`\\.${cls}\\s*\\{[^}]*\\}`, "g")) || []).forEach((rule) => {
+      assertNotMatches(rule, /rgba\(255,\s*255,\s*255/, `.${cls} plot background is not a white veil`);
+    });
+    // ...and the recessed well token is what paints it.
+    assertMatches(indexHtml, new RegExp(`\\.${cls}\\s*\\{[^}]*var\\(--chart-plot-bg\\)`), `.${cls} plot background uses the recessed --chart-plot-bg well`);
+  });
   assertCriticalTokensInSync(indexHtml, read("eyeflow-design-system.css"), "inlined critical tokens match the design-system :root block");
   assertNoJsInjectedHardcodedColors(
     indexHtml,
