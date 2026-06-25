@@ -557,12 +557,12 @@ function main() {
   assertNotMatches(indexHtml, /function\s+profilePlanTitle\([^)]*\)\s*\{(?:(?!function)[\s\S])*?suggestion\.focus/, "installed profile headline leaves the exact 分钟/秒 to the spec column");
   assertIncludes(indexHtml, "今日分享卡", "installed profile review adds a daily share card");
   assertIncludes(indexHtml, 'class="profile-score-inline" hidden=""', "installed profile review hides technical status signal from main flow");
-  assertMatches(indexHtml, /<div class="profile-share-bridge"[^>]*><span>今天就到这里了。<\/span><\/div>\s*<section class="panel profile-share-card"/, "installed profile share card has a ritual transition after rhythm memory");
+  assertMatches(indexHtml, /<div class="profile-share-bridge"[^>]*><span>今天就到这里了<\/span><\/div>\s*<section class="panel profile-share-card"/, "installed profile share card has a ritual transition after rhythm memory");
   assertMatches(indexHtml, /#profileView \.profile-share-bridge\s*\{[\s\S]*display:\s*flex;[\s\S]*font-size:\s*var\(--ef-text-body-sm\);[\s\S]*font-weight:\s*var\(--ef-symbol-weight-base\);/, "installed profile share transition uses quiet tokenized text");
   assertMatches(indexHtml, /#profileView \.profile-share-bridge::before,[\s\S]*#profileView \.profile-share-bridge::after\s*\{[\s\S]*height:\s*1px;[\s\S]*background:\s*var\(--group-line\);/, "installed profile share transition uses quiet, theme-adaptive divider lines");
   assertMatches(indexHtml, /<div class="profile-share-head">[\s\S]*<div class="profile-share-quick-metrics"[\s\S]*id="shareFocusTime"[\s\S]*id="shareBreaks"[\s\S]*<span class="profile-trend-tag">可分享<\/span>[\s\S]*<\/div>\s*<\/div>/, "installed profile share card exposes focus and rest in the first row");
   assertIncludes(indexHtml, 'class="profile-share-preview"', "installed profile share card renders a visual card preview");
-  assertIncludes(indexHtml, "background: #faf8f4;", "installed profile share card keeps a warm paper card surface");
+  assertMatches(indexHtml, /#profileView \.share-art-card \{[\s\S]*?background:\s*var\(--group-bg-strong\);/, "installed profile share card preview follows the theme surface (no fixed bright block in dark)");
   assertIncludes(indexHtml, "shareCardRhythm", "installed profile share card exposes rhythm as the third data point");
   assertIncludes(indexHtml, "eyeflow.app", "installed profile share card includes restrained domain branding");
   assertMatches(indexHtml, /#profileView \.share-art-mark\s*\{[\s\S]*border-radius:\s*var\(--ef-radius-lg\);[\s\S]*linear-gradient\(145deg,\s*#d8fff1 0%,\s*#bdeaff 58%,\s*#f4efc7 100%\);/, "installed profile share card uses the real rounded-square app icon mark");

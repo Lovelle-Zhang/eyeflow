@@ -293,7 +293,7 @@ function main() {
   assertIncludes(indexHtml, "当前节奏来源", "profile rhythm memory shows whether Mira or the user owns the rhythm");
   assertIncludes(indexHtml, "今日分享卡", "profile review adds a daily share card");
   assertIncludes(indexHtml, 'class="profile-score-inline" hidden=""', "profile review hides technical status signal from main flow");
-  assertMatches(indexHtml, /<div class="profile-share-bridge"[^>]*><span>今天就到这里了。<\/span><\/div>\s*<section class="panel profile-share-card"/, "profile share card has a ritual transition after rhythm memory");
+  assertMatches(indexHtml, /<div class="profile-share-bridge"[^>]*><span>今天就到这里了<\/span><\/div>\s*<section class="panel profile-share-card"/, "profile share card has a ritual transition after rhythm memory");
   assertMatches(indexHtml, /#profileView \.profile-share-bridge\s*\{[\s\S]*display:\s*flex;[\s\S]*font-size:\s*var\(--ef-text-body-sm\);[\s\S]*font-weight:\s*var\(--ef-symbol-weight-base\);/, "profile share transition uses quiet tokenized text");
   assertMatches(indexHtml, /#profileView \.profile-share-bridge::before,[\s\S]*#profileView \.profile-share-bridge::after\s*\{[\s\S]*height:\s*1px;[\s\S]*background:\s*var\(--group-line\);/, "profile share transition uses quiet, theme-adaptive divider lines");
   assertMatches(indexHtml, /<div class="profile-share-head">[\s\S]*<div class="profile-share-quick-metrics"[\s\S]*id="shareFocusTime"[\s\S]*id="shareBreaks"[\s\S]*<span class="profile-trend-tag">可分享<\/span>[\s\S]*<\/div>\s*<\/div>/, "profile share card exposes focus and rest in the first row");
@@ -303,7 +303,7 @@ function main() {
   assertMatches(indexHtml, /data-view-target="profileView">[\s\S]*?这几天\s*<\/button>/, "nav labels the recap 这几天");
   assertIncludes(indexHtml, 'id="profileObservation"', "这几天 opens with a warm Mira observation");
   assertIncludes(indexHtml, "function profileObservationText", "the observation is generated from local rest/symptom data");
-  assertMatches(indexHtml, /function\s+profileObservationText[\s\S]*?这阵子[\s\S]*?Mira 会继续盯着/, "observation reads as Mira reflecting, with softened quantifiers");
+  assertMatches(indexHtml, /function\s+profileObservationText[\s\S]*?const pick = \(list\) => list\[Math\.floor\(Math\.random\(\)[\s\S]*?这阵子/, "observation picks one wording at random per clause, so Mira varies between views");
   assertIncludes(indexHtml, "展开看这几天的明细", "all quantitative views are tucked into one gentle fold");
   assertIncludes(indexHtml, 'class="panel profile-detail-fold"', "the fold is a single disclosure, not scattered cards");
   assertMatches(indexHtml, /#profileView \.profile-detail-fold-body > \.profile-rhythm-memory,[\s\S]*?background:\s*transparent;/, "folded sections render flat, not as cards-in-cards");
@@ -312,7 +312,7 @@ function main() {
   assertNotMatches(indexHtml, /<span>波动<\/span>/, "KPI-flavored 波动 label is replaced with neutral wording");
   assertIncludes(indexHtml, "<span>起伏</span>", "trend range uses neutral 起伏 wording");
   assertMatches(indexHtml, /weeklyRecoveryHandled\.textContent[\s\S]*?大多接住/, "reminder handling reads qualitatively (大多接住), not as a X/Y pass rate");
-  assertIncludes(indexHtml, "background: #faf8f4;", "profile share card keeps a warm paper card surface");
+  assertMatches(indexHtml, /#profileView \.share-art-card \{[\s\S]*?background:\s*var\(--group-bg-strong\);/, "profile share card preview follows the theme surface (no fixed bright block in dark)");
   assertIncludes(indexHtml, "shareCardRhythm", "profile share card exposes rhythm as the third data point");
   assertIncludes(indexHtml, "eyeflow.app", "profile share card includes restrained domain branding");
   assertMatches(indexHtml, /#profileView \.share-art-mark\s*\{[\s\S]*border-radius:\s*var\(--ef-radius-lg\);[\s\S]*linear-gradient\(145deg,\s*#d8fff1 0%,\s*#bdeaff 58%,\s*#f4efc7 100%\);/, "profile share card uses the real rounded-square app icon mark");

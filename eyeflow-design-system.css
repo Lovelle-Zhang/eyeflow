@@ -22,6 +22,7 @@
   --ef-line-compact: 1.35;
   --ef-line-body: 1.45;
   --ef-line-reading: 1.62;
+  --ef-line-note: 1.7; /* relaxed, letter-like measure for short spoken paragraphs (Mira observation) */
 
   /* 5-role type scale. Every text element resolves to exactly one role via the
      .ef-role-* utility classes — no ad-hoc size/weight, no browser defaults. */

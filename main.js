@@ -666,7 +666,7 @@ function captureDebugDashboardView(viewName, extraDelayMs = 0) {
     : `clean ${targetViewName} debug view`;
   const focusSelector = viewName === "profile-share-card" ? ".profile-share-bridge" : "";
   const requiredText = viewName === "profile-share-card"
-    ? ["今天就到这里了。", "今日分享卡", "eyeflow.app"]
+    ? ["今天就到这里了", "今日分享卡", "eyeflow.app"]
     : [];
   setTimeout(() => {
     if (!dashboardWindow || dashboardWindow.isDestroyed()) return;

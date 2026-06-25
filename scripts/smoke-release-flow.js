@@ -414,7 +414,7 @@ function main() {
   assertIncludes(installedSmokeJs, "installed profile share transition uses quiet, theme-adaptive divider lines", "installed smoke checks profile share transition divider");
   assertIncludes(installedSmokeJs, "installed profile share card exposes focus and rest in the first row", "installed smoke checks profile share first-row data");
   assertIncludes(installedSmokeJs, "installed profile share card renders a visual card preview", "installed smoke checks profile share visual card");
-  assertIncludes(installedSmokeJs, "installed profile share card keeps a warm paper card surface", "installed smoke checks profile share paper background");
+  assertIncludes(installedSmokeJs, "installed profile share card preview follows the theme surface (no fixed bright block in dark)", "installed smoke checks profile share card themes correctly");
   assertIncludes(installedSmokeJs, "installed profile share card exposes rhythm as the third data point", "installed smoke checks profile share rhythm data");
   assertIncludes(installedSmokeJs, "installed profile share card includes restrained domain branding", "installed smoke checks profile share domain branding");
   assertIncludes(installedSmokeJs, "installed profile share card uses the real rounded-square app icon mark", "installed smoke checks profile share app icon mark");

@@ -33,7 +33,8 @@
       --ef-line-compact: 1.35;
       --ef-line-body: 1.45;
       --ef-line-reading: 1.62;
-    
+      --ef-line-note: 1.7;
+
       /* 5-role type scale. Every text element resolves to exactly one role via the
          .ef-role-* utility classes — no ad-hoc size/weight, no browser defaults. */
       --ef-role-display-size: 28px;
@@ -6436,6 +6437,8 @@
     #profileView .profile-share-bridge {
       display: flex;
       align-items: center;
+      justify-content: center;
+      text-align: center;
       gap: var(--ef-space-5);
     }
 
@@ -6450,7 +6453,10 @@
     /* ===== 这几天: warm observation (top) + one gentle fold (raw data) ===== */
     #profileView .profile-observation {
       display: grid;
-      gap: var(--ef-space-3);
+      /* Quiet-header rhythm: the eyebrow sits with a calm, letter-like gap above
+         the spoken paragraph — a touch looser than a default tight stack. */
+      gap: var(--ef-space-6);
+      padding: var(--ef-space-11);
     }
 
     #profileView .profile-observation-eyebrow {
@@ -6463,12 +6469,16 @@
 
     #profileView .profile-observation-text {
       margin: 0;
-      max-width: 52ch;
+      /* Narrow measure (~28-34 CJK chars) + relaxed line-height so Mira reads
+         like a short handwritten note, not a wide status line. text-wrap: pretty
+         avoids orphaned characters (e.g. 模糊 splitting); ignored where unsupported. */
+      max-width: 31em;
       color: var(--ink);
       font-size: var(--ef-role-body-size);
       font-weight: var(--ef-role-body-weight);
-      line-height: var(--ef-line-reading);
+      line-height: var(--ef-line-note);
       letter-spacing: var(--ef-role-body-spacing);
+      text-wrap: pretty;
     }
 
     /* Fold summary — the single "展开看这几天的明细" disclosure row. */
@@ -6543,27 +6553,27 @@
     }
 
     #profileView .profile-share-preview {
-      padding: var(--ef-space-8);
-      border-radius: var(--ef-radius-lg);
-      background: var(--share-frame-bg);
-      border: 0.5px solid var(--share-frame-border);
+      /* No mat — the card sits directly on the panel (panel → card, two layers).
+         An intermediate frame tone read as a visible third layer / 色差. */
+      padding: var(--ef-space-6) var(--ef-space-0) var(--ef-space-2);
+      background: transparent;
+      border: 0;
       display: grid;
       place-items: center;
     }
 
     #profileView .share-art-card {
-      /* The card always renders as a fixed light "printed card" (and exports to
-         a light PNG), so pin ink/muted locally — otherwise dark theme flips them
-         to near-white and the text vanishes on the light background. */
-      --ink: #1f211f;
-      --muted: #494844;
+      /* Preview only — the shareable PNG is drawn separately on canvas
+         (drawDailyShareCardCanvas), so this in-app card follows the theme and
+         stays a calm elevated surface in both modes, instead of a fixed cream
+         block that glares against the dark panel. */
       width: min(100%, 720px);
       min-height: 360px;
       padding: var(--ef-space-12);
-      border: 1px solid rgba(24, 32, 31, 0.07);
+      border: 1px solid var(--group-line);
       border-radius: var(--ef-radius-xl);
-      background: #faf8f4;
-      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.13);
+      background: var(--group-bg-strong);
+      box-shadow: var(--group-shadow);
       display: grid;
       gap: var(--ef-space-9);
       align-content: start;
@@ -6613,7 +6623,7 @@
 
     #profileView .share-art-divider {
       height: 1px;
-      background: rgba(24, 32, 31, 0.08);
+      background: var(--group-line);
     }
 
     #profileView .share-art-footer {
@@ -7392,7 +7402,6 @@
       color: #24584c;
     }
 
-    #profileView .profile-observation,
     #profileView .profile-overview,
     #profileView .profile-analysis-block,
     #profileView .profile-rhythm-memory,
@@ -9232,7 +9241,7 @@
           </div>
         </section>
 
-        <div class="profile-share-bridge" aria-label="收尾"><span>今天就到这里了。</span></div>
+        <div class="profile-share-bridge" aria-label="收尾"><span>今天就到这里了</span></div>
 
         <section class="panel profile-share-card" aria-label="今日分享卡">
           <div class="profile-share-head">
@@ -12894,6 +12903,11 @@
       els.navButtons.forEach((button) => {
         button.classList.toggle("active", button.dataset.viewTarget === targetId);
       });
+      // The topbar subtitle is hidden only on Today (today-state-focus). Sync the
+      // class here so the subtitle appears in the SAME frame as the page title on
+      // navigation — otherwise it stays display:none (carried over from Today)
+      // until the next render() clears it, so it lands a beat after the title.
+      document.body.classList.toggle("today-state-focus", targetId === "todayView");
       const copy = {
         todayView: ["今天", statusCopy(computeEyeLoad(), isRunning)],
         rhythmView: ["设置", "先选提醒边界，需要时再展开更多设置。"],
@@ -14305,28 +14319,64 @@
     // Mira's warm, qualitative reflection for the top of 这几天. Observation, not
     // scoring — softened quantifiers only (这阵子 / 大多 / 偶尔), never precise counts.
     function profileObservationText({ hasEvidence, accepted, skipped, symptomName, symptomValue }) {
+      // Each clause draws one line at random from its group, so Mira's wording
+      // varies between views. Branch conditions + {症状} substitution unchanged.
+      const pick = (list) => list[Math.floor(Math.random() * list.length)];
       if (!hasEvidence) {
-        return "这几天还没攒下太多记录。先陪你慢慢跑几轮，Mira 再把你的节奏一点点看清楚。";
+        return pick([
+          "这几天还没攒下太多记录。先陪你跑几轮，Mira 慢慢就把你的节奏摸熟了。",
+          "记录还少，Mira 还在悄悄观察你。先一起跑几轮，节奏会慢慢浮出来。",
+          "才刚开始呢。先陪你走几轮，Mira 再一点点把你的样子看清楚。"
+        ]);
       }
       const total = Number(accepted || 0) + Number(skipped || 0);
-      let rest;
+      let restGroup;
       if (total <= 0) {
-        rest = "这阵子你大多一直在专注，还很少停下来歇一歇";
+        restGroup = [
+          "这阵子你一直在心流里，连歇口气都顾不上。Mira 都有点替你的眼睛喊累了",
+          "你最近埋头埋得挺深，几乎没怎么停。Mira 在旁边偷偷给你心疼着",
+          "这阵子你一头扎进事情里，停下来这件事好像被你忘啦"
+        ];
       } else if (accepted >= skipped * 2) {
-        rest = "这阵子你大多愿意停下来歇一歇，节奏比之前稳了些";
+        restGroup = [
+          "这阵子你挺愿意停下来透口气，节奏稳稳的。Mira 看着也安心",
+          "你最近很懂得见好就收，停一停再走，节奏顺得很",
+          "这阵子你和休息处得不错，该停就停。Mira 给你比个小赞"
+        ];
       } else if (accepted >= skipped) {
-        rest = "这阵子你有在试着停一停，偶尔也想再多撑一会儿";
+        restGroup = [
+          "这阵子你有在试着停一停，虽然偶尔还是想再撑那么一下下",
+          "你最近在学着按下暂停，有时也会忍不住多坐一会儿",
+          "这阵子你停停走走，偶尔贪心一点想再多做点，Mira 都看在眼里"
+        ];
       } else {
-        rest = "这阵子你常顾着往前赶，停下来的次数还不太多";
+        restGroup = [
+          "这阵子你总忍不住往前冲，停下来这件事，咱们可以再练练",
+          "你最近赶得有点急，歇脚的时候不多。没关系，慢慢来，Mira 陪着",
+          "这阵子你一心往前，休息常被你跳过去。咱俩往后多照顾照顾自己"
+        ];
       }
-      let eye;
-      if (Number(symptomValue || 0) > 0) {
-        const degree = Number(symptomValue) >= 6 ? "有点" : "偶尔有点";
-        eye = `眼睛${degree}${symptomName}，Mira 会继续盯着，到点轻轻提醒你`;
+      let eyeGroup;
+      if (Number(symptomValue || 0) >= 6) {
+        eyeGroup = [
+          `眼睛有点${symptomName}了，Mira 会盯紧一点，到点就轻轻喊你歇会儿`,
+          `眼睛${symptomName}得有点明显，Mira 会更上心，到时候提醒你停一停`,
+          `眼睛在闹${symptomName}呢，Mira 守着你，该歇的时候不会忘了叫你`
+        ];
+      } else if (Number(symptomValue || 0) > 0) {
+        eyeGroup = [
+          `眼睛偶尔有点${symptomName}，Mira 在旁边盯着呢，到点轻轻提醒你`,
+          `眼睛时不时有点${symptomName}，不算严重，Mira 会留意着帮你看时间`,
+          `眼睛偶尔冒一点${symptomName}，Mira 记着呢，到点会来提醒你`
+        ];
       } else {
-        eye = "眼睛最近还算舒服，Mira 也会在旁边继续留意";
+        eyeGroup = [
+          "眼睛最近还挺舒服的，Mira 也会在旁边继续守着",
+          "眼睛状态不错，Mira 就安安静静陪着，有需要随时在",
+          "眼睛最近没闹脾气，Mira 也乐得在旁边陪你慢慢来"
+        ];
       }
-      return `${rest}。${eye}。`;
+      return `${pick(restGroup)}。${pick(eyeGroup)}。`;
     }
 
     function profileInsightSentence({ signalName, signalValue, action }) {
