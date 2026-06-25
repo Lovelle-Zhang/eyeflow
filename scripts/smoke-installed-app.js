@@ -219,7 +219,7 @@ function main() {
   assertMatches(indexHtml, /#rhythmView \.readiness-item strong\s*\{[\s\S]*grid-column:\s*1;[\s\S]*grid-row:\s*2;/, "installed settings readiness status sits under the row label instead of forming a table column");
   assertIncludes(indexHtml, "#rhythmView .readiness-item strong::before {\n      content: none;", "installed settings readiness row status avoids duplicate dots");
   assertIncludes(indexHtml, "#rhythmView .readiness-item:nth-child(-n + 3)", "installed mobile readiness rows keep only horizontal dividers");
-  assertIncludes(indexHtml, "border-radius: var(--ef-radius-pill);", "installed settings status pills use design-system pill radius");
+  assertMatches(indexHtml, /\.readiness-status\s*\{[\s\S]*border-radius:\s*var\(--ef-radius-md\);/, "installed read-only status labels share the unified 8px radius");
   assertIncludes(indexHtml, "font-weight: var(--ef-symbol-weight-base);", "installed details plus/minus symbols use design-system symbol weight");
   assertMatches(indexHtml, /\.active-setting\s*\{[\s\S]*box-shadow:\s*none;/, "installed active setting state avoids extra floating shadow");
   assertMatches(indexHtml, /\.intervention-meter\s*\{[\s\S]*gap:\s*var\(--ef-space-1\);[\s\S]*\}[\s\S]*\.intervention-meter span\s*\{[\s\S]*height:\s*var\(--ef-space-2\);[\s\S]*border-radius:\s*var\(--ef-radius-pill\);/, "installed intervention meter uses tokenized symbol rhythm");

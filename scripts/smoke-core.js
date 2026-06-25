@@ -270,7 +270,11 @@ function main() {
   assertMatches(indexHtml, /#rhythmView \.readiness-item strong\s*\{[\s\S]*grid-column:\s*1;[\s\S]*grid-row:\s*2;/, "settings readiness status sits under the row label instead of forming a table column");
   assertIncludes(indexHtml, "#rhythmView .readiness-item strong::before {\n      content: none;", "settings readiness row status avoids duplicate dots");
   assertIncludes(indexHtml, "#rhythmView .readiness-item:nth-child(-n + 3)", "mobile readiness rows keep only horizontal dividers");
-  assertIncludes(indexHtml, "border-radius: var(--ef-radius-pill);", "settings status pills use design-system pill radius");
+  // Read-only status labels share ONE radius — 8px. Pin it on the canonical pills
+  // so the radius can't drift back to fully-round (--ef-radius-pill).
+  assertMatches(indexHtml, /\.readiness-status\s*\{[\s\S]*border-radius:\s*var\(--ef-radius-md\);/, "readiness status pill uses the unified 8px status-label radius");
+  assertMatches(indexHtml, /\.state-cue\s*\{[\s\S]*border-radius:\s*var\(--ef-radius-md\);/, "state-cue status pill uses the unified 8px status-label radius");
+  assertNotMatches(indexHtml, /\.(readiness-status|state-cue)\s*\{[^}]*border-radius:\s*var\(--ef-radius-pill\);/, "status labels are not fully-round pills");
   assertIncludes(indexHtml, "font-weight: var(--ef-symbol-weight-base);", "details plus/minus symbols use design-system symbol weight");
   assertIncludes(indexHtml, "#profileView .profile-overview-main", "profile view uses a calmer scan layout");
   assertIncludes(indexHtml, "width: min(100%, var(--page-frame-width));", "dense views use the shared comfortable reading width");

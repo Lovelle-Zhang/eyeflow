@@ -108,7 +108,7 @@ Rules:
 | `--ef-radius-md` | 8px | Default cards, panels, inputs |
 | `--ef-radius-lg` | 12px | Modals and larger sheets |
 | `--ef-radius-xl` | 16px | Rare large calm surfaces |
-| `--ef-radius-pill` | 999px | Status pills, segmented markers, compact rounded chips |
+| `--ef-radius-pill` | 999px | Segmented markers and fully-round dots (NOT status labels — those are 8px) |
 | `--ef-radius-companion` | 22px | Mira companion body |
 
 Rules:
@@ -154,8 +154,13 @@ Roles are NOT styling. Classify each control by what it does, then pick the tier
   (e.g. `#startBtn` = primary action when 暂停/继续/开始, but a mode toggle when 手动专注
   during auto-tracking) switches treatment in JS by state, not via a fixed class.
 - **Status** (read-only) → the one **status pill** (`.readiness-status`, `.state-cue`,
-  `.profile-share-metric`): tonal, small, optional leading dot. Read-only labels must
-  NOT carry a border or solid fill that makes them look pressable.
+  `.profile-share-metric`, `.ef-status-pill`, `.tag`, `.archive-window-pill`,
+  `.profile-trend-tag`): tonal, small, optional leading dot. Read-only labels must
+  NOT carry a border or solid fill that makes them look pressable. **All read-only
+  status labels share ONE radius — 8px (`--ef-radius-md`); never `--ef-radius-pill`.**
+  Two weights: TIER A neutral statements (current-state facts) → `.status-quiet`
+  (transparent + leading dot, `--mode-pill-fg` text); TIER B mild-signal states →
+  faint `--status-pill-bg`, no border. 28px / 12·500.
 
 Segmented controls (白天/晚上, the L1–L4 rhythm selector) are their own single
 component each — do not rebuild them as button rows.
