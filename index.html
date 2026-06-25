@@ -379,6 +379,21 @@
       text-rendering: optimizeLegibility;
     }
 
+    /* Theme cross-fade fix: text that INHERITS --ink (headings, the hero strong,
+       metric values) was vanishing mid-fade — an inherited color transitions by
+       chasing its parent's own animating color, so it lagged out of sync with the
+       background and landed at near-equal luminance. Give that text an EXPLICIT
+       --ink so it cross-fades in a single synced hop like the page title / body
+       copy already do. Static appearance is unchanged (they already compute to
+       --ink); intentional non-ink headings (brand/onboarding/break) stay, being
+       more specific. */
+    h1, h2, h3, h4, h5, h6,
+    #stateHeadline,
+    .metric-main strong,
+    .metric-pair strong {
+      color: var(--ink);
+    }
+
     button,
     input,
     textarea {
