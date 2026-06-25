@@ -329,32 +329,25 @@
       --state-band-high: rgba(225, 120, 150, 0.18);
     }
 
-    /* ── Eye-friendly theme switch ─────────────────────────────────
+    /* ── Eye-friendly theme switch (View Transitions) ──────────────
        EyeFlow is an eye-care product, so flipping 白天⇄晚上 must be a calm
-       cross-fade — never a hard luminance flash (jarring, and worst at night).
-       The transition is armed ONLY for the moment of an explicit switch, via
-       .theme-anim on <html> (added by the toggle, removed once it settles).
-       First paint and all normal interactions stay instant. Reduced-motion
-       users get the instant flip (see the media-query override below). */
-    :root.theme-anim,
-    :root.theme-anim *,
-    :root.theme-anim *::before,
-    :root.theme-anim *::after {
-      transition:
-        background-color 460ms var(--ef-ease-calm),
-        border-color 460ms var(--ef-ease-calm),
-        color 460ms var(--ef-ease-calm),
-        fill 460ms var(--ef-ease-calm),
-        stroke 460ms var(--ef-ease-calm),
-        box-shadow 460ms var(--ef-ease-calm) !important;
+       cross-fade — never a hard luminance flash. We do NOT interpolate every
+       element's color/background over time: that drags text through a
+       low-contrast midpoint (it looked like the text faded in/out). Instead the
+       toggle wraps the flip in document.startViewTransition(), which snapshots
+       the page before and after and cross-dissolves the two CRISP frames — text
+       stays sharp the whole way. Tune the dissolve to a calm ~420ms here.
+       Reduced-motion users get an instant flip (animation removed below). */
+    ::view-transition-old(root),
+    ::view-transition-new(root) {
+      animation-duration: 420ms;
+      animation-timing-function: var(--ef-ease-calm);
     }
 
     @media (prefers-reduced-motion: reduce) {
-      :root.theme-anim,
-      :root.theme-anim *,
-      :root.theme-anim *::before,
-      :root.theme-anim *::after {
-        transition: none !important;
+      ::view-transition-old(root),
+      ::view-transition-new(root) {
+        animation: none !important;
       }
     }
 
@@ -15354,34 +15347,35 @@
       var root = document.documentElement;
       var reduceMotion = window.matchMedia
         && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-      var animTimer = null;
 
       function current() {
         return root.getAttribute("data-theme") === "dark" ? "dark" : "light";
       }
 
-      // animate=true only on an explicit user switch — never on first-paint sync.
-      function apply(theme, animate) {
-        if (animate && !reduceMotion) {
-          // Arm the cross-fade and flush layout so the transition starts from the
-          // current colors; then changing the theme below animates into the new ones.
-          root.classList.add("theme-anim");
-          void root.offsetWidth;
-          if (animTimer) clearTimeout(animTimer);
-          animTimer = setTimeout(function () {
-            root.classList.remove("theme-anim");
-            animTimer = null;
-          }, 520);
-        }
+      // The actual theme flip + control sync — applied instantly inside the view
+      // transition's snapshot callback (no per-property color interpolation).
+      function flip(theme) {
         if (theme === "dark") {
           root.setAttribute("data-theme", "dark");
         } else {
           root.removeAttribute("data-theme");
         }
-        try { localStorage.setItem("eyeflow-theme", theme); } catch (e) {}
         opts.forEach(function (btn) {
           btn.setAttribute("aria-pressed", btn.dataset.themeSet === theme ? "true" : "false");
         });
+      }
+
+      // animate=true only on an explicit user switch — never on first-paint sync.
+      function apply(theme, animate) {
+        try { localStorage.setItem("eyeflow-theme", theme); } catch (e) {}
+        // Cross-dissolve crisp before/after snapshots so text never interpolates
+        // through a low-contrast midpoint. Fall back to an instant flip when the
+        // API is unavailable, reduced-motion is on, or this is the first-paint sync.
+        if (animate && !reduceMotion && typeof document.startViewTransition === "function") {
+          document.startViewTransition(function () { flip(theme); });
+        } else {
+          flip(theme);
+        }
       }
 
       opts.forEach(function (btn) {

@@ -24,7 +24,7 @@ This file records product decisions that should survive code edits and rebuilds.
 - Prefer soft, eased transitions over instant snaps for anything that changes color, brightness, or large surfaces. Motion should confirm a change without startling the eye.
 - Always honor `prefers-reduced-motion`: users who opt out of motion get an instant, flash-free result instead of an animation.
 - When in doubt between "snappy" and "gentle," choose gentle. Comfort for the eyes outranks perceived speed.
-- Implementation note: the theme switch arms a one-shot `.theme-anim` cross-fade on `<html>` only during an explicit switch (see `index.html`), so first paint and normal interactions stay instant while the flip stays soft.
+- Implementation note: the theme switch uses the View Transitions API (`document.startViewTransition`) to cross-dissolve crisp before/after snapshots of the page (~420ms, `--ef-ease-calm`). Do NOT cross-fade via a CSS `transition` on every element's `color`/`background` — that drags text through a low-contrast midpoint and it appears to fade in/out. First-paint sync and reduced-motion flip instantly.
 
 ## Professional Foundation
 
