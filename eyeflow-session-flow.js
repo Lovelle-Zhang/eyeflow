@@ -34,6 +34,7 @@ window.EyeFlowSessionFlow = (() => {
         startText: "暂停",
         startTitle: "暂停当前专注",
         startIcon: "pause",
+        startIsMode: false,
         restText,
         restTitle
       };
@@ -52,6 +53,9 @@ window.EyeFlowSessionFlow = (() => {
             ? "继续当前专注"
             : "开始安静提醒",
       startIcon: "play",
+      // "手动专注" while auto-tracking is a MODE TOGGLE, not a real action — the
+      // renderer styles it as the low-key mode pill instead of solid primary.
+      startIsMode: Boolean(assessedToday && autoTracking),
       restText,
       restTitle
     };

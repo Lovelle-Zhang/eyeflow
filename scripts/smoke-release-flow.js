@@ -227,8 +227,8 @@ function main() {
   assertIncludes(installedSmokeJs, "installed session panel title follows session state", "installed smoke checks session title state");
   assertIncludes(installedSmokeJs, "installed running session title uses rhythm language", "installed smoke checks running session title copy");
   assertIncludes(installedSmokeJs, "installed session workflow hint hides first-round timing details", "installed smoke checks reduced workflow hint");
-  assertIncludes(installedSmokeJs, "installed session status pill uses tokenized shape and type", "installed smoke checks session status pill tokens");
-  assertIncludes(installedSmokeJs, "installed session primary controls use design-system height", "installed smoke checks session control height token");
+  assertIncludes(installedSmokeJs, "installed mode/state pill is the low-key tonal sage pill (no border)", "installed smoke checks session status pill tokens");
+  assertIncludes(installedSmokeJs, "installed session timer controls (primary + ② tonal) go large at 40px", "installed smoke checks session control height token");
   assertIncludes(installedSmokeJs, "installed session controls use quiet design-system icon size", "installed smoke checks session icon size token");
   assertIncludes(installedSmokeJs, "installed session settings stay compact when folded", "installed smoke checks folded session settings tokens");
   assertIncludes(installedSmokeJs, "installed rhythm tuning summary matches the primary quick-log hierarchy", "installed smoke checks rhythm tuning summary hierarchy");
@@ -292,7 +292,7 @@ function main() {
   assertIncludes(installedSmokeJs, "installed running state separates auto and manual session meaning", "installed smoke checks running state wording");
   assertIncludes(installedSmokeJs, "installed today hides secondary rhythm explanation from first glance", "installed smoke checks today hides secondary rhythm detail");
   assertIncludes(installedSmokeJs, "installed today first glance keeps Mira as the remembered subject", "installed smoke checks today Mira-first copy");
-  assertIncludes(installedSmokeJs, "installed today primary action is a filled Mira-green button", "installed smoke checks today primary action style");
+  assertIncludes(installedSmokeJs, "installed today primary action is the ① solid primary (tokenized, unified 36px)", "installed smoke checks today primary action style");
   assertIncludes(installedSmokeJs, "installed today first glance uses a lighter link-like primary action", "installed smoke checks today lighter action copy");
   assertIncludes(installedSmokeJs, "installed settings current mode renders as a quiet summary", "installed smoke checks settings current mode summary");
   assertIncludes(installedSmokeJs, "installed settings current mode does not repeat the same label and value row", "installed smoke checks settings current mode repetition");

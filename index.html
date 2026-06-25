@@ -234,6 +234,17 @@
       --btn-ghost-bg-hover: #FAFAF4;
       --btn-ghost-border: rgba(27, 38, 34, 0.16);
       --btn-ghost-border-hover: rgba(27, 38, 34, 0.24);
+      /* Button-tier system (②tonal ③ghost ④icon · mode-pill · status-pill). */
+      --btn-tonal-bg: rgba(31, 122, 94, 0.12);
+      --btn-tonal-bg-hover: rgba(31, 122, 94, 0.17);
+      --btn-tonal-fg: #1a6b52;
+      --btn-ghost-fg: #5a6358;
+      --btn-ghost-hover: rgba(31, 122, 94, 0.07);
+      --btn-icon-border: rgba(46, 54, 40, 0.12);
+      --mode-pill-bg: rgba(31, 122, 94, 0.08);
+      --mode-pill-fg: #5a6e63;
+      --status-pill-bg: rgba(31, 122, 94, 0.07);
+      --status-pill-fg: #5a6e63;
       --track-bg: rgba(0, 0, 0, 0.05);
       --pill-bg: rgba(250, 250, 244, 0.72);
       --field-bg: #FCFCF6;
@@ -300,6 +311,16 @@
       --btn-ghost-bg-hover: rgba(255, 255, 255, 0.11);
       --btn-ghost-border: rgba(255, 255, 255, 0.14);
       --btn-ghost-border-hover: rgba(255, 255, 255, 0.22);
+      --btn-tonal-bg: rgba(79, 201, 156, 0.16);
+      --btn-tonal-bg-hover: rgba(79, 201, 156, 0.22);
+      --btn-tonal-fg: #62d3aa;
+      --btn-ghost-fg: #9a9aa3;
+      --btn-ghost-hover: rgba(255, 255, 255, 0.06);
+      --btn-icon-border: rgba(255, 255, 255, 0.12);
+      --mode-pill-bg: rgba(79, 201, 156, 0.12);
+      --mode-pill-fg: #8fb3a4;
+      --status-pill-bg: rgba(79, 201, 156, 0.10);
+      --status-pill-fg: #9fb8ac;
       --track-bg: rgba(255, 255, 255, 0.07);
       --pill-bg: rgba(255, 255, 255, 0.08);
       --field-bg: rgba(255, 255, 255, 0.05);
@@ -657,18 +678,23 @@
       justify-content: flex-start;
     }
 
+    /* Unified action-button metrics — one height (36px), one radius (10px),
+       one type (14/500), one icon gap (6px). Tiers below only swap the fill. */
     .ghost,
     .primary,
+    .btn-tonal,
     .danger {
       max-width: 100%;
       min-width: 0;
-      min-height: var(--ef-control-lg);
-      border-radius: var(--ef-radius-md);
+      min-height: 36px;
+      border-radius: 10px;
       padding: var(--ef-space-0) var(--ef-space-6);
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      gap: var(--ef-space-3);
+      gap: var(--ef-space-2);
+      font-size: var(--ef-text-body);
+      font-weight: 500;
       white-space: normal;
       text-align: center;
       line-height: var(--ef-line-title);
@@ -680,29 +706,43 @@
         color var(--ef-motion-fast) var(--ef-ease-calm);
     }
 
+    /* ① Primary — solid, one real action per view. */
     .primary {
       color: var(--btn-primary-fg);
       background: var(--btn-primary-bg);
       box-shadow: 0 0 0 0.5px rgba(0, 0, 0, 0.12);
     }
 
+    /* ② Secondary — tonal sage, no border. */
+    .btn-tonal {
+      color: var(--btn-tonal-fg);
+      background: var(--btn-tonal-bg);
+      border: 0;
+    }
+
+    /* ③ Ghost — text (+ optional icon), no fill/border, muted, faint tonal hover. */
     .ghost {
-      color: var(--ink);
-      background: var(--btn-ghost-bg);
-      border: 0.5px solid var(--btn-ghost-border);
-      box-shadow: 0 0 0 0.5px rgba(0, 0, 0, 0.02);
+      color: var(--btn-ghost-fg);
+      background: transparent;
+      border: 0;
+      box-shadow: none;
     }
 
     .primary:hover {
       background: var(--btn-primary-bg-hover);
     }
 
+    .btn-tonal:hover {
+      background: var(--btn-tonal-bg-hover);
+    }
+
     .ghost:hover {
-      background: var(--btn-ghost-bg-hover);
-      border-color: var(--btn-ghost-border-hover);
+      background: var(--btn-ghost-hover);
+      color: var(--ink);
     }
 
     .primary:active,
+    .btn-tonal:active,
     .ghost:active {
       transform: scale(0.985);
     }
@@ -805,44 +845,41 @@
       letter-spacing: 0;
     }
 
-	    .session-state-pill {
-	      flex: 0 1 auto;
-	      width: fit-content;
-	      min-width: 0;
-	      border: 1px solid var(--line);
-	      border-radius: var(--ef-radius-pill);
-	      min-height: var(--ef-control-sm);
-	      padding: var(--ef-space-0) var(--ef-space-3);
-	      color: var(--muted);
-	      background: var(--pill-bg);
-	      display: inline-flex;
+    /* MODE / STATE pill — low-key sage tonal, NO border/solid fill, so it reads
+       as state rather than a button. Manual/due keep a subtle semantic tint but
+       stay in the same no-border tonal language. */
+    .session-state-pill {
+      flex: 0 1 auto;
+      width: fit-content;
+      min-width: 0;
+      border: 0;
+      border-radius: var(--ef-radius-md);
+      min-height: var(--ef-control-sm);
+      padding: var(--ef-space-0) var(--ef-space-3);
+      color: var(--mode-pill-fg);
+      background: var(--mode-pill-bg);
+      display: inline-flex;
       align-items: center;
       font-size: var(--ef-text-meta);
       line-height: var(--ef-line-compact);
       white-space: nowrap;
     }
 
-    .session-state-pill[data-state="auto"] {
-      color: var(--muted);
-      background: var(--pill-bg);
-      border-color: var(--line);
+    .session-state-pill[data-state="auto"],
+    .session-state-pill[data-state="idle"],
+    .session-state-pill[data-state="paused"] {
+      color: var(--mode-pill-fg);
+      background: var(--mode-pill-bg);
     }
 
-	    .session-state-pill[data-state="manual"] {
-	      color: #0b7f65;
-	      background: rgba(220, 246, 237, 0.66);
-	      border-color: rgba(15, 159, 122, 0.2);
-	    }
-
-    .session-state-pill[data-state="paused"] {
-      color: var(--muted);
-      background: var(--pill-bg);
+    .session-state-pill[data-state="manual"] {
+      color: var(--btn-tonal-fg);
+      background: var(--btn-tonal-bg);
     }
 
     .session-state-pill[data-state="due"] {
       color: #8a5a10;
-      background: #fff2d1;
-      border-color: rgba(216, 165, 55, 0.34);
+      background: rgba(216, 165, 55, 0.16);
     }
 
     /* Semantic state pills (green / amber) get dark-friendly tints so they read
@@ -1009,8 +1046,9 @@
       gap: var(--ef-space-4);
     }
 
+    /* Timer controls are the one place primaries/secondaries go large (40px). */
     .timer-card > .timer-controls .primary,
-    .timer-card > .timer-controls .ghost {
+    .timer-card > .timer-controls .btn-tonal {
       min-height: var(--ef-control-lg);
       padding-inline: var(--ef-space-6);
       font-size: var(--ef-text-body);
@@ -1038,9 +1076,27 @@
       box-shadow: none;
     }
 
-    .timer-card > .timer-controls .ghost {
-      background: var(--btn-ghost-bg);
-      border-color: var(--btn-ghost-border);
+    /* #startBtn as a MODE TOGGLE (手动专注 in auto-tracking) — render it as the
+       low-key mode pill, not solid primary, so it reads as state not action.
+       Class toggled in renderSessionControls by state, not fixed in markup. */
+    #startBtn.is-mode {
+      min-height: 28px;
+      align-self: center;
+      justify-self: start;
+      padding: 0 var(--ef-space-4);
+      border-radius: var(--ef-radius-md);
+      background: var(--mode-pill-bg);
+      color: var(--mode-pill-fg);
+      box-shadow: none;
+      font-weight: 500;
+    }
+
+    #startBtn.is-mode:hover {
+      background: var(--mode-pill-bg);
+    }
+
+    #startBtn.is-mode .small-icon {
+      display: none;
     }
 
     .timer-card.rest-due #restSessionBtn {
@@ -1668,10 +1724,10 @@
       min-width: 0;
       min-height: var(--ef-control-sm);
       padding: var(--ef-space-0) var(--ef-space-4);
-      border: 1px solid var(--group-line);
+      border: 0;
       border-radius: var(--ef-radius-pill);
-      background: var(--group-bg);
-      color: var(--muted);
+      background: var(--status-pill-bg);
+      color: var(--status-pill-fg);
       display: inline-flex;
       align-items: center;
       gap: var(--ef-space-2);
@@ -2057,17 +2113,12 @@
 
     .state-action-row .primary {
       min-width: 0;
-      min-height: var(--ef-control-lg);
+      /* Standard ① primary metrics (36px / 14·500) — was a one-off 40px/590. */
       padding: var(--ef-space-0) var(--ef-space-8);
-      /* Match the app's standard primary-button color language (tokenized, flips
-         with the theme) instead of a one-off bright --mira fill, so this hero CTA
-         stays in the same family as every other primary button. */
       color: var(--btn-primary-fg);
       background: var(--btn-primary-bg);
       border: 0;
       box-shadow: 0 0 0 0.5px rgba(0, 0, 0, 0.12);
-      font-size: var(--ef-text-body);
-      font-weight: 590;
       letter-spacing: -0.003em;
       line-height: var(--ef-line-title);
     }
@@ -2520,13 +2571,15 @@
       line-height: var(--ef-line-reading);
     }
 
+    /* STATUS pill (unified): tonal sage, no border, small. Semantic data-states
+       (enabled/action) tint on top; same language as .state-cue / share-metric. */
     .readiness-status {
       flex: 0 0 auto;
       padding: var(--ef-space-2) var(--ef-space-4);
       border-radius: var(--ef-radius-pill);
-      background: var(--mint-soft);
-      border: 1px solid rgba(15, 159, 122, 0.18);
-      color: var(--ink);
+      background: var(--status-pill-bg);
+      border: 0;
+      color: var(--status-pill-fg);
       font-size: var(--ef-text-meta);
       font-weight: 500;
       white-space: nowrap;
@@ -4473,15 +4526,23 @@
       }
     }
 
+    /* ④ Icon — 36px square, hairline border, icon only. */
     .icon-btn {
-      width: 34px;
-      height: 34px;
-      border-radius: var(--radius);
-      background: var(--group-bg);
-      border: 1px solid var(--line);
+      width: 36px;
+      height: 36px;
+      border-radius: 10px;
+      background: transparent;
+      border: 1px solid var(--btn-icon-border);
       color: var(--ink);
       display: grid;
       place-items: center;
+      transition:
+        background var(--ef-motion-fast) var(--ef-ease-calm),
+        border-color var(--ef-motion-fast) var(--ef-ease-calm);
+    }
+
+    .icon-btn:hover {
+      background: var(--btn-ghost-hover);
     }
 
     .pet-toast {
@@ -6678,9 +6739,9 @@
       gap: var(--ef-space-2);
       min-height: var(--ef-control-sm);
       padding: var(--ef-space-2) var(--ef-space-4);
-      border: 1px solid var(--profile-share-line);
+      border: 0;
       border-radius: var(--ef-radius-pill);
-      background: var(--group-bg);
+      background: var(--status-pill-bg);
       grid-template-columns: auto auto;
       align-items: baseline;
     }
@@ -7972,18 +8033,20 @@
       width: var(--settings-readiness-action-width);
       min-width: var(--settings-readiness-action-width);
       max-width: var(--settings-readiness-action-width);
-      min-height: var(--ef-control-md);
-      padding-inline: var(--ef-space-3);
-      border-color: var(--btn-ghost-border);
-      background: var(--btn-ghost-bg);
+      min-height: 36px;
+      padding-inline: var(--ef-space-4);
       justify-content: center;
       white-space: nowrap;
     }
 
+    /* 开启增强感知 — a real action → ② tonal. */
     #rhythmView .readiness-item .settings-action-button.primary-action {
-      color: var(--ink);
-      background: var(--btn-ghost-bg);
-      border-color: var(--btn-ghost-border);
+      color: var(--btn-tonal-fg);
+      background: var(--btn-tonal-bg);
+      border: 0;
+    }
+    #rhythmView .readiness-item .settings-action-button.primary-action:hover {
+      background: var(--btn-tonal-bg-hover);
     }
 
     #rhythmView .readiness-item .settings-action-button.secondary-action {
@@ -8788,7 +8851,7 @@
               <svg class="small-icon" id="startBtnIcon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5v14l11-7Z"></path></svg>
               <span id="startBtnText">开始安静提醒</span>
             </button>
-            <button class="ghost" id="restSessionBtn" type="button">
+            <button class="btn-tonal" id="restSessionBtn" type="button">
               <svg class="small-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M12 2v6"></path><path d="M12 16v6"></path><path d="M2 12h6"></path><path d="M16 12h6"></path></svg>
               休息
             </button>
@@ -13953,6 +14016,8 @@
       els.startBtnText.textContent = controls.startText;
       els.startBtn.title = controls.startTitle;
       els.startBtnIcon.innerHTML = sessionIcons[controls.startIcon] || sessionIcons.play;
+      // Mode-toggle state (手动专注) renders as the low-key mode pill, not ① primary.
+      els.startBtn.classList.toggle("is-mode", Boolean(controls.startIsMode));
       els.restSessionBtn.innerHTML = `${restButtonIcon}<span>${controls.restText}</span>`;
       els.restSessionBtn.title = controls.restTitle;
     }
