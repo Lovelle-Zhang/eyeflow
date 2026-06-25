@@ -5,6 +5,156 @@
   <title>EyeFlow - Mira 桌面伙伴</title>
   <link rel="stylesheet" href="./eyeflow-design-system.css">
   <style>
+    /* CRITICAL TOKENS — mirror of eyeflow-design-system.css :root block.
+       Inlined so first-paint layout (sidebar padding/gap, theme-switch sizing,
+       all --ef-* spacing/radius/motion) never depends on the external sheet
+       loading a frame late. KEEP IN SYNC with eyeflow-design-system.css. */
+    :root {
+      /* Typography scale */
+      --ef-font-sans: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      --ef-text-micro: 11px;
+      --ef-text-caption: 11.5px;
+      --ef-text-meta: 12px;
+      --ef-text-helper: 12.5px;
+      --ef-text-body-sm: 13px;
+      --ef-text-body: 14px;
+      --ef-text-body-lg: 15px;
+      --ef-text-reading: 15.5px;
+      --ef-text-title-sm: 16px;
+      --ef-text-title-md: 18px;
+      --ef-text-title-lg: 22px;
+      --ef-text-display-sm: 28px;
+      --ef-text-display-md: 34px;
+      --ef-text-display-lg: 44px;
+    
+      /* Line-height scale */
+      --ef-line-tight: 1.12;
+      --ef-line-title: 1.22;
+      --ef-line-compact: 1.35;
+      --ef-line-body: 1.45;
+      --ef-line-reading: 1.62;
+    
+      /* 5-role type scale. Every text element resolves to exactly one role via the
+         .ef-role-* utility classes — no ad-hoc size/weight, no browser defaults. */
+      --ef-role-display-size: 28px;
+      --ef-role-display-weight: 600;
+      --ef-role-display-line: 1.12;
+      --ef-role-display-spacing: -0.022em;
+    
+      --ef-role-title-size: 17px;
+      --ef-role-title-weight: 600;
+      --ef-role-title-line: 1.25;
+      --ef-role-title-spacing: -0.01em;
+    
+      --ef-role-stat-size: 20px;
+      --ef-role-stat-weight: 600;
+      --ef-role-stat-line: 1.2;
+      --ef-role-stat-spacing: -0.01em;
+    
+      --ef-role-body-size: 14px;
+      --ef-role-body-weight: 400;
+      --ef-role-body-line: 1.55;
+      --ef-role-body-spacing: 0;
+    
+      --ef-role-label-size: 12px;
+      --ef-role-label-weight: 500;
+      --ef-role-label-line: 1.4;
+      --ef-role-label-spacing: 0;
+    
+      /* 2px-based spacing scale, biased toward quiet desktop density. */
+      --ef-space-0: 0;
+      --ef-space-1: 4px;
+      --ef-space-2: 6px;
+      --ef-space-3: 8px;
+      --ef-space-4: 10px;
+      --ef-space-5: 12px;
+      --ef-space-6: 14px;
+      --ef-space-7: 16px;
+      --ef-space-8: 18px;
+      --ef-space-9: 20px;
+      --ef-space-10: 24px;
+      --ef-space-11: 28px;
+      --ef-space-12: 32px;
+      --ef-space-13: 40px;
+      --ef-space-14: 48px;
+    
+      /* Shape */
+      --ef-radius-xs: 4px;
+      --ef-radius-sm: 6px;
+      --ef-radius-md: 8px;
+      --ef-radius-lg: 12px;
+      --ef-radius-xl: 16px;
+      --ef-radius-pill: 999px;
+      --ef-radius-companion: 22px;
+    
+      /* Controls */
+      --ef-control-sm: 28px;
+      --ef-control-md: 34px;
+      --ef-control-lg: 40px;
+      --ef-hit-target: 32px;
+    
+      /* Icon and symbol weight */
+      --ef-icon-xs: 12px;
+      --ef-icon-sm: 14px;
+      --ef-icon-md: 16px;
+      --ef-icon-lg: 20px;
+      --ef-icon-xl: 24px;
+      --ef-icon-stroke-quiet: 1.4;
+      --ef-icon-stroke-base: 1.6;
+      --ef-icon-stroke-strong: 1.8;
+      --ef-symbol-weight-quiet: 500;
+      --ef-symbol-weight-base: 600;
+      --ef-symbol-weight-strong: 700;
+    
+      /* Mira avatar geometry: 58-unit canonical face. */
+      --ef-mira-avatar-size: 58px;
+      --ef-mira-avatar-radius: 18px 18px 16px 16px;
+      --ef-mira-visor-top: 19px;
+      --ef-mira-visor-left: 10px;
+      --ef-mira-visor-width: 38px;
+      --ef-mira-visor-height: 18px;
+      --ef-mira-signal-top: 15px;
+      --ef-mira-signal-right: 8px;
+      --ef-mira-signal-size: 9px;
+      --ef-mira-face-top: 24px;
+      --ef-mira-face-left: 18px;
+      --ef-mira-face-width: 22px;
+      --ef-mira-face-height: 8px;
+      --ef-mira-eye-size: 5px;
+      --ef-mira-mouth-top: 38px;
+      --ef-mira-mouth-width: 8px;
+      --ef-mira-mouth-height: 5px;
+      --ef-mira-mouth-stroke: 1.5px;
+      --ef-mira-mouth-color: rgba(15, 159, 122, 0.58);
+      --ef-mira-cheek-top: 35px;
+      --ef-mira-cheek-size: 7px;
+      --ef-mira-cheek-height: 3px;
+      --ef-mira-cheek-offset: 12px;
+      --ef-mira-antenna-top: 7px;
+      --ef-mira-antenna-left: 18px;
+      --ef-mira-antenna-width: 22px;
+      --ef-mira-antenna-height: 12px;
+      --ef-mira-antenna-stroke: 2px;
+    
+      /* Motion */
+      --ef-motion-fast: 120ms;
+      --ef-motion-base: 160ms;
+      --ef-motion-slow: 240ms;
+      --ef-ease-calm: cubic-bezier(0.2, 0, 0.2, 1);
+    
+      /* Compatibility aliases used by the current main window. */
+      --text-xs: var(--ef-text-helper);
+      --text-sm: 13.5px;
+      --text-base: var(--ef-text-body-lg);
+      --text-reading: var(--ef-text-reading);
+      --line-reading: var(--ef-line-reading);
+      --line-compact: 1.42;
+      --text-stack-tight: var(--ef-space-2);
+      --text-stack: var(--ef-space-4);
+      --text-stack-loose: var(--ef-space-6);
+    }
+  </style>
+  <style>
     :root {
       color-scheme: light;
       /* Neutral system — single restrained palette, no mood-driven hue shifts. */
@@ -15,19 +165,19 @@
       --ef-text-secondary: color-mix(in srgb, var(--ink) 60%, transparent);
       --muted: #6b6b70;
       --muted-soft: #98989f;
-      --line: rgba(0, 0, 0, 0.08);
+      --line: rgba(46, 54, 40, 0.09);
       --line-soft: rgba(0, 0, 0, 0.05);
       --line-strong: rgba(0, 0, 0, 0.13);
-      --panel: #ffffff;
-      --wash: #f7f6f3;
-      --wash-2: #efeeea;
-      --panel-strong: #ffffff;
-      --frost-line: rgba(0, 0, 0, 0.06);
+      --panel: #F7F8F0;
+      --wash: #E8E9DD;
+      --wash-2: #DDDED0;
+      --panel-strong: #FAFAF4;
+      --frost-line: rgba(46, 54, 40, 0.07);
       /* Single quiet accent — Mira's color. Used sparingly, only for active and live moments. */
       --mira: #1f7a5e;
       --mira-strong: #1a6b52;
-      --mira-soft: rgba(31, 122, 94, 0.10);
-      --mira-line: rgba(31, 122, 94, 0.20);
+      --mira-soft: rgba(31, 122, 94, 0.13);
+      --mira-line: rgba(31, 122, 94, 0.23);
 
       /* Sidebar material — swap this one group to retheme the rail (light ⇄ dark).
          Dark / Linear preset (kept here for one-line switch):
@@ -38,19 +188,19 @@
            --sb-hover-bg:rgba(255,255,255,.06); --sb-hover-text:#fff;
            --sb-hover-icon:rgba(236,240,243,.8); --sb-footer-bg:rgba(255,255,255,.04);
            --sb-footer-border:rgba(255,255,255,.08); */
-      --sb-bg: #f1f0ec;
-      --sb-border: rgba(0, 0, 0, 0.09);
+      --sb-bg: #E1E2D5;
+      --sb-border: rgba(46, 54, 40, 0.10);
       --sb-text: var(--ink);
       --sb-text-muted: var(--muted);
       --sb-icon: var(--muted-soft);
       --sb-brand-sub: var(--muted);
       --sb-active-text: var(--mira);
-      --sb-active-bg: rgba(31, 122, 94, 0.13);
+      --sb-active-bg: rgba(31, 122, 94, 0.16);
       --sb-active-icon: var(--mira);
       --sb-hover-bg: rgba(0, 0, 0, 0.045);
       --sb-hover-text: var(--ink);
       --sb-hover-icon: var(--ink-soft);
-      --sb-footer-bg: rgba(255, 255, 255, 0.55);
+      --sb-footer-bg: rgba(247, 248, 240, 0.55);
       --sb-footer-border: var(--line);
       /* Legacy aliases — keep mint/sage pointing at the new restrained accent so existing selectors still work but no longer introduce a second hue. */
       --mint: var(--mira);
@@ -63,33 +213,35 @@
       --amber: var(--ink-soft);
       --amber-soft: var(--wash-2);
       /* macOS-native shadow scale — no more 70px web drop shadows. */
-      --shadow: 0 0 0 0.5px rgba(0, 0, 0, 0.04), 0 1px 2px rgba(0, 0, 0, 0.05), 0 1px 3px rgba(0, 0, 0, 0.03);
+      --shadow: 0 0 0 0.5px rgba(46, 50, 38, 0.04), 0 1px 2px rgba(46, 50, 38, 0.05), 0 4px 12px rgba(46, 50, 38, 0.045);
       --shadow-soft: 0 0 0 0.5px rgba(0, 0, 0, 0.04);
-      --shadow-lift: 0 0 0 0.5px rgba(0, 0, 0, 0.05), 0 6px 20px rgba(0, 0, 0, 0.07), 0 2px 6px rgba(0, 0, 0, 0.05);
+      --shadow-lift: 0 0 0 0.5px rgba(46, 50, 38, 0.05), 0 8px 24px rgba(46, 50, 38, 0.07), 0 2px 6px rgba(46, 50, 38, 0.05);
       --shadow-line: inset 0 0 0 0.5px rgba(0, 0, 0, 0.06);
       --radius: 10px;
       --radius-card: 14px;
-      --surface-tint: #ffffff;
-      --group-bg: #ffffff;
-      --group-bg-strong: #ffffff;
-      --group-line: rgba(0, 0, 0, 0.07);
-      --group-line-soft: rgba(0, 0, 0, 0.045);
-      --group-shadow: 0 0 0 0.5px rgba(0, 0, 0, 0.05), 0 1px 2px rgba(0, 0, 0, 0.04);
+      --surface-tint: #F7F8F0;
+      --group-bg: #F7F8F0;
+      --group-bg-strong: #FAFAF4;
+      --group-line: rgba(46, 54, 40, 0.08);
+      --group-line-soft: rgba(46, 54, 40, 0.05);
+      --group-shadow: 0 0 0 0.5px rgba(46, 50, 38, 0.05), 0 1px 2px rgba(46, 50, 38, 0.045), 0 4px 14px rgba(46, 50, 38, 0.04);
 
       /* Control surfaces — tokenized so buttons/tracks/pills flip in dark mode. */
       --btn-primary-bg: #1f2f29;
       --btn-primary-bg-hover: #2a3d36;
       --btn-primary-fg: #f8fffb;
-      --btn-ghost-bg: #ffffff;
-      --btn-ghost-bg-hover: #fbfcf6;
+      --btn-ghost-bg: #F2F3EB;
+      --btn-ghost-bg-hover: #FAFAF4;
       --btn-ghost-border: rgba(27, 38, 34, 0.16);
       --btn-ghost-border-hover: rgba(27, 38, 34, 0.24);
       --track-bg: rgba(0, 0, 0, 0.05);
-      --pill-bg: rgba(255, 255, 255, 0.7);
-      --field-bg: #ffffff;
+      --pill-bg: rgba(250, 250, 244, 0.72);
+      --field-bg: #FCFCF6;
       /* Share-card preview frame — the card stays light; only the frame around it retones. */
       --share-frame-bg: #f5f3ee;
       --share-frame-border: transparent;
+      /* High eye-load state band — semantic warning tint (dark variant below). */
+      --state-band-high: #f7dde5;
     }
 
     /* ── Dark theme ────────────────────────────────────────────────
@@ -153,6 +305,36 @@
       --field-bg: rgba(255, 255, 255, 0.05);
       --share-frame-bg: #1c1e1f;
       --share-frame-border: rgba(255, 255, 255, 0.06);
+      --state-band-high: rgba(225, 120, 150, 0.18);
+    }
+
+    /* ── Eye-friendly theme switch ─────────────────────────────────
+       EyeFlow is an eye-care product, so flipping 白天⇄晚上 must be a calm
+       cross-fade — never a hard luminance flash (jarring, and worst at night).
+       The transition is armed ONLY for the moment of an explicit switch, via
+       .theme-anim on <html> (added by the toggle, removed once it settles).
+       First paint and all normal interactions stay instant. Reduced-motion
+       users get the instant flip (see the media-query override below). */
+    :root.theme-anim,
+    :root.theme-anim *,
+    :root.theme-anim *::before,
+    :root.theme-anim *::after {
+      transition:
+        background-color 460ms var(--ef-ease-calm),
+        border-color 460ms var(--ef-ease-calm),
+        color 460ms var(--ef-ease-calm),
+        fill 460ms var(--ef-ease-calm),
+        stroke 460ms var(--ef-ease-calm),
+        box-shadow 460ms var(--ef-ease-calm) !important;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      :root.theme-anim,
+      :root.theme-anim *,
+      :root.theme-anim *::before,
+      :root.theme-anim *::after {
+        transition: none !important;
+      }
     }
 
     * {
@@ -705,6 +887,36 @@
       border-color: rgba(225, 120, 150, 0.32);
     }
 
+    /* Dark variants for semantic surfaces/text that were light-only (audit sweep).
+       Keep each semantic hue (calm green / rest rose / action amber) but make it
+       hold up on dark surfaces instead of staying a light-mode tint. */
+    :root[data-theme="dark"] .session-start-hint {
+      background: rgba(79, 201, 156, 0.12);
+    }
+    :root[data-theme="dark"] .recovery-feedback {
+      background: var(--group-bg);
+    }
+    :root[data-theme="dark"] .today-flow.force {
+      color: #f2b8c8;
+      background: rgba(225, 120, 150, 0.14);
+    }
+    :root[data-theme="dark"] .state-action-row .primary[data-intent="rest"] {
+      color: #f2b8c8;
+      background: rgba(225, 120, 150, 0.12);
+      border-color: rgba(225, 120, 150, 0.28);
+    }
+    /* Hardcoded dark-ink text in settings — flip to legible light-on-dark tones. */
+    :root[data-theme="dark"] #rhythmView #applyRhythmBtn.settings-rhythm-action,
+    :root[data-theme="dark"] #rhythmView .readiness-item[data-state="enabled"] strong {
+      color: var(--mira-strong);
+    }
+    :root[data-theme="dark"] #rhythmView #previewForceBreakBtn {
+      color: var(--ink-soft);
+    }
+    :root[data-theme="dark"] #rhythmView .readiness-item[data-state="action"] strong {
+      color: #f0c674;
+    }
+
     .timer-card.session-pulse {
       animation: sessionPulse var(--ef-motion-slow) var(--ef-ease-calm);
     }
@@ -941,13 +1153,19 @@
 
     #sessionPanel input[type="range"] {
       height: var(--ef-control-sm);
-      --range-rest: rgba(226, 235, 229, 0.72);
-      --range-glow: rgba(15, 159, 122, 0.12);
+      --range-rest: var(--track-bg);
+      --range-glow: var(--mira-soft);
     }
 
     #sessionPanel input[type="range"]::-webkit-slider-runnable-track {
       height: var(--ef-space-2);
       border-radius: var(--ef-radius-pill);
+      /* Webkit slider pseudo-elements don't merge declarations across rules the
+         way normal elements do — the most-specific track rule must carry its own
+         background or the base green fill drops out (rendered as a bare/native
+         track). Restate the tokenized fill gradient here. */
+      background:
+        linear-gradient(90deg, var(--range-color) 0 var(--range-fill), var(--range-rest) var(--range-fill) 100%);
       box-shadow: inset 0 0 0 1px rgba(24, 32, 31, 0.035);
       transition:
         background var(--ef-motion-base) var(--ef-ease-calm),
@@ -958,6 +1176,9 @@
       width: var(--ef-icon-md);
       height: var(--ef-icon-md);
       margin-top: calc((var(--ef-space-2) - var(--ef-icon-md)) / 2);
+      /* Same reason as the track — carry background + ring here explicitly. */
+      background: var(--range-color);
+      border: 3px solid var(--panel);
       box-shadow: 0 2px 6px rgba(24, 32, 31, 0.12);
       transition:
         transform var(--ef-motion-fast) var(--ef-ease-calm),
@@ -1006,8 +1227,9 @@
       background: transparent;
       --range-color: var(--mint);
       --range-fill: 20%;
-      --range-rest: #e7eee9;
-      --range-glow: rgba(15, 159, 122, 0.18);
+      /* Tokenized so the unfilled track flips dark — was a light-only #e7eee9. */
+      --range-rest: var(--track-bg);
+      --range-glow: var(--mira-soft);
     }
 
     input[type="range"]::-webkit-slider-runnable-track {
@@ -1026,7 +1248,7 @@
       height: 18px;
       margin-top: -5px;
       border-radius: 50%;
-      border: 3px solid #ffffff;
+      border: 3px solid var(--panel);
       background: var(--range-color);
       box-shadow:
         0 2px 8px rgba(24, 32, 31, 0.14),
@@ -1071,7 +1293,7 @@
       width: 14px;
       height: 14px;
       border-radius: 50%;
-      border: 3px solid #ffffff;
+      border: 3px solid var(--panel);
       background: var(--range-color);
       box-shadow:
         0 2px 8px rgba(24, 32, 31, 0.14),
@@ -1837,13 +2059,13 @@
       min-width: 0;
       min-height: var(--ef-control-lg);
       padding: var(--ef-space-0) var(--ef-space-8);
-      color: #ffffff;
-      background: var(--mira);
+      /* Match the app's standard primary-button color language (tokenized, flips
+         with the theme) instead of a one-off bright --mira fill, so this hero CTA
+         stays in the same family as every other primary button. */
+      color: var(--btn-primary-fg);
+      background: var(--btn-primary-bg);
       border: 0;
-      box-shadow:
-        inset 0 0.5px 0 rgba(255, 255, 255, 0.22),
-        0 1px 2px rgba(24, 60, 47, 0.22),
-        0 2px 8px rgba(31, 122, 94, 0.18);
+      box-shadow: 0 0 0 0.5px rgba(0, 0, 0, 0.12);
       font-size: var(--ef-text-body);
       font-weight: 590;
       letter-spacing: -0.003em;
@@ -1851,8 +2073,8 @@
     }
 
     .state-action-row .primary:hover {
-      color: #ffffff;
-      background: var(--mira-strong);
+      color: var(--btn-primary-fg);
+      background: var(--btn-primary-bg-hover);
       transform: none;
     }
 
@@ -3307,7 +3529,7 @@
     }
 
     .profile-chart-svg .chart-point {
-      fill: #fbfcf6;
+      fill: var(--panel);
       stroke: var(--mira);
       stroke-width: var(--ef-icon-stroke-base);
     }
@@ -3775,6 +3997,18 @@
       --history-accent: #b95772;
     }
 
+    /* Dark-lifted history accents — same comfort/medium/high hues, brighter so
+       the trend dots/areas stay legible on dark rows. */
+    :root[data-theme="dark"] .history-row {
+      --history-accent: #62d3aa;
+    }
+    :root[data-theme="dark"] .history-row[data-zone="medium"] {
+      --history-accent: #f0c674;
+    }
+    :root[data-theme="dark"] .history-row[data-zone="high"] {
+      --history-accent: #f2b8c8;
+    }
+
     .history-date,
     .history-cell,
     .history-signal {
@@ -3882,7 +4116,7 @@
     }
 
     .history-trend-svg .trend-dot {
-      fill: #fbfcf6;
+      fill: var(--panel);
       stroke: var(--history-accent);
       stroke-width: var(--ef-icon-stroke-quiet);
     }
@@ -3978,7 +4212,7 @@
       padding: var(--ef-space-5);
       border: 0.5px solid rgba(24, 32, 31, 0.12);
       border-radius: var(--ef-radius-md);
-      background: #ffffff;
+      background: #F7F8F0;
       box-shadow: 0 0 0 0.5px rgba(24, 32, 31, 0.04), 0 6px 16px rgba(24, 32, 31, 0.08);
       display: grid;
       grid-template-columns: 58px 1fr auto;
@@ -6186,6 +6420,14 @@
       --profile-trend-high: rgba(185, 87, 114, 0.5);
     }
 
+    /* Brighter data-viz zone tones on dark — the light-mode values read as muddy
+       low-contrast strokes on a dark chart. Same three semantic hues, lifted. */
+    :root[data-theme="dark"] #profileView {
+      --profile-trend-comfort: rgba(79, 201, 156, 0.62);
+      --profile-trend-medium: rgba(240, 198, 116, 0.58);
+      --profile-trend-high: rgba(242, 184, 200, 0.55);
+    }
+
     #profileView .profile-overview,
     #profileView .profile-visual-panel,
     #profileView .profile-rhythm-memory,
@@ -6716,7 +6958,7 @@
 
     #profileView .profile-chart-svg .chart-point {
       r: var(--ef-space-1);
-      fill: rgba(251, 252, 246, 0.92);
+      fill: var(--panel);
       stroke: var(--profile-trend-comfort);
       stroke-width: var(--ef-icon-stroke-quiet);
     }
@@ -6875,7 +7117,7 @@
 
     #profileView .history-trend-svg .trend-dot {
       r: calc(var(--ef-space-1) / 2);
-      fill: rgba(251, 252, 246, 0.88);
+      fill: var(--panel);
       stroke-width: var(--ef-icon-stroke-quiet);
     }
 
@@ -7215,7 +7457,7 @@
       width: var(--ef-icon-sm);
       height: var(--ef-icon-sm);
       margin: var(--ef-space-0);
-      accent-color: #2f9b82;
+      accent-color: var(--mira);
       transform: translateY(calc(var(--ef-space-1) * -0.25));
     }
 
@@ -10456,11 +10698,9 @@
       const load = estimateInitialLoad(symptoms);
       const rhythm = initialRhythmForLoad(load);
       const strategy = onboardingStrategyForLoad(load, rhythm);
-      const tone = load >= 74
-        ? { color: "#1b2622", glow: "rgba(27, 38, 34, 0.12)" }
-        : load >= 48
-          ? { color: "rgba(31, 122, 94, 0.7)", glow: "rgba(31, 122, 94, 0.14)" }
-          : { color: "#1f7a5e", glow: "rgba(31, 122, 94, 0.16)" };
+      // Tokenized single accent (flips with the theme) instead of light-only
+      // hardcoded greens — keep the onboarding symptom sliders on-palette in dark.
+      const tone = { color: "var(--mira)", glow: "var(--mira-soft)" };
       els.onboardingLoadValue.textContent = strategy.token;
       els.onboardingLoadBand.textContent = strategy.band;
       els.onboardingLoadValue.closest(".onboarding-load")?.setAttribute("data-tone", strategy.tone);
@@ -12629,32 +12869,17 @@
       syncSidebarFooterAlignment();
     }
 
-    // Keep the sidebar's appearance toggle (margin-top:auto, so its bottom edge
-    // sits at sidebarHeight − paddingBottom) aligned with the bottom of the
-    // right column's content. When the active view is shorter than the scroll
-    // viewport, lift the toggle by the leftover gap so the two columns close on
-    // the same line; when content fills or overflows, it rests at the base inset.
+    // The appearance toggle rests at the bottom of the sidebar (CSS:
+    // .theme-switch { margin-top:auto } + the base --ef-space-9 inset).
+    // We deliberately do NOT lift it to match the active view's content bottom:
+    // on short views (e.g. Today) that left the toggle floating partway up the
+    // rail with a large empty gap below it, and it jumped position when switching
+    // views — both read as a layout bug. Clear any inline padding so CSS owns the
+    // resting position and the toggle stays pinned to the bottom on every view.
     function syncSidebarFooterAlignment() {
       const sidebar = document.querySelector(".sidebar");
       if (!sidebar) return;
-      // Below 860px the layout is single-column normal scroll — no alignment to do.
-      if (window.innerWidth <= 860) {
-        sidebar.style.paddingBottom = "";
-        return;
-      }
-      const baseInset = 20; // matches --ef-space-9 (sidebar/main bottom padding)
-      const activeView = Array.from(els.views).find((view) => !view.hidden);
-      if (!activeView) {
-        sidebar.style.paddingBottom = `${baseInset}px`;
-        return;
-      }
-      // The sidebar is 100vh, so the toggle's bottom edge sits at
-      // (innerHeight − paddingBottom). Lift it to the active view's content
-      // bottom; when content fills/overflows the viewport, fall back to the base
-      // inset. (scrollHeight is unusable here — it never drops below clientHeight.)
-      const contentBottom = activeView.getBoundingClientRect().bottom;
-      const lift = Math.max(baseInset, window.innerHeight - contentBottom);
-      sidebar.style.paddingBottom = `${lift}px`;
+      sidebar.style.paddingBottom = "";
     }
 
     let sidebarFooterSyncQueued = false;
@@ -13758,7 +13983,7 @@
       const [symptom, value] = topSymptom();
       const mins = Math.floor(elapsedSeconds / 60);
       els.stateBand.textContent = `已专注 ${mins} 分钟`;
-      els.stateBand.style.background = load >= 74 ? "#f7dde5" : load >= 48 ? "var(--amber-soft)" : "var(--mint-soft)";
+      els.stateBand.style.background = load >= 74 ? "var(--state-band-high)" : load >= 48 ? "var(--amber-soft)" : "var(--mint-soft)";
       els.stageLoadValue.textContent = `${mins}m`;
       const { mood: stageMood, tone: stageTone } = stageMiraView({
         load,
@@ -15024,15 +15249,32 @@
       var opts = Array.prototype.slice.call(document.querySelectorAll(".theme-opt"));
       if (!opts.length) return;
 
+      var root = document.documentElement;
+      var reduceMotion = window.matchMedia
+        && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+      var animTimer = null;
+
       function current() {
-        return document.documentElement.getAttribute("data-theme") === "dark" ? "dark" : "light";
+        return root.getAttribute("data-theme") === "dark" ? "dark" : "light";
       }
 
-      function apply(theme) {
+      // animate=true only on an explicit user switch — never on first-paint sync.
+      function apply(theme, animate) {
+        if (animate && !reduceMotion) {
+          // Arm the cross-fade and flush layout so the transition starts from the
+          // current colors; then changing the theme below animates into the new ones.
+          root.classList.add("theme-anim");
+          void root.offsetWidth;
+          if (animTimer) clearTimeout(animTimer);
+          animTimer = setTimeout(function () {
+            root.classList.remove("theme-anim");
+            animTimer = null;
+          }, 520);
+        }
         if (theme === "dark") {
-          document.documentElement.setAttribute("data-theme", "dark");
+          root.setAttribute("data-theme", "dark");
         } else {
-          document.documentElement.removeAttribute("data-theme");
+          root.removeAttribute("data-theme");
         }
         try { localStorage.setItem("eyeflow-theme", theme); } catch (e) {}
         opts.forEach(function (btn) {
@@ -15041,10 +15283,10 @@
       }
 
       opts.forEach(function (btn) {
-        btn.addEventListener("click", function () { apply(btn.dataset.themeSet); });
+        btn.addEventListener("click", function () { apply(btn.dataset.themeSet, true); });
       });
 
-      apply(current());
+      apply(current(), false);
     })();
   </script>
 

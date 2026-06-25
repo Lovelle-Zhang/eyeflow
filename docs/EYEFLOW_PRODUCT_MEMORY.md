@@ -17,6 +17,15 @@ This file records product decisions that should survive code edits and rebuilds.
 - First-open and public-facing copy should sell the feeling before explaining mechanics: companion first, differentiation second, features third.
 - Keep only necessary features. Avoid adding complex dashboards, noisy gamification, or heavy workflows.
 
+## Eye-Comfort DNA
+
+- EyeFlow is an eye-care product, so "extreme friendliness to the eyes" is part of the product DNA, not a polish item. The interface itself must never be a source of eye strain.
+- No harsh luminance flashes. Any change that shifts overall brightness — above all the 白天⇄晚上 (light⇄dark) switch — must be a calm cross-fade, never a hard cut. The dark→light jump at night is the worst offender and must feel gentle.
+- Prefer soft, eased transitions over instant snaps for anything that changes color, brightness, or large surfaces. Motion should confirm a change without startling the eye.
+- Always honor `prefers-reduced-motion`: users who opt out of motion get an instant, flash-free result instead of an animation.
+- When in doubt between "snappy" and "gentle," choose gentle. Comfort for the eyes outranks perceived speed.
+- Implementation note: the theme switch arms a one-shot `.theme-anim` cross-fade on `<html>` only during an explicit switch (see `index.html`), so first paint and normal interactions stay instant while the flip stays soft.
+
 ## Professional Foundation
 
 - EyeFlow's surface can feel healing, but the professional layer must not be softened. Data analysis, eye-health reasoning, and future hardware collection should feel credible enough to support a serious product ecosystem.

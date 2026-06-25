@@ -1,9 +1,13 @@
 window.EyeFlowSessionFlow = (() => {
+  // Single restrained accent — no mood-driven hue shifts (per the design DNA).
+  // These feed only the rhythm sliders' --range-color/--range-glow; every stage
+  // resolves to the tokenized Mira green, which flips with the light/dark theme.
+  // (Mira's own companion/avatar mood tints live in separate CSS and are unaffected.)
   const stageTones = {
-    calm: { color: "#2a927a", glow: "rgba(42, 146, 122, 0.17)" },
-    focus: { color: "#5fa9c1", glow: "rgba(95, 169, 193, 0.18)" },
-    blink: { color: "#c49a45", glow: "rgba(196, 154, 69, 0.2)" },
-    rest: { color: "#c9637f", glow: "rgba(201, 99, 127, 0.2)" }
+    calm: { color: "var(--mira)", glow: "var(--mira-soft)" },
+    focus: { color: "var(--mira)", glow: "var(--mira-soft)" },
+    blink: { color: "var(--mira)", glow: "var(--mira-soft)" },
+    rest: { color: "var(--mira)", glow: "var(--mira-soft)" }
   };
 
   function computeRestDue({ isRunning = false, elapsedSeconds = 0, focusMinutes = 0 } = {}) {

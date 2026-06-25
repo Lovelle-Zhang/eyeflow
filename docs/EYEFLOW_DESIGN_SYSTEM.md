@@ -15,6 +15,7 @@ Use:
 - Few visual layers.
 - 8px default radius for app surfaces.
 - Soft motion that confirms state without demanding attention.
+- Calm cross-fades for any brightness change. The 白天⇄晚上 switch must ease between themes (~460ms, `--ef-ease-calm`), never hard-cut — EyeFlow is an eye-care product and a luminance flash is a comfort defect. See "Eye-Comfort DNA" in `docs/EYEFLOW_PRODUCT_MEMORY.md`. Always honor `prefers-reduced-motion` (instant, flash-free fallback).
 
 Avoid:
 

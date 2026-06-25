@@ -164,7 +164,16 @@ function main() {
   assertEqual(sessionFlow.stageMiraView({ load: 20, topSymptomValue: 5 }).mood, "blink", "symptom-led Mira mood");
   assertEqual(sessionFlow.stageMiraView({ load: 20, isRunning: true }).mood, "focus", "running Mira mood");
   assertEqual(sessionFlow.stageMiraView({ load: 20 }).mood, "calm", "calm Mira mood");
-  assertEqual(sessionFlow.stageMiraView({ load: 80 }).tone.color, "#c9637f", "rest Mira tone");
+  // Mood still differentiates behavior/copy, but the slider tone is a single
+  // restrained accent (no mood-driven hue shifts) — every stage resolves to the
+  // tokenized Mira green that flips with the theme.
+  ["rest", "blink", "focus", "calm"].forEach((mood, i) => {
+    const load = [80, 50, 20, 20][i];
+    const running = mood === "focus";
+    const tone = sessionFlow.stageMiraView({ load, isRunning: running }).tone;
+    assertEqual(tone.color, "var(--mira)", `${mood} Mira tone is the single accent`);
+    assertEqual(tone.glow, "var(--mira-soft)", `${mood} Mira glow is the single accent`);
+  });
 
   console.log("[smoke:session] PASSED. Session controls and Mira stage state are extracted and stable.");
 }

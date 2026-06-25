@@ -73,6 +73,86 @@ function assertNoHardcodedNeutralSurfaces(html, label) {
   }
 }
 
+// Critical-CSS guardrail: index.html inlines the design-system :root token block
+// so first-paint layout (sidebar padding/gap, theme-switch sizing) never waits on
+// the external stylesheet. That makes two copies — this asserts they don't drift:
+// every --token declared in eyeflow-design-system.css's :root must appear, with an
+// identical value, in index.html's "CRITICAL TOKENS" inline <style>.
+function tokenMap(cssBlock) {
+  const map = new Map();
+  for (const m of cssBlock.matchAll(/(--[\w-]+)\s*:\s*([^;]+);/g)) {
+    map.set(m[1], m[2].replace(/\s+/g, " ").trim());
+  }
+  return map;
+}
+
+function assertCriticalTokensInSync(html, designCss, label) {
+  const sourceRoot = designCss.match(/:root\s*\{([\s\S]*?)\n\}/);
+  if (!sourceRoot) {
+    throw new Error(`${label}: could not locate :root block in eyeflow-design-system.css`);
+  }
+  const inlineBlock = html.match(/<style>\s*\/\* CRITICAL TOKENS[\s\S]*?<\/style>/);
+  if (!inlineBlock) {
+    throw new Error(`${label}: missing inlined "CRITICAL TOKENS" <style> in index.html`);
+  }
+  const source = tokenMap(sourceRoot[1]);
+  const inline = tokenMap(inlineBlock[0]);
+  const drift = [];
+  for (const [name, value] of source) {
+    if (!inline.has(name)) {
+      drift.push(`${name}: missing from inline mirror`);
+    } else if (inline.get(name) !== value) {
+      drift.push(`${name}: css="${value}" vs inline="${inline.get(name)}"`);
+    }
+  }
+  if (drift.length) {
+    throw new Error(
+      `${label}: ${drift.length} token(s) drifted — re-copy the :root block into index.html's CRITICAL TOKENS <style>:\n  ${drift.slice(0, 20).join("\n  ")}`
+    );
+  }
+}
+
+// Dark-mode guardrail #2: colors injected from JS bypass the CSS token system
+// entirely (the stage-tone sliders and the state band did exactly this), so the
+// CSS scan above can't see them. Scan JS — inline <script> blocks plus the
+// extracted modules — for hardcoded color literals assigned to .style.<color> or
+// a custom property via setProperty. Theme-aware values use var(--token) instead.
+function assertNoJsInjectedHardcodedColors(html, modules, label) {
+  // Standalone hex (not an HTML entity like &#039;) or an opaque rgb/rgba.
+  const HEX = /(?<![&\w])#[0-9a-fA-F]{3,8}\b/g;
+  const RGBA = /\brgba?\(\s*\d[^)]*\)/g;
+  const isHue = (v) => {
+    const m = v.match(/rgba\([^,]+,[^,]+,[^,]+,\s*([\d.]+)\)/);
+    return !m || Number(m[1]) > 0; // skip fully-transparent (alpha 0) — carries no hue
+  };
+  const scan = (src, where, sink) => {
+    for (const line of src.split("\n")) {
+      if (where && !where.test(line)) continue;
+      for (const m of [...line.matchAll(HEX), ...line.matchAll(RGBA)]) {
+        if (isHue(m[0])) sink.push(`${m[0]}  ::  ${line.trim().slice(0, 80)}`);
+      }
+    }
+  };
+  const violations = [];
+  // Logic modules carry no presentation — any color literal belongs in a CSS token.
+  for (const { name, src } of modules) {
+    const sink = [];
+    scan(src, null, sink);
+    violations.push(...sink.map((v) => `${name}: ${v}`));
+  }
+  // index.html inline scripts: only flag color-context lines (canvas/share-art
+  // generation may legitimately compute colors); the table/injection split that
+  // hid the stage tones is covered by the module scan above.
+  const COLOR_CTX = /\.style\.(background|backgroundColor|color|borderColor|fill|stroke|boxShadow)\b|setProperty\(\s*["'`]--[\w-]*(color|bg|fill|stroke|tone|glow|band)/i;
+  const scripts = [...html.matchAll(/<script>([\s\S]*?)<\/script>/g)].map((m) => m[1]).join("\n");
+  scan(scripts, COLOR_CTX, violations);
+  if (violations.length) {
+    throw new Error(
+      `${label}: ${violations.length} JS-injected hardcoded color(s) — assign var(--token) so they flip with the theme:\n  ${violations.slice(0, 15).join("\n  ")}`
+    );
+  }
+}
+
 function loadCore() {
   const sandbox = { window: {} };
   vm.createContext(sandbox);
@@ -382,6 +462,13 @@ function main() {
   assertIncludes(core.modeActionCopy("clear"), "明确介入", "clear mode action copy");
 
   assertNoHardcodedNeutralSurfaces(indexHtml, "themed views use theme tokens, not hardcoded neutral surfaces");
+  assertCriticalTokensInSync(indexHtml, read("eyeflow-design-system.css"), "inlined critical tokens match the design-system :root block");
+  assertNoJsInjectedHardcodedColors(
+    indexHtml,
+    ["eyeflow-session-flow.js", "eyeflow-rest-flow.js", "eyeflow-core.js", "eyeflow-recovery-data.js", "eyeflow-ui-utils.js"]
+      .map((name) => ({ name, src: read(name) })),
+    "JS does not inject hardcoded colors that bypass the theme"
+  );
 
   console.log("[smoke:core] PASSED. EyeFlow core scoring and first-round rhythm are stable.");
 }
