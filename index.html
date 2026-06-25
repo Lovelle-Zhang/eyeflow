@@ -3531,10 +3531,10 @@
     .profile-trend-tag {
       flex: 0 0 auto;
       padding: var(--ef-space-2) var(--ef-space-3);
-      border-radius: var(--ef-radius-sm);
-      border: 0.5px solid var(--line);
-      background: var(--pill-bg);
-      color: var(--ink);
+      border-radius: var(--ef-radius-md);
+      border: 0;
+      background: var(--status-pill-bg);
+      color: var(--mode-pill-fg);
       white-space: nowrap;
     }
 
@@ -3765,10 +3765,10 @@
     .archive-window-pill {
       flex: 0 0 auto;
       padding: var(--ef-space-2) var(--ef-space-3);
-      border: 1px solid var(--line);
-      border-radius: var(--ef-radius-sm);
-      background: var(--pill-bg);
-      color: var(--ink);
+      border: 0;
+      border-radius: var(--ef-radius-md);
+      background: var(--status-pill-bg);
+      color: var(--mode-pill-fg);
       white-space: nowrap;
     }
 
@@ -4193,13 +4193,42 @@
       gap: var(--ef-space-3);
     }
 
+    /* Read-only STATUS labels — flat, never pressable (no border/solid fill).
+       TIER B (mild-signal: 可选/预览/feedback counters): faint tonal.
+       TIER A (neutral statements) add .status-quiet → transparent + leading dot.
+       Unified metrics: 28px / radius 8 / 12·500 / optional leading dot. */
     .tag {
-      padding: 7px 9px;
-      border-radius: var(--ef-radius-pill);
-      background: var(--mint-soft);
-      color: var(--ink);
+      display: inline-flex;
+      align-items: center;
+      gap: var(--ef-space-2);
+      min-height: var(--ef-control-sm);
+      padding: var(--ef-space-0) var(--ef-space-3);
+      border: 0;
+      border-radius: var(--ef-radius-md);
+      background: var(--status-pill-bg);
+      color: var(--mode-pill-fg);
       font-size: var(--ef-text-meta);
-      border: 1px solid rgba(15, 159, 122, 0.18);
+      font-weight: 500;
+      line-height: var(--ef-line-compact);
+    }
+
+    /* TIER A — neutral "what is the current state" labels: quietest. */
+    .tag.status-quiet,
+    .ef-status-pill.status-quiet,
+    .readiness-status.status-quiet,
+    .settings-mode-pill.status-quiet {
+      background: transparent;
+      color: var(--mode-pill-fg);
+    }
+
+    .status-quiet::before {
+      content: "";
+      flex: 0 0 auto;
+      width: var(--ef-space-1);
+      height: var(--ef-space-1);
+      border-radius: 50%;
+      background: var(--mode-pill-fg);
+      opacity: 0.55;
     }
 
     .rec {
@@ -9093,7 +9122,7 @@
                 <h3 class="settings-section-title ef-preference-section-title">增强桌面感知</h3>
                 <p id="desktopReadyCopy">普通模式可用；开启后多一点桌面节奏判断。</p>
               </div>
-              <span class="readiness-status ef-status-pill preview" id="desktopReadyTag" data-state="checking">检查中</span>
+              <span class="readiness-status ef-status-pill preview status-quiet" id="desktopReadyTag" data-state="checking">检查中</span>
             </div>
             <div class="settings-row readiness-item ef-preference-row" data-state="checking">
               <span class="settings-row-label ef-preference-row-label">增强桌面感知</span>
@@ -9161,8 +9190,8 @@
                 <div class="settings-row ef-preference-row">
                   <strong class="settings-row-label ef-preference-row-label">桌面启动</strong>
                   <p class="settings-row-value ef-preference-row-value" id="desktopLaunchCopy">便利选项：开机后 EyeFlow 安静待命；关闭后只在你手动打开时运行。</p>
-                  <span class="tag ef-status-pill" id="launchAtLoginTag" data-state="optional">手动启动</span>
-                  <span class="tag ef-status-pill" id="desktopVersionTag" data-state="checking" hidden="">EyeFlow 0.1.1</span>
+                  <span class="tag ef-status-pill status-quiet" id="launchAtLoginTag" data-state="optional">手动启动</span>
+                  <span class="tag ef-status-pill status-quiet" id="desktopVersionTag" data-state="checking" hidden="">EyeFlow 0.1.1</span>
                 </div>
                 <div class="settings-row ef-preference-row">
                   <strong class="settings-row-label ef-preference-row-label">开机自动启动</strong>
@@ -9171,10 +9200,10 @@
                 <div class="settings-row ef-preference-row" hidden="">
                   <strong class="settings-row-label ef-preference-row-label">桌面感知</strong>
                   <p class="settings-row-value ef-preference-row-value" id="activityCopy">浏览器预览不会读取桌面活动。Electron 版会显示当前 App 和活跃时间。</p>
-                  <span class="tag" id="activityApp">当前 App 未知</span>
-                  <span class="tag" id="activityIdle" hidden="">空闲 0 秒</span>
-                  <span class="tag" id="activityMode" hidden="">手动计时</span>
-                  <span class="tag" id="naturalBreakTag" hidden="">等待恢复断点</span>
+                  <span class="tag status-quiet" id="activityApp">当前 App 未知</span>
+                  <span class="tag status-quiet" id="activityIdle" hidden="">空闲 0 秒</span>
+                  <span class="tag status-quiet" id="activityMode" hidden="">手动计时</span>
+                  <span class="tag status-quiet" id="naturalBreakTag" hidden="">等待恢复断点</span>
                 </div>
                 <div class="settings-row ef-preference-row" hidden="">
                   <strong class="settings-row-label ef-preference-row-label">轻提醒反馈</strong>
