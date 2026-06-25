@@ -189,7 +189,7 @@ function main() {
   assertIncludes(indexHtml, "body:has(#todayView:not([hidden])) .companion {\n        top: var(--ef-space-10);", "installed today compact Mira avoids bottom session sliders");
   assertIncludes(indexHtml, "body:has(#rhythmView:not([hidden])) .companion", "installed settings view lets Mira compact away from controls");
   assertMatches(indexHtml, /\.profile-summary-chips\s*\{[\s\S]*display:\s*none;/, "installed profile overview removes repeated summary chips from the main flow");
-  assertMatches(indexHtml, /\.profile-overview-main\s*\{[\s\S]*grid-template-columns:\s*minmax\(0,\s*1fr\) minmax\(calc\(var\(--ef-space-14\) \* 5\.4\),\s*0\.36fr\);/, "installed profile overview uses one recommendation column and one compact parameter column");
+  assertMatches(indexHtml, /\.profile-overview-main\s*\{[\s\S]*grid-template-columns:\s*minmax\(0,\s*1fr\) minmax\(calc\(var\(--ef-space-14\) \* 4\.6\),\s*0\.34fr\);[\s\S]*align-items:\s*start;/, "installed profile overview uses one recommendation column and one compact parameter column, top-aligned as one bound card");
   assertMatches(indexHtml, /\.profile-insight-card\s*\{[\s\S]*padding:\s*var\(--ef-space-0\);[\s\S]*border:\s*0;[\s\S]*background:\s*transparent;/, "installed profile insight avoids nested card chrome");
   assertMatches(indexHtml, /\.profile-insight-strip\s*\{[\s\S]*grid-template-columns:\s*minmax\(0,\s*1fr\);[\s\S]*border:\s*0;[\s\S]*background:\s*transparent;/, "installed profile insight summary becomes a quiet vertical list");
   assertMatches(indexHtml, /\.profile-memory-grid\s*\{[\s\S]*display:\s*flex;[\s\S]*flex-wrap:\s*wrap;[\s\S]*border:\s*0;[\s\S]*border-top:\s*1px solid var\(--group-line-soft\);[\s\S]*background:\s*transparent;/, "installed profile rhythm memory no longer renders as a boxed table");
@@ -546,14 +546,15 @@ function main() {
   assertIncludes(indexHtml, 'profilePlanTitle(nextAction, suggestion)', "installed first-day profile uses the plain next-round plan title");
   assertIncludes(indexHtml, 'els.profileTrendTag.textContent = "样本建立中";', "installed first-day profile avoids a premature stable verdict");
   assertIncludes(indexHtml, 'classList.toggle("profile-building", !hasProfileEvidence)', "installed first-day profile gets a dedicated low-evidence visual state");
-  assertMatches(indexHtml, /#profileView\.profile-building \.profile-workbench,[\s\S]*#profileView\.profile-building \.profile-archive-disclosure\s*\{[\s\S]*display:\s*none;/, "installed first-day profile hides trend and long-term archive entry");
+  assertMatches(indexHtml, /#profileView\.profile-building \.profile-detail-fold\s*\{[\s\S]*display:\s*none;/, "installed first-day profile hides the whole detail fold");
   assertIncludes(indexHtml, "下一轮建议", "installed profile review answers the next-round plan directly");
   assertNotMatches(indexHtml, /<span class="profile-trend-tag" id="profileTrendTag">/, "installed profile insight header removes the duplicated overall-state chip");
   assertIncludes(indexHtml, "主要感受", "installed profile review uses a user-facing signal label");
   assertIncludes(indexHtml, "<span>提醒时间</span>", "installed profile review labels the reminder timing directly");
   assertIncludes(indexHtml, "<span>休息时间</span>", "installed profile review labels the rest timing directly");
-  assertIncludes(indexHtml, "Mira 把这次复盘整理成一个可执行的节奏。", "installed profile insight subtitle explains the job in plain language");
-  assertMatches(indexHtml, /function\s+profilePlanTitle[\s\S]*\$\{suggestion\.focus\} 分钟后轻提醒/, "installed profile recommendation headline renders one obvious next action");
+  assertIncludes(indexHtml, "Mira 把这几天整理成一个可执行的节奏。", "installed profile insight subtitle explains the job in plain language");
+  assertMatches(indexHtml, /function\s+profilePlanTitle[\s\S]*return "保持轻提醒节奏";/, "installed profile recommendation headline renders one qualitative next action");
+  assertNotMatches(indexHtml, /function\s+profilePlanTitle\([^)]*\)\s*\{(?:(?!function)[\s\S])*?suggestion\.focus/, "installed profile headline leaves the exact 分钟/秒 to the spec column");
   assertIncludes(indexHtml, "今日分享卡", "installed profile review adds a daily share card");
   assertIncludes(indexHtml, 'class="profile-score-inline" hidden=""', "installed profile review hides technical status signal from main flow");
   assertMatches(indexHtml, /<div class="profile-share-bridge"[^>]*><span>今天就到这里了。<\/span><\/div>\s*<section class="panel profile-share-card"/, "installed profile share card has a ritual transition after rhythm memory");

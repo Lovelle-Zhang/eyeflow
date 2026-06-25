@@ -2743,8 +2743,10 @@
     }
 
     .profile-overview-main {
-      grid-template-columns: minmax(0, 1fr) minmax(calc(var(--ef-space-14) * 5.4), 0.36fr);
-      align-items: center;
+      grid-template-columns: minmax(0, 1fr) minmax(calc(var(--ef-space-14) * 4.6), 0.34fr);
+      /* Top-align so the qualitative left and the spec right read as one bound
+         card; centering would float the shorter column and open dead space. */
+      align-items: start;
       gap: var(--ef-space-9);
     }
 
@@ -2803,8 +2805,10 @@
       border-top: 1px solid var(--group-line-soft);
     }
 
-    .profile-insight-row:last-child {
-      border-right: 0;
+    /* Hairlines sit only BETWEEN spec rows — the first row has no top edge, so
+       the right column is a clean spec list, not a detached bordered module. */
+    .profile-insight-row:first-child {
+      border-top: 0;
     }
 
     .profile-insight-row span {
@@ -3844,7 +3848,7 @@
     .history-header,
     .history-row {
       display: grid;
-      grid-template-columns: minmax(118px, 0.8fr) minmax(126px, 0.75fr) minmax(190px, 1.2fr) repeat(3, minmax(78px, 0.52fr)) minmax(124px, 0.78fr);
+      grid-template-columns: minmax(118px, 0.8fr) minmax(126px, 0.75fr) minmax(190px, 1.2fr) repeat(3, minmax(78px, 0.52fr));
       gap: var(--ef-space-7);
       align-items: center;
     }
@@ -6350,6 +6354,8 @@
     }
 
     #profileView .profile-overview,
+    #profileView .profile-observation,
+    #profileView .profile-detail-fold,
     #profileView .profile-visual-panel,
     #profileView .profile-rhythm-memory,
     #profileView .profile-next-action,
@@ -6439,6 +6445,101 @@
       height: 1px;
       flex: 1 1 auto;
       background: var(--group-line);
+    }
+
+    /* ===== 这几天: warm observation (top) + one gentle fold (raw data) ===== */
+    #profileView .profile-observation {
+      display: grid;
+      gap: var(--ef-space-3);
+    }
+
+    #profileView .profile-observation-eyebrow {
+      color: var(--ef-text-secondary);
+      font-size: var(--ef-role-label-size);
+      font-weight: var(--ef-role-label-weight);
+      line-height: var(--ef-role-label-line);
+      letter-spacing: var(--ef-role-label-spacing);
+    }
+
+    #profileView .profile-observation-text {
+      margin: 0;
+      max-width: 52ch;
+      color: var(--ink);
+      font-size: var(--ef-role-body-size);
+      font-weight: var(--ef-role-body-weight);
+      line-height: var(--ef-line-reading);
+      letter-spacing: var(--ef-role-body-spacing);
+    }
+
+    /* Fold summary — the single "展开看这几天的明细" disclosure row. */
+    #profileView .profile-detail-fold > summary {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: var(--ef-space-7);
+      min-height: calc(var(--ef-control-lg) + var(--ef-space-6));
+      padding: var(--ef-space-7) var(--ef-space-8);
+      cursor: pointer;
+    }
+
+    #profileView .profile-detail-fold-title {
+      min-width: 0;
+      display: grid;
+      gap: var(--ef-space-1);
+    }
+
+    #profileView .profile-detail-fold-title strong {
+      color: var(--ink);
+      font-size: var(--ef-role-title-size);
+      font-weight: var(--ef-role-title-weight);
+      line-height: var(--ef-role-title-line);
+      letter-spacing: var(--ef-role-title-spacing);
+    }
+
+    #profileView .profile-detail-fold-title span {
+      color: var(--ef-text-secondary);
+      font-size: var(--ef-role-body-size);
+      line-height: var(--ef-role-body-line);
+    }
+
+    #profileView .profile-detail-fold > summary::after {
+      content: "↓";
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: var(--ef-control-sm);
+      min-height: var(--ef-control-sm);
+      color: var(--muted);
+      font-size: var(--ef-icon-sm);
+      line-height: 1;
+      font-weight: var(--ef-symbol-weight-quiet);
+      transition: transform var(--ef-motion-fast) var(--ef-ease-calm);
+    }
+
+    #profileView .profile-detail-fold[open] > summary::after {
+      transform: rotate(180deg);
+    }
+
+    #profileView .profile-detail-fold-body {
+      display: grid;
+      gap: var(--ef-space-7);
+      padding: var(--ef-space-3) var(--ef-space-8) var(--ef-space-8);
+    }
+
+    /* Inner blocks read as flat sections of the one fold — no card-in-card chrome. */
+    #profileView .profile-detail-fold-body > .profile-rhythm-memory,
+    #profileView .profile-detail-fold-body > .profile-visual-panel,
+    #profileView .profile-detail-fold-body > .profile-archive-disclosure {
+      padding: var(--ef-space-0);
+      border: 0;
+      background: transparent;
+      box-shadow: none;
+    }
+
+    /* Quiet hairline between folded sections instead of stacked card edges. */
+    #profileView .profile-detail-fold-body > * + * {
+      padding-top: var(--ef-space-7);
+      border-top: 1px solid var(--group-line-soft);
     }
 
     #profileView .profile-share-preview {
@@ -6675,7 +6776,7 @@
     }
 
     #profileView .profile-insight-row {
-      padding: var(--ef-space-3) var(--ef-space-0);
+      padding: var(--ef-space-4) var(--ef-space-0);
     }
 
     #profileView .profile-memory-item {
@@ -7081,8 +7182,7 @@
       content: "-";
     }
 
-    #profileView.profile-building .profile-workbench,
-    #profileView.profile-building .profile-archive-disclosure {
+    #profileView.profile-building .profile-detail-fold {
       display: none;
     }
 
@@ -7292,6 +7392,7 @@
       color: #24584c;
     }
 
+    #profileView .profile-observation,
     #profileView .profile-overview,
     #profileView .profile-analysis-block,
     #profileView .profile-rhythm-memory,
@@ -7300,16 +7401,19 @@
       padding: var(--ef-space-10);
     }
 
+    #profileView details.panel.profile-detail-fold,
     #profileView details.panel.profile-visual-panel,
     #profileView details.panel.profile-archive-disclosure {
       padding: var(--ef-space-0);
     }
 
+    #profileView details.panel.profile-detail-fold:not([open]),
     #profileView details.panel.profile-visual-panel:not([open]),
     #profileView details.panel.profile-archive-disclosure:not([open]) {
       max-height: none;
     }
 
+    #profileView details.panel.profile-detail-fold:not([open]) summary,
     #profileView details.panel.profile-visual-panel:not([open]) summary,
     #profileView details.panel.profile-archive-disclosure:not([open]) summary {
       min-height: calc(var(--ef-control-lg) + var(--ef-space-6));
@@ -8598,7 +8702,7 @@
         </button>
         <button type="button" data-view-target="profileView">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M3 3v18h18"></path><path d="M7 16v-4"></path><path d="M12 16V8"></path><path d="M17 16v-6"></path></svg>
-          复盘
+          这几天
         </button>
         <button type="button" data-view-target="rhythmView">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><path d="M12 7v5l3 3"></path></svg>
@@ -9084,11 +9188,16 @@
       </div>
 
       <div class="view" id="profileView" hidden="">
+        <section class="panel profile-observation" aria-label="Mira 这几天的观察">
+          <span class="profile-observation-eyebrow">Mira 这几天看到的</span>
+          <p class="profile-observation-text" id="profileObservation">先陪你慢慢跑几轮，Mira 再把你这几天的节奏一点点看清楚。</p>
+        </section>
+
         <section class="panel profile-overview" aria-label="Mira Insight">
           <div class="profile-overview-head">
             <div>
               <h3>下一轮建议</h3>
-              <p id="profileSummary">Mira 把这次复盘整理成一个可执行的节奏。</p>
+              <p id="profileSummary">Mira 把这几天整理成一个可执行的节奏。</p>
               <div class="profile-summary-chips" id="profileSummaryChips" aria-label="今日摘要信号">
                 <span>酸胀 2/10</span>
                 <span>50 分钟后</span>
@@ -9099,11 +9208,11 @@
           <div class="profile-overview-main profile-plan-card">
             <div class="profile-insight-card">
               <span class="profile-insight-label">现在先这样</span>
-              <strong class="profile-insight-title" id="profileBandLabel">50 分钟后轻提醒</strong>
-              <p class="profile-insight-text" id="profileInsightText">你最近更常记录酸胀。下一轮先按 50 分钟工作、120 秒休息来走。</p>
+              <strong class="profile-insight-title" id="profileBandLabel">保持轻提醒节奏</strong>
+              <p class="profile-insight-text" id="profileInsightText">感受偏酸胀，这一轮先放慢一点，按轻提醒的节奏走。</p>
               <span class="profile-score-inline" hidden="">状态信号 <strong id="profileLoad">16</strong></span>
             </div>
-            <div class="profile-insight-strip" aria-label="今日复盘重点">
+            <div class="profile-insight-strip" aria-label="今日重点">
               <div class="profile-insight-row">
                 <span>主要感受</span>
                 <strong id="profilePrimarySymptom">酸胀</strong>
@@ -9123,35 +9232,7 @@
           </div>
         </section>
 
-        <section class="panel profile-rhythm-memory" aria-label="Mira 记住的节奏">
-          <div class="profile-overview-head">
-            <div>
-              <h3>Mira 记住的节奏</h3>
-              <p id="profileRhythmWhy">先按今天的计时和记录安排当前节奏。</p>
-            </div>
-            <span class="profile-trend-tag" id="profileRecommendationSource">本地规则</span>
-          </div>
-          <div class="profile-memory-grid">
-            <div class="profile-memory-item">
-              <span>最近 7 天接受休息</span>
-              <strong id="profileMemoryAccepted">0 次</strong>
-            </div>
-            <div class="profile-memory-item">
-              <span>跳过休息</span>
-              <strong id="profileMemorySkipped">0 次</strong>
-            </div>
-            <div class="profile-memory-item">
-              <span>当前节奏来源</span>
-              <strong id="profileRhythmSource">Mira 建议</strong>
-            </div>
-            <div class="profile-memory-item">
-              <span>下一轮恢复</span>
-              <strong id="profileRhythmRest">120 秒</strong>
-            </div>
-          </div>
-        </section>
-
-        <div class="profile-share-bridge" aria-label="复盘收尾"><span>今天就到这里了。</span></div>
+        <div class="profile-share-bridge" aria-label="收尾"><span>今天就到这里了。</span></div>
 
         <section class="panel profile-share-card" aria-label="今日分享卡">
           <div class="profile-share-head">
@@ -9214,8 +9295,43 @@
           </div>
         </section>
 
-        <section class="profile-workbench profile-review-flow">
-          <details class="panel profile-visual-panel" aria-label="状态线">
+        <details class="panel profile-detail-fold" aria-label="这几天的明细">
+          <summary class="profile-detail-fold-summary">
+            <div class="profile-detail-fold-title">
+              <strong>展开看这几天的明细</strong>
+              <span>状态线、症状记录和长期趋势，需要时再看。</span>
+            </div>
+          </summary>
+          <div class="profile-detail-fold-body">
+            <section class="panel profile-rhythm-memory" aria-label="Mira 记住的节奏">
+              <div class="profile-overview-head">
+                <div>
+                  <h3>Mira 记住的节奏</h3>
+                  <p id="profileRhythmWhy">先按今天的计时和记录安排当前节奏。</p>
+                </div>
+                <span class="profile-trend-tag" id="profileRecommendationSource">本地规则</span>
+              </div>
+              <div class="profile-memory-grid">
+                <div class="profile-memory-item">
+                  <span>最近 7 天接受休息</span>
+                  <strong id="profileMemoryAccepted">0 次</strong>
+                </div>
+                <div class="profile-memory-item">
+                  <span>跳过休息</span>
+                  <strong id="profileMemorySkipped">0 次</strong>
+                </div>
+                <div class="profile-memory-item">
+                  <span>当前节奏来源</span>
+                  <strong id="profileRhythmSource">Mira 建议</strong>
+                </div>
+                <div class="profile-memory-item">
+                  <span>下一轮恢复</span>
+                  <strong id="profileRhythmRest">120 秒</strong>
+                </div>
+              </div>
+            </section>
+
+            <details class="panel profile-visual-panel" open aria-label="状态线">
             <summary>
               <div class="profile-chart-copy">
                 <h3>状态线</h3>
@@ -9236,16 +9352,15 @@
               <div class="profile-mini-stat"><span>当前</span><strong id="profileTrendCurrent">16</strong></div>
               <div class="profile-mini-stat"><span>高峰</span><strong id="profileTrendPeak">16</strong></div>
               <div class="profile-mini-stat"><span>已恢复</span><strong id="profileTrendBreaks">0 次</strong></div>
-              <div class="profile-mini-stat"><span>波动</span><strong id="profileTrendRange">0</strong></div>
+              <div class="profile-mini-stat"><span>起伏</span><strong id="profileTrendRange">0</strong></div>
             </div>
             <div class="profile-symptom-bars" id="profileTags">
               <div class="profile-symptom-bar"><span>酸胀</span><div class="profile-symptom-track"><span style="--value:30%;"></span></div><strong>3/10</strong></div>
             </div>
             <div class="profile-event-strip" id="profileEventStrip"></div>
-          </details>
-        </section>
+            </details>
 
-        <details class="panel profile-archive-disclosure" aria-label="长期档案">
+            <details class="panel profile-archive-disclosure" open aria-label="长期档案">
           <summary>
             <div class="archive-disclosure-title">
               <strong>查看长期档案</strong>
@@ -9365,6 +9480,8 @@
                 </div>
               </div>
             </details>
+          </div>
+        </details>
           </div>
         </details>
       </div>
@@ -9796,6 +9913,7 @@
       navButtons: document.querySelectorAll("[data-view-target]"),
       views: document.querySelectorAll(".view"),
       profileLoad: document.querySelector("#profileLoad"),
+      profileObservation: document.querySelector("#profileObservation"),
       profileBandLabel: document.querySelector("#profileBandLabel"),
       profileInsightText: document.querySelector("#profileInsightText"),
       profileOverallState: document.querySelector("#profileOverallState"),
@@ -12779,7 +12897,7 @@
       const copy = {
         todayView: ["今天", statusCopy(computeEyeLoad(), isRunning)],
         rhythmView: ["设置", "先选提醒边界，需要时再展开更多设置。"],
-        profileView: ["复盘", "Mira 帮你理解今天状态和下一轮节奏。"]
+        profileView: ["这几天", "Mira 帮你理解今天状态和下一轮节奏。"]
       }[targetId];
       els.pageTitle.textContent = copy[0];
       els.statusText.textContent = copy[1];
@@ -14038,7 +14156,7 @@
       els.profileTrendRange.textContent = range;
       els.profileTrendBreaks.textContent = `${state.breaks || 0} 次`;
       if (els.profileTrendTag) {
-        els.profileTrendTag.textContent = currentLoad >= 74 ? "需要恢复" : range >= 28 ? "波动偏大" : peak >= 74 ? "曾有高峰" : peak >= 48 ? "中段观察" : "今日稳定";
+        els.profileTrendTag.textContent = currentLoad >= 74 ? "需要恢复" : range >= 28 ? "起伏明显" : peak >= 74 ? "曾有高峰" : peak >= 48 ? "中段观察" : "今日平稳";
       }
       els.profileTrendCopy.textContent = timeline.length > 1
         ? `当前 ${latest.load}，高峰 ${peak}。`
@@ -14081,7 +14199,7 @@
       const contributors = analysis.contributors || {};
       const baseline = analysis.baseline || {};
       const baselineCopy = baseline.sampleCount
-        ? `个人基线 ${baseline.average}，当前${baseline.delta >= 0 ? "+" : ""}${baseline.delta}，波动 ${baseline.volatility}。`
+        ? `个人基线 ${baseline.average}，当前${baseline.delta >= 0 ? "+" : ""}${baseline.delta}，起伏 ${baseline.volatility}。`
         : "个人基线仍在形成。";
       els.profileModelVersion.textContent = `${analysis.modelVersion || "V2"} · KB ${analysis.knowledgeBaseVersion || SCORE_KNOWLEDGE_BASE_VERSION}`;
       els.profileCollectionMode.textContent = hasDesktopContextSignal() ? "软件 + 桌面上下文" : "软件模式";
@@ -14101,7 +14219,7 @@
       const stats = state.reminderStats || {};
       const handled = Number(stats.completed || 0) + Number(stats.snoozed || 0);
       const shown = Number(stats.shown || 0);
-      els.profileDataLineage.textContent = `输入来自本地自评 ${sampleCount} 条、${recordedDurationLine(recordedSecondsForDay({ elapsedSeconds, autoElapsedSeconds }))}、恢复 ${state.breaks || 0} 次、提醒处理 ${shown ? `${handled}/${shown}` : "暂无"}。${baselineCopy} 硬件信号未接入时，不推断眨眼、视距或环境。`;
+      els.profileDataLineage.textContent = `输入来自本地自评 ${sampleCount} 条、${recordedDurationLine(recordedSecondsForDay({ elapsedSeconds, autoElapsedSeconds }))}、恢复 ${state.breaks || 0} 次、提醒处理 ${shown ? `${handled} 次` : "暂无"}。${baselineCopy} 硬件信号未接入时，不推断眨眼、视距或环境。`;
       const missing = Array.isArray(analysis.missingSignals) ? analysis.missingSignals : [];
       els.profileMissingSignals.innerHTML = missing.length
         ? missing.map((signal) => `<span>${escapeHtml(missingSignalLabel(signal))}</span>`).join("")
@@ -14174,19 +14292,51 @@
       return `${suggestion.focus} 分钟后`;
     }
 
-    function profilePlanTitle(action, suggestion) {
+    // Left column is Mira's qualitative judgment only — the concrete numbers
+    // (提醒时间 / 休息时间) live solely in the right-hand spec, so neither the
+    // title nor the body sentence restate 分钟/秒.
+    function profilePlanTitle(action) {
       if (action === "少提醒一点") return "这轮少提醒一点";
-      if (action === "多休息一会儿") return `${suggestion.focus} 分钟后提醒，多休息 ${suggestion.rest} 秒`;
-      if (action === "早点提醒") return `${suggestion.focus} 分钟后提前提醒`;
-      return `${suggestion.focus} 分钟后轻提醒`;
+      if (action === "多休息一会儿") return "这轮多留点恢复";
+      if (action === "早点提醒") return "这轮早一点提醒";
+      return "保持轻提醒节奏";
     }
 
-    function profileInsightSentence({ signalName, signalValue, action, suggestion }) {
+    // Mira's warm, qualitative reflection for the top of 这几天. Observation, not
+    // scoring — softened quantifiers only (这阵子 / 大多 / 偶尔), never precise counts.
+    function profileObservationText({ hasEvidence, accepted, skipped, symptomName, symptomValue }) {
+      if (!hasEvidence) {
+        return "这几天还没攒下太多记录。先陪你慢慢跑几轮，Mira 再把你的节奏一点点看清楚。";
+      }
+      const total = Number(accepted || 0) + Number(skipped || 0);
+      let rest;
+      if (total <= 0) {
+        rest = "这阵子你大多一直在专注，还很少停下来歇一歇";
+      } else if (accepted >= skipped * 2) {
+        rest = "这阵子你大多愿意停下来歇一歇，节奏比之前稳了些";
+      } else if (accepted >= skipped) {
+        rest = "这阵子你有在试着停一停，偶尔也想再多撑一会儿";
+      } else {
+        rest = "这阵子你常顾着往前赶，停下来的次数还不太多";
+      }
+      let eye;
+      if (Number(symptomValue || 0) > 0) {
+        const degree = Number(symptomValue) >= 6 ? "有点" : "偶尔有点";
+        eye = `眼睛${degree}${symptomName}，Mira 会继续盯着，到点轻轻提醒你`;
+      } else {
+        eye = "眼睛最近还算舒服，Mira 也会在旁边继续留意";
+      }
+      return `${rest}。${eye}。`;
+    }
+
+    function profileInsightSentence({ signalName, signalValue, action }) {
       const signalCopy = Number(signalValue || 0) > 0
-        ? `主要感受是${signalName}`
-        : "暂时没有明显不适记录";
-      if (action === "少提醒一点") return `${signalCopy}。这一轮先少打扰一点，更多等自然断点再提醒。`;
-      return `${signalCopy}。这一轮先按 ${suggestion.focus} 分钟工作、${suggestion.rest} 秒休息来走。`;
+        ? `感受偏${signalName}`
+        : "暂时没有明显不适";
+      if (action === "少提醒一点") return `${signalCopy}，这一轮先少打扰一点，多等自然断点再提醒。`;
+      if (action === "多休息一会儿") return `${signalCopy}，这一轮放慢一点，给眼睛多留些恢复。`;
+      if (action === "早点提醒") return `${signalCopy}，这一轮早一点轻提醒，别撑太久。`;
+      return `${signalCopy}，这一轮先放慢一点，按轻提醒的节奏走。`;
     }
 
     function recordedMinutes(seconds) {
@@ -14594,6 +14744,15 @@
         ? `${top[0]} ${top[1]}/10，是今天最明显的信号。`
         : "暂时没有明显不适记录。";
       els.profileLoad.textContent = hasProfileEvidence ? load : "记录中";
+      if (els.profileObservation) {
+        els.profileObservation.textContent = profileObservationText({
+          hasEvidence: hasProfileEvidence,
+          accepted: rhythmSummary.acceptedBreaks,
+          skipped: rhythmSummary.skippedBreaks,
+          symptomName: top[0],
+          symptomValue: top[1]
+        });
+      }
       els.profileBandLabel.textContent = hasProfileEvidence
         ? profilePlanTitle(nextAction, suggestion)
         : "先跑几轮，再给建议";
@@ -14634,11 +14793,11 @@
         ? suggestion.reason || rhythmSummary.lastRecommendationReason || "先按今天的计时和记录安排当前节奏。"
         : "先按默认节奏开始。完成几轮后，Mira 会记住更适合你的提醒节奏。";
       els.profileRecommendationSource.textContent = suggestion.recommendationSource === "rule-local" ? "本地规则" : "本地建议";
-      els.profileHandledRate.textContent = stats.shown ? `${handled}/${stats.shown}` : "暂无";
+      els.profileHandledRate.textContent = stats.shown ? `${handled} 次` : "暂无";
       els.profileConfidence.textContent = confidence;
       els.profileIntensity.textContent = intensityLabel(state.settings.intensity || "quiet").replace(" 安静", "");
       els.profileSummary.textContent = hasProfileEvidence
-        ? "Mira 把这次复盘整理成一个可执行的节奏。"
+        ? "Mira 把这几天整理成一个可执行的节奏。"
         : "先完成几轮，Mira 再给建议。";
       els.profileSummaryChips.innerHTML = (hasProfileEvidence
         ? [`${top[0]} ${top[1]}/10`, profileNextActionShort(nextAction, suggestion), `${suggestion.rest} 秒休息`]
@@ -14710,7 +14869,9 @@
 
       els.weeklyRecoveryDays.textContent = `${activeDays.length} 天`;
       els.weeklyRecoveryBreaks.textContent = `${breaks} 次`;
-      els.weeklyRecoveryHandled.textContent = stats.shown ? `${handled}/${stats.shown}` : "暂无";
+      els.weeklyRecoveryHandled.textContent = stats.shown
+        ? (handled >= stats.shown * 0.6 ? "大多接住" : handled > 0 ? "接住一部分" : "暂时不多")
+        : "暂无";
       els.weeklyRecoveryPeak.textContent = peak ? `${peak}` : "暂无";
       renderWeeklyKline(days);
 
@@ -14973,7 +15134,6 @@
         const trend = historyTrendSvg(sparkLoads);
         const handled = Number(stats.completed || 0) + Number(stats.snoozed || 0);
         const shown = Number(stats.shown || 0);
-        const handledRate = shown ? `${Math.round((handled / shown) * 100)}%` : "暂无";
         const peakValue = peakLoad || 0;
         const zone = loadZone(peakValue);
         const symptomCopy = value ? `${symptom} ${value}/10` : "暂无明显信号";
@@ -14990,8 +15150,7 @@
             <div class="history-trend history-spark">${trend}</div>
             <div class="history-cell"><span>计时</span><strong>${focusLabel}</strong></div>
             <div class="history-cell"><span>恢复</span><strong>${day.breaks || 0} 次</strong></div>
-            <div class="history-cell"><span>提醒接住</span><strong>${handled}/${shown}</strong></div>
-            <div class="history-signal"><span>接住率</span><strong>${handledRate}</strong></div>
+            <div class="history-cell"><span>提醒接住</span><strong>${shown ? `${handled} 次` : "暂无"}</strong></div>
           </article>
         `;
       }).join("");
@@ -15004,7 +15163,6 @@
             <span>计时</span>
             <span>恢复</span>
             <span>提醒</span>
-            <span>接住率</span>
           </div>
           ${rows}
         </div>

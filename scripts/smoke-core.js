@@ -242,7 +242,7 @@ function main() {
   assertMatches(indexHtml, /<div class="state-copy">[\s\S]*<div class="today-flow" id="todayFlowCopy">[\s\S]*<\/div>\s*<\/div>\s*<div class="actions state-action-row">/, "today primary action sits outside the judgement column");
   assertIncludes(indexHtml, "body:has(#rhythmView:not([hidden])) .companion", "settings view lets Mira compact away from controls");
   assertMatches(indexHtml, /\.profile-summary-chips\s*\{[\s\S]*display:\s*none;/, "profile overview removes repeated summary chips from the main flow");
-  assertMatches(indexHtml, /\.profile-overview-main\s*\{[\s\S]*grid-template-columns:\s*minmax\(0,\s*1fr\) minmax\(calc\(var\(--ef-space-14\) \* 5\.4\),\s*0\.36fr\);/, "profile overview uses one recommendation column and one compact parameter column");
+  assertMatches(indexHtml, /\.profile-overview-main\s*\{[\s\S]*grid-template-columns:\s*minmax\(0,\s*1fr\) minmax\(calc\(var\(--ef-space-14\) \* 4\.6\),\s*0\.34fr\);[\s\S]*align-items:\s*start;/, "profile overview uses one recommendation column and one compact parameter column, top-aligned as one bound card");
   assertMatches(indexHtml, /\.profile-insight-card\s*\{[\s\S]*padding:\s*var\(--ef-space-0\);[\s\S]*border:\s*0;[\s\S]*background:\s*transparent;/, "profile insight avoids nested card chrome");
   assertMatches(indexHtml, /\.profile-insight-strip\s*\{[\s\S]*grid-template-columns:\s*minmax\(0,\s*1fr\);[\s\S]*border:\s*0;[\s\S]*background:\s*transparent;/, "profile insight summary becomes a quiet vertical list");
   assertMatches(indexHtml, /\.profile-memory-grid\s*\{[\s\S]*display:\s*flex;[\s\S]*flex-wrap:\s*wrap;[\s\S]*border:\s*0;[\s\S]*border-top:\s*1px solid var\(--group-line-soft\);[\s\S]*background:\s*transparent;/, "profile rhythm memory no longer renders as a boxed table");
@@ -298,6 +298,20 @@ function main() {
   assertMatches(indexHtml, /#profileView \.profile-share-bridge::before,[\s\S]*#profileView \.profile-share-bridge::after\s*\{[\s\S]*height:\s*1px;[\s\S]*background:\s*var\(--group-line\);/, "profile share transition uses quiet, theme-adaptive divider lines");
   assertMatches(indexHtml, /<div class="profile-share-head">[\s\S]*<div class="profile-share-quick-metrics"[\s\S]*id="shareFocusTime"[\s\S]*id="shareBreaks"[\s\S]*<span class="profile-trend-tag">可分享<\/span>[\s\S]*<\/div>\s*<\/div>/, "profile share card exposes focus and rest in the first row");
   assertIncludes(indexHtml, 'class="profile-share-preview"', "profile share card renders a visual card preview");
+  // 这几天 companion recap: warm observation on top, raw data folded.
+  assertMatches(indexHtml, /profileView:\s*\["这几天"/, "recap page is titled 这几天, not a dashboard 复盘");
+  assertMatches(indexHtml, /data-view-target="profileView">[\s\S]*?这几天\s*<\/button>/, "nav labels the recap 这几天");
+  assertIncludes(indexHtml, 'id="profileObservation"', "这几天 opens with a warm Mira observation");
+  assertIncludes(indexHtml, "function profileObservationText", "the observation is generated from local rest/symptom data");
+  assertMatches(indexHtml, /function\s+profileObservationText[\s\S]*?这阵子[\s\S]*?Mira 会继续盯着/, "observation reads as Mira reflecting, with softened quantifiers");
+  assertIncludes(indexHtml, "展开看这几天的明细", "all quantitative views are tucked into one gentle fold");
+  assertIncludes(indexHtml, 'class="panel profile-detail-fold"', "the fold is a single disclosure, not scattered cards");
+  assertMatches(indexHtml, /#profileView \.profile-detail-fold-body > \.profile-rhythm-memory,[\s\S]*?background:\s*transparent;/, "folded sections render flat, not as cards-in-cards");
+  assertNotMatches(indexHtml, /接住率/, "no pass-rate (接住率) grade anywhere in 这几天");
+  assertNotMatches(indexHtml, /达标率/, "no 达标率 quota framing anywhere");
+  assertNotMatches(indexHtml, /<span>波动<\/span>/, "KPI-flavored 波动 label is replaced with neutral wording");
+  assertIncludes(indexHtml, "<span>起伏</span>", "trend range uses neutral 起伏 wording");
+  assertMatches(indexHtml, /weeklyRecoveryHandled\.textContent[\s\S]*?大多接住/, "reminder handling reads qualitatively (大多接住), not as a X/Y pass rate");
   assertIncludes(indexHtml, "background: #faf8f4;", "profile share card keeps a warm paper card surface");
   assertIncludes(indexHtml, "shareCardRhythm", "profile share card exposes rhythm as the third data point");
   assertIncludes(indexHtml, "eyeflow.app", "profile share card includes restrained domain branding");
@@ -357,12 +371,14 @@ function main() {
   assertNotMatches(indexHtml, /<span>盯屏<\/span><strong>\$\{focusMinutes\}m<\/strong>|<span>盯屏<\/span>/, "profile history no longer presents missing local timer data as screen time");
   assertIncludes(indexHtml, "profileNextAction", "profile view collapses next steps to one Mira recommendation");
   assertMatches(indexHtml, /function\s+renderProfile[\s\S]*rhythmSuggestion\(load\)[\s\S]*rhythmMemorySummary\(\)[\s\S]*profileInsightSentence[\s\S]*profileMemoryAccepted[\s\S]*profileMemorySkipped/, "profile insight is driven by load, symptoms, rhythmMemory, and local rhythm rules");
-  assertIncludes(indexHtml, "Mira 把这次复盘整理成一个可执行的节奏。", "profile insight subtitle explains the job in plain language");
+  assertIncludes(indexHtml, "Mira 把这几天整理成一个可执行的节奏。", "profile insight subtitle explains the job in plain language");
   assertIncludes(indexHtml, "<span>主要感受</span>", "profile review uses a user-facing signal label");
   assertIncludes(indexHtml, "<span>提醒时间</span>", "profile review labels the reminder timing directly");
   assertIncludes(indexHtml, "<span>休息时间</span>", "profile review labels the rest timing directly");
-  assertMatches(indexHtml, /function\s+profilePlanTitle[\s\S]*\$\{suggestion\.focus\} 分钟后轻提醒/, "profile plan title renders one obvious next action");
-  assertMatches(indexHtml, /function\s+profileInsightSentence[\s\S]*主要感受是[\s\S]*这一轮先按 \$\{suggestion\.focus\} 分钟工作、\$\{suggestion\.rest\} 秒休息来走/, "profile insight answers records, reminder timing, and rest timing in plain language");
+  assertMatches(indexHtml, /function\s+profilePlanTitle[\s\S]*return "保持轻提醒节奏";/, "profile plan title renders one qualitative next action");
+  assertNotMatches(indexHtml, /function\s+profilePlanTitle\([^)]*\)\s*\{(?:(?!function)[\s\S])*?suggestion\.focus/, "profile plan title leaves the exact 分钟/秒 to the spec column");
+  assertMatches(indexHtml, /function\s+profileInsightSentence[\s\S]*感受偏\$\{signalName\}[\s\S]*按轻提醒的节奏走/, "profile insight speaks Mira's qualitative judgement");
+  assertNotMatches(indexHtml, /function\s+profileInsightSentence\([^)]*\)\s*\{(?:(?!function)[\s\S])*?分钟工作/, "profile insight no longer restates 分钟工作/秒休息 — those live only in the right-hand spec");
   assertIncludes(indexHtml, "profileRecommendationSource", "profile view keeps recommendation source visible as local rules");
   assertIncludes(indexHtml, "#profileView details.panel.profile-visual-panel,\n    #profileView details.panel.profile-archive-disclosure {\n      padding: var(--ef-space-0);", "profile collapsed details do not inherit large panel padding");
   assertIncludes(indexHtml, "#profileView details.panel.profile-visual-panel:not([open]),\n    #profileView details.panel.profile-archive-disclosure:not([open]) {\n      max-height: none;", "profile collapsed details are not clipped into empty cards");

@@ -465,7 +465,7 @@ function debugPrepareCaptureScript(options = {}) {
     const titles = {
       todayView: ["今天", typeof statusCopy === "function" ? statusCopy(typeof computeEyeLoad === "function" ? computeEyeLoad() : 0, false) : ""],
       rhythmView: ["设置", "先选提醒边界，需要时再展开更多设置。"],
-      profileView: ["复盘", "看见 Mira 帮你保留下来的轻提醒恢复节奏。"]
+      profileView: ["这几天", "Mira 帮你理解今天状态和下一轮节奏。"]
     };
     const copy = titles[requestedView];
     if (copy) {
