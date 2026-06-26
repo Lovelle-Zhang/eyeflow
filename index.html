@@ -383,7 +383,7 @@
     .theme-switch {
       margin-top: auto;
       display: grid;
-      grid-template-columns: 1fr 1fr;
+      grid-template-columns: repeat(3, 1fr);
       gap: 2px;
       padding: 3px;
       border-radius: var(--ef-radius-md);
@@ -431,6 +431,10 @@
 
     .theme-opt[data-theme-set="light"][aria-pressed="true"] {
       color: #d98a1f;
+    }
+
+    .theme-opt[data-theme-set="auto"][aria-pressed="true"] {
+      color: var(--sb-text);
     }
 
     main {
@@ -4691,11 +4695,14 @@
     }
 
     .mira-intro .pet {
-      --mira-intro-avatar-scale: 1.28;
-      --mira-intro-avatar-offset: var(--ef-space-1);
-      width: calc(var(--ef-mira-avatar-size) + var(--ef-space-3));
-      height: calc(var(--ef-mira-avatar-size) + var(--ef-space-3));
-      margin: var(--ef-space-1) 0 var(--ef-space-2);
+      /* Face fills the glow center (native size + zero offset), scaled to keep
+         the same on-screen size — Mira no longer sits small in a big glow.
+         Extra layout margin compensates the smaller layout box. */
+      --mira-intro-avatar-scale: 1.46;
+      --mira-intro-avatar-offset: 0px;
+      width: var(--ef-mira-avatar-size);
+      height: var(--ef-mira-avatar-size);
+      margin: var(--ef-space-3) 0 var(--ef-space-4);
       justify-self: center;
       border-radius: var(--ef-radius-pill);
       background:
@@ -4711,8 +4718,8 @@
        a soft glow so she feels present instead of branded. */
     :root[data-theme="dark"] .mira-intro .pet {
       background:
-        radial-gradient(circle at 50% 52%, rgba(79, 201, 156, 0.18) 0%, rgba(79, 201, 156, 0.08) 48%, rgba(79, 201, 156, 0) 74%);
-      box-shadow: 0 0 var(--ef-space-8) rgba(79, 201, 156, 0.08);
+        radial-gradient(circle at 50% 52%, rgba(79, 201, 156, 0.12) 0%, rgba(79, 201, 156, 0.05) 48%, rgba(79, 201, 156, 0) 74%);
+      box-shadow: 0 0 var(--ef-space-8) rgba(79, 201, 156, 0.05);
     }
 
     @keyframes miraIntroBreathe {
@@ -8012,14 +8019,141 @@
     }
   </style>
   <script>
-    // Apply saved appearance before first paint so dark mode never flashes light.
+    // Apply appearance before first paint so dark mode never flashes light.
+    // Auto mode is resolved locally from today's sunrise/sunset using the system timezone.
     (function () {
-      try {
-        var saved = localStorage.getItem("eyeflow-theme");
-        if (saved === "dark" || saved === "light") {
-          document.documentElement.setAttribute("data-theme", saved);
+      var timezoneCoordinates = {
+        "Asia/Shanghai": [31.23, 121.47],
+        "Asia/Hong_Kong": [22.32, 114.17],
+        "Asia/Taipei": [25.03, 121.57],
+        "Asia/Tokyo": [35.68, 139.69],
+        "Asia/Seoul": [37.57, 126.98],
+        "Asia/Singapore": [1.35, 103.82],
+        "Europe/London": [51.51, -0.13],
+        "Europe/Paris": [48.86, 2.35],
+        "Europe/Berlin": [52.52, 13.41],
+        "America/New_York": [40.71, -74.01],
+        "America/Chicago": [41.88, -87.63],
+        "America/Denver": [39.74, -104.99],
+        "America/Los_Angeles": [34.05, -118.24],
+        "America/Seattle": [47.61, -122.33],
+        "America/Phoenix": [33.45, -112.07],
+        "America/Toronto": [43.65, -79.38],
+        "Australia/Sydney": [-33.87, 151.21]
+      };
+
+      function storageGet(key) {
+        try { return localStorage.getItem(key); } catch (e) { return ""; }
+      }
+
+      function storageSet(key, value) {
+        try { localStorage.setItem(key, value); } catch (e) {}
+      }
+
+      function normalizeTheme(value) {
+        if (value === "dark" || value === "night") return "dark";
+        if (value === "light" || value === "day") return "light";
+        return "";
+      }
+
+      function currentMode() {
+        var mode = storageGet("eyeflow-theme-mode");
+        return mode === "auto" || mode === "light" || mode === "dark" ? mode : "auto";
+      }
+
+      function currentTimezone() {
+        try { return Intl.DateTimeFormat().resolvedOptions().timeZone || ""; } catch (e) { return ""; }
+      }
+
+      function coordinatesForTimezone() {
+        var zone = currentTimezone();
+        if (timezoneCoordinates[zone]) return timezoneCoordinates[zone];
+        if (/^America\//.test(zone)) return [39.83, -98.58];
+        if (/^Europe\//.test(zone)) return [50.11, 8.68];
+        if (/^Asia\//.test(zone)) return [31.23, 121.47];
+        if (/^Australia\//.test(zone)) return [-33.87, 151.21];
+        return null;
+      }
+
+      function dayOfYear(date) {
+        var start = new Date(date.getFullYear(), 0, 0);
+        return Math.floor((date - start) / 86400000);
+      }
+
+      function normalizeDegrees(value) {
+        return (value % 360 + 360) % 360;
+      }
+
+      function solarMinutes(date, coords) {
+        if (!coords) return null;
+        var latitude = coords[0];
+        var longitude = coords[1];
+        var zenith = 90.833;
+        var n = dayOfYear(new Date(date.getFullYear(), date.getMonth(), date.getDate()));
+        var lngHour = longitude / 15;
+
+        function calc(isRise) {
+          var t = n + (((isRise ? 6 : 18) - lngHour) / 24);
+          var m = (0.9856 * t) - 3.289;
+          var l = normalizeDegrees(m + (1.916 * Math.sin(m * Math.PI / 180)) + (0.020 * Math.sin(2 * m * Math.PI / 180)) + 282.634);
+          var ra = Math.atan(0.91764 * Math.tan(l * Math.PI / 180)) * 180 / Math.PI;
+          ra = normalizeDegrees(ra);
+          ra += Math.floor(l / 90) * 90 - Math.floor(ra / 90) * 90;
+          ra /= 15;
+          var sinDec = 0.39782 * Math.sin(l * Math.PI / 180);
+          var cosDec = Math.cos(Math.asin(sinDec));
+          var cosH = (Math.cos(zenith * Math.PI / 180) - (sinDec * Math.sin(latitude * Math.PI / 180))) / (cosDec * Math.cos(latitude * Math.PI / 180));
+          if (cosH > 1 || cosH < -1) return null;
+          var h = isRise
+            ? 360 - (Math.acos(cosH) * 180 / Math.PI)
+            : Math.acos(cosH) * 180 / Math.PI;
+          h /= 15;
+          var localOffset = -new Date(date.getFullYear(), date.getMonth(), date.getDate()).getTimezoneOffset() / 60;
+          var localHour = (h + ra - (0.06571 * t) - 6.622 - lngHour + localOffset + 24) % 24;
+          return Math.round(localHour * 60);
         }
-      } catch (e) { /* private mode / storage blocked — fall back to light */ }
+
+        var sunrise = calc(true);
+        var sunset = calc(false);
+        return sunrise === null || sunset === null ? null : { sunrise: sunrise, sunset: sunset };
+      }
+
+      function resolveAutoTheme(now) {
+        var date = now || new Date();
+        var solar = solarMinutes(date, coordinatesForTimezone());
+        var minutes = date.getHours() * 60 + date.getMinutes();
+        if (!solar) return minutes >= 420 && minutes < 1140 ? "light" : "dark";
+        return minutes >= solar.sunrise && minutes < solar.sunset ? "light" : "dark";
+      }
+
+      function state(mode, now) {
+        var safeMode = mode === "auto" || mode === "light" || mode === "dark" ? mode : currentMode();
+        var theme = safeMode === "auto" ? resolveAutoTheme(now || new Date()) : normalizeTheme(safeMode);
+        return {
+          mode: safeMode,
+          theme: theme || "light",
+          companionTheme: (theme || "light") === "dark" ? "night" : "day"
+        };
+      }
+
+      function applyThemeAttribute(theme) {
+        if (theme === "dark") {
+          document.documentElement.setAttribute("data-theme", "dark");
+        } else {
+          document.documentElement.removeAttribute("data-theme");
+        }
+      }
+
+      window.EyeFlowTheme = {
+        currentMode: currentMode,
+        state: state,
+        applyThemeAttribute: applyThemeAttribute,
+        storageSet: storageSet
+      };
+
+      var initial = state();
+      applyThemeAttribute(initial.theme);
+      storageSet("eyeflow-theme", initial.theme);
     })();
   </script>
 </head>
@@ -8050,7 +8184,11 @@
       </nav>
 
       <div class="theme-switch" role="group" aria-label="外观模式">
-        <button type="button" class="theme-opt" data-theme-set="light" aria-pressed="true">
+        <button type="button" class="theme-opt" data-theme-set="auto" aria-pressed="true" title="按日出日落自动切换">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><path d="M12 3v2"></path><path d="M12 19v2"></path><path d="M4.93 4.93 6.34 6.34"></path><path d="m17.66 17.66 1.41 1.41"></path><path d="M3 12h2"></path><path d="M19 12h2"></path><circle cx="12" cy="12" r="3.5"></circle></svg>
+          自动
+        </button>
+        <button type="button" class="theme-opt" data-theme-set="light" aria-pressed="false">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><circle cx="12" cy="12" r="4"></circle><path d="M12 2v2"></path><path d="M12 20v2"></path><path d="m4.93 4.93 1.41 1.41"></path><path d="m17.66 17.66 1.41 1.41"></path><path d="M2 12h2"></path><path d="M20 12h2"></path><path d="m6.34 17.66-1.41 1.41"></path><path d="m19.07 4.93-1.41 1.41"></path></svg>
           白天
         </button>
@@ -14464,6 +14602,16 @@
         : "休息点";
     }
 
+    function currentAppearanceState() {
+      const themeState = window.EyeFlowTheme?.state?.() || {};
+      const appearanceTheme = themeState.theme === "dark" ? "dark" : "light";
+      return {
+        theme: appearanceTheme === "dark" ? "night" : "day",
+        appearanceTheme,
+        appearanceMode: themeState.mode || "auto"
+      };
+    }
+
     function renderCompanion(load) {
       const intervention = currentIntervention(load);
       const analysis = state.lastAnalysis || scoreAnalysisSnapshot(computeEyeAnalysis());
@@ -14509,7 +14657,8 @@
         snoozeUntil: Number(state.snoozeUntil || 0),
         reminderOpening,
         naturalBreak,
-        allowSystemNotify: Boolean(state.settings.systemNotifyToggle && state.settings.intensity !== "force")
+        allowSystemNotify: Boolean(state.settings.systemNotifyToggle && state.settings.intensity !== "force"),
+        ...currentAppearanceState()
       });
     }
 
@@ -14519,6 +14668,14 @@
       if (!window.eyeflowDesktop?.publishState) return;
       window.eyeflowDesktop.publishState(nextState);
     }
+
+    window.addEventListener("eyeflow:themechange", () => {
+      if (!latestCompanionState) return;
+      publishCompanionState({
+        ...latestCompanionState,
+        ...currentAppearanceState()
+      });
+    });
 
     function statusCopy(load, running) {
       if (!hasAssessedToday()) return "先做今日打分。";
@@ -14613,50 +14770,68 @@
   </script>
 
   <script>
-    // Appearance toggle: switch light/dark, persist, and keep the segmented control in sync.
+    // Appearance toggle: switch auto/light/dark, persist, and keep the segmented control in sync.
     (function () {
       var opts = Array.prototype.slice.call(document.querySelectorAll(".theme-opt"));
       if (!opts.length) return;
 
       var root = document.documentElement;
+      var themeApi = window.EyeFlowTheme;
       var reduceMotion = window.matchMedia
         && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
-      function current() {
-        return root.getAttribute("data-theme") === "dark" ? "dark" : "light";
-      }
-
       // The actual theme flip + control sync — applied instantly inside the view
       // transition's snapshot callback (no per-property color interpolation).
-      function flip(theme) {
-        if (theme === "dark") {
-          root.setAttribute("data-theme", "dark");
-        } else {
-          root.removeAttribute("data-theme");
-        }
+      function flip(themeState) {
+        var theme = themeState.theme === "dark" ? "dark" : "light";
+        var mode = themeState.mode || theme;
+        if (themeApi?.applyThemeAttribute) themeApi.applyThemeAttribute(theme);
+        else if (theme === "dark") root.setAttribute("data-theme", "dark");
+        else root.removeAttribute("data-theme");
+        root.setAttribute("data-theme-mode", mode);
         opts.forEach(function (btn) {
-          btn.setAttribute("aria-pressed", btn.dataset.themeSet === theme ? "true" : "false");
+          btn.setAttribute("aria-pressed", btn.dataset.themeSet === mode ? "true" : "false");
         });
       }
 
+      function publishTheme(themeState) {
+        var payload = {
+          theme: themeState.companionTheme,
+          appearanceTheme: themeState.theme,
+          appearanceMode: themeState.mode
+        };
+        window.dispatchEvent(new CustomEvent("eyeflow:themechange", { detail: payload }));
+        window.eyeflowDesktop?.publishState?.(payload);
+      }
+
       // animate=true only on an explicit user switch — never on first-paint sync.
-      function apply(theme, animate) {
-        try { localStorage.setItem("eyeflow-theme", theme); } catch (e) {}
+      function apply(mode, animate) {
+        var themeState = themeApi?.state ? themeApi.state(mode) : { mode: mode, theme: mode, companionTheme: mode === "dark" ? "night" : "day" };
+        themeApi?.storageSet?.("eyeflow-theme-mode", themeState.mode);
+        themeApi?.storageSet?.("eyeflow-theme", themeState.theme);
         // Cross-dissolve crisp before/after snapshots so text never interpolates
         // through a low-contrast midpoint. Fall back to an instant flip when the
         // API is unavailable, reduced-motion is on, or this is the first-paint sync.
         if (animate && !reduceMotion && typeof document.startViewTransition === "function") {
-          document.startViewTransition(function () { flip(theme); });
+          document.startViewTransition(function () { flip(themeState); });
         } else {
-          flip(theme);
+          flip(themeState);
         }
+        publishTheme(themeState);
       }
 
       opts.forEach(function (btn) {
         btn.addEventListener("click", function () { apply(btn.dataset.themeSet, true); });
       });
 
-      apply(current(), false);
+      window.setInterval(function () {
+        if (!themeApi?.state || (themeApi.currentMode?.() || "auto") !== "auto") return;
+        var before = root.getAttribute("data-theme") === "dark" ? "dark" : "light";
+        var next = themeApi.state("auto");
+        apply("auto", next.theme !== before);
+      }, 60 * 1000);
+
+      apply(themeApi?.currentMode?.() || "auto", false);
     })();
   </script>
 
