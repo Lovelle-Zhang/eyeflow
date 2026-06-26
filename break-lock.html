@@ -4,6 +4,10 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>EyeFlow Rest</title>
+  <!-- Load the design system FIRST so this window's inline :root (dark-surface
+       --ink etc.) overrides it; otherwise the sheet flips --ink dark and the
+       timer/title render dark-on-dark. -->
+  <link rel="stylesheet" href="./eyeflow-design-system.css">
   <style>
     :root {
       color-scheme: dark;
@@ -17,6 +21,17 @@
       --bg: #0f1a17;
       --bg-2: #17231e;
       --rest-line: calc(var(--ef-icon-stroke-base) * 1px);
+      --mira-ease-organic: cubic-bezier(0.37, 0, 0.2, 1);
+      --mira-scale-rest: 2.12;
+      --mira-scale-peak: 2.23;
+      --mira-breath-lift: -1.2px;
+      --mira-body-tilt-rest: 0deg;
+      --mira-body-tilt-peak: 0deg;
+      --mira-breath-duration: 4.3s;
+      --mira-sway-duration: 5.1s;
+      --mira-action-blink-duration: 2.1s;
+      --mira-blink-duration: 220ms;
+      --mira-double-blink-duration: 560ms;
     }
 
     * {
@@ -76,8 +91,10 @@
       place-items: center;
       position: relative;
       overflow: hidden;
-      transform: scale(2.12);
+      transform: scale(var(--mira-scale-rest));
       transform-origin: center;
+      animation: miraAliveBreath var(--mira-breath-duration) var(--mira-ease-organic) infinite;
+      transition: transform var(--ef-motion-slow) var(--mira-ease-organic);
       box-shadow:
         inset 0 0 0 1px rgba(231, 241, 236, 0.1),
         inset 0 -8px 18px rgba(15, 159, 122, 0.1),
@@ -106,6 +123,11 @@
       border-radius: 999px;
       background: var(--mint);
       box-shadow: 0 0 var(--ef-space-4) rgba(142, 223, 199, 0.38);
+      transform-origin: center;
+      animation: miraSignalBreath var(--mira-breath-duration) var(--mira-ease-organic) infinite;
+      transition:
+        transform var(--ef-motion-slow) var(--mira-ease-organic),
+        box-shadow var(--ef-motion-slow) var(--mira-ease-organic);
     }
 
     .pet-face {
@@ -115,7 +137,7 @@
       width: var(--ef-mira-face-width);
       height: var(--ef-mira-face-height);
       z-index: 1;
-      transition: transform var(--ef-motion-slow) var(--ef-ease-calm);
+      transition: transform 240ms var(--mira-ease-organic);
     }
 
     .pet-face::before,
@@ -127,7 +149,11 @@
       height: var(--ef-mira-eye-size);
       border-radius: 50%;
       background: #fbfcf6;
-      animation: petBlink 5s var(--ef-ease-calm) infinite;
+      transform-origin: center;
+      transition:
+        height 240ms var(--mira-ease-organic),
+        transform 240ms var(--mira-ease-organic),
+        border-radius 240ms var(--mira-ease-organic);
     }
 
     .pet-face::before {
@@ -148,6 +174,12 @@
       border-bottom: var(--ef-mira-mouth-stroke) solid var(--ef-mira-mouth-color);
       border-radius: 0 0 999px 999px;
       z-index: 1;
+      transition:
+        width 240ms var(--mira-ease-organic),
+        height 240ms var(--mira-ease-organic),
+        transform 240ms var(--mira-ease-organic),
+        border-color 240ms var(--mira-ease-organic),
+        background 240ms var(--mira-ease-organic);
     }
 
     .pet-cheek {
@@ -177,6 +209,9 @@
       border-top: var(--ef-mira-antenna-stroke) solid rgba(15, 23, 21, 0.34);
       border-radius: 50%;
       z-index: 0;
+      transform-origin: 50% 100%;
+      animation: miraAntennaSway var(--mira-sway-duration) var(--mira-ease-organic) infinite;
+      transition: transform 240ms var(--mira-ease-organic);
     }
 
     .mira-caption {
@@ -195,22 +230,30 @@
       transform: translateX(5px);
     }
 
+    body[data-relax="gaze"] {
+      --mira-scale-peak: 2.22;
+      --mira-breath-lift: -1px;
+      --mira-body-tilt-peak: 0.08deg;
+    }
+
+    body[data-relax="blink"] {
+      --mira-scale-peak: 2.18;
+      --mira-breath-lift: -1.8px;
+      --mira-body-tilt-peak: -0.08deg;
+    }
+
     body[data-relax="blink"] .pet {
       background:
-        radial-gradient(circle at 50% 50%, rgba(244, 232, 205, 0.88) 0 54%, rgba(190, 222, 210, 0.7) 100%);
-      animation: miraBlinkLead 1.8s var(--ef-ease-calm) infinite;
+        radial-gradient(circle at 50% 50%, rgba(231, 241, 236, 0.9) 0 55%, rgba(190, 222, 210, 0.72) 100%);
     }
 
     body[data-relax="blink"] .pet-face::before,
     body[data-relax="blink"] .pet-face::after {
-      height: 2px;
-      border-radius: 999px;
-      transform: translateY(3px);
-      animation-duration: 1.8s;
+      animation: miraActionBlink var(--mira-action-blink-duration) var(--mira-ease-organic) infinite;
     }
 
     body[data-relax="blink"] .pet-mouth {
-      border-bottom-color: rgba(202, 143, 38, 0.78);
+      border-bottom-color: var(--ef-mira-mouth-color);
       transform: translateX(-50%) scaleX(0.82);
     }
 
@@ -218,6 +261,8 @@
     body[data-relax="close"] .pet-face::after,
     body[data-relax="breath"] .pet-face::before,
     body[data-relax="breath"] .pet-face::after,
+    body[data-relax="jaw"] .pet-face::before,
+    body[data-relax="jaw"] .pet-face::after,
     body[data-relax="neck"] .pet-face::before,
     body[data-relax="neck"] .pet-face::after {
       height: 2px;
@@ -226,16 +271,33 @@
       animation: none;
     }
 
-    body[data-relax="close"] .pet,
-    body[data-relax="breath"] .pet,
-    body[data-relax="neck"] .pet {
-      animation: miraRestBreath 4s var(--ef-ease-calm) infinite;
+    body[data-relax="close"] {
+      --mira-scale-peak: 2.25;
+      --mira-breath-lift: -1.1px;
+      --mira-body-tilt-peak: 0deg;
+    }
+
+    body[data-relax="breath"] {
+      --mira-scale-peak: 2.24;
+      --mira-breath-lift: -1.4px;
+      --mira-body-tilt-peak: 0deg;
+    }
+
+    body[data-relax="neck"] {
+      --mira-scale-peak: 2.2;
+      --mira-breath-lift: -0.9px;
+      --mira-body-tilt-peak: 0.45deg;
+    }
+
+    body[data-relax="jaw"] {
+      --mira-scale-peak: 2.17;
+      --mira-breath-lift: -0.7px;
+      --mira-body-tilt-peak: -0.16deg;
     }
 
     body[data-relax="breath"] .pet::after {
       background: #8bd8c1;
       box-shadow: 0 0 var(--ef-space-5) rgba(139, 216, 193, 0.36);
-      animation-duration: 4s;
     }
 
     body[data-relax="breath"] .pet-mouth {
@@ -256,10 +318,24 @@
       transform: translateX(-50%) translateY(1px);
     }
 
+    body[data-relax="jaw"] .pet-mouth {
+      width: 18px;
+      height: 5px;
+      border-radius: 999px;
+      border: 0;
+      background: rgba(142, 223, 199, 0.68);
+      transform: translateX(-50%) translateY(2px) scaleX(0.9);
+    }
+
+    body[data-relax="press"] {
+      --mira-scale-peak: 2.19;
+      --mira-breath-lift: -0.9px;
+      --mira-body-tilt-peak: 0.12deg;
+    }
+
     body[data-relax="press"] .pet {
       background:
         radial-gradient(circle at 50% 50%, rgba(244, 232, 205, 0.88) 0 54%, rgba(190, 222, 210, 0.7) 100%);
-      animation: miraRestBreath 3.4s var(--ef-ease-calm) infinite;
     }
 
     body[data-relax="press"] .pet::after {
@@ -282,6 +358,16 @@
       border-bottom: var(--rest-line) solid rgba(202, 143, 38, 0.78);
       border-radius: 0 0 999px 999px;
       transform: translateX(-50%) scaleX(0.78);
+    }
+
+    body[data-blink="single"] .pet-face::before,
+    body[data-blink="single"] .pet-face::after {
+      animation: miraRandomBlink var(--mira-blink-duration) var(--mira-ease-organic) 1;
+    }
+
+    body[data-blink="double"] .pet-face::before,
+    body[data-blink="double"] .pet-face::after {
+      animation: miraDoubleBlink var(--mira-double-blink-duration) var(--mira-ease-organic) 1;
     }
 
     .eyebrow {
@@ -500,41 +586,94 @@
       }
     }
 
-    @keyframes petBlink {
+    @keyframes miraAliveBreath {
       0%,
-      91%,
       100% {
-        transform: scaleY(1);
+        transform: scale(var(--mira-scale-rest)) translateY(0) rotate(var(--mira-body-tilt-rest));
       }
-      94% {
-        transform: scaleY(0.28);
+      34% {
+        transform: scale(var(--mira-scale-peak)) translateY(var(--mira-breath-lift)) rotate(var(--mira-body-tilt-peak));
+      }
+      46% {
+        transform: scale(var(--mira-scale-peak)) translateY(var(--mira-breath-lift)) rotate(var(--mira-body-tilt-peak));
+      }
+      82% {
+        transform: scale(var(--mira-scale-rest)) translateY(0) rotate(var(--mira-body-tilt-rest));
       }
     }
 
-    @keyframes miraBlinkLead {
+    @keyframes miraActionBlink {
       0%,
       100% {
-        transform: scale(2.12) translateY(0);
+        height: var(--ef-mira-eye-size);
+        border-radius: 50%;
+        transform: translateY(0) scaleY(1);
       }
-      42% {
-        transform: scale(2.12) translateY(-3px);
+      40%,
+      54% {
+        height: 2px;
+        border-radius: 999px;
+        transform: translateY(3px) scaleY(0.9);
       }
-      55% {
-        transform: scale(2.12) translateY(1px);
+      72% {
+        height: var(--ef-mira-eye-size);
+        border-radius: 50%;
+        transform: translateY(0) scaleY(1);
       }
     }
 
-    @keyframes miraRestBreath {
+    @keyframes miraRandomBlink {
       0%,
       100% {
-        transform: scale(1.7);
+        transform: translateY(0) scaleY(1);
       }
-      50% {
-        transform: scale(1.78) translateY(1px);
+      48%,
+      62% {
+        transform: translateY(1px) scaleY(0.22);
+      }
+    }
+
+    @keyframes miraDoubleBlink {
+      0%,
+      100% {
+        transform: translateY(0) scaleY(1);
+      }
+      20%,
+      29%,
+      62%,
+      71% {
+        transform: translateY(1px) scaleY(0.22);
+      }
+      43%,
+      84% {
+        transform: translateY(0) scaleY(1);
+      }
+    }
+
+    @keyframes miraAntennaSway {
+      0%,
+      100% {
+        transform: rotate(-0.6deg);
+      }
+      42%,
+      54% {
+        transform: rotate(0.6deg);
+      }
+    }
+
+    @keyframes miraSignalBreath {
+      0%,
+      100% {
+        transform: scale(0.98);
+        box-shadow: 0 0 var(--ef-space-4) rgba(142, 223, 199, 0.34);
+      }
+      38%,
+      48% {
+        transform: scale(1.04);
+        box-shadow: 0 0 var(--ef-space-5) rgba(142, 223, 199, 0.42);
       }
     }
   </style>
-  <link rel="stylesheet" href="./eyeflow-design-system.css">
 </head>
 <body>
   <main>
@@ -589,7 +728,8 @@
       escapeBtn: document.querySelector("#escapeBtn"),
       hint: document.querySelector("#hint"),
       miraCaption: document.querySelector("#miraCaption"),
-      stepFlow: document.querySelector("#stepFlow")
+      stepFlow: document.querySelector("#stepFlow"),
+      pet: document.querySelector(".pet")
     };
     let totalSeconds = 90;
     let endsAt = Date.now() + totalSeconds * 1000;
@@ -600,6 +740,22 @@
     let completionSpoken = false;
     let completionShown = false;
     let escapeArmedUntil = 0;
+    let currentTaskIndex = -1;
+    let currentRelaxMood = "neutral";
+    let relaxTransitionTimer = null;
+    let nextBreathShiftAt = 0;
+    let nextBlinkAt = 0;
+    let blinkClearAt = 0;
+    const breathBaseSeconds = {
+      neutral: 4.3,
+      gaze: 4.2,
+      blink: 2.4,
+      breath: 4.8,
+      close: 5.4,
+      neck: 4.6,
+      jaw: 3.8,
+      press: 3.6
+    };
     const defaultTasks = [
       {
         mood: "gaze",
@@ -642,7 +798,7 @@
         voiceCue: "下巴微收。肩膀慢慢沉下去，后颈变长一点。"
       },
       {
-        mood: "neck",
+        mood: "jaw",
         label: "下颌",
         title: "把下颌松开一点",
         copy: "牙齿轻轻分开，舌尖自然放松，别让脸部继续用力。",
@@ -668,7 +824,7 @@
         }
       }
       if (!Array.isArray(tasks) || tasks.length === 0) return defaultTasks;
-      const allowedMoods = new Set(["gaze", "blink", "close", "neck", "press", "breath"]);
+      const allowedMoods = new Set(["gaze", "blink", "close", "neck", "jaw", "press", "breath"]);
       const safeTasks = tasks.slice(0, 6).map((task) => ({
         mood: allowedMoods.has(task?.mood) ? task.mood : "gaze",
         label: String(task?.label || "").slice(0, 12),
@@ -682,6 +838,80 @@
 
     function stepLabel(task) {
       return String(task?.label || task?.caption || task?.title || "恢复").slice(0, 8);
+    }
+
+    function randomBetween(min, max) {
+      return min + Math.random() * (max - min);
+    }
+
+    function randomizedSeconds(base, jitter) {
+      return base * randomBetween(1 - jitter, 1 + jitter);
+    }
+
+    function setBreathCycle(mood = currentRelaxMood) {
+      const base = breathBaseSeconds[mood] || breathBaseSeconds.neutral;
+      const duration = randomizedSeconds(base, 0.17);
+      document.body.style.setProperty("--mira-breath-duration", `${duration.toFixed(2)}s`);
+      document.body.style.setProperty("--mira-sway-duration", `${(duration * randomBetween(1.08, 1.22)).toFixed(2)}s`);
+      document.body.style.setProperty("--mira-action-blink-duration", `${randomizedSeconds(2.1, 0.22).toFixed(2)}s`);
+      nextBreathShiftAt = Date.now() + duration * 1000;
+    }
+
+    function clearBlink() {
+      document.body.removeAttribute("data-blink");
+      blinkClearAt = 0;
+    }
+
+    function scheduleBlink(now = Date.now()) {
+      nextBlinkAt = now + randomBetween(2000, 6000);
+    }
+
+    function triggerBlink(now = Date.now()) {
+      const doubleBlink = Math.random() < 0.18;
+      document.body.style.setProperty("--mira-blink-duration", `${Math.round(randomBetween(170, 260))}ms`);
+      document.body.style.setProperty("--mira-double-blink-duration", `${Math.round(randomBetween(470, 650))}ms`);
+      document.body.dataset.blink = doubleBlink ? "double" : "single";
+      blinkClearAt = now + (doubleBlink ? 720 : 330);
+      scheduleBlink(now);
+    }
+
+    function canIdleBlink() {
+      return !document.hidden && !["blink", "close", "breath", "neck", "jaw", "press"].includes(currentRelaxMood);
+    }
+
+    function driveMotionTick(now = Date.now()) {
+      if (now >= nextBreathShiftAt) setBreathCycle(currentRelaxMood);
+      if (blinkClearAt && now >= blinkClearAt) clearBlink();
+      if (!nextBlinkAt) scheduleBlink(now);
+      if (now >= nextBlinkAt) {
+        if (canIdleBlink()) {
+          triggerBlink(now);
+          return;
+        }
+        scheduleBlink(now);
+      }
+    }
+
+    function setRelaxMood(nextMood, options = {}) {
+      const safeMood = nextMood || "neutral";
+      if (safeMood === currentRelaxMood && document.body.dataset.relax === safeMood) return;
+      currentRelaxMood = safeMood;
+      setBreathCycle(safeMood);
+      clearBlink();
+      window.clearTimeout(relaxTransitionTimer);
+      if (options.immediate) {
+        document.body.dataset.relax = safeMood;
+        document.body.removeAttribute("data-relax-transition");
+        return;
+      }
+      document.body.dataset.relaxTransition = "true";
+      document.body.dataset.relax = "neutral";
+      relaxTransitionTimer = window.setTimeout(() => {
+        document.body.dataset.relax = safeMood;
+        relaxTransitionTimer = window.setTimeout(() => {
+          document.body.removeAttribute("data-relax-transition");
+        }, 260);
+      }, 90);
     }
 
     function renderStepFlow(activeIndex) {
@@ -771,6 +1001,10 @@
       completionShown = false;
       stopVoiceGuide();
       activeTasks = normalizeBreakTasks(payload.tasks || params.get("tasks"));
+      currentTaskIndex = -1;
+      currentRelaxMood = "neutral";
+      setBreathCycle(currentRelaxMood);
+      scheduleBlink();
       document.body.removeAttribute("data-complete");
       els.eyebrow.textContent = previewSession ? "恢复流程预览" : "轻提醒恢复";
       els.title.textContent = payload.title || "Mira 带你离开屏幕一下";
@@ -787,7 +1021,7 @@
       if (completionShown) return;
       completionShown = true;
       document.body.dataset.complete = "true";
-      document.body.dataset.relax = "close";
+      setRelaxMood("close");
       els.eyebrow.textContent = previewSession ? "预览完成" : "恢复完成";
       els.title.textContent = "可以慢慢回来了";
       els.copy.textContent = previewSession
@@ -809,6 +1043,8 @@
     }
 
     function tick() {
+      const now = Date.now();
+      driveMotionTick(now);
       const remaining = Math.max(0, Math.ceil((endsAt - Date.now()) / 1000));
       const progress = totalSeconds <= 0 ? 100 : ((totalSeconds - remaining) / totalSeconds) * 100;
       const taskIndex = Math.min(activeTasks.length - 1, Math.floor(progress / (100 / activeTasks.length)));
@@ -818,7 +1054,10 @@
       els.taskCopy.textContent = task.copy;
       els.miraCaption.textContent = task.caption;
       renderStepFlow(taskIndex);
-      document.body.dataset.relax = task.mood;
+      if (taskIndex !== currentTaskIndex) {
+        currentTaskIndex = taskIndex;
+        setRelaxMood(task.mood, { immediate: taskIndex === 0 });
+      }
       maybeSpeakTask(task, taskIndex);
       els.timer.textContent = formatTime(remaining);
       els.ring.style.setProperty("--progress", `${Math.max(0, Math.min(100, progress))}%`);
