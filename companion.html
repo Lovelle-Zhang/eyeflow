@@ -21,7 +21,7 @@
       --mira-signal: #80d7bd;
       --mira-signal-glow: rgba(128, 215, 189, 0.42);
       --mira-line: calc(var(--ef-icon-stroke-base) * 1px);
-      --popover-bg: rgba(30, 36, 41, 0.86);
+      --popover-bg: rgba(30, 36, 41, 0.96);
       --popover-line: rgba(255, 255, 255, 0.07);
       --popover-shadow:
         0 12px 30px rgba(0, 0, 0, 0.42),
@@ -119,7 +119,7 @@
     }
 
     .companion.theme-day {
-      --popover-bg: rgba(252, 252, 250, 0.93);
+      --popover-bg: rgba(252, 252, 250, 0.97);
       --popover-line: rgba(20, 28, 26, 0.07);
       --popover-shadow:
         0 8px 26px rgba(26, 38, 34, 0.16),
@@ -895,7 +895,7 @@
         companion.classList.remove("speaking");
         miraBubbleText.textContent = "";
         bubbleTimer = null;
-      }, 5000);
+      }, 8000);
     }
 
     async function setExpanded(expanded) {
@@ -1026,7 +1026,6 @@
       clearHoverOpenTimer();
       clearHoverCloseTimer();
       isHoveringCompanion = false;
-      setHovering(false);
       dragState = null;
       companion.classList.remove("dragging");
     });

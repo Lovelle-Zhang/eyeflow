@@ -1465,8 +1465,8 @@ function showCompanionBubble(message, options = {}) {
   bringCompanionToFront(companionWindow);
   sendCompanionBubble({ visible: true, message: text });
   if (companionBubbleTimer) clearTimeout(companionBubbleTimer);
-  const durationMs = Number.isFinite(options.durationMs) ? options.durationMs : 5200;
-  companionBubbleTimer = setTimeout(restoreCompanionBubble, Math.max(1200, Math.min(durationMs, 8000)));
+  const durationMs = Number.isFinite(options.durationMs) ? options.durationMs : 8000;
+  companionBubbleTimer = setTimeout(restoreCompanionBubble, Math.max(1200, Math.min(durationMs, 12000)));
   return { ok: true, bounds: nextBounds };
 }
 
