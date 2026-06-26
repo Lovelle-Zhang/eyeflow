@@ -5530,6 +5530,9 @@
     }
 
     .break-overlay.feedback-mode .recovery-feedback .timer-controls {
+      /* Preserve the vertical space the removed prompt line held (≈ 13·1.5 line
+         + var(--ef-space-5) gap) so the copy→buttons rhythm doesn't compress. */
+      margin-top: 32px;
       gap: 9px;
       grid-template-columns: repeat(3, minmax(0, 1fr));
     }
@@ -8898,7 +8901,6 @@
         <button class="primary" id="forceReturnBtn" type="button" hidden="">回到 EyeFlow</button>
       </div>
       <div class="recovery-feedback" id="recoveryFeedback" hidden="">
-        <p>选择最接近的状态。</p>
         <div class="timer-controls">
           <button class="primary" type="button" data-recovery-feedback="better">好多了</button>
           <button class="ghost" type="button" data-recovery-feedback="same">差不多</button>
