@@ -935,7 +935,7 @@ function runDebugForcePreview() {
         recoveryMode: mode,
         tasks,
         title: "Mira 带你离开屏幕一下",
-        copy: "这是 ${previewSeconds} 秒预览，不会计入今日休息。你可以感受一下恢复画面的节奏。"
+        copy: "这是 ${previewSeconds} 秒窗口预览，不会计入今日休息。正式开启后会进入全屏恢复。"
       });
       return { ok: true, mode, taskCount: tasks.length, voiceChecked };
     })()`).then((result) => {
@@ -963,14 +963,12 @@ function runDebugForcePreview() {
         if (result?.ok) {
           clearInterval(timer);
           console.log("[EyeFlow:debug] force return ready", { ...result, attempts });
-          captureDebugPageNow(breakLockWindow, "break-lock", {
+          captureDebugPageNow(breakLockWindow, "break-lock-complete", {
             requestedView: "break-lock",
             expectedVisibleView: "",
-            captureState: "break-lock active",
-            requiredText: ["Mira 带你离开屏幕一下", "紧急退出"],
-            captureReason: "force preview active"
-          }).finally(() => {
-            captureDebugBreakLockComplete(breakLockWindow, 120);
+            captureState: "force-return",
+            requiredText: ["Mira 已经守完这段时间", "回到 EyeFlow"],
+            captureReason: "force preview complete state"
           });
           setTimeout(() => {
             if (!breakLockWindow || breakLockWindow.isDestroyed()) return;
@@ -1961,6 +1959,7 @@ function sanitizeBreakTasks(tasks) {
 
 function enterBreakLockFullscreen() {
   if (!breakLockWindow || breakLockWindow.isDestroyed()) return;
+  if (breakLockWindow.__eyeflowPreviewWindow) return;
   breakLockWindow.setAlwaysOnTop(true, "screen-saver");
   breakLockWindow.setVisibleOnAllWorkspaces(true, { visibleOnFullScreen: true });
   breakLockWindow.setFullScreen(true);
@@ -1969,6 +1968,7 @@ function enterBreakLockFullscreen() {
 }
 
 function startBreakLock(payload = {}) {
+  const previewWindow = Boolean(payload.preview);
   const minSeconds = debugCapture && payload.preview ? 4 : 15;
   const seconds = Math.max(minSeconds, Math.min(600, Math.round(Number(payload.seconds) || 90)));
   const title = String(payload.title || "Mira 带你离开屏幕一下");
@@ -1978,6 +1978,7 @@ function startBreakLock(payload = {}) {
   breakLockCanClose = false;
 
   if (breakLockWindow && !breakLockWindow.isDestroyed()) {
+    breakLockWindow.__eyeflowPreviewWindow = previewWindow;
     breakLockWindow.webContents.send("breakLock:update", {
       seconds,
       title,
@@ -1993,9 +1994,6 @@ function startBreakLock(payload = {}) {
       requiredText: ["Mira 带你离开屏幕一下", "紧急退出"],
       captureReason: payload.preview ? "force preview active" : "break lock active"
     });
-    if (debugCapture && payload.preview) {
-      captureDebugBreakLockComplete(breakLockWindow, (seconds + 1) * 1000);
-    }
     breakLockWindow.show();
     enterBreakLockFullscreen();
     breakLockWindow.focus();
@@ -2003,9 +2001,12 @@ function startBreakLock(payload = {}) {
   }
 
   breakLockWindow = new BrowserWindow({
-    fullscreen: true,
-    kiosk: true,
+    width: previewWindow ? DASHBOARD_DEFAULT_SIZE.width : undefined,
+    height: previewWindow ? DASHBOARD_DEFAULT_SIZE.height : undefined,
+    fullscreen: !previewWindow,
+    kiosk: !previewWindow,
     frame: false,
+    show: false,
     resizable: false,
     movable: false,
     alwaysOnTop: true,
@@ -2020,9 +2021,10 @@ function startBreakLock(payload = {}) {
       nodeIntegration: false
     }
   });
+  breakLockWindow.__eyeflowPreviewWindow = previewWindow;
   attachWebDiagnostics(breakLockWindow, "break-lock");
 
-  breakLockWindow.setVisibleOnAllWorkspaces(true, { visibleOnFullScreen: true });
+  breakLockWindow.setVisibleOnAllWorkspaces(!previewWindow, { visibleOnFullScreen: !previewWindow });
   enterBreakLockFullscreen();
   breakLockWindow.loadFile(path.join(appRoot, "break-lock.html"), {
     query: {
@@ -2042,9 +2044,6 @@ function startBreakLock(payload = {}) {
       requiredText: ["Mira 带你离开屏幕一下", "紧急退出"],
       captureReason: payload.preview ? "force preview active" : "break lock active"
     });
-    if (debugCapture && payload.preview) {
-      captureDebugBreakLockComplete(breakLockWindow, (seconds + 1) * 1000);
-    }
   });
   breakLockWindow.once("ready-to-show", () => {
     breakLockWindow.show();

@@ -786,9 +786,6 @@
     :root[data-theme="dark"] #rhythmView .readiness-item[data-state="enabled"] strong {
       color: var(--mira-strong);
     }
-    :root[data-theme="dark"] #rhythmView #previewForceBreakBtn {
-      color: var(--ink-soft);
-    }
     :root[data-theme="dark"] #rhythmView .readiness-item[data-state="action"] strong {
       color: #f0c674;
     }
@@ -4851,11 +4848,6 @@
       gap: var(--ef-space-3);
     }
 
-    .onboarding-section.role .trust-strip {
-      grid-template-columns: repeat(3, minmax(0, 1fr));
-      gap: var(--ef-space-2);
-    }
-
     .onboarding-trust-cues {
       margin-top: var(--ef-space-3);
     }
@@ -4889,43 +4881,10 @@
       overflow-wrap: anywhere;
     }
 
-    .onboarding-section.role {
-      grid-column: 1 / -1;
-      grid-row: 1;
-      background:
-        linear-gradient(180deg, rgba(226, 236, 238, 0.48), rgba(247, 250, 246, 0.76)),
-        rgba(247, 250, 246, 0.8);
-    }
-
     .onboarding-section.check {
       grid-column: 1 / -1;
       grid-row: 1;
       background: transparent;
-    }
-
-    .onboarding-section.next {
-      grid-column: 1 / -1;
-      grid-row: 2;
-      padding-top: var(--ef-space-5);
-      border-top: 1px solid rgba(24, 32, 31, 0.055);
-      background: transparent;
-    }
-
-    .onboarding-section.boundary {
-      grid-column: 1 / -1;
-      padding: var(--ef-space-2) var(--ef-space-2) var(--ef-space-0);
-      background: transparent;
-      border-top: 1px solid rgba(24, 32, 31, 0.055);
-      border-radius: 0;
-      grid-template-columns: 1fr;
-      align-items: center;
-      gap: var(--ef-space-0);
-    }
-
-    .onboarding-section.boundary h4 {
-      color: var(--muted);
-      font-size: var(--ef-text-meta);
-      font-weight: 500;
     }
 
     .trust-item {
@@ -4936,16 +4895,6 @@
       background: var(--group-bg);
       display: grid;
       gap: 3px;
-    }
-
-    .onboarding-section.role .trust-item {
-      min-height: 30px;
-      padding: 6px 7px;
-      align-content: center;
-    }
-
-    .onboarding-section.role .trust-item span {
-      display: none;
     }
 
     .trust-item strong {
@@ -4997,155 +4946,6 @@
     .onboarding-dialog .symptom {
       padding: var(--ef-space-3);
       gap: var(--ef-space-2);
-    }
-
-    .onboarding-presets {
-      display: grid;
-      grid-template-columns: repeat(3, minmax(0, 1fr));
-      gap: var(--ef-space-0);
-      border: 1px solid rgba(24, 32, 31, 0.06);
-      border-radius: var(--ef-radius-md);
-      background: rgba(255, 255, 255, 0.42);
-      overflow: hidden;
-    }
-
-    .onboarding-preset {
-      position: relative;
-      min-width: 0;
-      min-height: calc(var(--ef-control-lg) + var(--ef-space-8));
-      padding: var(--ef-space-4) var(--ef-space-5);
-      border: 0;
-      border-right: 1px solid rgba(24, 32, 31, 0.055);
-      border-radius: 0;
-      color: var(--ink);
-      background: transparent;
-      display: grid;
-      grid-template-columns: var(--ef-icon-sm) minmax(0, 1fr);
-      gap: var(--ef-space-1) var(--ef-space-3);
-      text-align: left;
-      align-content: center;
-      align-items: start;
-      transition: border-color var(--ef-motion-fast) var(--ef-ease-calm), background var(--ef-motion-fast) var(--ef-ease-calm);
-    }
-
-    .onboarding-preset:last-child {
-      border-right: 0;
-    }
-
-    .onboarding-preset::before {
-      content: "";
-      align-self: center;
-      width: var(--ef-icon-xs);
-      height: var(--ef-icon-xs);
-      border-radius: var(--ef-radius-pill);
-      background: var(--preset-dot, rgba(42, 146, 122, 0.42));
-      box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.58);
-    }
-
-    .onboarding-preset::after {
-      content: "";
-      position: absolute;
-      right: var(--ef-space-4);
-      bottom: var(--ef-space-4);
-      width: var(--ef-icon-sm);
-      height: var(--ef-icon-sm);
-      border-radius: var(--ef-radius-pill);
-      display: grid;
-      place-items: center;
-      color: var(--mint);
-      font-size: var(--ef-text-meta);
-      font-weight: var(--ef-symbol-weight-base);
-      line-height: var(--ef-line-tight);
-    }
-
-    .onboarding-preset[data-onboarding-preset="fine"] {
-      --preset-dot: rgba(42, 146, 122, 0.44);
-    }
-
-    .onboarding-preset[data-onboarding-preset="tired"] {
-      --preset-dot: rgba(196, 150, 56, 0.46);
-    }
-
-    .onboarding-preset[data-onboarding-preset="strained"] {
-      --preset-dot: rgba(201, 99, 127, 0.44);
-    }
-
-    .onboarding-preset:hover {
-      background: rgba(255, 255, 255, 0.58);
-    }
-
-    .onboarding-preset.active {
-      background: rgba(42, 146, 122, 0.07);
-      box-shadow: inset 0 0 0 1px rgba(42, 146, 122, 0.08);
-    }
-
-    .onboarding-preset.active::after {
-      content: "✓";
-    }
-
-    .onboarding-preset strong {
-      grid-column: 2;
-      font-size: var(--ef-text-body-sm);
-      font-weight: var(--ef-symbol-weight-base);
-      line-height: var(--ef-line-title);
-    }
-
-    .onboarding-preset span {
-      grid-column: 2;
-      color: var(--muted);
-      font-size: var(--ef-text-meta);
-      line-height: var(--ef-line-compact);
-    }
-
-    .onboarding-fine-tune {
-      min-width: 0;
-      border: 0;
-      border-radius: 0;
-      background: transparent;
-      overflow: hidden;
-    }
-
-    .onboarding-fine-tune summary {
-      min-height: var(--ef-control-sm);
-      padding: var(--ef-space-0);
-      list-style: none;
-      cursor: pointer;
-      color: var(--mint);
-      font-size: var(--ef-text-helper);
-      font-weight: 500;
-      display: flex;
-      align-items: center;
-      justify-content: flex-start;
-      gap: var(--ef-space-2);
-    }
-
-    .onboarding-fine-tune summary::-webkit-details-marker {
-      display: none;
-    }
-
-    .onboarding-fine-tune summary::after {
-      content: "+";
-      width: var(--ef-icon-sm);
-      height: var(--ef-icon-sm);
-      border-radius: var(--ef-radius-pill);
-      display: grid;
-      place-items: center;
-      color: var(--mint);
-      background: transparent;
-      font-size: var(--ef-text-body-sm);
-      font-weight: var(--ef-symbol-weight-base);
-      line-height: var(--ef-line-tight);
-      flex: 0 0 auto;
-    }
-
-    .onboarding-fine-tune[open] summary::after {
-      content: "-";
-      color: var(--muted);
-      background: rgba(24, 32, 31, 0.06);
-    }
-
-    .onboarding-fine-tune .symptom-grid {
-      padding: var(--ef-space-3) var(--ef-space-0) var(--ef-space-0);
     }
 
     .onboarding-load {
@@ -5230,184 +5030,8 @@
       gap: var(--ef-space-2);
     }
 
-    .onboarding-section.next .onboarding-plan {
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-      gap: var(--ef-space-4);
-      position: relative;
-    }
-
-    .onboarding-plan-item {
-      min-width: 0;
-      min-height: 74px;
-      padding: var(--ef-space-4);
-      border: 1px solid var(--line);
-      border-radius: var(--ef-radius-md);
-      background: rgba(255, 255, 255, 0.68);
-      display: grid;
-      grid-template-columns: 22px minmax(0, 1fr);
-      align-content: start;
-      gap: var(--ef-space-2);
-    }
-
-    .onboarding-section.next .onboarding-plan-item {
-      min-height: auto;
-      padding: 0;
-      border: 0;
-      border-radius: 0;
-      background: transparent;
-      grid-template-columns: var(--ef-icon-md) minmax(0, 1fr);
-      gap: var(--ef-space-1) var(--ef-space-3);
-      position: relative;
-    }
-
-    .onboarding-section.next .onboarding-plan-item:not(:last-child)::after {
-      content: none;
-    }
-
-    .onboarding-plan-item span {
-      width: 22px;
-      height: 22px;
-      border-radius: var(--ef-radius-pill);
-      display: grid;
-      place-items: center;
-      color: var(--ink);
-      background: var(--mint-soft);
-      font-size: var(--ef-text-meta);
-      font-weight: 760;
-    }
-
-    .onboarding-section.next .onboarding-plan-item span {
-      width: var(--ef-icon-md);
-      height: var(--ef-icon-md);
-      font-size: var(--ef-text-micro);
-      color: var(--mint);
-      background: rgba(42, 146, 122, 0.08);
-      box-shadow: none;
-      z-index: 1;
-    }
-
-    .onboarding-plan-item strong {
-      font-size: var(--ef-text-body-sm);
-      font-weight: var(--ef-symbol-weight-base);
-      line-height: var(--ef-line-title);
-    }
-
-    .onboarding-plan-item p {
-      grid-column: 2;
-      margin: 0;
-      color: var(--muted);
-      font-size: var(--ef-text-meta);
-      line-height: var(--ef-line-body);
-      overflow-wrap: anywhere;
-    }
-
-    .onboarding-levels {
-      min-width: 0;
-      border: 1px solid rgba(24, 32, 31, 0.075);
-      border-radius: var(--ef-radius-md);
-      background: rgba(255, 255, 255, 0.58);
-      overflow: hidden;
-    }
-
-    .onboarding-levels summary {
-      min-height: 34px;
-      padding: var(--ef-space-3) var(--ef-space-4);
-      list-style: none;
-      cursor: default;
-      color: var(--ink);
-      font-size: var(--ef-text-helper);
-      font-weight: 760;
-      line-height: 1.28;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: var(--ef-space-3);
-    }
-
     .onboarding-levels-title {
       min-width: 0;
-      overflow-wrap: anywhere;
-    }
-
-    .onboarding-levels-cue {
-      flex: 0 0 auto;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      width: 54px;
-      min-height: 24px;
-      padding: var(--ef-space-0) var(--ef-space-3);
-      gap: var(--ef-space-1);
-      border-radius: var(--ef-radius-pill);
-      background: rgba(42, 146, 122, 0.08);
-      color: var(--mint);
-      font-size: var(--ef-text-micro);
-      font-weight: 780;
-      line-height: 1;
-      white-space: nowrap;
-    }
-
-    .onboarding-levels-cue::before {
-      content: attr(data-label);
-      width: 24px;
-      text-align: center;
-    }
-
-    .onboarding-levels summary::-webkit-details-marker {
-      display: none;
-    }
-
-    .onboarding-levels-cue::after {
-      content: "+";
-      display: inline-grid;
-      place-items: center;
-      width: 12px;
-      height: 12px;
-      font-size: var(--ef-text-body-sm);
-      line-height: 12px;
-    }
-
-    .onboarding-levels[open] .onboarding-levels-cue::after {
-      content: "-";
-    }
-
-    .onboarding-levels[open] .onboarding-levels-cue {
-      background: rgba(24, 32, 31, 0.055);
-    }
-
-    .onboarding-levels[open] .onboarding-levels-cue::before {
-      content: attr(data-open-label);
-    }
-
-    .onboarding-levels-list {
-      display: grid;
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-      gap: var(--ef-space-2);
-      padding: var(--ef-space-0) var(--ef-space-4) var(--ef-space-4);
-      margin: 0;
-      list-style: none;
-    }
-
-    .onboarding-levels-list li {
-      min-width: 0;
-      padding: 7px 8px;
-      border: 1px solid rgba(24, 32, 31, 0.06);
-      border-radius: var(--ef-radius-md);
-      background: rgba(255, 255, 255, 0.58);
-      display: grid;
-      gap: 3px;
-    }
-
-    .onboarding-levels-list strong {
-      color: var(--ink);
-      font-size: var(--ef-text-caption);
-      line-height: 1.2;
-    }
-
-    .onboarding-levels-list span {
-      color: var(--muted);
-      font-size: var(--ef-text-micro);
-      line-height: 1.28;
       overflow-wrap: anywhere;
     }
 
@@ -5490,38 +5114,6 @@
       display: grid;
       grid-template-columns: repeat(3, minmax(0, 1fr));
       gap: var(--ef-space-5);
-    }
-
-    .onboarding-step {
-      padding: var(--ef-space-6);
-      border-radius: var(--ef-radius-md);
-      border: 1px solid var(--line);
-      background: var(--wash);
-      display: grid;
-      gap: var(--ef-space-3);
-    }
-
-    .onboarding-step span {
-      width: 28px;
-      height: 28px;
-      border-radius: var(--ef-radius-pill);
-      background: var(--ink);
-      color: #ffffff;
-      display: grid;
-      place-items: center;
-      font-size: var(--ef-text-body-sm);
-      font-weight: 500;
-    }
-
-    .onboarding-step strong {
-      font-size: var(--ef-text-body-lg);
-    }
-
-    .onboarding-step p {
-      margin: 0;
-      color: var(--muted);
-      font-size: var(--ef-text-body-sm);
-      line-height: 1.45;
     }
 
     .break-overlay.show {
@@ -6160,7 +5752,6 @@
     .rec > div,
     .summary-card,
     .feature-card,
-    .onboarding-plan-item > div,
     .onboarding-section {
       row-gap: var(--text-stack);
     }
@@ -6210,7 +5801,6 @@
     .data-console-box p,
     .history-empty,
     .onboarding-section p,
-    .onboarding-plan-item p,
     .onboarding-permission-note {
       font-size: var(--text-reading);
       line-height: var(--line-reading);
@@ -6240,7 +5830,6 @@
     }
 
     .onboarding-section p,
-    .onboarding-plan-item p,
     .onboarding-permission-note {
       font-size: var(--ef-text-meta);
       line-height: var(--ef-line-body);
@@ -7653,21 +7242,24 @@
       align-items: center;
       padding: var(--ef-space-5) 0 0;
       border: 0;
-      border-top: 1px solid rgba(185, 87, 114, 0.1);
+      border-top: 1px solid var(--group-line);
       border-radius: 0;
       background: transparent;
     }
 
+    /* Calm, theme-aware confirm row — the old hardcoded maroon read as an error
+       and turned muddy in dark. The "this is the forceful mode" caution lives in
+       the copy + the primary button, not a loud color. */
     #rhythmView .force-confirm strong {
       grid-column: 1;
-      color: #673342;
+      color: var(--ink);
       font-size: var(--ef-text-body);
       line-height: var(--ef-line-title);
     }
 
     #rhythmView .force-confirm p {
       grid-column: 1;
-      color: rgba(103, 51, 66, 0.78);
+      color: var(--muted);
       font-size: var(--ef-text-body-sm);
       line-height: var(--ef-line-body);
       max-width: 42ch;
@@ -7686,26 +7278,6 @@
       grid-row: 1 / span 2;
       gap: var(--ef-space-3);
       align-items: center;
-    }
-
-    #rhythmView .force-confirm .primary {
-      min-height: var(--ef-control-lg);
-      color: #ffffff;
-      background: var(--btn-primary-bg);
-      border-color: var(--ink);
-    }
-
-    #rhythmView #previewForceBreakBtn {
-      color: #2f3f39;
-      background: var(--group-bg);
-      border-color: var(--group-line);
-    }
-
-    #rhythmView #cancelForceBtn {
-      color: var(--muted);
-      background: transparent;
-      border-color: transparent;
-      padding-inline: var(--ef-space-3);
     }
 
     #rhythmView .intervention-card {
@@ -8297,7 +7869,6 @@
       .trust-strip,
               .onboarding-flow,
               .onboarding-plan,
-              .onboarding-presets,
               .onboarding-grid,
               .readiness-grid,
       .profile-grid,
@@ -8326,15 +7897,6 @@
 
       .profile-evidence-grid {
         grid-template-columns: repeat(2, minmax(0, 1fr));
-      }
-
-      .onboarding-preset {
-        border-right: 0;
-        border-bottom: 1px solid rgba(24, 32, 31, 0.055);
-      }
-
-      .onboarding-preset:last-child {
-        border-bottom: 0;
       }
 
       .data-console-grid {
@@ -8405,22 +7967,9 @@
         border-bottom: 0;
       }
 
-      .onboarding-section.role,
-      .onboarding-section.check,
-      .onboarding-section.next {
+      .onboarding-section.check {
         grid-column: auto;
         grid-row: auto;
-      }
-
-      .onboarding-section.next {
-        padding-top: var(--ef-space-5);
-        padding-left: var(--ef-space-0);
-        border-top: 1px solid rgba(24, 32, 31, 0.055);
-        border-left: 0;
-      }
-
-      .onboarding-levels-list {
-        grid-template-columns: 1fr;
       }
 
 	      .state-stage {
@@ -8997,10 +8546,10 @@
                 </div>
                 <div class="force-confirm" id="forceConfirm" hidden="">
                   <strong id="forceConfirmTitle">开启前确认</strong>
-                  <p id="forceConfirmCopy">只在你主动开启并开始手动专注后接管。</p>
+                  <p id="forceConfirmCopy">只在手动专注后接管。预览会以窗口打开，正式开启后会进入全屏恢复。</p>
                   <div class="actions">
                     <button class="primary" id="enableForceBtn" type="button">开启强制爱</button>
-                    <button class="ghost" id="previewForceBreakBtn" type="button">预览 15 秒</button>
+                    <button class="btn-tonal" id="previewForceBreakBtn" type="button">预览 15 秒</button>
                     <button class="ghost" id="cancelForceBtn" type="button">先不用</button>
                   </div>
                 </div>
@@ -10078,10 +9627,6 @@
       setRangeFill(input);
     });
 
-    document.querySelectorAll("[data-onboarding-preset]").forEach((button) => {
-      button.addEventListener("click", () => applyOnboardingPreset(button.dataset.onboardingPreset, { record: true }));
-    });
-
     els.startBtn.addEventListener("click", toggleSession);
     els.primaryActionBtn.addEventListener("click", handlePrimaryAction);
     els.explainBtn.addEventListener("click", () => showToast(els.stateAction.textContent));
@@ -10688,10 +10233,6 @@
     }
 
     function syncOnboardingPresetButtons(symptoms) {
-      const nearestPreset = onboardingPresetMatch(symptoms).name;
-      document.querySelectorAll("[data-onboarding-preset]").forEach((button) => {
-        button.classList.toggle("active", button.dataset.onboardingPreset === nearestPreset);
-      });
     }
 
     function setRangeFill(input) {
@@ -11136,7 +10677,7 @@
         tasks: recoveryTasksForMode(state.settings.recoveryMode || "mixed"),
         title: "Mira 带你离开屏幕一下",
         copy: options.preview
-          ? "这是 15 秒预览，不会计入今日休息。你可以感受一下恢复画面的节奏。"
+          ? "这是 15 秒窗口预览，不会计入今日休息。正式开启后会进入全屏恢复。"
           : state.settings.forceVoiceGuideToggle === false
             ? restCompanionLine("force")
             : `${restCompanionLine("voice")} Mira 会用声音带你完成这段恢复。`
@@ -11182,7 +10723,7 @@
           window.clearInterval(forceBreakTimer);
           forceBreakTimer = null;
           els.breakCopy.textContent = payload.preview
-            ? "全屏恢复预览结束。现在可以回到 EyeFlow。"
+            ? "恢复流程预览结束。现在可以回到 EyeFlow。"
             : "这轮恢复完成。现在可以回到 EyeFlow。";
           renderForceRecoveryTask(100, 0);
           els.forceReturnBtn.hidden = false;
@@ -11760,7 +11301,7 @@
       els.forceConfirmTitle.textContent = forceActive ? "强制爱已开启" : "开启前确认";
       els.forceConfirmCopy.textContent = forceActive
         ? "恢复断点会进入全屏恢复；可预览，也可随时切回安静。"
-        : "只在手动专注后接管。建议先预览一次。";
+        : "只在手动专注后接管。预览会以窗口打开，正式开启后会进入全屏恢复。";
       els.enableForceBtn.hidden = forceActive;
       els.cancelForceBtn.textContent = forceActive ? "切回安静" : "先不用";
     }
@@ -14316,18 +13857,44 @@
       return "保持轻提醒节奏";
     }
 
+    const PROFILE_OBSERVATION_REFRESH_MS = 60 * 60 * 1000;
+
+    function stableTextIndex(seed, length) {
+      if (!length) return 0;
+      let hash = 2166136261;
+      const text = String(seed || "");
+      for (let index = 0; index < text.length; index += 1) {
+        hash ^= text.charCodeAt(index);
+        hash = Math.imul(hash, 16777619);
+      }
+      return Math.abs(hash >>> 0) % length;
+    }
+
+    function profileObservationBucket(now = Date.now()) {
+      return Math.floor(Number(now || 0) / PROFILE_OBSERVATION_REFRESH_MS);
+    }
+
     // Mira's warm, qualitative reflection for the top of 这几天. Observation, not
     // scoring — softened quantifiers only (这阵子 / 大多 / 偶尔), never precise counts.
+    // The wording is stable within a fixed refresh bucket and the current evidence
+    // signature, so Mira does not appear to change her mind on every timer render.
     function profileObservationText({ hasEvidence, accepted, skipped, symptomName, symptomValue }) {
-      // Each clause draws one line at random from its group, so Mira's wording
-      // varies between views. Branch conditions + {症状} substitution unchanged.
-      const pick = (list) => list[Math.floor(Math.random() * list.length)];
+      const evidenceSignature = [
+        todayKey(),
+        profileObservationBucket(),
+        hasEvidence ? "evidence" : "building",
+        Number(accepted || 0),
+        Number(skipped || 0),
+        symptomName || "none",
+        Number(symptomValue || 0)
+      ].join("|");
+      const pick = (list, salt) => list[stableTextIndex(`${evidenceSignature}|${salt}`, list.length)];
       if (!hasEvidence) {
         return pick([
           "这几天还没攒下太多记录。先陪你跑几轮，Mira 慢慢就把你的节奏摸熟了。",
           "记录还少，Mira 还在悄悄观察你。先一起跑几轮，节奏会慢慢浮出来。",
           "才刚开始呢。先陪你走几轮，Mira 再一点点把你的样子看清楚。"
-        ]);
+        ], "building");
       }
       const total = Number(accepted || 0) + Number(skipped || 0);
       let restGroup;
@@ -14376,7 +13943,7 @@
           "眼睛最近没闹脾气，Mira 也乐得在旁边陪你慢慢来"
         ];
       }
-      return `${pick(restGroup)}。${pick(eyeGroup)}。`;
+      return `${pick(restGroup, "rest")}。${pick(eyeGroup, "eye")}。`;
     }
 
     function profileInsightSentence({ signalName, signalValue, action }) {

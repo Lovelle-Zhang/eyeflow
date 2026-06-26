@@ -222,10 +222,10 @@ function main() {
   assertIncludes(indexHtml, "L4 强制爱</button>", "settings force segmented label stays compact");
   assertIncludes(indexHtml, "class=\"settings-segmented-control ef-segmented-control\"", "settings boundary renders as a design-system segmented control");
   assertIncludes(designSystemCss, ".ef-segmented-control {\n  min-height: var(--ef-control-md);", "settings boundary segmented control uses design-system control tokens");
-  assertIncludes(indexHtml, "border-top: 1px solid rgba(185, 87, 114, 0.1);", "force confirmation is a low-weight prompt row");
+  assertMatches(indexHtml, /#rhythmView \.force-confirm \{[\s\S]*?border-top:\s*1px solid var\(--group-line\);/, "force confirmation is a low-weight, theme-aware prompt row");
   assertIncludes(indexHtml, "background: transparent;", "force confirmation avoids warning-card background");
-  assertIncludes(indexHtml, "只在手动专注后接管。建议先预览一次。", "force confirmation copy stays compact");
-  assertIncludes(indexHtml, "#rhythmView #cancelForceBtn", "force confirmation keeps cancel as a low-weight text button");
+  assertIncludes(indexHtml, "只在手动专注后接管。预览会以窗口打开，正式开启后会进入全屏恢复。", "force confirmation sets preview/fullscreen expectations");
+  assertIncludes(indexHtml, "<button class=\"ghost\" id=\"cancelForceBtn\"", "force confirmation keeps cancel as a low-weight ghost-tier button");
   assertIncludes(indexHtml, "class=\"settings-preference-rows\"", "settings lower controls are grouped as preference rows");
   assertMatches(indexHtml, /#rhythmView \.settings-preference-rows\s*\{[\s\S]*?border-bottom:\s*1px solid var\(--group-line\);/, "settings preference rows avoid card borders (tokenized hairline)");
   assertMatches(indexHtml, /<div class="settings-preference-rows">\s*<details class="settings-disclosure-row ef-disclosure-row panel settings-rules-row">[\s\S]*<summary>查看轻提醒规则<\/summary>[\s\S]*<details class="settings-disclosure-row ef-disclosure-row panel advanced-settings system-integration-settings">[\s\S]*<summary>更多设置<\/summary>[\s\S]*<details class="settings-disclosure-row ef-disclosure-row panel advanced-settings system-diagnostic-card">[\s\S]*<summary>反馈与诊断<\/summary>/, "settings lower disclosures put reminder rules before tools and diagnostics");
@@ -303,7 +303,9 @@ function main() {
   assertMatches(indexHtml, /data-view-target="profileView">[\s\S]*?这几天\s*<\/button>/, "nav labels the recap 这几天");
   assertIncludes(indexHtml, 'id="profileObservation"', "这几天 opens with a warm Mira observation");
   assertIncludes(indexHtml, "function profileObservationText", "the observation is generated from local rest/symptom data");
-  assertMatches(indexHtml, /function\s+profileObservationText[\s\S]*?const pick = \(list\) => list\[Math\.floor\(Math\.random\(\)[\s\S]*?这阵子/, "observation picks one wording at random per clause, so Mira varies between views");
+  assertIncludes(indexHtml, "const PROFILE_OBSERVATION_REFRESH_MS = 60 * 60 * 1000;", "observation copy refreshes on a fixed hourly bucket");
+  assertMatches(indexHtml, /function\s+profileObservationText[\s\S]*?profileObservationBucket\(\)[\s\S]*?stableTextIndex\(`\$\{evidenceSignature\}\|\$\{salt\}`/, "observation wording is stable for the same evidence snapshot");
+  assertNotMatches(indexHtml, /function\s+profileObservationText[\s\S]*?Math\.random\(\)/, "observation does not randomly change on every render");
   assertIncludes(indexHtml, "展开看这几天的明细", "all quantitative views are tucked into one gentle fold");
   assertIncludes(indexHtml, 'class="panel profile-detail-fold"', "the fold is a single disclosure, not scattered cards");
   assertMatches(indexHtml, /#profileView \.profile-detail-fold-body > \.profile-rhythm-memory,[\s\S]*?background:\s*transparent;/, "folded sections render flat, not as cards-in-cards");

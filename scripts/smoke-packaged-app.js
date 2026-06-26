@@ -62,11 +62,11 @@ const expectedCaptureStates = [
     name: "eyeflow-profile-clean.png",
     requestedView: "profileView",
     visibleView: "profileView",
-    pageTitle: "复盘",
-    activeNav: "复盘",
+    pageTitle: "这几天",
+    activeNav: "这几天",
     onboardingVisible: false,
     captureState: "default",
-    requiredText: ["下一轮建议", "Mira 记住的节奏", "提醒时间"]
+    requiredText: ["下一轮建议", "今日分享卡", "今天就到这里了"]
   },
   {
     name: "eyeflow-companion-panel.png",
@@ -398,8 +398,12 @@ function assertProfileViewProbe(output) {
   ].filter((text) => firstScreen.includes(text));
   const failures = [];
   if (probe.visibleView !== "profileView") failures.push(`visibleView=${probe.visibleView || "missing"}`);
-  if (probe.pageTitleText !== "复盘") failures.push(`pageTitle=${probe.pageTitleText || "missing"}`);
-  if (probe.activeNavText !== "复盘") failures.push(`activeNav=${probe.activeNavText || "missing"}`);
+  if (!["复盘", "这几天"].includes(probe.pageTitleText)) {
+    failures.push(`pageTitle=${probe.pageTitleText || "missing"}`);
+  }
+  if (!["复盘", "这几天"].includes(probe.activeNavText)) {
+    failures.push(`activeNav=${probe.activeNavText || "missing"}`);
+  }
   if (forbidden.length) failures.push(`profile first screen contains: ${forbidden.join(", ")}`);
   if (Number(layout.scrollXOverflow || 0) > 0) failures.push(`horizontal overflow ${layout.scrollXOverflow}px`);
   if (clipped.length) failures.push(`clipped controls: ${clipped.map((item) => item.text).join(", ")}`);

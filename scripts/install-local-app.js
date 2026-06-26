@@ -53,7 +53,12 @@ function isEyeFlowRunning() {
     timeout: 3000
   });
   if (result.status !== 0) return false;
-  return result.stdout.split(/\r?\n/).some((line) => line.includes("/Applications/EyeFlow.app/"));
+  return result.stdout.split(/\r?\n/).some((line) => {
+    const command = line.trim();
+    return command.startsWith("/Applications/EyeFlow.app/Contents/MacOS/EyeFlow")
+      || command.startsWith("/Applications/EyeFlow.app/Contents/Frameworks/")
+      || command.startsWith("/Applications/EyeFlow.app/Contents/Helpers/");
+  });
 }
 
 function waitForEyeFlowExit() {

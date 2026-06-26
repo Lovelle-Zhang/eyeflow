@@ -772,7 +772,7 @@
       stopVoiceGuide();
       activeTasks = normalizeBreakTasks(payload.tasks || params.get("tasks"));
       document.body.removeAttribute("data-complete");
-      els.eyebrow.textContent = previewSession ? "全屏恢复预览" : "轻提醒恢复";
+      els.eyebrow.textContent = previewSession ? "恢复流程预览" : "轻提醒恢复";
       els.title.textContent = payload.title || "Mira 带你离开屏幕一下";
       els.copy.textContent = payload.copy || "不用盯着倒计时。我来守时间，你把视线交给远处。";
       els.hint.textContent = "倒计时结束前，EyeFlow 会安静守住这段恢复时间。";
@@ -791,7 +791,7 @@
       els.eyebrow.textContent = previewSession ? "预览完成" : "恢复完成";
       els.title.textContent = "可以慢慢回来了";
       els.copy.textContent = previewSession
-        ? "全屏恢复预览结束。你已经看过恢复画面的节奏。"
+        ? "恢复流程预览结束。你已经看过恢复画面的节奏。"
         : "这轮恢复完成。先眨眨眼、动一下肩膀，再回到 EyeFlow。";
       els.taskStep.textContent = "完成";
       els.taskTitle.textContent = "Mira 已经守完这段时间";

@@ -171,10 +171,10 @@ function main() {
   assertIncludes(indexHtml, "L4 强制爱</button>", "installed settings force segmented label stays compact");
   assertIncludes(indexHtml, "class=\"settings-segmented-control ef-segmented-control\"", "installed settings boundary renders as a design-system segmented control");
   assertIncludes(designSystemCss, ".ef-segmented-control {\n  min-height: var(--ef-control-md);", "installed settings boundary segmented control uses design-system control tokens");
-  assertIncludes(indexHtml, "border-top: 1px solid rgba(185, 87, 114, 0.1);", "installed force confirmation is a low-weight prompt row");
+  assertMatches(indexHtml, /#rhythmView \.force-confirm \{[\s\S]*?border-top:\s*1px solid var\(--group-line\);/, "installed force confirmation is a low-weight, theme-aware prompt row");
   assertIncludes(indexHtml, "background: transparent;", "installed force confirmation avoids warning-card background");
-  assertIncludes(indexHtml, "只在手动专注后接管。建议先预览一次。", "installed force confirmation copy stays compact");
-  assertIncludes(indexHtml, "#rhythmView #cancelForceBtn", "installed force confirmation keeps cancel as a low-weight text button");
+  assertIncludes(indexHtml, "只在手动专注后接管。预览会以窗口打开，正式开启后会进入全屏恢复。", "installed force confirmation sets preview/fullscreen expectations");
+  assertIncludes(indexHtml, "<button class=\"ghost\" id=\"cancelForceBtn\"", "installed force confirmation keeps cancel as a low-weight ghost-tier button");
   assertIncludes(indexHtml, "class=\"settings-preference-rows\"", "installed settings lower controls are grouped as preference rows");
   assertMatches(indexHtml, /#rhythmView \.settings-preference-rows\s*\{[\s\S]*?border-bottom:\s*1px solid var\(--group-line\);/, "installed settings preference rows avoid card borders (tokenized hairline)");
   assertMatches(indexHtml, /<div class="settings-preference-rows">\s*<details class="settings-disclosure-row ef-disclosure-row panel settings-rules-row">[\s\S]*<summary>查看轻提醒规则<\/summary>[\s\S]*<details class="settings-disclosure-row ef-disclosure-row panel advanced-settings system-integration-settings">[\s\S]*<summary>更多设置<\/summary>[\s\S]*<details class="settings-disclosure-row ef-disclosure-row panel advanced-settings system-diagnostic-card">[\s\S]*<summary>反馈与诊断<\/summary>/, "installed settings lower disclosures put reminder rules before tools and diagnostics");
@@ -455,7 +455,7 @@ function main() {
   assertMatches(indexHtml, /\.state-action-row:not\(:has\(button:not\(\[hidden\]\)\)\)\s*\{[\s\S]*display:\s*none;/, "installed today action column hides when no action is visible");
   assertNotIncludes(indexHtml, 'class="state-meta-row"', "installed today main state no longer renders unclear folded meta row");
   assertNotIncludes(indexHtml, 'aria-label="快速反馈"', "installed today main state no longer renders first-screen quick feedback");
-  assertMatches(indexHtml, /\.state-center \.timer-card\s*\{[\s\S]*margin-top:\s*var\(--ef-space-7\);[\s\S]*padding:\s*var\(--ef-space-5\) var\(--ef-space-6\);[\s\S]*background:\s*rgba\(255,\s*255,\s*255,\s*0\.58\);/, "installed today next-round card stays close to the Mira judgement");
+  assertMatches(indexHtml, /\.state-center \.timer-card\s*\{[\s\S]*margin-top:\s*var\(--ef-space-7\);[\s\S]*padding:\s*var\(--ef-space-6\) var\(--ef-space-7\);[\s\S]*background:\s*var\(--panel\);[\s\S]*border-color:\s*var\(--group-line\);/, "installed today next-round card stays close to the Mira judgement");
   assertMatches(indexHtml, /\.state-center \.timer-card \.session-card-head\s*\{[\s\S]*justify-items:\s*start;[\s\S]*align-content:\s*center;/, "installed session workflow header aligns status with the title");
   assertMatches(indexHtml, /\.state-center \.timer-card \.session-settings\s*\{[\s\S]*grid-column:\s*1;[\s\S]*grid-row:\s*2;/, "installed folded rhythm settings stay with the workflow title");
   assertMatches(indexHtml, /\.state-center \.timer-card \.session-settings\[open\]\s*\{[\s\S]*grid-column:\s*1 \/ -1;/, "installed expanded rhythm settings can use the full workflow width");
