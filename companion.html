@@ -947,40 +947,6 @@
       if (event.detail > 0) event.currentTarget.blur();
     }
 
-    function scheduleHoverOpen() {
-      clearHoverOpenTimer();
-      clearHoverCloseTimer();
-      if (isMiraSpeaking) {
-        setHovering(false);
-        return;
-      }
-      setHovering(true);
-      if (dragState) return;
-      if (isExpanded) {
-        if (isDesktopShell) setExpanded(true);
-        return;
-      }
-      hoverOpenTimer = window.setTimeout(() => {
-        hoverOpenTimer = null;
-        if (!isExpanded && !dragState) {
-          setExpanded(true);
-        }
-      }, hoverOpenDelay);
-    }
-
-    function scheduleHoverClose() {
-      clearHoverOpenTimer();
-      setHovering(false);
-      if (isDesktopShell || !isExpanded || dragState) return;
-      clearHoverCloseTimer();
-      hoverCloseTimer = window.setTimeout(() => {
-        hoverCloseTimer = null;
-        if (isExpanded && !dragState) {
-          setExpanded(false);
-        }
-      }, hoverCloseDelay);
-    }
-
     document.querySelector("#openBtn").addEventListener("click", (event) => {
       releaseMouseFocus(event);
       openDashboard();
@@ -1065,23 +1031,9 @@
       companion.classList.remove("dragging");
     });
 
-    function handleCompanionEnter() {
-      if (isMiraSpeaking) return;
-      if (isHoveringCompanion) return;
-      isHoveringCompanion = true;
-      scheduleHoverOpen();
-    }
-
-    function handleCompanionLeave() {
-      if (!isHoveringCompanion) return;
-      isHoveringCompanion = false;
-      scheduleHoverClose();
-    }
-
-    companion.addEventListener("mouseenter", handleCompanionEnter);
-    companion.addEventListener("pointerenter", handleCompanionEnter);
-    companion.addEventListener("mouseleave", handleCompanionLeave);
-    companion.addEventListener("pointerleave", handleCompanionLeave);
+    // Mira's bubble opens on an explicit click of the avatar (see the mouseup
+    // handler → toggleExpanded), not on hover. Scheduled reminders still pop on
+    // their own via the speaking bubble and the intervention auto-panel.
 
     function openDashboard(options = {}) {
       if (window.eyeflowDesktop) {
