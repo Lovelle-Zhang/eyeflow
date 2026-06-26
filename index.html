@@ -5069,14 +5069,20 @@
       backdrop-filter: none;
     }
 
+    /* ① Primary — the single welcome CTA. Pin the solid ink-green + off-white in
+       BOTH themes: the global dark primary flips to gray (--btn-primary-bg #34373b),
+       but this first warm moment should read the same as light. Metrics otherwise
+       fall back to the unified 36px / radius 10 / 14·500 from the base .primary. */
     .onboarding-actions .primary {
       width: fit-content;
       min-width: 0;
-      min-height: var(--ef-control-lg);
-      padding: var(--ef-space-0) var(--ef-space-7);
-      font-size: var(--ef-text-body);
-      font-weight: var(--ef-symbol-weight-base);
+      color: #f8fffb;
+      background: #1f2f29;
       box-shadow: none;
+    }
+
+    .onboarding-actions .primary:hover {
+      background: #2a3d36;
     }
 
     .onboarding-secondary-actions {
