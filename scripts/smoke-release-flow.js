@@ -394,7 +394,7 @@ function main() {
   assertIncludes(installedSmokeJs, "installed today stage Mira mouth stays as a canonical soft short smile", "installed smoke checks today Mira mouth softness");
   assertIncludes(installedSmokeJs, "installed main Mira default mouth stays as a canonical soft short smile", "installed smoke checks main Mira mouth softness");
   assertIncludes(installedSmokeJs, "installed rest dialog Mira uses a circular avatar shell", "installed smoke checks rest dialog circular Mira");
-  assertIncludes(installedSmokeJs, "installed feedback Mira is a solid round avatar (no glow)", "installed smoke checks feedback daytime Mira avatar");
+  assertIncludes(installedSmokeJs, "installed feedback Mira is a solid round avatar (no glow), face filling the circle", "installed smoke checks feedback daytime Mira avatar");
   assertIncludes(installedSmokeJs, "installed feedback Mira night is a solid round avatar (no glow)", "installed smoke checks feedback night Mira avatar");
   assertIncludes(installedSmokeJs, "installed feedback Mira mouth follows the canonical soft short smile standard", "installed smoke checks feedback Mira mouth softness");
   assertIncludes(installedSmokeJs, "installed desktop Mira mouth follows the canonical soft short smile standard", "installed smoke checks desktop Mira mouth softness");
