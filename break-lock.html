@@ -60,6 +60,18 @@
       text-align: center;
       min-width: 0;
       align-content: center;
+      transform-origin: center;
+    }
+
+    /* Fullscreen presence: the calm cluster is fixed-size and read small/lost in
+       the void on large displays. Scale the whole block up with the viewport
+       (guarded on both axes so it never overflows on small or portrait windows)
+       so Mira, the ring and the copy stay proportionate and present. */
+    @media (min-height: 880px) and (min-width: 1000px) {
+      main { transform: scale(1.18); }
+    }
+    @media (min-height: 1040px) and (min-width: 1280px) {
+      main { transform: scale(1.32); }
     }
 
     .mira-stage {
