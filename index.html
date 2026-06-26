@@ -4860,199 +4860,6 @@
       align-items: center;
     }
 
-    .trust-strip {
-      display: grid;
-      grid-template-columns: repeat(3, minmax(0, 1fr));
-      gap: var(--ef-space-3);
-    }
-
-    .onboarding-trust-cues {
-      margin-top: var(--ef-space-3);
-    }
-
-    .onboarding-section {
-      min-width: 0;
-      display: grid;
-      gap: var(--ef-space-3);
-      padding: var(--ef-space-0);
-      border: 0;
-      border-radius: 0;
-      background: transparent;
-      box-shadow: none;
-    }
-
-    .onboarding-section h4 {
-      margin: 0;
-      font-size: var(--ef-text-body-sm);
-      font-weight: var(--ef-symbol-weight-base);
-      line-height: var(--ef-line-title);
-      display: inline-flex;
-      align-items: center;
-      gap: var(--ef-space-0);
-    }
-
-    .onboarding-section > p {
-      margin: 0;
-      color: var(--muted);
-      font-size: var(--ef-text-helper);
-      line-height: var(--ef-line-body);
-      overflow-wrap: anywhere;
-    }
-
-    .onboarding-section.check {
-      grid-column: 1 / -1;
-      grid-row: 1;
-      background: transparent;
-    }
-
-    .trust-item {
-      min-width: 0;
-      padding: 6px 7px;
-      border: 1px solid var(--group-line);
-      border-radius: var(--ef-radius-md);
-      background: var(--group-bg);
-      display: grid;
-      gap: 3px;
-    }
-
-    .trust-item strong {
-      font-size: var(--ef-text-meta);
-      line-height: 1.25;
-    }
-
-    .trust-item span {
-      color: var(--muted);
-      font-size: var(--ef-text-micro);
-      line-height: 1.35;
-      overflow-wrap: anywhere;
-    }
-
-    .onboarding-trust-cues .trust-item {
-      min-height: var(--ef-control-sm);
-      padding: var(--ef-space-2) var(--ef-space-3);
-      grid-template-columns: var(--ef-icon-sm) minmax(0, 1fr);
-      align-items: center;
-      gap: var(--ef-space-2);
-    }
-
-    .trust-item .cue-symbol {
-      width: var(--ef-icon-sm);
-      height: var(--ef-icon-sm);
-      border-radius: var(--ef-radius-pill);
-      display: grid;
-      place-items: center;
-      color: var(--mint);
-      background: rgba(42, 146, 122, 0.08);
-      font-size: var(--ef-text-micro);
-      font-weight: var(--ef-symbol-weight-strong);
-      line-height: var(--ef-line-tight);
-    }
-
-    .trust-line {
-      margin: var(--ef-space-0);
-      color: var(--muted);
-      font-size: var(--ef-text-meta);
-      line-height: var(--ef-line-body);
-      overflow-wrap: anywhere;
-    }
-
-    .onboarding-dialog .symptom-grid {
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-      gap: var(--ef-space-2);
-    }
-
-    .onboarding-dialog .symptom {
-      padding: var(--ef-space-3);
-      gap: var(--ef-space-2);
-    }
-
-    .onboarding-load {
-      min-width: 0;
-      margin-top: var(--ef-space-0);
-      padding: var(--ef-space-0);
-      border: 0;
-      border-radius: 0;
-      background: transparent;
-      display: grid;
-      grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
-      gap: var(--ef-space-5);
-    }
-
-    .onboarding-load-main {
-      display: flex;
-      min-height: var(--ef-control-sm);
-      align-items: center;
-      justify-content: space-between;
-      gap: var(--ef-space-5);
-      padding: var(--ef-space-0);
-      border-bottom: 0;
-    }
-
-    .onboarding-load-main > div {
-      display: flex;
-      align-items: baseline;
-      gap: var(--ef-space-3);
-      min-width: 0;
-    }
-
-    .onboarding-load-main strong {
-      font-size: var(--ef-text-body-sm);
-      font-weight: var(--ef-symbol-weight-base);
-    }
-
-    .onboarding-load-main span {
-      color: var(--muted);
-      font-size: var(--ef-text-meta);
-    }
-
-    .onboarding-load-value {
-      font-size: var(--ef-text-body);
-      font-weight: 500;
-      color: var(--ink);
-      white-space: nowrap;
-    }
-
-    .onboarding-bands {
-      display: none;
-    }
-
-    .onboarding-rhythm {
-      min-width: 0;
-      min-height: var(--ef-control-sm);
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: var(--ef-space-5);
-      color: var(--muted);
-      font-size: var(--ef-text-meta);
-      line-height: var(--ef-line-compact);
-      padding: var(--ef-space-0);
-      border-bottom: 0;
-    }
-
-    .onboarding-rhythm strong {
-      color: var(--ink);
-      font-size: var(--ef-text-body-sm);
-      font-weight: var(--ef-symbol-weight-base);
-      white-space: normal;
-      overflow-wrap: anywhere;
-    }
-
-    .onboarding-proof {
-      display: none;
-    }
-
-    .onboarding-plan {
-      display: grid;
-      grid-template-columns: 1fr;
-      gap: var(--ef-space-2);
-    }
-
-    .onboarding-levels-title {
-      min-width: 0;
-      overflow-wrap: anywhere;
-    }
-
     .onboarding-permission-note {
       margin: 0;
       padding: var(--ef-space-0);
@@ -5090,54 +4897,6 @@
 
     .onboarding-actions .primary:hover {
       background: #2a3d36;
-    }
-
-    .onboarding-secondary-actions {
-      display: flex;
-      align-items: center;
-      justify-content: flex-end;
-      gap: var(--ef-space-4);
-      flex-wrap: wrap;
-    }
-
-    .onboarding-preview-link {
-      font-size: var(--ef-text-body-sm);
-      min-height: var(--ef-hit-target);
-      padding: var(--ef-space-0) var(--ef-space-2);
-    }
-
-    #skipOnboardingBtn {
-      min-height: var(--ef-hit-target);
-      padding: var(--ef-space-0);
-      border: 0;
-      background: transparent;
-      color: var(--muted);
-      box-shadow: none;
-      font-weight: var(--ef-symbol-weight-quiet);
-    }
-
-    #skipOnboardingBtn:hover {
-      color: var(--ink);
-      background: transparent;
-    }
-
-    .text-link {
-      padding: var(--ef-space-0);
-      background: transparent;
-      color: var(--mint);
-      font-weight: 500;
-      text-decoration: none;
-      cursor: pointer;
-    }
-
-    .text-link:hover {
-      text-decoration: underline;
-    }
-
-    .onboarding-grid {
-      display: grid;
-      grid-template-columns: repeat(3, minmax(0, 1fr));
-      gap: var(--ef-space-5);
     }
 
     .break-overlay.show {
@@ -5804,8 +5563,7 @@
     .data-console-box,
     .rec > div,
     .summary-card,
-    .feature-card,
-    .onboarding-section {
+    .feature-card {
       row-gap: var(--text-stack);
     }
 
@@ -5853,7 +5611,6 @@
     .profile-method-row p,
     .data-console-box p,
     .history-empty,
-    .onboarding-section p,
     .onboarding-permission-note {
       font-size: var(--text-reading);
       line-height: var(--line-reading);
@@ -5876,13 +5633,11 @@
     .weekly-market-head span,
     .profile-chart-copy span,
     .profile-chart-labels,
-    .history-meta,
-    .onboarding-state-card p {
+    .history-meta {
       font-size: var(--text-sm);
       line-height: 1.5;
     }
 
-    .onboarding-section p,
     .onboarding-permission-note {
       font-size: var(--ef-text-meta);
       line-height: var(--ef-line-body);
@@ -7888,10 +7643,7 @@
       .settings-grid,
       .metrics,
       .daily-summary,
-      .trust-strip,
               .onboarding-flow,
-              .onboarding-plan,
-              .onboarding-grid,
               .readiness-grid,
       .profile-grid,
       .profile-workbench,
@@ -7987,11 +7739,6 @@
 
       .profile-evidence:nth-child(n + 7) {
         border-bottom: 0;
-      }
-
-      .onboarding-section.check {
-        grid-column: auto;
-        grid-row: auto;
       }
 
 	      .state-stage {
@@ -8147,9 +7894,7 @@
     }
 
     @media (max-width: 480px) {
-      .mira-intro,
-      .onboarding-load-main,
-      .onboarding-rhythm {
+      .mira-intro {
         display: grid;
         grid-template-columns: 1fr;
       }
@@ -9183,11 +8928,6 @@
       tired: { dryness: 3, strain: 4, blur: 2, light: 1 },
       strained: { dryness: 6, strain: 6, blur: 4, light: 3 }
     };
-    const ONBOARDING_PRESET_LABELS = {
-      fine: "还好",
-      tired: "有点累",
-      strained: "明显不舒服"
-    };
     const SYMPTOM_KEYS = ["dryness", "strain", "blur", "light"];
     const {
       todayKey,
@@ -9565,17 +9305,7 @@
       petMessage: document.querySelector("#petMessage"),
       petToast: document.querySelector("#petToast"),
       onboardingOverlay: document.querySelector("#onboardingOverlay"),
-      onboardingLoadValue: document.querySelector("#onboardingLoadValue"),
-      onboardingLoadBand: document.querySelector("#onboardingLoadBand"),
-      onboardingRhythmCopy: document.querySelector("#onboardingRhythmCopy"),
-      onboardingRhythmValue: document.querySelector("#onboardingRhythmValue"),
-      onboardingPlanLoad: document.querySelector("#onboardingPlanLoad"),
-      onboardingPlanRhythm: document.querySelector("#onboardingPlanRhythm"),
-      onboardingPlanMira: document.querySelector("#onboardingPlanMira"),
       startOnboardingBtn: document.querySelector("#startOnboardingBtn"),
-      previewRecoveryBtn: document.querySelector("#previewRecoveryBtn"),
-      onboardingPermissionBtn: document.querySelector("#onboardingPermissionBtn"),
-      skipOnboardingBtn: document.querySelector("#skipOnboardingBtn"),
       petRestBtn: document.querySelector("#petRestBtn"),
       petMinimizeBtn: document.querySelector("#petMinimizeBtn"),
       petMinimizeIcon: document.querySelector("#petMinimizeIcon"),
@@ -9630,25 +9360,6 @@
       setRangeFill(input);
     });
 
-    document.querySelectorAll("[data-onboarding-symptom]").forEach((input) => {
-      const saved = state.symptoms[input.dataset.onboardingSymptom];
-      if (typeof saved === "number") input.value = saved;
-      input.addEventListener("input", () => {
-        input.nextElementSibling.textContent = `${input.value} / 10`;
-        setRangeFill(input);
-        renderOnboardingLoad();
-      });
-      input.addEventListener("change", () => {
-        recordOnboardingEvent("symptom_changed", {
-          symptom: input.dataset.onboardingSymptom,
-          value: Number(input.value),
-          computedLoad: estimateInitialLoad(readOnboardingSymptoms())
-        });
-      });
-      input.nextElementSibling.textContent = `${input.value} / 10`;
-      setRangeFill(input);
-    });
-
     els.startBtn.addEventListener("click", toggleSession);
     els.primaryActionBtn.addEventListener("click", handlePrimaryAction);
     els.explainBtn.addEventListener("click", () => showToast(els.stateAction.textContent));
@@ -9693,12 +9404,6 @@
     els.applyRhythmBtn.addEventListener("click", applyRhythmSuggestion);
     els.openTodayRhythmBtn.addEventListener("click", openTodayRhythmSettings);
     els.startOnboardingBtn.addEventListener("click", completeInitialAssessment);
-    els.previewRecoveryBtn?.addEventListener("click", () => completeInitialAssessment({ previewRecovery: true }));
-    els.skipOnboardingBtn?.addEventListener("click", dismissOnboarding);
-    els.onboardingPermissionBtn?.addEventListener("click", () => {
-      recordOnboardingEvent("permission_clicked", { placement: "first_run" });
-      openAccessibilitySettings();
-    });
     els.permissionBtn?.addEventListener("click", openAccessibilitySettings);
     els.readinessPermissionBtn.addEventListener("click", toggleEnhancedDesktopSensing);
     els.readinessCompanionBtn.addEventListener("click", toggleDesktopCompanion);
@@ -10172,25 +9877,11 @@
       if (!hasAssessedToday()) {
         resetSessionClock();
       }
-      syncOnboardingInputs();
-      renderOnboardingLoad();
       els.onboardingOverlay.classList.add("show");
       recordOnboardingEvent("viewed", {
         trigger: forceOnboarding ? "debug_forced" : (hasAssessedToday() ? "manual_reopen" : "first_open"),
         computedLoad: estimateInitialLoad(readOnboardingSymptoms())
       });
-    }
-
-    function dismissOnboarding() {
-      recordOnboardingEvent("skipped", {
-        hasAssessment: hasAssessedToday(),
-        computedLoad: estimateInitialLoad(readOnboardingSymptoms())
-      });
-      state.onboardingDismissed = true;
-      els.onboardingOverlay.classList.remove("show");
-      render();
-      persist();
-      showToast("Mira：可以直接使用；眼睛变化时再记录状态。");
     }
 
     function prepareRestGuideSurface() {
@@ -10199,66 +9890,6 @@
       els.onboardingOverlay.classList.remove("show");
       render();
       persist();
-    }
-
-    function syncOnboardingInputs() {
-      document.querySelectorAll("[data-onboarding-symptom]").forEach((input) => {
-        const value = state.symptoms[input.dataset.onboardingSymptom] ?? Number(input.value);
-        input.value = value;
-        input.nextElementSibling.textContent = `${input.value} / 10`;
-        setRangeFill(input);
-      });
-      renderOnboardingLoad();
-    }
-
-    function applyOnboardingPreset(presetName, options = {}) {
-      const preset = ONBOARDING_PRESETS[presetName];
-      if (!preset) return;
-      document.querySelectorAll("[data-onboarding-symptom]").forEach((input) => {
-        const value = preset[input.dataset.onboardingSymptom];
-        if (typeof value !== "number") return;
-        input.value = value;
-        input.nextElementSibling.textContent = `${input.value} / 10`;
-        setRangeFill(input);
-      });
-      renderOnboardingLoad();
-      if (options.record) {
-        recordOnboardingEvent("preset_selected", {
-          preset: presetName,
-          computedLoad: estimateInitialLoad(readOnboardingSymptoms())
-        });
-      }
-    }
-
-    function onboardingPresetMatch(symptoms) {
-      const presetEntries = Object.entries(ONBOARDING_PRESETS);
-      const exactPreset = presetEntries.find(([, preset]) => (
-        Object.keys(preset).every((key) => Number(symptoms[key] || 0) === Number(preset[key]))
-      ));
-      const nearestPreset = exactPreset?.[0] || presetEntries
-        .map(([name, preset]) => ({
-          name,
-          distance: Object.keys(preset).reduce((total, key) => (
-            total + Math.abs(Number(symptoms[key] || 0) - Number(preset[key] || 0))
-          ), 0)
-        }))
-        .sort((a, b) => a.distance - b.distance)[0]?.name;
-      return {
-        name: nearestPreset || "fine",
-        label: ONBOARDING_PRESET_LABELS[nearestPreset] || ONBOARDING_PRESET_LABELS.fine,
-        exact: Boolean(exactPreset)
-      };
-    }
-
-    function onboardingCalibrationLabel(symptoms) {
-      const match = onboardingPresetMatch(symptoms);
-      return {
-        ...match,
-        copy: match.exact ? `“${match.label}”` : `接近“${match.label}”`
-      };
-    }
-
-    function syncOnboardingPresetButtons(symptoms) {
     }
 
     function setRangeFill(input) {
@@ -10276,68 +9907,6 @@
         symptoms[input.dataset.onboardingSymptom] = Number(input.value);
       });
       return symptoms;
-    }
-
-    function onboardingStrategyForLoad(load, rhythm) {
-      if (load >= 74) {
-        return {
-          tone: "high",
-          band: "明显不舒服",
-          token: "更早照顾",
-          copy: "节奏",
-          loadPlan: `${rhythm.focus} 分钟后轻提醒。`,
-          rhythmPlan: `${rhythm.rest} 秒恢复，完成后安静回来。`
-        };
-      }
-      if (load >= 48) {
-        return {
-          tone: "medium",
-          band: "有点累",
-          token: "早一点提醒",
-          copy: "节奏",
-          loadPlan: `${rhythm.focus} 分钟后轻提醒。`,
-          rhythmPlan: `${rhythm.rest} 秒恢复，完成后安静回来。`
-        };
-      }
-      return {
-        tone: "comfort",
-        band: "还好",
-        token: "安静节奏",
-        copy: "节奏",
-        loadPlan: `${rhythm.focus} 分钟后轻提醒。`,
-        rhythmPlan: `${rhythm.rest} 秒恢复，完成后安静回来。`
-      };
-    }
-
-    function renderOnboardingLoad() {
-      if (!els.onboardingLoadValue || !els.onboardingLoadBand) return;
-      const symptoms = readOnboardingSymptoms();
-      const load = estimateInitialLoad(symptoms);
-      const rhythm = initialRhythmForLoad(load);
-      const strategy = onboardingStrategyForLoad(load, rhythm);
-      // Tokenized single accent (flips with the theme) instead of light-only
-      // hardcoded greens — keep the onboarding symptom sliders on-palette in dark.
-      const tone = { color: "var(--mira)", glow: "var(--mira-soft)" };
-      els.onboardingLoadValue.textContent = strategy.token;
-      els.onboardingLoadBand.textContent = strategy.band;
-      els.onboardingLoadValue.closest(".onboarding-load")?.setAttribute("data-tone", strategy.tone);
-      els.onboardingRhythmCopy.textContent = strategy.copy;
-      els.onboardingRhythmValue.textContent = `${rhythm.focus} 分 / ${rhythm.rest} 秒`;
-      els.onboardingPlanLoad.textContent = strategy.loadPlan;
-      els.onboardingPlanRhythm.textContent = strategy.rhythmPlan;
-      els.onboardingPlanMira.textContent = "完成后安静回来。";
-      document.querySelectorAll("[data-onboarding-symptom]").forEach((input) => {
-        input.style.setProperty("--range-color", tone.color);
-        input.style.setProperty("--range-glow", tone.glow);
-        setRangeFill(input);
-      });
-      syncOnboardingPresetButtons(symptoms);
-      document.querySelectorAll("[data-onboarding-band]").forEach((item) => {
-        const active = (item.dataset.onboardingBand === "comfort" && load < 48)
-          || (item.dataset.onboardingBand === "medium" && load >= 48 && load < 74)
-          || (item.dataset.onboardingBand === "high" && load >= 74);
-        item.classList.toggle("active", active);
-      });
     }
 
     function applySymptomsToMainControls(symptoms) {
