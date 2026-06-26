@@ -71,7 +71,7 @@ window.EyeFlowRecoveryData = {
       voiceCue: "下巴微收。肩膀慢慢沉下去，后颈变长一点。"
     },
     jaw: {
-      mood: "neck",
+      mood: "jaw",
       label: "下颌",
       title: "把下颌松开一点",
       copy: "牙齿轻轻分开，舌尖自然放松，别让脸部继续用力。",

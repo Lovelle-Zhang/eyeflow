@@ -1946,7 +1946,7 @@ function speak(message) {
 
 function sanitizeBreakTasks(tasks) {
   if (!Array.isArray(tasks)) return [];
-  const allowedMoods = new Set(["gaze", "blink", "close", "neck", "press", "breath"]);
+  const allowedMoods = new Set(["gaze", "blink", "close", "neck", "jaw", "press", "breath"]);
   return tasks.slice(0, 6).map((task) => ({
     mood: allowedMoods.has(task?.mood) ? task.mood : "gaze",
     label: String(task?.label || "").slice(0, 12),
