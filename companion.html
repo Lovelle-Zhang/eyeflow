@@ -145,12 +145,12 @@
     }
 
     .pet {
-      width: 68px;
+      width: var(--ef-mira-avatar-size);
       aspect-ratio: 1;
       position: absolute;
-      left: 1px;
-      top: 1px;
-      border-radius: 23px 23px 20px 20px;
+      left: 6px;
+      top: 6px;
+      border-radius: var(--ef-mira-avatar-radius);
       background:
         linear-gradient(150deg, #172c2e 0%, #1f3937 48%, #142224 100%);
       display: grid;
@@ -177,14 +177,14 @@
     }
 
     .companion.expanded .pet {
-      left: 7px;
-      top: 25px;
+      left: 12px;
+      top: 30px;
     }
 
     .companion.speaking .pet {
       left: auto;
-      right: 1px;
-      top: 4px;
+      right: 7px;
+      top: 9px;
     }
 
     .companion.settling .pet::after,
@@ -217,10 +217,10 @@
     .pet::before {
       content: "";
       position: absolute;
-      top: 22px;
-      left: 12px;
-      width: 44px;
-      height: 21px;
+      top: var(--ef-mira-visor-top);
+      left: var(--ef-mira-visor-left);
+      width: var(--ef-mira-visor-width);
+      height: var(--ef-mira-visor-height);
       border-radius: 999px;
       background:
         linear-gradient(90deg, rgba(129, 239, 216, 0.18), rgba(108, 176, 255, 0.12)),
@@ -240,10 +240,10 @@
     .pet::after {
       content: "";
       position: absolute;
-      top: 17px;
-      right: 9px;
-      width: 10px;
-      height: 10px;
+      top: var(--ef-mira-signal-top);
+      right: var(--ef-mira-signal-right);
+      width: var(--ef-mira-signal-size);
+      height: var(--ef-mira-signal-size);
       border-radius: 50%;
       background: var(--mira-signal);
       box-shadow: 0 0 var(--ef-space-3) var(--mira-signal-glow);
@@ -267,10 +267,10 @@
 
     .face {
       position: absolute;
-      top: 28px;
-      left: 21px;
-      width: 26px;
-      height: 8px;
+      top: var(--ef-mira-face-top);
+      left: var(--ef-mira-face-left);
+      width: var(--ef-mira-face-width);
+      height: var(--ef-mira-face-height);
       z-index: 1;
     }
 
@@ -279,8 +279,8 @@
       content: "";
       position: absolute;
       top: 0;
-      width: 5px;
-      height: 5px;
+      width: var(--ef-mira-eye-size);
+      height: var(--ef-mira-eye-size);
       border-radius: 50%;
       background: #fbfcf6;
       animation: blink 5s ease-in-out infinite;
@@ -296,43 +296,43 @@
 
     .mouth {
       position: absolute;
-      top: 44px;
+      top: var(--ef-mira-mouth-top);
       left: 50%;
-      width: 9px;
-      height: 5px;
+      width: var(--ef-mira-mouth-width);
+      height: var(--ef-mira-mouth-height);
       transform: translateX(-50%);
-      border-bottom: var(--mira-line) solid var(--mira-mouth);
+      border-bottom: var(--ef-mira-mouth-stroke) solid var(--mira-mouth);
       border-radius: 0 0 999px 999px;
       z-index: 1;
     }
 
     .antenna {
       position: absolute;
-      top: 8px;
-      left: 21px;
-      width: 26px;
-      height: 14px;
-      border-top: var(--mira-line) solid var(--mira-antenna);
+      top: var(--ef-mira-antenna-top);
+      left: var(--ef-mira-antenna-left);
+      width: var(--ef-mira-antenna-width);
+      height: var(--ef-mira-antenna-height);
+      border-top: var(--ef-mira-antenna-stroke) solid var(--mira-antenna);
       filter: drop-shadow(0 0 var(--ef-space-1) var(--mira-antenna-glow));
       border-radius: 50%;
     }
 
     .cheek {
       position: absolute;
-      top: 41px;
-      width: 8px;
-      height: 3px;
+      top: var(--ef-mira-cheek-top);
+      width: var(--ef-mira-cheek-size);
+      height: var(--ef-mira-cheek-height);
       border-radius: 999px;
       background: rgba(255, 139, 176, 0.24);
       z-index: 1;
     }
 
     .cheek.left {
-      left: 14px;
+      left: var(--ef-mira-cheek-offset);
     }
 
     .cheek.right {
-      right: 14px;
+      right: var(--ef-mira-cheek-offset);
     }
 
     .body {
@@ -532,11 +532,11 @@
     }
 
     .blink .mouth {
-      width: 9px;
-      height: 5px;
-      top: 44px;
+      width: var(--ef-mira-mouth-width);
+      height: var(--ef-mira-mouth-height);
+      top: var(--ef-mira-mouth-top);
       border: 0;
-      border-bottom: var(--mira-line) solid rgba(255, 214, 111, 0.66);
+      border-bottom: var(--ef-mira-mouth-stroke) solid rgba(255, 214, 111, 0.66);
       border-radius: 0 0 999px 999px;
       transform: translateX(-50%) scaleX(0.82);
       box-shadow: 0 0 var(--ef-space-2) rgba(255, 214, 111, 0.12);
@@ -561,7 +561,7 @@
     .rest .mouth {
       width: 14px;
       height: 15px;
-      top: 40px;
+      top: calc(var(--ef-mira-mouth-top) + var(--ef-space-1));
       border: 0;
       background: transparent;
       transform: translateX(-50%);

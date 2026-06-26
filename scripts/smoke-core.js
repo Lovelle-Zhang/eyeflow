@@ -303,8 +303,10 @@ function main() {
   assertMatches(indexHtml, /data-view-target="profileView">[\s\S]*?这几天\s*<\/button>/, "nav labels the recap 这几天");
   assertIncludes(indexHtml, 'id="profileObservation"', "这几天 opens with a warm Mira observation");
   assertIncludes(indexHtml, "function profileObservationText", "the observation is generated from local rest/symptom data");
-  assertIncludes(indexHtml, "const PROFILE_OBSERVATION_REFRESH_MS = 60 * 60 * 1000;", "observation copy refreshes on a fixed hourly bucket");
-  assertMatches(indexHtml, /function\s+profileObservationText[\s\S]*?profileObservationBucket\(\)[\s\S]*?stableTextIndex\(`\$\{evidenceSignature\}\|\$\{salt\}`/, "observation wording is stable for the same evidence snapshot");
+  assertIncludes(indexHtml, "const PROFILE_OBSERVATION_MIN_REFRESH_MS = 6 * 60 * 60 * 1000;", "observation copy has a low-frequency refresh guard");
+  assertIncludes(indexHtml, "function profileObservationCandidate", "observation is derived from named evidence types");
+  assertMatches(indexHtml, /function\s+profileObservationCandidate[\s\S]*?insightType = "high_signal"[\s\S]*?insightType = "skipped_rest"[\s\S]*?insightType = "manual_rhythm"/, "observation covers real evidence branches instead of copy variation");
+  assertMatches(indexHtml, /function\s+profileObservationText[\s\S]*?state\.profileObservation = candidate;[\s\S]*?persist\(\);/, "observation is persisted locally after evidence changes");
   assertNotMatches(indexHtml, /function\s+profileObservationText[\s\S]*?Math\.random\(\)/, "observation does not randomly change on every render");
   assertIncludes(indexHtml, "展开看这几天的明细", "all quantitative views are tucked into one gentle fold");
   assertIncludes(indexHtml, 'class="panel profile-detail-fold"', "the fold is a single disclosure, not scattered cards");
@@ -317,8 +319,7 @@ function main() {
   assertMatches(indexHtml, /#profileView \.share-art-card \{[\s\S]*?background:\s*var\(--group-bg-strong\);/, "profile share card preview follows the theme surface (no fixed bright block in dark)");
   assertIncludes(indexHtml, "shareCardRhythm", "profile share card exposes rhythm as the third data point");
   assertIncludes(indexHtml, "eyeflow.app", "profile share card includes restrained domain branding");
-  assertMatches(indexHtml, /#profileView \.share-art-mark\s*\{[\s\S]*border-radius:\s*var\(--ef-radius-lg\);[\s\S]*linear-gradient\(145deg,\s*#d8fff1 0%,\s*#bdeaff 58%,\s*#f4efc7 100%\);/, "profile share card uses the real rounded-square app icon mark");
-  assertMatches(indexHtml, /#profileView \.share-art-mark::after\s*\{[\s\S]*background:\s*#62d6ae;/, "profile share card app icon keeps the green status dot");
+  assertMatches(indexHtml, /#profileView \.share-art-mark\s*\{[\s\S]*width:\s*calc\(var\(--ef-control-lg\) \+ var\(--ef-space-1\)\);[\s\S]*background:\s*url\("\.\/assets\/icon\.svg"\) center \/ contain no-repeat;/, "profile share card uses the source app icon asset");
   assertIncludes(indexHtml, "带走这张卡", "profile share card uses a card-level copy action");
   assertNotMatches(indexHtml, /带走这一句/, "profile share card no longer frames sharing as copying one sentence");
   assertNotMatches(indexHtml, /复制分享文案/, "profile share card avoids internal copywriting language");
@@ -359,7 +360,7 @@ function main() {
   assertMatches(indexHtml, /#profileView \.profile-overview > \.profile-overview-head p\s*\{[\s\S]*max-width:\s*46ch;/, "profile judgement subtitle stays bounded");
   assertMatches(indexHtml, /#profileView \.profile-insight-text\s*\{[\s\S]*max-width:\s*58ch;/, "profile judgement body stays bounded");
   assertMatches(indexHtml, /\.profile-insight-row p\s*\{[\s\S]*display:\s*none;/, "profile insight summary rows avoid repeated explanatory copy");
-  assertMatches(indexHtml, /function\s+drawShareMiraMark\([\s\S]*iconGradient\.addColorStop\(0,\s*"#d8fff1"\);[\s\S]*iconGradient\.addColorStop\(0\.58,\s*"#bdeaff"\);[\s\S]*iconGradient\.addColorStop\(1,\s*"#f4efc7"\);[\s\S]*"#62d6ae"/, "profile share image draws the real app icon mark");
+  assertMatches(indexHtml, /function\s+drawShareBrandMark\([\s\S]*iconSize = size \* 0\.84;[\s\S]*iconGradient\.addColorStop\(0,\s*"#EAFFF6"\);[\s\S]*iconGradient\.addColorStop\(0\.58,\s*"#BDEAFF"\);[\s\S]*iconGradient\.addColorStop\(1,\s*"#F3EEC7"\);[\s\S]*"#6FE7C3"/, "profile share image draws the real app icon mark");
   assertMatches(indexHtml, /function\s+drawDailyShareCardCanvas\([\s\S]*canvas\.width = 1200;[\s\S]*canvas\.height = 720;[\s\S]*#f5f3ee[\s\S]*eyeflow\.app/, "profile share image draws a textured card artifact");
   assertMatches(indexHtml, /window\.eyeflowDesktop\?\.copyShareImage[\s\S]*generateDailyShareImageDataUrl\(\)/, "profile share action copies the generated image card first");
   assertMatches(indexHtml, /function\s+buildDailyShareText\(\)[\s\S]*今日专注[\s\S]*节奏[\s\S]*Mira 今日小句/, "profile share fallback text includes focus, rhythm, rest, and Mira line");

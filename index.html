@@ -4691,29 +4691,28 @@
     }
 
     .mira-intro .pet {
-      --mira-intro-avatar-scale: 1.24;
-      width: calc(var(--ef-space-14) + var(--ef-space-7));
-      height: calc(var(--ef-space-14) + var(--ef-space-7));
+      --mira-intro-avatar-scale: 1.28;
+      --mira-intro-avatar-offset: var(--ef-space-1);
+      width: calc(var(--ef-mira-avatar-size) + var(--ef-space-3));
+      height: calc(var(--ef-mira-avatar-size) + var(--ef-space-3));
       margin: var(--ef-space-1) 0 var(--ef-space-2);
       justify-self: center;
       border-radius: var(--ef-radius-pill);
       background:
-        radial-gradient(circle at 50% 54%, rgba(225, 255, 244, 0.68) 0 50%, rgba(225, 244, 238, 0.22) 51% 66%, transparent 67% 100%);
+        radial-gradient(circle at 50% 54%, rgba(225, 255, 244, 0.58) 0 46%, rgba(225, 244, 238, 0.18) 58%, rgba(225, 244, 238, 0) 74%);
       box-shadow:
-        0 var(--ef-space-2) var(--ef-space-6) rgba(24, 32, 31, 0.045);
+        0 var(--ef-space-2) var(--ef-space-8) rgba(24, 32, 31, 0.045);
       transform: scale(var(--mira-intro-avatar-scale));
       animation: miraIntroBreathe 6.4s ease-in-out infinite;
     }
 
-    /* Dark: the light mint gradient (opaque-ish stops + a hard 66%→67% cutoff)
-       reads as a gray-green disc with a ring on the dark card — Mira looks stuck
-       on a plate. Match light's logic: one soft radial glow, gentle mint near
-       Mira fading FULLY to transparent (rgba .., 0 — not `transparent`, which
-       interpolates through grey), no border/ring, so she's cradled by light. */
+    /* Onboarding uses Mira as a floating character moment: the face keeps the
+       canonical 58-unit geometry, while the hard app-icon body is replaced by
+       a soft glow so she feels present instead of branded. */
     :root[data-theme="dark"] .mira-intro .pet {
       background:
-        radial-gradient(circle at 50% 52%, rgba(79, 201, 156, 0.22) 0%, rgba(79, 201, 156, 0.10) 40%, rgba(79, 201, 156, 0) 72%);
-      box-shadow: 0 0 var(--ef-space-7) rgba(79, 201, 156, 0.08);
+        radial-gradient(circle at 50% 52%, rgba(79, 201, 156, 0.18) 0%, rgba(79, 201, 156, 0.08) 48%, rgba(79, 201, 156, 0) 74%);
+      box-shadow: 0 0 var(--ef-space-8) rgba(79, 201, 156, 0.08);
     }
 
     @keyframes miraIntroBreathe {
@@ -4726,10 +4725,10 @@
     }
 
     .mira-intro .pet::before {
-      top: 24px;
-      left: 14px;
-      width: 36px;
-      height: 18px;
+      top: calc(var(--mira-intro-avatar-offset) + var(--ef-mira-visor-top));
+      left: calc(var(--mira-intro-avatar-offset) + var(--ef-mira-visor-left));
+      width: var(--ef-mira-visor-width);
+      height: var(--ef-mira-visor-height);
       border-radius: var(--ef-radius-pill);
       background:
         linear-gradient(90deg, rgba(127, 232, 207, 0.2), rgba(104, 166, 232, 0.14)),
@@ -4740,23 +4739,23 @@
     }
 
     .mira-intro .pet::after {
-      top: 20px;
-      right: 12px;
-      width: 7px;
-      height: 7px;
+      top: calc(var(--mira-intro-avatar-offset) + var(--ef-mira-signal-top));
+      right: calc(var(--mira-intro-avatar-offset) + var(--ef-mira-signal-right));
+      width: var(--ef-mira-signal-size);
+      height: var(--ef-mira-signal-size);
     }
 
     .mira-intro .pet-face {
-      top: 31px;
-      left: 21px;
-      width: 22px;
-      height: 6px;
+      top: calc(var(--mira-intro-avatar-offset) + var(--ef-mira-face-top));
+      left: calc(var(--mira-intro-avatar-offset) + var(--ef-mira-face-left));
+      width: var(--ef-mira-face-width);
+      height: var(--ef-mira-face-height);
     }
 
     .mira-intro .pet-face::before,
     .mira-intro .pet-face::after {
-      width: 5px;
-      height: 5px;
+      width: var(--ef-mira-eye-size);
+      height: var(--ef-mira-eye-size);
     }
 
     .mira-intro .pet-face::before {
@@ -4768,34 +4767,42 @@
     }
 
     .mira-intro .pet-mouth {
-      top: 42px;
-      width: 8px;
-      height: 5px;
-      border-bottom-width: 1.5px;
-      border-bottom-color: rgba(15, 159, 122, 0.58);
+      top: calc(var(--mira-intro-avatar-offset) + var(--ef-mira-mouth-top));
+      width: var(--ef-mira-mouth-width);
+      height: var(--ef-mira-mouth-height);
+      border-bottom-width: var(--ef-mira-mouth-stroke);
+      border-bottom-color: var(--ef-mira-mouth-color);
     }
 
     .mira-intro .pet-cheek {
-      top: 38px;
-      width: 6px;
-      height: 2.5px;
+      top: calc(var(--mira-intro-avatar-offset) + var(--ef-mira-cheek-top));
+      width: var(--ef-mira-cheek-size);
+      height: var(--ef-mira-cheek-height);
       background: rgba(15, 159, 122, 0.14);
     }
 
     .mira-intro .pet-cheek.left {
-      left: 13px;
+      left: calc(var(--mira-intro-avatar-offset) + var(--ef-mira-cheek-offset));
     }
 
     .mira-intro .pet-cheek.right {
-      right: 13px;
+      right: calc(var(--mira-intro-avatar-offset) + var(--ef-mira-cheek-offset));
     }
 
     .mira-intro .pet-antenna {
-      top: 12px;
-      left: 20px;
-      width: 24px;
-      height: 12px;
+      top: calc(var(--mira-intro-avatar-offset) + var(--ef-mira-antenna-top));
+      left: calc(var(--mira-intro-avatar-offset) + var(--ef-mira-antenna-left));
+      width: var(--ef-mira-antenna-width);
+      height: var(--ef-mira-antenna-height);
       border-top-color: rgba(15, 23, 21, 0.3);
+    }
+
+    :root[data-theme="dark"] .mira-intro .pet-antenna {
+      border-top-color: rgba(177, 209, 198, 0.34);
+    }
+
+    :root[data-theme="dark"] .mira-intro .pet-mouth {
+      border-bottom-color: rgba(126, 244, 216, 0.58);
     }
 
     .mira-intro-copy {
@@ -5179,12 +5186,24 @@
 
     .break-mira .pet {
       width: 58px;
+      border-radius: 50%;
+      background:
+        radial-gradient(circle at 50% 50%, rgba(251, 252, 246, 0.94) 0 56%, rgba(221, 239, 230, 0.88) 100%);
       transform: scale(1.9);
       transform-origin: center;
       box-shadow:
-        inset 0 0 0 1px rgba(231, 241, 236, 0.12),
-        inset 0 -8px 18px rgba(15, 159, 122, 0.16),
+        inset 0 0 0 1px rgba(231, 241, 236, 0.18),
+        inset 0 -8px 18px rgba(15, 159, 122, 0.12),
         0 18px 42px rgba(0, 0, 0, 0.22);
+    }
+
+    :root[data-theme="dark"] .break-mira .pet {
+      background:
+        radial-gradient(circle at 50% 50%, rgba(231, 241, 236, 0.88) 0 54%, rgba(190, 222, 210, 0.72) 100%);
+      box-shadow:
+        inset 0 0 0 1px rgba(231, 241, 236, 0.12),
+        inset 0 -8px 18px rgba(15, 159, 122, 0.13),
+        0 18px 42px rgba(0, 0, 0, 0.24);
     }
 
     .break-mira-caption {
@@ -5204,8 +5223,13 @@
 
     .break-overlay[data-relax="blink"] .break-mira .pet {
       background:
-        linear-gradient(160deg, #f5ead3 0%, #fbfcf6 52%, #dcefe5 100%);
+        radial-gradient(circle at 50% 50%, rgba(253, 245, 224, 0.96) 0 55%, rgba(221, 239, 230, 0.88) 100%);
       animation: miraBlinkLead 1.8s ease-in-out infinite;
+    }
+
+    :root[data-theme="dark"] .break-overlay[data-relax="blink"] .break-mira .pet {
+      background:
+        radial-gradient(circle at 50% 50%, rgba(244, 232, 205, 0.88) 0 54%, rgba(190, 222, 210, 0.7) 100%);
     }
 
     .break-overlay[data-relax="blink"] .break-mira .pet-face::before,
@@ -5588,54 +5612,59 @@
       place-self: start;
     }
 
+    /* No separate halo ring — match onboarding, which floats Mira on the soft
+       .pet glow alone. The teal ring read as an extra hard-edged disc. */
     .break-overlay.feedback-mode .break-mira::before {
-      width: 82px;
-      height: 82px;
-      background:
-        radial-gradient(circle, rgba(142, 223, 199, 0.18), rgba(142, 223, 199, 0.045) 56%, transparent 72%);
-      animation: none;
+      display: none;
     }
 
     .break-overlay.feedback-mode .break-mira .pet {
-      width: 64px;
-      background: linear-gradient(160deg, #dcefe5 0%, #f8faf3 52%, #e5edf1 100%);
+      --feedback-mira-avatar-offset: var(--ef-space-1);
+      width: calc(var(--ef-mira-avatar-size) + var(--ef-space-3));
+      border-radius: var(--ef-radius-pill);
+      background:
+        radial-gradient(circle at 50% 54%, rgba(225, 255, 244, 0.58) 0 46%, rgba(225, 244, 238, 0.18) 58%, rgba(225, 244, 238, 0) 74%);
       transform: none;
       animation: none;
       box-shadow:
-        inset 0 0 0 1px rgba(24, 32, 31, 0.08),
-        inset 0 -8px 18px rgba(15, 159, 122, 0.13),
-        0 14px 30px rgba(15, 23, 21, 0.12);
+        0 var(--ef-space-2) var(--ef-space-8) rgba(24, 32, 31, 0.045);
     }
 
-    /* Mini Mira: 64px avatar, scaled from the 58-unit Mira face standard. */
+    :root[data-theme="dark"] .break-overlay.feedback-mode .break-mira .pet {
+      background:
+        radial-gradient(circle at 50% 52%, rgba(79, 201, 156, 0.18) 0%, rgba(79, 201, 156, 0.08) 48%, rgba(79, 201, 156, 0) 74%);
+      box-shadow: 0 0 var(--ef-space-8) rgba(79, 201, 156, 0.08);
+    }
+
+    /* Feedback uses the same floating-avatar language as onboarding: the face
+       keeps the 58-unit Mira standard, while each theme supplies its own light. */
     .break-overlay.feedback-mode .break-mira .pet::before {
-      top: 21px;
-      left: 50%;
-      width: 42px;
-      height: 20px;
-      transform: translateX(-50%);
+      top: calc(var(--feedback-mira-avatar-offset) + var(--ef-mira-visor-top));
+      left: calc(var(--feedback-mira-avatar-offset) + var(--ef-mira-visor-left));
+      width: var(--ef-mira-visor-width);
+      height: var(--ef-mira-visor-height);
     }
 
     .break-overlay.feedback-mode .break-mira .pet::after {
-      top: 16.5px;
-      right: 9px;
-      width: 10px;
-      height: 10px;
+      top: calc(var(--feedback-mira-avatar-offset) + var(--ef-mira-signal-top));
+      right: calc(var(--feedback-mira-avatar-offset) + var(--ef-mira-signal-right));
+      width: var(--ef-mira-signal-size);
+      height: var(--ef-mira-signal-size);
     }
 
     .break-overlay.feedback-mode .break-mira .pet-face {
-      top: 26.5px;
-      left: 0;
-      width: 64px;
-      height: 8px;
+      top: calc(var(--feedback-mira-avatar-offset) + var(--ef-mira-face-top));
+      left: calc(var(--feedback-mira-avatar-offset) + var(--ef-mira-face-left));
+      width: var(--ef-mira-face-width);
+      height: var(--ef-mira-face-height);
       transform: none;
     }
 
     .break-overlay.feedback-mode .break-mira .pet-face::before,
     .break-overlay.feedback-mode .break-mira .pet-face::after {
       top: 0;
-      width: 5.5px;
-      height: 5.5px;
+      width: var(--ef-mira-eye-size);
+      height: var(--ef-mira-eye-size);
       border-radius: 50%;
       transform: none;
       animation: petBlink 5s ease-in-out infinite;
@@ -5643,12 +5672,12 @@
     }
 
     .break-overlay.feedback-mode .break-mira .pet-face::before {
-      left: 21px;
+      left: 1px;
     }
 
     .break-overlay.feedback-mode .break-mira .pet-face::after {
-      right: auto;
-      left: 37.5px;
+      right: 1px;
+      left: auto;
     }
 
     .break-overlay.feedback-mode .break-mira .pet-antenna,
@@ -5658,39 +5687,46 @@
     }
 
     .break-overlay.feedback-mode .break-mira .pet-antenna {
-      top: 8px;
-      left: 50%;
-      width: 24px;
-      height: 13px;
-      transform: translateX(-50%);
+      top: calc(var(--feedback-mira-avatar-offset) + var(--ef-mira-antenna-top));
+      left: calc(var(--feedback-mira-avatar-offset) + var(--ef-mira-antenna-left));
+      width: var(--ef-mira-antenna-width);
+      height: var(--ef-mira-antenna-height);
       border-top-color: rgba(15, 23, 21, 0.28);
     }
 
+    :root[data-theme="dark"] .break-overlay.feedback-mode .break-mira .pet-antenna {
+      border-top-color: rgba(177, 209, 198, 0.34);
+    }
+
     .break-overlay.feedback-mode .break-mira .pet-mouth {
-      top: 42px;
+      top: calc(var(--feedback-mira-avatar-offset) + var(--ef-mira-mouth-top));
       left: 50%;
-      width: 8px;
-      height: 5px;
+      width: var(--ef-mira-mouth-width);
+      height: var(--ef-mira-mouth-height);
       border: 0;
-      border-bottom: 1.5px solid rgba(15, 159, 122, 0.58);
+      border-bottom: var(--ef-mira-mouth-stroke) solid var(--ef-mira-mouth-color);
       border-radius: 0 0 999px 999px;
       background: transparent;
       transform: translateX(-50%);
     }
 
+    :root[data-theme="dark"] .break-overlay.feedback-mode .break-mira .pet-mouth {
+      border-bottom-color: rgba(126, 244, 216, 0.58);
+    }
+
     .break-overlay.feedback-mode .break-mira .pet-cheek {
-      top: 38.5px;
-      width: 7.7px;
-      height: 3.3px;
-      background: rgba(215, 79, 117, 0.18);
+      top: calc(var(--feedback-mira-avatar-offset) + var(--ef-mira-cheek-top));
+      width: var(--ef-mira-cheek-size);
+      height: var(--ef-mira-cheek-height);
+      background: rgba(15, 159, 122, 0.14);
     }
 
     .break-overlay.feedback-mode .break-mira .pet-cheek.left {
-      left: 13.2px;
+      left: calc(var(--feedback-mira-avatar-offset) + var(--ef-mira-cheek-offset));
     }
 
     .break-overlay.feedback-mode .break-mira .pet-cheek.right {
-      right: 13.2px;
+      right: calc(var(--feedback-mira-avatar-offset) + var(--ef-mira-cheek-offset));
     }
 
     .break-overlay.feedback-mode .break-mira-caption {
@@ -6248,42 +6284,11 @@
     }
 
     #profileView .share-art-mark {
-      width: var(--ef-control-lg);
-      height: var(--ef-control-lg);
-      border-radius: var(--ef-radius-lg);
-      background:
-        linear-gradient(145deg, #d8fff1 0%, #bdeaff 58%, #f4efc7 100%);
+      width: calc(var(--ef-control-lg) + var(--ef-space-1));
+      height: calc(var(--ef-control-lg) + var(--ef-space-1));
+      background: url("./assets/icon.svg") center / contain no-repeat;
       position: relative;
       flex: 0 0 auto;
-      box-shadow:
-        inset 0 0 0 1px rgba(255, 255, 255, 0.52),
-        0 1px 2px rgba(31, 47, 40, 0.04);
-    }
-
-    #profileView .share-art-mark::before {
-      content: "";
-      position: absolute;
-      left: 9px;
-      top: 14px;
-      width: 24px;
-      height: 13px;
-      border-radius: var(--ef-radius-pill);
-      background:
-        radial-gradient(circle at 31% 48%, #fbfff9 0 2px, transparent 2.4px),
-        radial-gradient(circle at 69% 48%, #fbfff9 0 2px, transparent 2.4px),
-        #1d2926;
-    }
-
-    #profileView .share-art-mark::after {
-      content: "";
-      position: absolute;
-      right: 7px;
-      top: 10px;
-      width: 7px;
-      height: 7px;
-      border-radius: var(--ef-radius-pill);
-      background: #62d6ae;
-      box-shadow: 0 0 8px rgba(98, 214, 174, 0.54);
     }
 
     #profileView .share-art-brand strong,
@@ -14129,33 +14134,53 @@
       return lines.slice(0, 3);
     }
 
-    function drawShareMiraMark(ctx, x, y, size) {
+    function drawShareBrandMark(ctx, x, y, size) {
       ctx.save();
-      const iconGradient = ctx.createLinearGradient(x, y, x + size, y + size);
-      iconGradient.addColorStop(0, "#d8fff1");
-      iconGradient.addColorStop(0.58, "#bdeaff");
-      iconGradient.addColorStop(1, "#f4efc7");
+      const iconX = x + size * 0.08;
+      const iconY = y + size * 0.08;
+      const iconSize = size * 0.84;
+      const iconGradient = ctx.createLinearGradient(
+        x + size * 0.257,
+        y + size * 0.208,
+        x + size * 0.758,
+        y + size * 0.797
+      );
+      iconGradient.addColorStop(0, "#EAFFF6");
+      iconGradient.addColorStop(0.58, "#BDEAFF");
+      iconGradient.addColorStop(1, "#F3EEC7");
       ctx.fillStyle = iconGradient;
-      roundedRect(ctx, x, y, size, size, size * 0.3);
+      roundedRect(ctx, iconX, iconY, iconSize, iconSize, size * 0.177);
       ctx.fill();
-      ctx.strokeStyle = "rgba(255, 255, 255, 0.62)";
-      ctx.lineWidth = 1;
-      ctx.stroke();
-      const visorW = size * 0.6;
-      const visorH = size * 0.32;
-      const visorX = x + size * 0.22;
-      const visorY = y + size * 0.36;
-      ctx.fillStyle = "#1d2926";
+
+      const visorW = size * 0.550;
+      const visorH = size * 0.261;
+      const visorX = x + size * 0.225;
+      const visorY = y + size * 0.355;
+      const lensGradient = ctx.createLinearGradient(
+        x + size * 0.262,
+        y + size * 0.367,
+        x + size * 0.743,
+        y + size * 0.633
+      );
+      lensGradient.addColorStop(0, "#0E1C20");
+      lensGradient.addColorStop(1, "#10272A");
+      ctx.fillStyle = lensGradient;
       roundedRect(ctx, visorX, visorY, visorW, visorH, visorH / 2);
       ctx.fill();
-      ctx.fillStyle = "#fbfff9";
+      ctx.strokeStyle = "rgba(126, 239, 212, 0.18)";
+      ctx.lineWidth = size * 0.025;
+      roundedRect(ctx, visorX, visorY, visorW, visorH, visorH / 2);
+      ctx.stroke();
+
+      ctx.fillStyle = "#F8FFFC";
       ctx.beginPath();
-      ctx.arc(visorX + visorW * 0.31, visorY + visorH * 0.5, size * 0.045, 0, Math.PI * 2);
-      ctx.arc(visorX + visorW * 0.69, visorY + visorH * 0.5, size * 0.045, 0, Math.PI * 2);
+      ctx.arc(x + size * 0.392, y + size * 0.464, size * 0.036, 0, Math.PI * 2);
+      ctx.arc(x + size * 0.608, y + size * 0.464, size * 0.036, 0, Math.PI * 2);
       ctx.fill();
-      ctx.fillStyle = "#62d6ae";
+
+      ctx.fillStyle = "#6FE7C3";
       ctx.beginPath();
-      ctx.arc(x + size * 0.74, y + size * 0.29, size * 0.09, 0, Math.PI * 2);
+      ctx.arc(x + size * 0.739, y + size * 0.362, size * 0.065, 0, Math.PI * 2);
       ctx.fill();
       ctx.restore();
     }
@@ -14211,7 +14236,7 @@
       ctx.lineTo(cardX + cardW - 72, cardY + 446);
       ctx.stroke();
 
-      drawShareMiraMark(ctx, contentX, cardY + 492, 44);
+      drawShareBrandMark(ctx, contentX, cardY + 492, 44);
       ctx.fillStyle = "rgba(31, 33, 31, 0.82)";
       ctx.font = '750 25px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
       ctx.fillText("EyeFlow", contentX + 62, cardY + 513);

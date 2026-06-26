@@ -67,16 +67,16 @@
     }
 
     .pet {
-      width: 72px;
+      width: var(--ef-mira-avatar-size);
       aspect-ratio: 1;
-      border-radius: 22px 22px 20px 20px;
+      border-radius: 50%;
       background:
-        linear-gradient(160deg, #dcefe5 0%, #f8faf3 52%, #e5edf1 100%);
+        radial-gradient(circle at 50% 50%, rgba(231, 241, 236, 0.9) 0 55%, rgba(190, 222, 210, 0.72) 100%);
       display: grid;
       place-items: center;
       position: relative;
       overflow: hidden;
-      transform: scale(1.72);
+      transform: scale(2.12);
       transform-origin: center;
       box-shadow:
         inset 0 0 0 1px rgba(231, 241, 236, 0.1),
@@ -87,10 +87,10 @@
     .pet::before {
       content: "";
       position: absolute;
-      top: 24px;
-      left: 12px;
-      width: 48px;
-      height: 22px;
+      top: var(--ef-mira-visor-top);
+      left: var(--ef-mira-visor-left);
+      width: var(--ef-mira-visor-width);
+      height: var(--ef-mira-visor-height);
       border-radius: 999px;
       background: rgba(15, 23, 21, 0.86);
       box-shadow: inset 0 0 0 var(--rest-line) rgba(255, 255, 255, 0.1);
@@ -99,10 +99,10 @@
     .pet::after {
       content: "";
       position: absolute;
-      right: 10px;
-      top: 15px;
-      width: 11px;
-      height: 11px;
+      right: var(--ef-mira-signal-right);
+      top: var(--ef-mira-signal-top);
+      width: var(--ef-mira-signal-size);
+      height: var(--ef-mira-signal-size);
       border-radius: 999px;
       background: var(--mint);
       box-shadow: 0 0 var(--ef-space-4) rgba(142, 223, 199, 0.38);
@@ -110,10 +110,10 @@
 
     .pet-face {
       position: absolute;
-      top: 30px;
-      left: 23px;
-      width: 27px;
-      height: 9px;
+      top: var(--ef-mira-face-top);
+      left: var(--ef-mira-face-left);
+      width: var(--ef-mira-face-width);
+      height: var(--ef-mira-face-height);
       z-index: 1;
       transition: transform var(--ef-motion-slow) var(--ef-ease-calm);
     }
@@ -123,8 +123,8 @@
       content: "";
       position: absolute;
       top: 0;
-      width: 6px;
-      height: 6px;
+      width: var(--ef-mira-eye-size);
+      height: var(--ef-mira-eye-size);
       border-radius: 50%;
       background: #fbfcf6;
       animation: petBlink 5s var(--ef-ease-calm) infinite;
@@ -140,41 +140,41 @@
 
     .pet-mouth {
       position: absolute;
-      top: 46px;
+      top: var(--ef-mira-mouth-top);
       left: 50%;
-      width: 17px;
-      height: 8px;
+      width: var(--ef-mira-mouth-width);
+      height: var(--ef-mira-mouth-height);
       transform: translateX(-50%);
-      border-bottom: var(--rest-line) solid rgba(15, 23, 21, 0.78);
+      border-bottom: var(--ef-mira-mouth-stroke) solid var(--ef-mira-mouth-color);
       border-radius: 0 0 999px 999px;
       z-index: 1;
     }
 
     .pet-cheek {
       position: absolute;
-      top: 44px;
-      width: 8px;
-      height: 3px;
+      top: var(--ef-mira-cheek-top);
+      width: var(--ef-mira-cheek-size);
+      height: var(--ef-mira-cheek-height);
       border-radius: 999px;
       background: rgba(215, 79, 117, 0.22);
       z-index: 1;
     }
 
     .pet-cheek.left {
-      left: 15px;
+      left: var(--ef-mira-cheek-offset);
     }
 
     .pet-cheek.right {
-      right: 15px;
+      right: var(--ef-mira-cheek-offset);
     }
 
     .pet-antenna {
       position: absolute;
-      top: 9px;
-      left: 22px;
-      width: 28px;
-      height: 15px;
-      border-top: var(--rest-line) solid rgba(15, 23, 21, 0.34);
+      top: var(--ef-mira-antenna-top);
+      left: var(--ef-mira-antenna-left);
+      width: var(--ef-mira-antenna-width);
+      height: var(--ef-mira-antenna-height);
+      border-top: var(--ef-mira-antenna-stroke) solid rgba(15, 23, 21, 0.34);
       border-radius: 50%;
       z-index: 0;
     }
@@ -197,7 +197,7 @@
 
     body[data-relax="blink"] .pet {
       background:
-        linear-gradient(160deg, #f5ead3 0%, #fbfcf6 52%, #dcefe5 100%);
+        radial-gradient(circle at 50% 50%, rgba(244, 232, 205, 0.88) 0 54%, rgba(190, 222, 210, 0.7) 100%);
       animation: miraBlinkLead 1.8s var(--ef-ease-calm) infinite;
     }
 
@@ -258,7 +258,7 @@
 
     body[data-relax="press"] .pet {
       background:
-        linear-gradient(160deg, #f5ead3 0%, #fbf8f2 52%, #dcefe5 100%);
+        radial-gradient(circle at 50% 50%, rgba(244, 232, 205, 0.88) 0 54%, rgba(190, 222, 210, 0.7) 100%);
       animation: miraRestBreath 3.4s var(--ef-ease-calm) infinite;
     }
 
@@ -514,13 +514,13 @@
     @keyframes miraBlinkLead {
       0%,
       100% {
-        transform: scale(1.72) translateY(0);
+        transform: scale(2.12) translateY(0);
       }
       42% {
-        transform: scale(1.72) translateY(-3px);
+        transform: scale(2.12) translateY(-3px);
       }
       55% {
-        transform: scale(1.72) translateY(1px);
+        transform: scale(2.12) translateY(1px);
       }
     }
 
