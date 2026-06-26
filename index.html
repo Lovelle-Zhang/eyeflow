@@ -437,6 +437,16 @@
       color: var(--sb-text);
     }
 
+    .theme-note {
+      min-height: var(--ef-line-compact);
+      margin: var(--ef-space-2) var(--ef-space-1) 0;
+      color: var(--sb-text-muted);
+      font-size: var(--ef-text-micro);
+      font-weight: 450;
+      line-height: var(--ef-line-compact);
+      text-align: center;
+    }
+
     main {
       /* The only scroll surface; fills its grid cell so the scrollbar sits at
          the window edge while content stays centered via --page-frame-width. */
@@ -8132,7 +8142,8 @@
         return {
           mode: safeMode,
           theme: theme || "light",
-          companionTheme: (theme || "light") === "dark" ? "night" : "day"
+          companionTheme: (theme || "light") === "dark" ? "night" : "day",
+          source: safeMode === "auto" ? "timezone" : "manual"
         };
       }
 
@@ -8184,7 +8195,7 @@
       </nav>
 
       <div class="theme-switch" role="group" aria-label="外观模式">
-        <button type="button" class="theme-opt" data-theme-set="auto" aria-pressed="true" title="按日出日落自动切换">
+        <button type="button" class="theme-opt" data-theme-set="auto" aria-pressed="true" title="按系统时区的日出日落自动切换">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><path d="M12 3v2"></path><path d="M12 19v2"></path><path d="M4.93 4.93 6.34 6.34"></path><path d="m17.66 17.66 1.41 1.41"></path><path d="M3 12h2"></path><path d="M19 12h2"></path><circle cx="12" cy="12" r="3.5"></circle></svg>
           自动
         </button>
@@ -8197,6 +8208,7 @@
           晚上
         </button>
       </div>
+      <p class="theme-note" id="themeNote">自动 · 按时区</p>
 
     </aside>
 
@@ -14608,7 +14620,8 @@
       return {
         theme: appearanceTheme === "dark" ? "night" : "day",
         appearanceTheme,
-        appearanceMode: themeState.mode || "auto"
+        appearanceMode: themeState.mode || "auto",
+        appearanceSource: themeState.source || "timezone"
       };
     }
 
@@ -14776,6 +14789,7 @@
       if (!opts.length) return;
 
       var root = document.documentElement;
+      var themeNote = document.querySelector("#themeNote");
       var themeApi = window.EyeFlowTheme;
       var reduceMotion = window.matchMedia
         && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -14798,10 +14812,22 @@
         var payload = {
           theme: themeState.companionTheme,
           appearanceTheme: themeState.theme,
-          appearanceMode: themeState.mode
+          appearanceMode: themeState.mode,
+          appearanceSource: themeState.source
         };
         window.dispatchEvent(new CustomEvent("eyeflow:themechange", { detail: payload }));
         window.eyeflowDesktop?.publishState?.(payload);
+      }
+
+      function syncNote(themeState) {
+        if (!themeNote) return;
+        if (themeState.mode === "auto") {
+          themeNote.textContent = "自动 · 按时区";
+          return;
+        }
+        themeNote.textContent = themeState.theme === "dark"
+          ? "Mira 跟随晚上版本"
+          : "Mira 跟随白天版本";
       }
 
       // animate=true only on an explicit user switch — never on first-paint sync.
@@ -14817,6 +14843,7 @@
         } else {
           flip(themeState);
         }
+        syncNote(themeState);
         publishTheme(themeState);
       }
 

@@ -741,8 +741,23 @@
       return true;
     }
 
+    function normalizeTheme(value) {
+      if (value === "day" || value === "light") return "day";
+      if (value === "night" || value === "dark") return "night";
+      return "";
+    }
+
+    function applyTheme(nextTheme) {
+      const safeTheme = normalizeTheme(nextTheme) || theme;
+      if (safeTheme === theme && companion.classList.contains(`theme-${safeTheme}`)) return;
+      theme = safeTheme;
+      companion.classList.toggle("theme-day", theme === "day");
+      companion.classList.toggle("theme-night", theme === "night");
+    }
+
     function applyState(state) {
       const mood = state.mood === "calm" ? "" : state.mood || "";
+      applyTheme(state.theme || state.appearanceTheme);
       currentMood = mood;
       const booting = companion.classList.contains("booting") ? "booting" : "";
       const ready = companion.classList.contains("ready") ? "ready" : "";
@@ -802,16 +817,18 @@
     function getTheme() {
       const previewTheme = new URLSearchParams(window.location.search).get("theme");
       if (previewTheme === "day" || previewTheme === "night") return previewTheme;
+      try {
+        const stored = normalizeTheme(localStorage.getItem("eyeflow-theme"));
+        if (stored) return stored;
+      } catch (_error) {}
       const hour = new Date().getHours();
       return hour >= 7 && hour < 19 ? "day" : "night";
     }
 
     function refreshTheme() {
+      if (hasLiveState) return;
       const nextTheme = getTheme();
-      if (nextTheme === theme) return;
-      theme = nextTheme;
-      companion.classList.toggle("theme-day", theme === "day");
-      companion.classList.toggle("theme-night", theme === "night");
+      applyTheme(nextTheme);
     }
 
     companion.classList.add(`theme-${theme}`);
