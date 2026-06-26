@@ -4705,6 +4705,17 @@
       animation: miraIntroBreathe 6.4s ease-in-out infinite;
     }
 
+    /* Dark: the light mint gradient (opaque-ish stops + a hard 66%→67% cutoff)
+       reads as a gray-green disc with a ring on the dark card — Mira looks stuck
+       on a plate. Match light's logic: one soft radial glow, gentle mint near
+       Mira fading FULLY to transparent (rgba .., 0 — not `transparent`, which
+       interpolates through grey), no border/ring, so she's cradled by light. */
+    :root[data-theme="dark"] .mira-intro .pet {
+      background:
+        radial-gradient(circle at 50% 52%, rgba(79, 201, 156, 0.22) 0%, rgba(79, 201, 156, 0.10) 40%, rgba(79, 201, 156, 0) 72%);
+      box-shadow: 0 0 var(--ef-space-7) rgba(79, 201, 156, 0.08);
+    }
+
     @keyframes miraIntroBreathe {
       0%, 100% {
         transform: translateY(0) scale(var(--mira-intro-avatar-scale));
@@ -9838,6 +9849,7 @@
           recommendationSource: "rule-local",
           lastRecommendationAt: ""
         },
+        profileObservation: null,
         sessionSource: "idle",
         miraMemory: {
           firstAssessment: null,
@@ -9861,6 +9873,7 @@
           rhythmMemory: { ...fallback.rhythmMemory, ...(saved.rhythmMemory || {}) },
           summaryHistory: Array.isArray(saved.summaryHistory) ? saved.summaryHistory : [],
           events: Array.isArray(saved.events) ? saved.events : [],
+          profileObservation: saved.profileObservation || null,
           settings: { ...fallback.settings, ...(saved.settings || {}) }
         };
         loaded.rhythmMemory.recentEvents = Array.isArray(saved.rhythmMemory?.recentEvents)
@@ -9935,6 +9948,7 @@
             symptoms: dayState.symptoms || {},
             events: dayState.events || [],
             analysis: dayState.lastAnalysis || null,
+            profileObservation: dayState.profileObservation || null,
             modelVersion: dayState.lastAnalysis?.modelVersion || ""
           },
           ...(dayState.summaryHistory || [])
@@ -9961,6 +9975,7 @@
       dayState.lastNaturalBreakNudgeAt = 0;
       dayState.lastActiveSecondsBeforeIdle = 0;
       dayState.symptoms = { dryness: 2, strain: 3, blur: 1, light: 1 };
+      dayState.profileObservation = null;
       dayState.onboardingDismissed = false;
       dayState.initialAssessmentDone = false;
       dayState.lastAssessmentDay = "";
@@ -11440,6 +11455,7 @@
       state.lastAutoBreakAt = 0;
       lastActiveSecondsBeforeIdle = 0;
       state.symptoms = normalizeSymptoms({ dryness: 2, strain: 3, blur: 1, light: 1 });
+      state.profileObservation = null;
       state.onboardingDismissed = false;
       state.initialAssessmentDone = false;
       state.lastAssessmentDay = "";
@@ -13857,93 +13873,129 @@
       return "保持轻提醒节奏";
     }
 
-    const PROFILE_OBSERVATION_REFRESH_MS = 60 * 60 * 1000;
+    const PROFILE_OBSERVATION_MIN_REFRESH_MS = 6 * 60 * 60 * 1000;
 
-    function stableTextIndex(seed, length) {
-      if (!length) return 0;
-      let hash = 2166136261;
-      const text = String(seed || "");
-      for (let index = 0; index < text.length; index += 1) {
-        hash ^= text.charCodeAt(index);
-        hash = Math.imul(hash, 16777619);
-      }
-      return Math.abs(hash >>> 0) % length;
+    function profileObservationCountBand(value) {
+      const count = Number(value || 0);
+      if (count >= 4) return "many";
+      if (count >= 2) return "some";
+      if (count >= 1) return "one";
+      return "none";
     }
 
-    function profileObservationBucket(now = Date.now()) {
-      return Math.floor(Number(now || 0) / PROFILE_OBSERVATION_REFRESH_MS);
+    function profileObservationFocusBand(minutes) {
+      const safeMinutes = Number(minutes || 0);
+      if (safeMinutes >= 120) return "long";
+      if (safeMinutes >= 50) return "full";
+      if (safeMinutes >= 20) return "started";
+      return "short";
+    }
+
+    function profileObservationSymptomBand(value) {
+      const score = Number(value || 0);
+      if (score >= 6) return "high";
+      if (score >= 3) return "mild";
+      if (score > 0) return "trace";
+      return "none";
+    }
+
+    function profileObservationRestPattern(accepted, skipped) {
+      const acceptedCount = Number(accepted || 0);
+      const skippedCount = Number(skipped || 0);
+      const total = acceptedCount + skippedCount;
+      if (total <= 0) return "none";
+      if (skippedCount >= 2 && skippedCount > acceptedCount) return "skipped";
+      if (acceptedCount >= 2 && acceptedCount >= skippedCount * 2) return "accepted";
+      return "mixed";
+    }
+
+    function profileObservationCandidate({
+      hasEvidence,
+      accepted,
+      skipped,
+      symptomName,
+      symptomValue,
+      focusMinutes,
+      breaks,
+      load,
+      rhythmSummary
+    }) {
+      const restPattern = profileObservationRestPattern(accepted, skipped);
+      const symptomBand = profileObservationSymptomBand(symptomValue);
+      const focusBand = profileObservationFocusBand(focusMinutes);
+      const adjustedRhythm = state.rhythmSource === "manual" || Number(rhythmSummary?.manualHoldRounds || 0) > 0;
+      let insightType = "calm";
+      let subjectKey = "general";
+      let text = "这几天眼睛整体还稳。Mira 会继续安静陪着，不主动加重提醒。";
+
+      if (!hasEvidence) {
+        insightType = "building";
+        text = "这几天记录还少，Mira 先不急着下判断。先陪你跑几轮，节奏会慢慢清楚。";
+      } else if (symptomBand === "high" || Number(load || 0) >= 74) {
+        insightType = "high_signal";
+        subjectKey = String(symptomName || "眼睛状态");
+        text = `今天最明显的是${subjectKey}。Mira 会优先帮你留出恢复断点，先别拖到偏累。`;
+      } else if (restPattern === "skipped") {
+        insightType = "skipped_rest";
+        text = "这几天休息常被跳过。Mira 会少一点催促，多等自然断点提醒你停一下。";
+      } else if (adjustedRhythm) {
+        insightType = "manual_rhythm";
+        text = "你刚调整过这一轮节奏。Mira 先按你的设置走，观察几轮后再建议要不要改。";
+      } else if (focusMinutes >= 20 && restPattern === "none" && Number(breaks || 0) <= 0) {
+        insightType = "focus_without_rest";
+        text = "今天专注已经开始累积，但休息记录还少。Mira 会留意恢复断点，别一路撑到底。";
+      } else if (restPattern === "accepted") {
+        insightType = "rest_accepted";
+        text = "这几天你比较能接住休息。当前轻提醒节奏先保持，不需要加重提醒。";
+      } else if (symptomBand !== "none") {
+        insightType = "mild_signal";
+        subjectKey = String(symptomName || "眼睛");
+        text = `眼睛偶尔有${subjectKey}信号。Mira 会先轻提醒，帮你在合适的时候停一下。`;
+      }
+
+      const evidenceHash = [
+        state.currentDay || todayKey(),
+        insightType,
+        subjectKey,
+        restPattern,
+        profileObservationCountBand(accepted),
+        profileObservationCountBand(skipped),
+        symptomBand,
+        focusBand,
+        Number(breaks || 0) > 0 ? "has-break" : "no-break",
+        adjustedRhythm ? "manual-rhythm" : "mira-rhythm"
+      ].join("|");
+
+      return {
+        day: state.currentDay || todayKey(),
+        insightType,
+        subjectKey,
+        evidenceHash,
+        text,
+        generatedAt: new Date().toISOString()
+      };
+    }
+
+    function shouldRefreshProfileObservation(saved, candidate) {
+      if (!saved?.text) return true;
+      if (saved.day !== candidate.day) return true;
+      if (saved.insightType !== candidate.insightType) return true;
+      if (saved.evidenceHash === candidate.evidenceHash) return false;
+      if (candidate.insightType === "high_signal" && saved.subjectKey !== candidate.subjectKey) return true;
+      const savedAt = Date.parse(saved.generatedAt || "");
+      return !savedAt || Date.now() - savedAt >= PROFILE_OBSERVATION_MIN_REFRESH_MS;
     }
 
     // Mira's warm, qualitative reflection for the top of 这几天. Observation, not
-    // scoring — softened quantifiers only (这阵子 / 大多 / 偶尔), never precise counts.
-    // The wording is stable within a fixed refresh bucket and the current evidence
-    // signature, so Mira does not appear to change her mind on every timer render.
-    function profileObservationText({ hasEvidence, accepted, skipped, symptomName, symptomValue }) {
-      const evidenceSignature = [
-        todayKey(),
-        profileObservationBucket(),
-        hasEvidence ? "evidence" : "building",
-        Number(accepted || 0),
-        Number(skipped || 0),
-        symptomName || "none",
-        Number(symptomValue || 0)
-      ].join("|");
-      const pick = (list, salt) => list[stableTextIndex(`${evidenceSignature}|${salt}`, list.length)];
-      if (!hasEvidence) {
-        return pick([
-          "这几天还没攒下太多记录。先陪你跑几轮，Mira 慢慢就把你的节奏摸熟了。",
-          "记录还少，Mira 还在悄悄观察你。先一起跑几轮，节奏会慢慢浮出来。",
-          "才刚开始呢。先陪你走几轮，Mira 再一点点把你的样子看清楚。"
-        ], "building");
-      }
-      const total = Number(accepted || 0) + Number(skipped || 0);
-      let restGroup;
-      if (total <= 0) {
-        restGroup = [
-          "这阵子你一直在心流里，连歇口气都顾不上。Mira 都有点替你的眼睛喊累了",
-          "你最近埋头埋得挺深，几乎没怎么停。Mira 在旁边偷偷给你心疼着",
-          "这阵子你一头扎进事情里，停下来这件事好像被你忘啦"
-        ];
-      } else if (accepted >= skipped * 2) {
-        restGroup = [
-          "这阵子你挺愿意停下来透口气，节奏稳稳的。Mira 看着也安心",
-          "你最近很懂得见好就收，停一停再走，节奏顺得很",
-          "这阵子你和休息处得不错，该停就停。Mira 给你比个小赞"
-        ];
-      } else if (accepted >= skipped) {
-        restGroup = [
-          "这阵子你有在试着停一停，虽然偶尔还是想再撑那么一下下",
-          "你最近在学着按下暂停，有时也会忍不住多坐一会儿",
-          "这阵子你停停走走，偶尔贪心一点想再多做点，Mira 都看在眼里"
-        ];
-      } else {
-        restGroup = [
-          "这阵子你总忍不住往前冲，停下来这件事，咱们可以再练练",
-          "你最近赶得有点急，歇脚的时候不多。没关系，慢慢来，Mira 陪着",
-          "这阵子你一心往前，休息常被你跳过去。咱俩往后多照顾照顾自己"
-        ];
-      }
-      let eyeGroup;
-      if (Number(symptomValue || 0) >= 6) {
-        eyeGroup = [
-          `眼睛有点${symptomName}了，Mira 会盯紧一点，到点就轻轻喊你歇会儿`,
-          `眼睛${symptomName}得有点明显，Mira 会更上心，到时候提醒你停一停`,
-          `眼睛在闹${symptomName}呢，Mira 守着你，该歇的时候不会忘了叫你`
-        ];
-      } else if (Number(symptomValue || 0) > 0) {
-        eyeGroup = [
-          `眼睛偶尔有点${symptomName}，Mira 在旁边盯着呢，到点轻轻提醒你`,
-          `眼睛时不时有点${symptomName}，不算严重，Mira 会留意着帮你看时间`,
-          `眼睛偶尔冒一点${symptomName}，Mira 记着呢，到点会来提醒你`
-        ];
-      } else {
-        eyeGroup = [
-          "眼睛最近还挺舒服的，Mira 也会在旁边继续守着",
-          "眼睛状态不错，Mira 就安安静静陪着，有需要随时在",
-          "眼睛最近没闹脾气，Mira 也乐得在旁边陪你慢慢来"
-        ];
-      }
-      return `${pick(restGroup, "rest")}。${pick(eyeGroup, "eye")}。`;
+    // scoring: it is derived from a named evidence type and persisted locally, so
+    // timer ticks do not make Mira "say a different thing" without new evidence.
+    function profileObservationText(input) {
+      const candidate = profileObservationCandidate(input);
+      const saved = state.profileObservation || null;
+      if (!shouldRefreshProfileObservation(saved, candidate)) return saved.text;
+      state.profileObservation = candidate;
+      persist();
+      return candidate.text;
     }
 
     function profileInsightSentence({ signalName, signalValue, action }) {
@@ -14367,7 +14419,11 @@
           accepted: rhythmSummary.acceptedBreaks,
           skipped: rhythmSummary.skippedBreaks,
           symptomName: top[0],
-          symptomValue: top[1]
+          symptomValue: top[1],
+          focusMinutes,
+          breaks: state.breaks || 0,
+          load,
+          rhythmSummary
         });
       }
       els.profileBandLabel.textContent = hasProfileEvidence
