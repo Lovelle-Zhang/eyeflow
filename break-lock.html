@@ -414,14 +414,9 @@
     .task {
       min-width: 0;
       display: grid;
-      gap: var(--ef-space-3);
+      gap: var(--ef-space-2);
       width: min(640px, 100%);
       margin: 0 auto;
-      padding: var(--ef-space-7);
-      border: 1px solid var(--line);
-      border-radius: var(--ef-radius-md);
-      background: var(--panel);
-      box-shadow: none;
     }
 
     .task span {
@@ -432,7 +427,7 @@
     }
 
     .task strong {
-      font-size: var(--ef-text-title-lg);
+      font-size: var(--ef-text-display-sm);
       line-height: var(--ef-line-tight);
       overflow-wrap: anywhere;
     }
@@ -697,17 +692,10 @@
         <div class="pet-cheek right"></div>
         <div class="pet-mouth"></div>
       </div>
-      <span class="mira-caption" id="miraCaption">跟着 Mira 慢慢来</span>
-    </div>
-    <div class="eyebrow" id="eyebrow">轻提醒恢复</div>
-    <div>
-      <h1 id="title">Mira 带你离开屏幕一下</h1>
-      <p id="copy">不用盯着倒计时。我来守时间，你把视线交给远处。</p>
     </div>
     <div class="task" aria-live="polite">
-      <span id="taskStep">第 1 步</span>
-      <strong id="taskTitle">看向 6 米外</strong>
-      <p id="taskCopy">找一个远处的点，轻轻看过去，不需要盯着屏幕。</p>
+      <strong id="taskTitle">看向远处</strong>
+      <p id="taskCopy">不用盯着屏幕，看远处 20 秒再回来。</p>
     </div>
     <div class="step-flow" id="stepFlow" aria-label="恢复流程"></div>
     <div class="ring" id="ring" style="--progress: 0%;">
@@ -722,24 +710,17 @@
       <button class="escape" id="escapeBtn" type="button">紧急退出</button>
       <button class="done" id="doneBtn" type="button" hidden="">回到 EyeFlow</button>
     </div>
-    <p class="hint" id="hint">倒计时结束前，EyeFlow 会安静守住这段恢复时间。</p>
   </main>
 
   <script>
     const params = new URLSearchParams(window.location.search);
     const els = {
-      title: document.querySelector("#title"),
-      copy: document.querySelector("#copy"),
-      taskStep: document.querySelector("#taskStep"),
       taskTitle: document.querySelector("#taskTitle"),
       taskCopy: document.querySelector("#taskCopy"),
       timer: document.querySelector("#timer"),
       ring: document.querySelector("#ring"),
-      eyebrow: document.querySelector("#eyebrow"),
       doneBtn: document.querySelector("#doneBtn"),
       escapeBtn: document.querySelector("#escapeBtn"),
-      hint: document.querySelector("#hint"),
-      miraCaption: document.querySelector("#miraCaption"),
       stepFlow: document.querySelector("#stepFlow"),
       pet: document.querySelector(".pet")
     };
@@ -1018,10 +999,6 @@
       setBreathCycle(currentRelaxMood);
       scheduleBlink();
       document.body.removeAttribute("data-complete");
-      els.eyebrow.textContent = previewSession ? "恢复流程预览" : "轻提醒恢复";
-      els.title.textContent = payload.title || "Mira 带你离开屏幕一下";
-      els.copy.textContent = payload.copy || "不用盯着倒计时。我来守时间，你把视线交给远处。";
-      els.hint.textContent = "倒计时结束前，EyeFlow 会安静守住这段恢复时间。";
       els.doneBtn.hidden = true;
       els.escapeBtn.hidden = false;
       resetEscapeButton();
@@ -1034,16 +1011,10 @@
       completionShown = true;
       document.body.dataset.complete = "true";
       setRelaxMood("close");
-      els.eyebrow.textContent = previewSession ? "预览完成" : "恢复完成";
-      els.title.textContent = "可以慢慢回来了";
-      els.copy.textContent = previewSession
-        ? "恢复流程预览结束。你已经看过恢复画面的节奏。"
-        : "这轮恢复完成。先眨眨眼、动一下肩膀，再回到 EyeFlow。";
-      els.taskStep.textContent = "完成";
-      els.taskTitle.textContent = "Mira 已经守完这段时间";
-      els.taskCopy.textContent = "不用急着立刻盯回屏幕。让视线自然回来，再继续。";
-      els.miraCaption.textContent = "慢慢回来";
-      els.hint.textContent = "按钮已经可以使用。回去后可以告诉 Mira 眼睛感觉如何。";
+      els.taskTitle.textContent = "可以慢慢回来了";
+      els.taskCopy.textContent = previewSession
+        ? "恢复流程预览结束，可以回到 EyeFlow。"
+        : "这轮恢复完成。慢慢把视线收回来，再回到 EyeFlow。";
       renderStepFlow(activeTasks.length);
       els.timer.textContent = "00:00";
       els.ring.style.setProperty("--progress", "100%");
@@ -1061,10 +1032,8 @@
       const progress = totalSeconds <= 0 ? 100 : ((totalSeconds - remaining) / totalSeconds) * 100;
       const taskIndex = Math.min(activeTasks.length - 1, Math.floor(progress / (100 / activeTasks.length)));
       const task = activeTasks[taskIndex];
-      els.taskStep.textContent = `第 ${taskIndex + 1} 步 / ${activeTasks.length}`;
       els.taskTitle.textContent = task.title;
       els.taskCopy.textContent = task.copy;
-      els.miraCaption.textContent = task.caption;
       renderStepFlow(taskIndex);
       if (taskIndex !== currentTaskIndex) {
         currentTaskIndex = taskIndex;
@@ -1095,7 +1064,6 @@
         escapeArmedUntil = now + 3500;
         els.escapeBtn.classList.add("armed");
         els.escapeBtn.textContent = "再点一次确认退出";
-        els.hint.textContent = "这次不会记录为完成休息。确认退出后，Mira 会先安静几分钟。";
         window.setTimeout(() => {
           if (escapeArmedUntil > Date.now()) return;
           resetEscapeButton();

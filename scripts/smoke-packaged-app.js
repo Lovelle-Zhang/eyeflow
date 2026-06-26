@@ -86,7 +86,7 @@ const expectedCaptureStates = [
     activeNav: "",
     onboardingVisible: false,
     captureState: "break-lock active",
-    requiredText: ["Mira 带你离开屏幕一下", "紧急退出"]
+    requiredText: ["看向远处", "紧急退出"]
   },
   {
     name: "eyeflow-break-lock-complete.png",
@@ -96,7 +96,7 @@ const expectedCaptureStates = [
     activeNav: "",
     onboardingVisible: false,
     captureState: "force-return",
-    requiredText: ["Mira 已经守完这段时间", "回到 EyeFlow"]
+    requiredText: ["可以慢慢回来了", "回到 EyeFlow"]
   },
   {
     name: "eyeflow-rest-guide.png",
