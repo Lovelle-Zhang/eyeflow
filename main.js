@@ -43,6 +43,7 @@ let companionExpanded = false;
 let companionHoverState = { avatar: false, panel: false };
 let companionBubbleTimer = null;
 let companionBubbleBaseBounds = null;
+let companionExpandBaseBounds = null;
 let companionBoundsTransient = false;
 let latestPanelSide = "right";
 let latestPanelAnchorY = "center";
@@ -126,7 +127,8 @@ const appRoot = __dirname;
 const companionSizes = {
   compact: { width: 86, height: 86 },
   bubble: { width: 390, height: 104 },
-  panel: { width: 292, height: 142 }
+  panel: { width: 292, height: 142 },
+  expanded: { width: 360, height: 130 }
 };
 const hoverOpenDelay = 120;
 const hoverCloseDelay = 1600;
@@ -1257,6 +1259,7 @@ function defaultDashboardBounds() {
 
 function saveCompanionBounds() {
   if (!companionWindow || companionWindow.isDestroyed()) return;
+  if (companionBubbleBaseBounds || companionExpandBaseBounds) return;
   writeSettings({ ...readSettings(), companionBounds: companionWindow.getBounds() });
 }
 
@@ -1376,9 +1379,6 @@ function updateCompanionHover(source, hovering) {
     clearHoverCloseTimer();
     if (source === "avatar" && !companionExpanded) {
       scheduleHoverOpenFromMain();
-    } else if (companionExpanded) {
-      if (!companionPanelWindow || companionPanelWindow.isDestroyed()) createCompanionPanelWindow();
-      showCompanionPanelWhenReady();
     }
   } else {
     if (source === "avatar") clearHoverOpenTimer();
@@ -1387,9 +1387,8 @@ function updateCompanionHover(source, hovering) {
 }
 
 function positionCompanionPanel() {
-  if (!companionPanelWindow || companionPanelWindow.isDestroyed()) return;
-  companionPanelWindow.setBounds(panelBoundsForCompanion(), false);
-  sendPanelSide();
+  // The panel is now fused into the companion window and expands in place;
+  // there is no separate panel window to reposition.
 }
 
 function bringCompanionToFront(win) {
@@ -1419,13 +1418,6 @@ function ensureCompanionReachable() {
   keepCompanionVisible();
   if (!companionWindow.isVisible()) return;
   bringCompanionToFront(companionWindow);
-  if (companionExpanded) {
-    positionCompanionPanel();
-    if (companionPanelWindow && !companionPanelWindow.isDestroyed()) {
-      companionPanelWindow.showInactive();
-      bringCompanionToFront(companionPanelWindow);
-    }
-  }
 }
 
 function startCompanionVisibilityMonitor() {
@@ -1458,15 +1450,29 @@ function showCompanionPanelWhenReady() {
   bringCompanionToFront(companionPanelWindow);
 }
 
+function expandedBoundsForCompanion(baseBounds) {
+  return visibleCompanionBounds({
+    ...companionSizes.expanded,
+    x: baseBounds.x + baseBounds.width - companionSizes.expanded.width,
+    y: baseBounds.y + Math.round((baseBounds.height - companionSizes.expanded.height) / 2)
+  });
+}
+
 function showCompanionPanel() {
   if (companionBubbleBaseBounds) return;
   if (!companionWindow || companionWindow.isDestroyed()) createCompanionWindow();
-  if (!companionPanelWindow || companionPanelWindow.isDestroyed()) createCompanionPanelWindow();
-  companionExpanded = true;
+  if (!companionWindow || companionWindow.isDestroyed()) return;
   clearHoverOpenTimer();
   clearHoverCloseTimer();
-  revealCompanionWindow();
-  showCompanionPanelWhenReady();
+  if (!companionExpandBaseBounds) {
+    companionExpandBaseBounds = companionWindow.getBounds();
+  }
+  companionExpanded = true;
+  companionBoundsTransient = true;
+  companionWindow.setBounds(expandedBoundsForCompanion(companionExpandBaseBounds), false);
+  companionBoundsTransient = false;
+  companionWindow.showInactive();
+  bringCompanionToFront(companionWindow);
   sendCompanionExpanded();
 }
 
@@ -1479,8 +1485,18 @@ function hideCompanionPanel() {
     clearTimeout(autoPanelTimer);
     autoPanelTimer = null;
   }
-  hideWindowIfAlive(companionPanelWindow);
+  if (companionWindow && !companionWindow.isDestroyed() && companionExpandBaseBounds) {
+    companionBoundsTransient = true;
+    companionWindow.setBounds(visibleCompanionBounds({
+      ...companionSizes.compact,
+      x: companionExpandBaseBounds.x,
+      y: companionExpandBaseBounds.y
+    }), false);
+    companionBoundsTransient = false;
+  }
+  companionExpandBaseBounds = null;
   sendCompanionExpanded();
+  saveCompanionBounds();
 }
 
 function restoreCompanionBubble() {
@@ -1552,7 +1568,7 @@ function maybeShowCompanionExitHint() {
 
 function keepCompanionVisible() {
   if (!companionWindow || companionWindow.isDestroyed()) return;
-  if (companionBubbleBaseBounds) return;
+  if (companionBubbleBaseBounds || companionExpandBaseBounds) return;
   const nextBounds = visibleCompanionBounds(companionWindow.getBounds());
   companionWindow.setBounds(nextBounds, false);
   saveCompanionBounds();
@@ -2377,7 +2393,9 @@ app.whenReady().then(() => {
   createDashboardWindow();
   if (desktopPreferenceDefaults().showCompanionOnLaunch || debugCapture || wantsCurrentVisualCapture("companion-panel")) {
     createCompanionWindow();
-    createCompanionPanelWindow();
+    if (wantsCurrentVisualCapture("companion-panel")) {
+      createCompanionPanelWindow();
+    }
   }
   createTray();
   startActivityMonitor();
@@ -2425,20 +2443,13 @@ ipcMain.handle("companion:setExpanded", (_event, expanded) => {
     return { expanded: false, blocked: "bubble" };
   }
   if (companionExpanded === shouldExpand) {
-    if (shouldExpand) {
-      if (!companionPanelWindow || companionPanelWindow.isDestroyed()) createCompanionPanelWindow();
-      revealCompanionWindow();
-      showCompanionPanelWhenReady();
-    }
     return { expanded: companionExpanded };
   }
-  if (!companionPanelWindow || companionPanelWindow.isDestroyed()) createCompanionPanelWindow();
   if (shouldExpand) {
     showCompanionPanel();
   } else {
     hideCompanionPanel();
   }
-  saveCompanionBounds();
   return { expanded: companionExpanded };
 });
 

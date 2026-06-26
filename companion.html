@@ -21,15 +21,16 @@
       --mira-signal: #80d7bd;
       --mira-signal-glow: rgba(128, 215, 189, 0.42);
       --mira-line: calc(var(--ef-icon-stroke-base) * 1px);
-      --popover-bg: rgba(25, 31, 34, 0.82);
-      --popover-line: rgba(255, 255, 255, 0.075);
+      --popover-bg: rgba(30, 36, 41, 0.86);
+      --popover-line: rgba(255, 255, 255, 0.07);
       --popover-shadow:
-        0 10px 24px rgba(10, 18, 20, 0.16),
-        0 1px 2px rgba(10, 18, 20, 0.12);
-      --popover-text: rgba(247, 252, 249, 0.94);
-      --popover-muted: rgba(231, 242, 238, 0.68);
-      --popover-context: rgba(231, 242, 238, 0.46);
-      --popover-button-hover: rgba(255, 255, 255, 0.075);
+        0 12px 30px rgba(0, 0, 0, 0.42),
+        0 1px 3px rgba(0, 0, 0, 0.3),
+        inset 0 1px 0 rgba(255, 255, 255, 0.06);
+      --popover-text: rgba(247, 252, 250, 0.96);
+      --popover-muted: rgba(224, 236, 231, 0.72);
+      --popover-context: rgba(206, 222, 216, 0.52);
+      --popover-button-hover: rgba(255, 255, 255, 0.08);
       --popover-focus: rgba(128, 215, 189, 0.42);
     }
 
@@ -98,28 +99,14 @@
     }
 
     .companion.expanded {
-      width: 354px;
-      height: 136px;
+      width: calc(100vw - 16px);
+      height: calc(100vh - 16px);
       padding: 0;
       border: 0;
       border-radius: 0;
       background: transparent;
       box-shadow: none;
       backdrop-filter: none;
-    }
-
-    .companion.expanded::before {
-      content: "";
-      position: absolute;
-      left: 80px;
-      top: 51px;
-      width: var(--ef-space-6);
-      height: var(--ef-space-6);
-      border-radius: var(--ef-radius-xs);
-      background: var(--popover-bg);
-      transform: rotate(45deg);
-      box-shadow: -1px 1px 0 var(--popover-line);
-      z-index: 0;
     }
 
     .companion.expanded::after {
@@ -132,15 +119,16 @@
     }
 
     .companion.theme-day {
-      --popover-bg: rgba(251, 252, 246, 0.94);
-      --popover-line: rgba(24, 32, 31, 0.065);
+      --popover-bg: rgba(252, 252, 250, 0.93);
+      --popover-line: rgba(20, 28, 26, 0.07);
       --popover-shadow:
-        0 10px 24px rgba(30, 44, 38, 0.09),
-        0 1px 2px rgba(30, 44, 38, 0.06);
+        0 8px 26px rgba(26, 38, 34, 0.16),
+        0 1px 3px rgba(26, 38, 34, 0.09),
+        inset 0 1px 0 rgba(255, 255, 255, 0.7);
       --popover-text: var(--ink);
-      --popover-muted: rgba(100, 115, 107, 0.76);
-      --popover-context: rgba(100, 115, 107, 0.58);
-      --popover-button-hover: rgba(24, 32, 31, 0.055);
+      --popover-muted: rgba(48, 60, 55, 0.74);
+      --popover-context: rgba(86, 99, 92, 0.66);
+      --popover-button-hover: rgba(20, 28, 26, 0.05);
       --popover-focus: rgba(15, 159, 122, 0.34);
     }
 
@@ -177,8 +165,10 @@
     }
 
     .companion.expanded .pet {
-      left: 12px;
-      top: 30px;
+      left: auto;
+      right: 6px;
+      top: calc(50% - (var(--ef-mira-avatar-size) / 2));
+      z-index: 2;
     }
 
     .companion.speaking .pet {
@@ -347,20 +337,43 @@
     .companion.expanded .body {
       display: grid;
       align-content: center;
+      gap: var(--ef-space-2);
       position: absolute;
+      inset: 0;
       z-index: 1;
       overflow: hidden;
-      width: 260px;
-      min-height: 118px;
       max-width: none;
-      padding: var(--ef-space-6) calc(var(--ef-hit-target) + var(--ef-space-4)) var(--ef-space-6) var(--ef-space-7);
-      border: 1px solid var(--popover-line);
-      border-radius: var(--ef-radius-lg);
+      padding: var(--ef-space-5) calc(var(--ef-mira-avatar-size) + var(--ef-space-6)) var(--ef-space-5) var(--ef-space-7);
+      border: 0.5px solid var(--popover-line);
+      border-radius: var(--ef-radius-xl);
       background: var(--popover-bg);
       box-shadow: var(--popover-shadow);
-      backdrop-filter: blur(16px);
-      -webkit-backdrop-filter: blur(16px);
+      backdrop-filter: blur(18px);
+      -webkit-backdrop-filter: blur(18px);
       color: var(--popover-text);
+      cursor: pointer;
+    }
+
+    .companion.expanded .body strong {
+      margin: 0;
+    }
+
+    .companion.expanded .context-line {
+      margin-top: 0;
+      padding-left: 12px;
+      position: relative;
+    }
+
+    .companion.expanded .context-line::before {
+      content: "";
+      position: absolute;
+      left: 0;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 5px;
+      height: 5px;
+      border-radius: 50%;
+      background: var(--mira-signal);
     }
 
     .mira-bubble {
@@ -450,14 +463,21 @@
     .actions {
       display: none;
       position: absolute;
-      right: var(--ef-space-5);
-      top: var(--ef-space-9);
+      top: var(--ef-space-4);
+      right: calc(var(--ef-mira-avatar-size) + var(--ef-space-5));
     }
 
     .companion.expanded .actions {
       display: flex;
-      flex-direction: column;
-      gap: var(--ef-space-2);
+      flex-direction: row;
+      gap: var(--ef-space-1);
+      z-index: 2;
+    }
+
+    .companion.expanded .icon-btn {
+      width: 26px;
+      height: 26px;
+      border-radius: var(--ef-radius-sm);
     }
 
     .icon-btn {
@@ -846,7 +866,7 @@
 
     function syncExpanded(expanded) {
       isExpanded = Boolean(expanded);
-      companion.classList.toggle("expanded", !isDesktopShell && isExpanded);
+      companion.classList.toggle("expanded", isExpanded);
     }
 
     function setMiraBubble(payload = {}) {
