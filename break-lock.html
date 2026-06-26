@@ -411,6 +411,22 @@
       overflow-wrap: anywhere;
     }
 
+    .preview-badge {
+      justify-self: center;
+      width: fit-content;
+      margin: 0 auto;
+      padding: var(--ef-space-1) var(--ef-space-4);
+      border-radius: var(--ef-radius-pill);
+      background: rgba(142, 223, 199, 0.1);
+      color: rgba(231, 241, 236, 0.66);
+      font-size: var(--ef-text-meta);
+      font-weight: 620;
+    }
+
+    .preview-badge[hidden] {
+      display: none;
+    }
+
     .task {
       min-width: 0;
       display: grid;
@@ -693,6 +709,7 @@
         <div class="pet-mouth"></div>
       </div>
     </div>
+    <div class="preview-badge" id="previewBadge" hidden>15 秒预览 · 不计入今日休息</div>
     <div class="task" aria-live="polite">
       <strong id="taskTitle">看向远处</strong>
       <p id="taskCopy">不用盯着屏幕，看远处 20 秒再回来。</p>
@@ -717,6 +734,7 @@
     const els = {
       taskTitle: document.querySelector("#taskTitle"),
       taskCopy: document.querySelector("#taskCopy"),
+      previewBadge: document.querySelector("#previewBadge"),
       timer: document.querySelector("#timer"),
       ring: document.querySelector("#ring"),
       doneBtn: document.querySelector("#doneBtn"),
@@ -999,6 +1017,7 @@
       setBreathCycle(currentRelaxMood);
       scheduleBlink();
       document.body.removeAttribute("data-complete");
+      els.previewBadge.hidden = !previewSession;
       els.doneBtn.hidden = true;
       els.escapeBtn.hidden = false;
       resetEscapeButton();
