@@ -118,7 +118,6 @@ function checkPublicUiCopy() {
   const appFiles = [
     "index.html",
     "companion.html",
-    "companion-panel.html",
     "break-lock.html",
     "main.js",
     "preload.js"

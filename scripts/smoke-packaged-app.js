@@ -21,7 +21,6 @@ const expectedCaptures = [
   "eyeflow-profile-clean.png",
   "eyeflow-rest-guide.png",
   "eyeflow-companion.png",
-  "eyeflow-companion-panel.png",
   "eyeflow-break-lock-active.png",
   "eyeflow-break-lock-complete.png",
   "eyeflow-force-return.png"
@@ -67,16 +66,6 @@ const expectedCaptureStates = [
     onboardingVisible: false,
     captureState: "default",
     requiredText: ["下一轮建议", "今日分享卡", "今天就到这里了"]
-  },
-  {
-    name: "eyeflow-companion-panel.png",
-    requestedView: "companion-panel",
-    visibleView: "",
-    pageTitle: "Mira Panel",
-    activeNav: "",
-    onboardingVisible: false,
-    captureState: "companion panel",
-    requiredText: ["Mira", "舒适区"]
   },
   {
     name: "eyeflow-break-lock-active.png",

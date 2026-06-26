@@ -5,7 +5,6 @@ const { execFile, spawnSync } = require("node:child_process");
 
 let dashboardWindow;
 let companionWindow;
-let companionPanelWindow;
 let breakLockWindow;
 let tray;
 let breakLockCanClose = false;
@@ -45,15 +44,12 @@ let companionBubbleTimer = null;
 let companionBubbleBaseBounds = null;
 let companionExpandBaseBounds = null;
 let companionBoundsTransient = false;
-let latestPanelSide = "right";
-let latestPanelAnchorY = "center";
 let lastAutoPanelAt = 0;
 let lastAutoNotifyAt = 0;
 let lastInterventionLevel = 1;
 let autoPanelTimer = null;
 let hoverOpenTimer = null;
 let hoverCloseTimer = null;
-let panelReadyShowPending = false;
 let companionVisibilityTimer = null;
 let startupPanelShown = false;
 let companionHiddenByLifecycle = false;
@@ -239,9 +235,6 @@ function parseCurrentVisualCaptureTargets(input) {
     profileShareCard: "profile-share-card",
     onboarding: "onboarding-active",
     "onboarding-active": "onboarding-active",
-    "mira-panel": "companion-panel",
-    "companion-panel": "companion-panel",
-    panel: "companion-panel",
     "break-lock": "break-lock-active",
     "break-lock-active": "break-lock-active",
     breakLock: "break-lock-active",
@@ -265,7 +258,6 @@ function parseCurrentVisualCaptureTargets(input) {
         "profileView",
         "profile-share-card",
         "onboarding-active",
-        "companion-panel",
         "break-lock-active",
         "force-return"
       ].forEach((target) => targets.add(target));
@@ -294,7 +286,6 @@ function debugCaptureFilename(label) {
     "dashboard-rest-guide": "eyeflow-rest-guide.png",
     "dashboard-force-return": "eyeflow-force-return.png",
     companion: "eyeflow-companion.png",
-    "companion-panel": "eyeflow-companion-panel.png",
     "break-lock": "eyeflow-break-lock-active.png",
     "break-lock-complete": "eyeflow-break-lock-complete.png"
   })[label] || `eyeflow-${label}.png`;
@@ -310,7 +301,6 @@ function captureStateFor(label, options = {}) {
   if (options.restGuide) return "rest guide active";
   if (label === "break-lock") return "break-lock active";
   if (label === "break-lock-complete" || label === "dashboard-force-return") return "force-return";
-  if (label === "companion-panel") return "companion panel";
   if (label === "companion") return "companion avatar";
   return "default";
 }
@@ -1279,50 +1269,6 @@ function keepDashboardVisible() {
   dashboardWindow.setBounds(defaultDashboardBounds(), false);
 }
 
-function visiblePanelBounds(bounds) {
-  const displays = screen.getAllDisplays();
-  const display = screen.getDisplayMatching(bounds);
-  const area = display?.workArea || displays[0]?.workArea || { x: 0, y: 0, width: 1440, height: 900 };
-  const padding = 12;
-  const width = Math.min(bounds.width || companionSizes.panel.width, area.width);
-  const height = Math.min(bounds.height || companionSizes.panel.height, area.height);
-  return {
-    width,
-    height,
-    x: Math.min(Math.max(bounds.x ?? area.x + padding, area.x + padding), area.x + area.width - width - padding),
-    y: Math.min(Math.max(bounds.y ?? area.y + padding, area.y + padding), area.y + area.height - height - padding)
-  };
-}
-
-function panelBoundsForCompanion() {
-  const icon = companionWindow?.getBounds() || { x: 40, y: 80, ...companionSizes.compact };
-  const display = screen.getDisplayMatching(icon);
-  const area = display.workArea;
-  const panel = companionSizes.panel;
-  const rightX = icon.x + icon.width - 3;
-  const leftX = icon.x - panel.width + 3;
-  const hasRoomRight = rightX + panel.width <= area.x + area.width - 12;
-  latestPanelSide = hasRoomRight ? "right" : "left";
-  const x = latestPanelSide === "right" ? rightX : leftX;
-  const y = icon.y + Math.round((icon.height - panel.height) / 2);
-  const visible = visiblePanelBounds({ ...panel, x, y });
-  const pointerY = icon.y + Math.round(icon.height / 2) - visible.y;
-  latestPanelAnchorY = pointerY < 36
-    ? "top"
-    : pointerY > visible.height - 36
-      ? "bottom"
-      : "center";
-  return visible;
-}
-
-function sendPanelSide() {
-  if (!companionPanelWindow || companionPanelWindow.isDestroyed()) return;
-  companionPanelWindow.webContents.send("panel:side", {
-    side: latestPanelSide,
-    anchorY: latestPanelAnchorY
-  });
-}
-
 function sendCompanionExpanded() {
   if (!companionWindow || companionWindow.isDestroyed()) return;
   companionWindow.webContents.send("companion:expanded", companionExpanded);
@@ -1386,11 +1332,6 @@ function updateCompanionHover(source, hovering) {
   }
 }
 
-function positionCompanionPanel() {
-  // The panel is now fused into the companion window and expands in place;
-  // there is no separate panel window to reposition.
-}
-
 function bringCompanionToFront(win) {
   if (!win || win.isDestroyed()) return;
   win.setAlwaysOnTop(true, "floating");
@@ -1428,26 +1369,6 @@ function startCompanionVisibilityMonitor() {
 function hideWindowIfAlive(win) {
   if (!win || win.isDestroyed()) return;
   win.hide();
-}
-
-function showCompanionPanelWhenReady() {
-  if (!companionPanelWindow || companionPanelWindow.isDestroyed()) return;
-  positionCompanionPanel();
-  if (companionPanelWindow.webContents.isLoading()) {
-    if (panelReadyShowPending) return;
-    panelReadyShowPending = true;
-    companionPanelWindow.webContents.once("did-finish-load", () => {
-      panelReadyShowPending = false;
-      if (!companionExpanded || !companionPanelWindow || companionPanelWindow.isDestroyed()) return;
-      positionCompanionPanel();
-      companionPanelWindow.showInactive();
-      bringCompanionToFront(companionPanelWindow);
-      sendCompanionExpanded();
-    });
-    return;
-  }
-  companionPanelWindow.showInactive();
-  bringCompanionToFront(companionPanelWindow);
 }
 
 function expandedBoundsForCompanion(baseBounds) {
@@ -1552,7 +1473,7 @@ function showCompanionBubble(message, options = {}) {
 function maybeShowCompanionExitHint() {
   const settings = readSettings();
   if (settings.companionExitHintShown === true) return { ok: false, reason: "shown" };
-  if (debugCapture || wantsCurrentVisualCapture("companion") || wantsCurrentVisualCapture("companion-panel")) {
+  if (debugCapture || wantsCurrentVisualCapture("companion")) {
     return { ok: false, reason: "capture" };
   }
   if (!desktopPreferenceDefaults(settings).showCompanionOnLaunch) {
@@ -1576,7 +1497,6 @@ function keepCompanionVisible() {
 
 function resetCompanionPosition() {
   companionExpanded = false;
-  hideWindowIfAlive(companionPanelWindow);
   revealCompanionWindow({ reset: true, focus: true });
   sendCompanionExpanded();
 }
@@ -1585,7 +1505,6 @@ function hideCompanionWindow({ persistPreference = true } = {}) {
   if (persistPreference) markCompanionExitHintShown();
   if (persistPreference) writeDesktopPreference("showCompanionOnLaunch", false);
   hideWindowIfAlive(companionWindow);
-  hideWindowIfAlive(companionPanelWindow);
   companionExpanded = false;
   companionHoverState = { avatar: false, panel: false };
   companionBubbleBaseBounds = null;
@@ -1741,9 +1660,6 @@ function createCompanionWindow() {
     revealCompanionWindow();
     setTimeout(() => maybeShowCompanionExitHint(), 650);
     runDebugRestClick();
-    if (wantsCurrentVisualCapture("companion-panel")) {
-      setTimeout(() => showCompanionPanel(), 450);
-    }
     if (!startupPanelShown && Number(latestState.interventionLevel || 1) > 1) {
       startupPanelShown = true;
       setTimeout(() => {
@@ -1760,50 +1676,6 @@ function createCompanionWindow() {
   companionWindow.on("moved", () => {
     if (companionBoundsTransient) return;
     saveCompanionBounds();
-    positionCompanionPanel();
-  });
-}
-
-function createCompanionPanelWindow() {
-  panelReadyShowPending = false;
-  companionPanelWindow = new BrowserWindow({
-    ...panelBoundsForCompanion(),
-    frame: false,
-    resizable: false,
-    movable: false,
-    transparent: true,
-    hasShadow: false,
-    alwaysOnTop: true,
-    skipTaskbar: true,
-    acceptFirstMouse: true,
-    show: false,
-    title: "Mira Panel",
-    webPreferences: {
-      preload: path.join(appRoot, "preload.js"),
-      contextIsolation: true,
-      nodeIntegration: false
-    }
-  });
-  attachWebDiagnostics(companionPanelWindow, "companion-panel");
-
-  companionPanelWindow.loadFile(path.join(appRoot, "companion-panel.html"));
-  companionPanelWindow.setVisibleOnAllWorkspaces(true, { visibleOnFullScreen: false });
-  companionPanelWindow.webContents.once("did-finish-load", () => {
-    companionPanelWindow.webContents.send("state:update", latestState);
-    sendPanelSide();
-    if (wantsCurrentVisualCapture("companion-panel")) {
-      companionExpanded = true;
-      positionCompanionPanel();
-      companionPanelWindow.showInactive();
-      bringCompanionToFront(companionPanelWindow);
-    }
-    captureDebugPage(companionPanelWindow, "companion-panel", 600, {
-      requestedView: "companion-panel",
-      expectedVisibleView: "",
-      captureState: "companion panel",
-      requiredText: ["Mira", "舒适区"],
-      captureReason: "companion panel"
-    });
   });
 }
 
@@ -2185,7 +2057,7 @@ function broadcastState(state) {
   }
   latestState = { ...latestState, ...state };
   updateTrayMenu();
-  for (const win of [dashboardWindow, companionWindow, companionPanelWindow]) {
+  for (const win of [dashboardWindow, companionWindow]) {
     if (win && !win.isDestroyed()) {
       win.webContents.send("state:update", latestState);
     }
@@ -2391,11 +2263,8 @@ app.whenReady().then(() => {
   updateApplicationMenu();
 
   createDashboardWindow();
-  if (desktopPreferenceDefaults().showCompanionOnLaunch || debugCapture || wantsCurrentVisualCapture("companion-panel")) {
+  if (desktopPreferenceDefaults().showCompanionOnLaunch || debugCapture) {
     createCompanionWindow();
-    if (wantsCurrentVisualCapture("companion-panel")) {
-      createCompanionPanelWindow();
-    }
   }
   createTray();
   startActivityMonitor();
@@ -2431,7 +2300,6 @@ ipcMain.handle("companion:moveBy", (_event, delta) => {
     y: bounds.y + Math.round(delta?.y || 0)
   };
   companionWindow.setBounds(visibleCompanionBounds(nextBounds), false);
-  positionCompanionPanel();
   saveCompanionBounds();
 });
 

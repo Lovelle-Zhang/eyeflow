@@ -47,7 +47,6 @@ function main() {
   const recoveryDataJs = read("eyeflow-recovery-data.js");
   const uiUtilsJs = read("eyeflow-ui-utils.js");
   const companionHtml = read("companion.html");
-  const companionPanelHtml = read("companion-panel.html");
   const mainJs = read("main.js");
   const preloadJs = read("preload.js");
   parseScriptFile("eyeflow-core.js");
@@ -56,8 +55,7 @@ function main() {
 
   const scriptCounts = [
     ["index.html", parseInlineScripts("index.html")],
-    ["companion.html", parseInlineScripts("companion.html")],
-    ["companion-panel.html", parseInlineScripts("companion-panel.html")]
+    ["companion.html", parseInlineScripts("companion.html")]
   ];
 
   assertNotIncludes(indexHtml, '<span class="state-label">认识 Mira</span>', "onboarding removes the redundant intro label");
@@ -164,7 +162,7 @@ function main() {
   assertIncludes(mainJs, "hasCompanionVisibilityPreference", "main can migrate old hidden desktop Mira preferences");
   assertIncludes(mainJs, "showCompanionOnLaunch: hasCompanionVisibilityPreference", "main defaults desktop Mira visible unless explicitly hidden in the current preference version");
   assertIncludes(mainJs, "next.companionVisibilityPreferenceVersion = COMPANION_VISIBILITY_PREFERENCE_VERSION", "main marks explicit desktop Mira visibility choices");
-  assertMatches(mainJs, /if \(desktopPreferenceDefaults\(\)\.showCompanionOnLaunch \|\| debugCapture \|\| wantsCurrentVisualCapture\("companion-panel"\)\) \{[\s\S]*createCompanionWindow\(\);[\s\S]*createCompanionPanelWindow\(\);[\s\S]*\}/, "main creates companion windows by default unless the user hides Mira");
+  assertMatches(mainJs, /if \(desktopPreferenceDefaults\(\)\.showCompanionOnLaunch \|\| debugCapture\) \{[\s\S]*createCompanionWindow\(\);[\s\S]*\}/, "main creates the companion window by default unless the user hides Mira");
   assertMatches(mainJs, /function defaultCompanionBounds\(\)[\s\S]*screen\.getPrimaryDisplay\(\)\?\.workArea[\s\S]*x: area\.x \+ area\.width - companionSizes\.compact\.width - 28[\s\S]*y: area\.y \+ area\.height - companionSizes\.compact\.height - 28/, "main defaults desktop Mira to the primary workArea bottom-right above the Dock");
   assertMatches(mainJs, /const bounds = settings\.companionBounds \|\| defaultCompanionBounds\(\);[\s\S]*const initialBounds = visibleCompanionBounds/, "first desktop Mira appearance uses the bottom-right default when no saved position exists");
   assertMatches(mainJs, /if \(reset\) \{[\s\S]*setBounds\(visibleCompanionBounds\(defaultCompanionBounds\(\)\), false\);[\s\S]*\}/, "find Mira resets to the same bottom-right default position");
@@ -209,7 +207,6 @@ function main() {
   assertMatches(mainJs, /function\s+sendDashboardFocus\(payload = \{\}\)[\s\S]*dashboardWindow\.webContents\.send\("dashboard:focus"/, "main process forwards dashboard focus requests");
   assertMatches(indexHtml, /onDashboardFocus\?\.\(\(payload = \{\}\) => \{[\s\S]*focusManualStartEntry\(\);/, "dashboard focus can locate the manual start entry");
   assertMatches(indexHtml, /function\s+focusManualStartEntry\(\)[\s\S]*switchView\("todayView"\)[\s\S]*focusSessionPanel\(\{\s*focusTarget:\s*"start"\s*\}\)/, "manual start focus opens Today and targets the session action");
-  assertMatches(companionPanelHtml, /showDashboard\(\{\s*view:\s*"todayView",\s*focus:\s*"manualStart"\s*\}\)/, "companion panel opens directly to the manual start entry");
   assertMatches(indexHtml, /function\s+toggleSession\(\)\s*\{[\s\S]*clearFirstRoundLanding\(\);/, "manual session controls clear first-round hint");
   assertMatches(indexHtml, /function\s+showBreak\(reason\)\s*\{[\s\S]*clearFirstRoundLanding\(\);/, "break overlay clears first-round hint");
 
@@ -218,10 +215,6 @@ function main() {
   assertMatches(companionHtml, /companion\.addEventListener\("dblclick"[\s\S]*setCompanionVisible\?\.\(false\)/, "desktop Mira double-click persists hidden visibility");
   assertMatches(mainJs, /function\s+showDashboard\(options = \{\}\)[\s\S]*options\?\.restGuide[\s\S]*sendDashboardRestGuide/, "main process forwards rest guide request");
   assertMatches(mainJs, /dashboardWindow\.webContents\.send\("dashboard:restGuide"/, "dashboard rest-guide IPC");
-
-  assertIncludes(companionPanelHtml, "anchor-top", "panel top anchor class");
-  assertIncludes(companionPanelHtml, "anchor-bottom", "panel bottom anchor class");
-  assertMatches(mainJs, /anchorY:\s*latestPanelAnchorY/, "main process sends panel vertical anchor");
 
   console.log("[smoke:onboarding] PASSED. First-run Mira flow is wired.");
   console.log("  - eyeflow-core.js: parse OK");

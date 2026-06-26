@@ -99,7 +99,6 @@ function main() {
   const restFlowJs = read("eyeflow-rest-flow.js");
   const uiUtilsJs = read("eyeflow-ui-utils.js");
   const companionHtml = read("companion.html");
-  const companionPanelHtml = read("companion-panel.html");
   const breakLockHtml = read("break-lock.html");
   const mainJs = read("main.js");
   const preloadJs = read("preload.js");
@@ -120,7 +119,6 @@ function main() {
   const scriptCounts = [
     ["index.html", parseInlineScripts("index.html")],
     ["companion.html", parseInlineScripts("companion.html")],
-    ["companion-panel.html", parseInlineScripts("companion-panel.html")],
     ["break-lock.html", parseInlineScripts("break-lock.html")]
   ];
 
@@ -245,19 +243,7 @@ function main() {
   assertMatches(mainJs, /function\s+keepDashboardVisible\(\)[\s\S]*dashboardWindow\.setBounds\(defaultDashboardBounds\(\), false\);/, "installed dashboard reopens centered at the default size");
   assertIncludes(mainJs, "defaultX = area.x + Math.round((area.width - width) / 2)", "installed dashboard default bounds are centered");
   assertIncludes(companionHtml, "font-size: var(--ef-text-helper);", "installed companion uses helper body text token");
-  assertIncludes(companionPanelHtml, "font-size: var(--ef-text-helper);", "installed companion panel uses helper body text token");
-  assertIncludes(mainJs, "panel: { width: 292, height: 142 }", "installed companion panel stays compact with vertical actions");
   assertIncludes(companionHtml, "-webkit-line-clamp: 2;", "installed companion bubble keeps copy to two quiet lines");
-  assertIncludes(companionPanelHtml, "-webkit-line-clamp: 2;", "installed companion panel keeps copy to two quiet lines");
-  assertIncludes(companionPanelHtml, "--popover-line: rgba(255, 255, 255, 0.075);", "installed companion panel uses low-weight popover line");
-  assertIncludes(companionPanelHtml, "box-shadow: var(--popover-shadow);", "installed companion panel uses macOS-style popover shadow token");
-  assertMatches(companionPanelHtml, /\.bubble\s*\{[\s\S]*border:\s*1px solid var\(--popover-line\);[\s\S]*border-radius:\s*var\(--ef-radius-lg\);/, "installed companion panel reads as a native popover surface");
-  assertMatches(companionPanelHtml, /\.panel::before\s*\{[\s\S]*box-shadow:\s*-1px 1px 0 var\(--popover-line\);/, "installed companion panel keeps a low-weight Mira connection tail");
-  assertMatches(companionPanelHtml, /\.icon-btn\s*\{[\s\S]*width:\s*var\(--ef-hit-target\);[\s\S]*background:\s*transparent;[\s\S]*border:\s*1px solid transparent;/, "installed companion panel buttons are lightweight icon controls");
-  assertMatches(companionPanelHtml, /svg\s*\{[\s\S]*width:\s*var\(--ef-icon-sm\);[\s\S]*stroke-width:\s*var\(--ef-icon-stroke-quiet\);/, "installed companion panel icons use quiet design-system stroke");
-  assertNotIncludes(companionPanelHtml, 'stroke-width="2"', "installed companion panel avoids heavy inline icon strokes");
-  assertMatches(companionPanelHtml, /\.bubble\s*\{[\s\S]*overflow:\s*hidden;[\s\S]*align-items:\s*start;/, "installed companion panel keeps text inside bubble");
-  assertMatches(companionPanelHtml, /\.actions\s*\{[\s\S]*flex-direction:\s*column;/, "installed companion panel stacks actions vertically");
   assertIncludes(indexHtml, 'const SYMPTOM_KEYS = ["dryness", "strain", "blur", "light"];', "installed dashboard defines canonical symptom key order");
   assertMatches(indexHtml, /function\s+currentSymptoms\(\)\s*\{[\s\S]*return normalizeSymptoms\(state\.symptoms\);[\s\S]*\}/, "installed dashboard reads current symptoms from state");
   assertMatches(indexHtml, /function\s+setCurrentSymptoms\(symptoms = \{\}, options = \{\}\)[\s\S]*state\.symptoms = normalizeSymptoms/, "installed dashboard writes symptoms through normalized setter");
@@ -371,7 +357,7 @@ function main() {
   assertIncludes(mainJs, "hasCompanionVisibilityPreference", "installed main can migrate old hidden desktop Mira preferences");
   assertIncludes(mainJs, "showCompanionOnLaunch: hasCompanionVisibilityPreference", "installed main defaults desktop Mira visible unless explicitly hidden in the current preference version");
   assertIncludes(mainJs, "next.companionVisibilityPreferenceVersion = COMPANION_VISIBILITY_PREFERENCE_VERSION", "installed main marks explicit desktop Mira visibility choices");
-  assertMatches(mainJs, /if \(desktopPreferenceDefaults\(\)\.showCompanionOnLaunch \|\| debugCapture \|\| wantsCurrentVisualCapture\("companion-panel"\)\) \{[\s\S]*createCompanionWindow\(\);[\s\S]*createCompanionPanelWindow\(\);[\s\S]*\}/, "installed main creates companion windows by default unless the user hides Mira");
+  assertMatches(mainJs, /if \(desktopPreferenceDefaults\(\)\.showCompanionOnLaunch \|\| debugCapture\) \{[\s\S]*createCompanionWindow\(\);[\s\S]*\}/, "installed main creates the companion window by default unless the user hides Mira");
   assertMatches(mainJs, /function defaultCompanionBounds\(\)[\s\S]*screen\.getPrimaryDisplay\(\)\?\.workArea[\s\S]*x: area\.x \+ area\.width - companionSizes\.compact\.width - 28[\s\S]*y: area\.y \+ area\.height - companionSizes\.compact\.height - 28/, "installed main defaults desktop Mira to the primary workArea bottom-right above the Dock");
   assertMatches(mainJs, /const bounds = settings\.companionBounds \|\| defaultCompanionBounds\(\);[\s\S]*const initialBounds = visibleCompanionBounds/, "installed first desktop Mira appearance uses the bottom-right default when no saved position exists");
   assertMatches(mainJs, /if \(reset\) \{[\s\S]*setBounds\(visibleCompanionBounds\(defaultCompanionBounds\(\)\), false\);[\s\S]*\}/, "installed find Mira resets to the same bottom-right default position");
@@ -533,10 +519,7 @@ function main() {
   assertIncludes(companionHtml, "点我会打开休息指引。", "installed pink Mira copy");
   assertMatches(companionHtml, /companion\.addEventListener\("dblclick"[\s\S]*setCompanionVisible\?\.\(false\)/, "installed desktop Mira double-click persists hidden visibility");
   assertIncludes(companionHtml, 'id="contextLine"', "installed companion renders continuity context");
-  assertIncludes(companionPanelHtml, 'id="contextLine"', "installed companion panel renders continuity context");
-  assertIncludes(companionPanelHtml, "state.continuityLine", "installed companion panel consumes continuity context");
-  assertIncludes(companionPanelHtml, 'title="打开手动专注"', "installed companion panel labels the manual start jump");
-  assertMatches(companionPanelHtml, /showDashboard\(\{\s*view:\s*"todayView",\s*focus:\s*"manualStart"\s*\}\)/, "installed companion panel opens directly to the manual start entry");
+  assertIncludes(companionHtml, "state.continuityLine", "installed companion consumes continuity context");
   assertIncludes(indexHtml, 'continuityLine: `${classifyLoad(load)} · ${intensityLabel(state.settings.intensity || "quiet")}`', "installed companion context avoids baseline math");
   assertIncludes(companionHtml, "function shouldNotifyRest", "installed companion gates rest notifications");
   assertIncludes(companionHtml, "restNotifyCooldown = 12 * 60 * 1000", "installed companion rest notifications have a cooldown");
@@ -544,8 +527,6 @@ function main() {
   assertMatches(companionHtml, /state\.allowSystemNotify !== true/, "installed companion respects notification setting");
   assertIncludes(indexHtml, "max-height: calc(100vh - var(--ef-space-12));", "installed break dialog stays inside short desktop windows");
   assertIncludes(indexHtml, "overscroll-behavior: contain;", "installed break dialog scroll is contained");
-  assertIncludes(companionPanelHtml, "anchor-top", "installed panel top anchor");
-  assertIncludes(companionPanelHtml, "anchor-bottom", "installed panel bottom anchor");
   assertIncludes(breakLockHtml, "再点一次确认退出", "installed break lock emergency exit requires confirmation");
   assertIncludes(breakLockHtml, "interrupted: true", "installed break lock reports interrupted force exits");
   assertIncludes(indexHtml, "Mira 先只改变状态和颜色；到恢复断点再短暂提示。", "installed L2 early phase stays visual-only");

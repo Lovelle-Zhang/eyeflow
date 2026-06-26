@@ -53,7 +53,6 @@ function main() {
     "profileView",
     "profile-share-card",
     "onboarding-active",
-    "companion-panel",
     "break-lock-active",
     "force-return"
   ].forEach((target) => {
@@ -99,7 +98,6 @@ function main() {
   assertIncludes(packagedSmokeJs, "assertScreenshotStateGate", "packaged smoke has screenshot state gate");
   assertIncludes(packagedSmokeJs, "stateMatchesRequest !== true", "packaged smoke rejects mismatched captures");
   assertIncludes(packagedSmokeJs, "captureState", "packaged smoke validates capture state");
-  assertIncludes(packagedSmokeJs, "eyeflow-companion-panel.png", "packaged smoke covers companion panel capture");
   assertIncludes(packagedSmokeJs, "eyeflow-break-lock-active.png", "packaged smoke covers break-lock active capture");
   assertIncludes(packagedSmokeJs, "eyeflow-force-return.png", "packaged smoke covers force-return capture");
   assertMatches(verifyJs, /\["Check current visual capture gate",\s*"smoke:current-capture"\]/, "verify includes current visual capture gate");

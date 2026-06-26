@@ -49,7 +49,6 @@
       "eyeflow-rest-flow.js",
       "eyeflow-ui-utils.js",
       "companion.html",
-      "companion-panel.html",
       "break-lock.html",
       "main.js",
       "preload.js",

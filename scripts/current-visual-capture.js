@@ -75,13 +75,6 @@ const targets = {
     onboardingVisible: true,
     captureState: "onboarding active"
   },
-  "companion-panel": {
-    aliases: ["panel", "mira-panel", "companion-panel"],
-    filename: "eyeflow-companion-panel.png",
-    requestedView: "companion-panel",
-    visibleView: "",
-    captureState: "companion panel"
-  },
   "break-lock-active": {
     aliases: ["break-lock", "break-lock-active"],
     filename: "eyeflow-break-lock-active.png",

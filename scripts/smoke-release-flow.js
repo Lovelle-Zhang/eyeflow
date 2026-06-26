@@ -8,7 +8,6 @@ const root = path.join(__dirname, "..");
 const visualSourceFiles = [
   "index.html",
   "companion.html",
-  "companion-panel.html",
   "break-lock.html"
 ];
 const styleSignalPattern = /href="\.\/eyeflow-design-system\.css"|stroke-width="2"|font-size:\s*(?!var\()[0-9]|gap:\s*[0-9]|padding:\s*[0-9]|border-radius:\s*[0-9]/g;
@@ -106,7 +105,6 @@ function main() {
   const visualSmokeJs = read("scripts/smoke-visual-utils.js");
   const launchPreflightJs = read("scripts/launch-preflight.js");
   const mainJs = read("main.js");
-  const companionPanelHtml = visualSources["companion-panel.html"];
   const visualGate = assertVisualSourceGate(visualSources);
 
   [
@@ -160,7 +158,6 @@ function main() {
     "eyeflow-rest-flow.js",
     "eyeflow-ui-utils.js",
     "companion.html",
-    "companion-panel.html",
     "break-lock.html",
     "main.js",
     "preload.js",
@@ -287,7 +284,6 @@ function main() {
   assertIncludes(installedSmokeJs, "installed today action column hides when no action is visible", "installed smoke checks today action column empty state");
   assertIncludes(installedSmokeJs, "installed hero primary action starts workflow immediately", "installed smoke checks hero workflow action");
   assertIncludes(installedSmokeJs, "installed dashboard focus can locate the manual start entry", "installed smoke checks dashboard manual-start focus");
-  assertIncludes(installedSmokeJs, "installed companion panel opens directly to the manual start entry", "installed smoke checks companion panel manual-start jump");
   assertIncludes(installedSmokeJs, "installed today main state leads with Mira's companion role", "installed smoke checks today Mira companion role");
   assertIncludes(installedSmokeJs, "installed running state separates auto and manual session meaning", "installed smoke checks running state wording");
   assertIncludes(installedSmokeJs, "installed today hides secondary rhythm explanation from first glance", "installed smoke checks today hides secondary rhythm detail");
@@ -365,15 +361,6 @@ function main() {
   assertIncludes(installedSmokeJs, "installed app avoids heavy inline icon strokes", "installed smoke checks heavy icon stroke removal");
   assertIncludes(installedSmokeJs, "点我会打开休息指引。", "installed smoke checks pink Mira copy");
   assertIncludes(installedSmokeJs, "installed companion uses helper body text token", "installed smoke checks companion body typography token");
-  assertIncludes(installedSmokeJs, "installed companion panel uses helper body text token", "installed smoke checks companion panel body typography token");
-  assertIncludes(installedSmokeJs, "installed companion panel stays compact with vertical actions", "installed smoke checks compact companion panel size");
-  assertIncludes(installedSmokeJs, "installed companion panel stacks actions vertically", "installed smoke checks companion panel action stack");
-  assertIncludes(installedSmokeJs, "installed companion panel keeps copy to two quiet lines", "installed smoke checks companion panel copy clamp");
-  assertIncludes(installedSmokeJs, "installed companion panel uses low-weight popover line", "installed smoke checks companion panel native popover line");
-  assertIncludes(installedSmokeJs, "installed companion panel uses macOS-style popover shadow token", "installed smoke checks companion panel popover shadow");
-  assertIncludes(installedSmokeJs, "installed companion panel keeps a low-weight Mira connection tail", "installed smoke checks companion panel tail");
-  assertIncludes(installedSmokeJs, "installed companion panel buttons are lightweight icon controls", "installed smoke checks companion panel light icon buttons");
-  assertIncludes(installedSmokeJs, "installed companion panel icons use quiet design-system stroke", "installed smoke checks companion panel quiet icon stroke");
   assertIncludes(installedSmokeJs, "installed onboarding sells the companion feeling first", "installed smoke checks onboarding companion-first sentence");
   assertIncludes(installedSmokeJs, "installed onboarding creates a first-five-minute aha moment", "installed smoke checks onboarding aha moment");
   assertIncludes(installedSmokeJs, "installed onboarding has one primary action", "installed smoke checks onboarding single primary action");
@@ -381,7 +368,7 @@ function main() {
   assertIncludes(installedSmokeJs, "installed onboarding removes first-run state presets", "installed smoke checks onboarding removes state presets");
   assertIncludes(installedSmokeJs, "installed onboarding removes permission wording from first-run", "installed smoke checks onboarding removes permission wording");
   assertIncludes(installedSmokeJs, "installed onboarding overlay centers the first-run dialog in the dashboard window", "installed smoke checks onboarding dialog centering");
-  assertIncludes(installedSmokeJs, "installed main creates companion windows by default unless the user hides Mira", "installed smoke checks companion default visible");
+  assertIncludes(installedSmokeJs, "installed main creates the companion window by default unless the user hides Mira", "installed smoke checks companion default visible");
   assertIncludes(installedSmokeJs, "installed main can migrate old hidden desktop Mira preferences", "installed smoke checks old hidden companion migration");
   assertIncludes(installedSmokeJs, "installed main marks explicit desktop Mira visibility choices", "installed smoke checks explicit companion preference marker");
   assertIncludes(installedSmokeJs, "installed temporary companion hides do not persist the hidden preference", "installed smoke checks lifecycle hide does not persist");
@@ -462,7 +449,6 @@ function main() {
     "eyeflow-profile-clean.png",
     "eyeflow-rest-guide.png",
     "eyeflow-companion.png",
-    "eyeflow-companion-panel.png",
     "eyeflow-break-lock-active.png",
     "eyeflow-break-lock-complete.png",
     "eyeflow-force-return.png"
@@ -482,8 +468,6 @@ function main() {
   assertIncludes(packagedSmokeJs, "toastOverlaps", "packaged smoke reports toast safe-zone overlap count");
   assertIncludes(packagedSmokeJs, "scrollXOverflow", "packaged smoke rejects visible horizontal overflow");
   assertIncludes(packagedSmokeJs, "clippedControls", "packaged smoke rejects clipped dashboard controls");
-  assertIncludes(companionPanelHtml, "overflow: hidden;", "companion panel keeps bubble text inside panel bounds");
-  assertIncludes(companionPanelHtml, "-webkit-line-clamp: 2;", "companion panel keeps bubble copy quiet and contained");
   assertIncludes(packagedSmokeJs, "EYEFLOW_SMOKE_TIMEOUT_MS || 90000", "packaged smoke gives force-return capture enough time");
   assertIncludes(mainJs, "debugCaptureQueues", "debug captures are serialized per window");
   assertIncludes(mainJs, "[EyeFlow:debug] dashboard view json", "dashboard debug emits structured layout probe");
