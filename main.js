@@ -933,9 +933,7 @@ function runDebugForcePreview() {
         preview: true,
         voiceGuide: false,
         recoveryMode: mode,
-        tasks,
-        title: "Mira 带你离开屏幕一下",
-        copy: "这是 ${previewSeconds} 秒窗口预览，不会计入今日休息。正式开启后会进入全屏恢复。"
+        tasks
       });
       return { ok: true, mode, taskCount: tasks.length, voiceChecked };
     })()`).then((result) => {
@@ -967,7 +965,7 @@ function runDebugForcePreview() {
             requestedView: "break-lock",
             expectedVisibleView: "",
             captureState: "force-return",
-            requiredText: ["Mira 已经守完这段时间", "回到 EyeFlow"],
+            requiredText: ["可以慢慢回来了", "回到 EyeFlow"],
             captureReason: "force preview complete state"
           });
           setTimeout(() => {
@@ -1018,7 +1016,7 @@ function captureDebugBreakLockComplete(win, delayMs = 600) {
         requestedView: "break-lock",
         expectedVisibleView: "",
         captureState: "force-return",
-        requiredText: ["Mira 已经守完这段时间", "回到 EyeFlow"],
+        requiredText: ["可以慢慢回来了", "回到 EyeFlow"],
         captureReason: "force preview complete state"
       });
     });
@@ -2077,7 +2075,7 @@ function finishBreakLock(payload = {}) {
         requestedView: "break-lock",
         expectedVisibleView: "",
         captureState: "force-return",
-        requiredText: ["Mira 已经守完这段时间", "回到 EyeFlow"],
+        requiredText: ["可以慢慢回来了", "回到 EyeFlow"],
         captureReason: "force preview complete state"
       })).finally(closeBreakLockWindow);
     } else {
