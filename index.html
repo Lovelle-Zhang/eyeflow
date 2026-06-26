@@ -5075,6 +5075,9 @@
 
     .break-dialog h3 {
       margin: 0;
+      /* Fixed-dark dialog surface: the global h3 color is --ink (dark) and made
+         the active break title invisible. Pin a light title like rest-ready. */
+      color: #f2fbf7;
       font-size: var(--ef-text-display-sm);
       line-height: var(--ef-line-tight);
       letter-spacing: 0;
