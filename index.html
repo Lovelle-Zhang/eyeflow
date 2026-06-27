@@ -14350,7 +14350,7 @@
       let recoveryCount = 0;
       let recordCount = 0;
       records.forEach((r) => {
-        const dayActive = Math.max(Number(r.elapsedSeconds) || 0, Number(r.autoElapsedSeconds) || 0);
+        const dayActive = recordedSecondsForDay(r);
         const recoveries = (Array.isArray(r.events) ? r.events : [])
           .filter((e) => e && e.type === "recovery_event" && e.completed !== false);
         activeSeconds += dayActive;
