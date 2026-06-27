@@ -14317,31 +14317,50 @@
     }
 
     // ===== 这几天 window overview (week / month rest summary) =====
-    function recoveryDurationSeconds(events) {
-      return (events || []).reduce((sum, event) => {
-        if (!event || event.type !== "recovery_event" || event.completed === false) return sum;
-        return sum + Math.max(0, Number(event.durationSeconds) || 0);
-      }, 0);
-    }
-
     function setOverviewText(id, text) {
       const node = document.getElementById(id);
       if (node) node.textContent = text;
     }
 
-    // Per-day aggregation. Live current day from in-memory counters; past days
-    // from summaryHistory. Windowed by dayGap so 本周 = 7, 本月 = 30.
+    // A user-completed rest = completeRecovery only. Excludes auto idle-detection
+    // (mode "system-detected"), system lock/sleep (mode "system-lifecycle"), and
+    // interrupted/extended rests (completed === false).
+    function isUserRecovery(event) {
+      return Boolean(
+        event
+        && event.type === "recovery_event"
+        && event.completed !== false
+        && event.mode !== "system-detected"
+        && event.mode !== "system-lifecycle"
+      );
+    }
+
+    // A user-written status = saveLog, which emits a daily_assessment with
+    // trigger "manual_log". Excludes addSystemLog system entries (no such event).
+    function isUserRecord(event) {
+      return Boolean(event && event.type === "daily_assessment" && event.trigger === "manual_log");
+    }
+
+    // Real active time per focus segment = wall-clock (endedAt - startedAt).
+    // durationSeconds is cumulative across pause/resume, so summing it would
+    // double-count; the segment span never does.
+    function focusSegmentSeconds(event) {
+      if (!event || event.type !== "focus_session" || event.phase !== "ended") return 0;
+      const start = Date.parse(event.startedAt || "");
+      const end = Date.parse(event.endedAt || "");
+      if (Number.isFinite(start) && Number.isFinite(end) && end > start) {
+        return (end - start) / 1000;
+      }
+      return 0;
+    }
+
+    // Per-day aggregation over stored events (current day + summaryHistory),
+    // windowed by dayGap so 本周 = 7, 本月 = 30. Counts only user-initiated
+    // activity so the three figures sit on the same real-usage scale.
     function profileWindowStats(days) {
       const today = todayKey();
       const records = [
-        {
-          day: today,
-          elapsedSeconds: Math.max(Number(elapsedSeconds) || 0, 0),
-          autoElapsedSeconds: Math.max(Number(autoElapsedSeconds) || 0, 0),
-          breaks: Number(state.breaks) || 0,
-          logs: state.logs || [],
-          events: state.events || []
-        },
+        { day: today, events: state.events || [] },
         ...(state.summaryHistory || [])
       ].filter((r) => r && r.day && dayGap(r.day, today) < days);
 
@@ -14350,13 +14369,17 @@
       let recoveryCount = 0;
       let recordCount = 0;
       records.forEach((r) => {
-        const dayActive = recordedSecondsForDay(r);
-        const recoveries = (Array.isArray(r.events) ? r.events : [])
-          .filter((e) => e && e.type === "recovery_event" && e.completed !== false);
-        activeSeconds += dayActive;
-        restSeconds += recoveryDurationSeconds(recoveries);
-        recoveryCount += Math.max(Number(r.breaks) || 0, recoveries.length);
-        recordCount += Array.isArray(r.logs) ? r.logs.length : 0;
+        (Array.isArray(r.events) ? r.events : []).forEach((event) => {
+          if (!event) return;
+          if (event.type === "focus_session" && event.phase === "ended") {
+            activeSeconds += focusSegmentSeconds(event);
+          } else if (isUserRecovery(event)) {
+            recoveryCount += 1;
+            restSeconds += Math.max(0, Number(event.durationSeconds) || 0);
+          } else if (isUserRecord(event)) {
+            recordCount += 1;
+          }
+        });
       });
       // Mirror the displayed stats: the encouraging note shows whenever every
       // metric reads zero, so sub-minute noise doesn't suppress it.
