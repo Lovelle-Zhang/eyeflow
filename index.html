@@ -2735,6 +2735,84 @@
       flex: 0 0 auto;
     }
 
+    /* 这几天 window overview — week/month rest summary, the trend entry for this
+       page. Self-contained Apple-Health-style glanceable stat cards. */
+    #profileView .profile-window {
+      display: grid;
+      gap: var(--ef-space-5);
+    }
+
+    #profileView .profile-window-switch {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      width: min(100%, calc(var(--ef-space-14) * 7));
+    }
+
+    #profileView .profile-window-label {
+      color: var(--muted);
+      font-size: var(--ef-text-meta);
+    }
+
+    #profileView .profile-window-stats {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: var(--ef-space-4);
+    }
+
+    #profileView .profile-window-stat {
+      display: grid;
+      gap: var(--ef-space-2);
+      padding: var(--ef-space-5) var(--ef-space-6);
+      border: 0;
+      border-radius: var(--ef-radius-md);
+      background: var(--panel);
+    }
+
+    #profileView .profile-window-stat-label {
+      color: var(--muted);
+      font-size: var(--ef-text-caption);
+    }
+
+    #profileView .profile-window-stat-value {
+      color: var(--ink);
+      font-size: var(--ef-text-display-sm);
+      font-weight: 600;
+      letter-spacing: -0.02em;
+      line-height: 1.05;
+      font-variant-numeric: tabular-nums;
+    }
+
+    #profileView .profile-window-empty {
+      margin: 0;
+      color: var(--muted);
+      font-size: var(--ef-text-body-sm);
+      line-height: var(--ef-line-body);
+    }
+
+    @media (max-width: 860px) {
+      #profileView .profile-window-stats {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+    }
+
+    /* Lightweight Today → 这几天 entry: a quiet text link, never a card. */
+    #todayView .today-recap-link {
+      justify-self: start;
+      display: inline-flex;
+      align-items: center;
+      gap: var(--ef-space-2);
+      padding: var(--ef-space-2) 0;
+      border: 0;
+      background: transparent;
+      color: var(--muted);
+      font-size: var(--ef-text-body-sm);
+      cursor: pointer;
+      transition: color var(--ef-motion-fast) var(--ef-ease-calm);
+    }
+
+    #todayView .today-recap-link:hover {
+      color: var(--ink);
+    }
+
     .profile-grid {
       display: grid;
       grid-template-columns: minmax(0, 1fr);
@@ -8488,6 +8566,11 @@
         <span id="recoveryCopy" hidden="">主动或自动识别的休息都会计入。</span>
       </section>
 
+      <button type="button" class="today-recap-link" id="todayRecapLink">
+        看这几天的恢复趋势
+        <span aria-hidden="true">›</span>
+      </button>
+
       <div id="logs" hidden="">
           <article class="log-item">
             <header><span>18:14</span><span>状态信号 11</span></header>
@@ -8726,6 +8809,33 @@
       </div>
 
       <div class="view" id="profileView" hidden="">
+        <section class="profile-window" aria-label="最近概览">
+          <div class="settings-segmented-control ef-segmented-control profile-window-switch" id="profileWindowSwitch" role="group" aria-label="时间范围">
+            <button type="button" class="active-setting" data-window="7" aria-pressed="true">本周</button>
+            <button type="button" data-window="30" aria-pressed="false">本月</button>
+          </div>
+          <span class="profile-window-label" id="profileWindowLabel">本周概览</span>
+          <div class="profile-window-stats">
+            <div class="profile-window-stat">
+              <span class="profile-window-stat-label">屏幕活跃</span>
+              <strong class="profile-window-stat-value" id="profileWindowActive">0 分钟</strong>
+            </div>
+            <div class="profile-window-stat">
+              <span class="profile-window-stat-label">护眼休息</span>
+              <strong class="profile-window-stat-value" id="profileWindowRest">0 分钟</strong>
+            </div>
+            <div class="profile-window-stat">
+              <span class="profile-window-stat-label">恢复</span>
+              <strong class="profile-window-stat-value" id="profileWindowCount">0 次</strong>
+            </div>
+            <div class="profile-window-stat">
+              <span class="profile-window-stat-label">记录</span>
+              <strong class="profile-window-stat-value" id="profileWindowLogs">0 条</strong>
+            </div>
+          </div>
+          <p class="profile-window-empty" id="profileWindowEmpty" hidden="">恢复记录会在这里慢慢积累。</p>
+        </section>
+
         <section class="panel profile-observation" aria-label="Mira 这几天的观察">
           <span class="profile-observation-eyebrow">Mira 这几天看到的</span>
           <p class="profile-observation-text" id="profileObservation">先陪你慢慢跑几轮，Mira 再把你这几天的节奏一点点看清楚。</p>
@@ -9586,6 +9696,18 @@
       els.petMinimizeBtn.addEventListener("click", toggleCompanion);
       els.pet.addEventListener("click", expandCompanionFromPet);
     }
+    document.getElementById("todayRecapLink")?.addEventListener("click", () => switchView("profileView"));
+    document.getElementById("profileWindowSwitch")?.querySelectorAll("button").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        profileWindowDays = Number(btn.dataset.window) || 7;
+        document.getElementById("profileWindowSwitch").querySelectorAll("button").forEach((b) => {
+          const active = b === btn;
+          b.classList.toggle("active-setting", active);
+          b.setAttribute("aria-pressed", String(active));
+        });
+        renderProfileWindow();
+      });
+    });
     window.eyeflowDesktop?.onRestGuide?.((payload = {}) => {
       prepareRestGuideSurface();
       const level = Number(payload.interventionLevel || 1);
@@ -12260,7 +12382,7 @@
       const copy = {
         todayView: ["今天", statusCopy(computeEyeLoad(), isRunning)],
         rhythmView: ["设置", "先选提醒边界，需要时再展开更多设置。"],
-        profileView: ["这几天", "Mira 帮你理解今天状态和下一轮节奏。"]
+        profileView: ["这几天", "Mira 帮你理解最近的眼部节奏。"]
       }[targetId];
       els.pageTitle.textContent = copy[0];
       els.statusText.textContent = copy[1];
@@ -14194,7 +14316,81 @@
       }, null, 2);
     }
 
+    // ===== 这几天 window overview (week / month rest summary) =====
+    function recoveryDurationSeconds(events) {
+      return (events || []).reduce((sum, event) => {
+        if (!event || event.type !== "recovery_event" || event.completed === false) return sum;
+        return sum + Math.max(0, Number(event.durationSeconds) || 0);
+      }, 0);
+    }
+
+    function setOverviewText(id, text) {
+      const node = document.getElementById(id);
+      if (node) node.textContent = text;
+    }
+
+    // Per-day aggregation. Live current day from in-memory counters; past days
+    // from summaryHistory. Windowed by dayGap so 本周 = 7, 本月 = 30.
+    function profileWindowStats(days) {
+      const today = todayKey();
+      const records = [
+        {
+          day: today,
+          elapsedSeconds: Math.max(Number(elapsedSeconds) || 0, 0),
+          autoElapsedSeconds: Math.max(Number(autoElapsedSeconds) || 0, 0),
+          breaks: Number(state.breaks) || 0,
+          logs: state.logs || [],
+          events: state.events || []
+        },
+        ...(state.summaryHistory || [])
+      ].filter((r) => r && r.day && dayGap(r.day, today) < days);
+
+      let activeSeconds = 0;
+      let restSeconds = 0;
+      let recoveryCount = 0;
+      let recordCount = 0;
+      records.forEach((r) => {
+        const dayActive = Math.max(Number(r.elapsedSeconds) || 0, Number(r.autoElapsedSeconds) || 0);
+        const recoveries = (Array.isArray(r.events) ? r.events : [])
+          .filter((e) => e && e.type === "recovery_event" && e.completed !== false);
+        activeSeconds += dayActive;
+        restSeconds += recoveryDurationSeconds(recoveries);
+        recoveryCount += Math.max(Number(r.breaks) || 0, recoveries.length);
+        recordCount += Array.isArray(r.logs) ? r.logs.length : 0;
+      });
+      // Mirror the displayed stats: the encouraging note shows whenever every
+      // metric reads zero, so sub-minute noise doesn't suppress it.
+      const hasData = Math.round(activeSeconds / 60) > 0 || recoveryCount > 0 || recordCount > 0;
+      return { activeSeconds, restSeconds, recoveryCount, recordCount, hasData };
+    }
+
+    // "28 分钟" under an hour, "3 小时 20 分" beyond — keeps the read precise.
+    function formatDurationCompact(totalSeconds) {
+      const minutes = Math.round(Math.max(0, Number(totalSeconds) || 0) / 60);
+      if (minutes < 60) return `${minutes} 分钟`;
+      const hours = Math.floor(minutes / 60);
+      const rest = minutes % 60;
+      return rest ? `${hours} 小时 ${rest} 分` : `${hours} 小时`;
+    }
+
+    let profileWindowDays = 7;
+
+    function renderProfileWindow() {
+      const labelEl = document.getElementById("profileWindowLabel");
+      if (!labelEl) return;
+      const days = profileWindowDays;
+      const stats = profileWindowStats(days);
+      labelEl.textContent = days >= 30 ? "本月概览" : "本周概览";
+      setOverviewText("profileWindowActive", formatDurationCompact(stats.activeSeconds));
+      setOverviewText("profileWindowRest", formatDurationCompact(stats.restSeconds));
+      setOverviewText("profileWindowCount", `${stats.recoveryCount} 次`);
+      setOverviewText("profileWindowLogs", `${stats.recordCount} 条`);
+      const emptyEl = document.getElementById("profileWindowEmpty");
+      if (emptyEl) emptyEl.hidden = stats.hasData;
+    }
+
     function renderProfile(load, analysis = computeEyeAnalysis()) {
+      renderProfileWindow();
       const symptoms = analysis.symptoms || currentSymptoms();
       const entries = [
         ["干涩", symptoms.dryness],
