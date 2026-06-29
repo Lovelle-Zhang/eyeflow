@@ -31,3 +31,7 @@ coverage/
 # Editor folders
 .idea/
 .vscode/
+
+# Claude Code local config and preview output
+.claude/
+.preview-out/

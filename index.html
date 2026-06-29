@@ -6982,41 +6982,113 @@
 
     #rhythmView .settings-check-list {
       display: flex;
-      flex-wrap: wrap;
-      align-items: center;
-      gap: var(--ef-space-3) var(--ef-space-5);
+      flex-direction: column;
+      align-items: stretch;
+      gap: var(--ef-space-1);
       min-width: 0;
     }
 
     #rhythmView .settings-check-list p {
-      flex: 0 0 100%;
-      margin: var(--ef-space-0);
+      margin: var(--ef-space-0) var(--ef-space-0) var(--ef-space-1);
       color: var(--ink);
       font-size: var(--ef-text-body-sm);
       line-height: var(--ef-line-body);
       font-weight: var(--ef-symbol-weight-base);
     }
 
-    #rhythmView .settings-check-list label {
-      display: inline-flex;
+    #rhythmView .settings-check-list > .tag {
+      align-self: flex-start;
+      margin-bottom: var(--ef-space-1);
+    }
+
+    /* Each toggle option reads as a "label … switch" row. Shared by the
+       check-lists and standalone switch rows so every toggle matches. */
+    #rhythmView .settings-check-list label,
+    #rhythmView .ef-switch-label {
+      display: flex;
       align-items: center;
-      gap: var(--ef-space-2);
+      justify-content: space-between;
+      gap: var(--ef-space-4);
+      width: 100%;
       min-height: var(--ef-hit-target);
       margin: var(--ef-space-0);
-      color: var(--muted);
+      color: var(--ink);
       font-size: var(--ef-text-body-sm);
       line-height: var(--ef-line-title);
       font-weight: var(--ef-symbol-weight-quiet);
-      white-space: nowrap;
+      cursor: pointer;
     }
 
-    #rhythmView .settings-check-list input[type="checkbox"] {
-      display: block;
-      width: var(--ef-icon-sm);
-      height: var(--ef-icon-sm);
+    #rhythmView .settings-check-list label > span,
+    #rhythmView .ef-switch-label > span {
+      min-width: 0;
+    }
+
+    /* macOS-style toggle switch — replaces raw checkboxes in preference rows
+       so a binary setting reads as a switch, not a stray native control. */
+    #rhythmView .ef-switch {
+      --ef-switch-h: calc(var(--ef-control-sm) - var(--ef-space-2)); /* 22px */
+      --ef-switch-w: calc(var(--ef-control-sm) + var(--ef-space-6)); /* 42px */
+      --ef-switch-pad: var(--ef-space-1);
+      position: relative;
+      flex: 0 0 auto;
+      justify-self: end;
+      align-self: center;
+      box-sizing: border-box;
+      width: var(--ef-switch-w);
+      height: var(--ef-switch-h);
       margin: var(--ef-space-0);
-      accent-color: var(--mira);
-      transform: translateY(calc(var(--ef-space-1) * -0.25));
+      padding: var(--ef-space-0);
+      appearance: none;
+      -webkit-appearance: none;
+      border: 1px solid var(--group-line);
+      border-radius: var(--ef-radius-pill);
+      background: var(--track-bg);
+      cursor: pointer;
+      transition: background-color 180ms ease, border-color 180ms ease;
+    }
+
+    #rhythmView .ef-switch::before {
+      content: "";
+      position: absolute;
+      top: 50%;
+      left: var(--ef-switch-pad);
+      width: calc(var(--ef-switch-h) - var(--ef-switch-pad) * 2 - 2px);
+      height: calc(var(--ef-switch-h) - var(--ef-switch-pad) * 2 - 2px);
+      transform: translateY(-50%);
+      border-radius: 50%;
+      background: #fff;
+      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.25);
+      transition: transform 180ms ease;
+    }
+
+    #rhythmView .ef-switch:checked {
+      background: var(--mint);
+      border-color: var(--mint);
+    }
+
+    #rhythmView .ef-switch:checked::before {
+      transform: translate(
+        calc(var(--ef-switch-w) - var(--ef-switch-h)),
+        -50%
+      );
+    }
+
+    #rhythmView .ef-switch:focus-visible {
+      outline: 2px solid var(--mint);
+      outline-offset: 2px;
+    }
+
+    #rhythmView .ef-switch:disabled {
+      opacity: 0.45;
+      cursor: not-allowed;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      #rhythmView .ef-switch,
+      #rhythmView .ef-switch::before {
+        transition: none;
+      }
     }
 
     #rhythmView .system-integration-settings {
@@ -8633,7 +8705,7 @@
                     <button class="ghost active-setting" type="button" data-recovery-mode="mixed">混合</button>
                   </div>
                   <p id="recoveryModeCopy">强制爱会组合远眺、眨眼、闭眼和肩颈放松。</p>
-                  <label><input type="checkbox" id="forceVoiceGuideToggle" checked=""> 强制爱语音引导</label>
+                  <label class="ef-switch-label"><span>强制爱语音引导</span><input type="checkbox" class="ef-switch" id="forceVoiceGuideToggle" role="switch" checked=""></label>
                 </div>
               </div>
             </details>
@@ -8697,6 +8769,14 @@
                 <button class="ghost settings-action-button secondary-action" id="readinessCompanionBtn" type="button">退出 Mira</button>
               </div>
             </div>
+            <div class="settings-row readiness-item ef-preference-row" data-state="checking">
+              <span class="settings-row-label ef-preference-row-label">简约模式</span>
+              <strong class="settings-row-value ef-preference-row-value" id="hideDockOnCloseTitle">保留 Dock 图标</strong>
+              <p id="hideDockOnCloseCopy">开启后只保留菜单栏图标和桌面 Mira，关闭主窗口也不占用 Dock。</p>
+              <div class="settings-row-action settings-action-stack ef-preference-row-action">
+                <input type="checkbox" class="ef-switch" id="hideDockOnCloseToggle" role="switch" aria-label="简约模式：开启后只保留菜单栏和桌面 Mira，关闭主窗口不占用 Dock">
+              </div>
+            </div>
             <div class="settings-row readiness-item ef-preference-row" data-state="checking" hidden="">
               <span class="settings-row-label ef-preference-row-label">开机启动</span>
               <strong class="settings-row-value ef-preference-row-value" id="readyLaunchTitle">检查启动项</strong>
@@ -8751,7 +8831,7 @@
                 </div>
                 <div class="settings-row ef-preference-row">
                   <strong class="settings-row-label ef-preference-row-label">开机自动启动</strong>
-                  <label class="settings-row-value ef-preference-row-value"><input type="checkbox" id="launchAtLoginToggle"> EyeFlow</label>
+                  <input type="checkbox" class="ef-switch" id="launchAtLoginToggle" role="switch" aria-label="开机自动启动 EyeFlow">
                 </div>
                 <div class="settings-row ef-preference-row" hidden="">
                   <strong class="settings-row-label ef-preference-row-label">桌面感知</strong>
@@ -8773,9 +8853,9 @@
                 <div class="settings-row ef-preference-row">
                   <strong class="settings-row-label ef-preference-row-label">勿扰场景</strong>
                   <div class="settings-row-value settings-check-list">
-                    <label><input type="checkbox" id="quietFullscreenToggle" checked=""> 全屏时安静</label>
-                    <label><input type="checkbox" id="quietMeetingToggle" checked=""> 会议中安静</label>
-                    <label><input type="checkbox" id="deepWorkMiraOnlyToggle"> 深度工作时只显示 Mira</label>
+                    <label><span>全屏时安静</span><input type="checkbox" class="ef-switch" id="quietFullscreenToggle" role="switch" checked=""></label>
+                    <label><span>会议中安静</span><input type="checkbox" class="ef-switch" id="quietMeetingToggle" role="switch" checked=""></label>
+                    <label><span>深度工作时只显示 Mira</span><input type="checkbox" class="ef-switch" id="deepWorkMiraOnlyToggle" role="switch"></label>
                   </div>
                 </div>
                 <div class="settings-row ef-preference-row">
@@ -8783,9 +8863,9 @@
                   <div class="settings-row-value settings-check-list">
                     <p id="notificationCopy">系统通知是可选通道。默认只用 Mira 状态变化和轻提示。</p>
                     <span class="tag ef-status-pill" id="notificationTag" data-state="optional">可选</span>
-                    <label><input type="checkbox" id="miraStateToggle" checked=""> Mira 状态变化</label>
-                    <label><input type="checkbox" id="soundToggle"> 轻提示音</label>
-                    <label><input type="checkbox" id="systemNotifyToggle"> 系统通知（可选）</label>
+                    <label><span>Mira 状态变化</span><input type="checkbox" class="ef-switch" id="miraStateToggle" role="switch" checked=""></label>
+                    <label><span>轻提示音</span><input type="checkbox" class="ef-switch" id="soundToggle" role="switch"></label>
+                    <label><span>系统通知（可选）</span><input type="checkbox" class="ef-switch" id="systemNotifyToggle" role="switch"></label>
                   </div>
                   <button class="ghost settings-row-action ef-preference-row-action" id="testNotificationBtn" type="button">测试通知</button>
                 </div>
@@ -9485,6 +9565,9 @@
       desktopVersionTag: document.querySelector("#desktopVersionTag"),
       launchAtLoginTag: document.querySelector("#launchAtLoginTag"),
       launchAtLoginToggle: document.querySelector("#launchAtLoginToggle"),
+      hideDockOnCloseTitle: document.querySelector("#hideDockOnCloseTitle"),
+      hideDockOnCloseCopy: document.querySelector("#hideDockOnCloseCopy"),
+      hideDockOnCloseToggle: document.querySelector("#hideDockOnCloseToggle"),
       activityCopy: document.querySelector("#activityCopy"),
       activityApp: document.querySelector("#activityApp"),
       activityIdle: document.querySelector("#activityIdle"),
@@ -9748,6 +9831,7 @@
     els.copyShareBtn?.addEventListener("click", copyDailyShareCard);
     els.showOnboardingBtn.addEventListener("click", showOnboarding);
     els.launchAtLoginToggle.addEventListener("change", setLaunchAtLogin);
+    els.hideDockOnCloseToggle?.addEventListener("change", setHideDockOnClose);
     els.assessmentReminderBtn.addEventListener("click", showOnboarding);
     els.introToggle?.addEventListener("click", toggleIntro);
     els.intensityButtons.forEach((button) => {
@@ -11573,9 +11657,10 @@
       if (text !== undefined) element.textContent = text;
     }
 
-    function setReadinessState(titleElement, state) {
+    function setReadinessState(titleElement, state, label) {
       const item = titleElement?.closest(".readiness-item");
       if (item) item.dataset.state = state;
+      if (titleElement && typeof label === "string") titleElement.textContent = label;
     }
 
     function renderPermissionStatus(status) {
@@ -11669,6 +11754,16 @@
         setSystemStatus(els.launchAtLoginTag, "preview", "桌面版可用");
         els.launchAtLoginToggle.checked = false;
         els.launchAtLoginToggle.disabled = true;
+        if (els.hideDockOnCloseToggle) {
+          els.hideDockOnCloseToggle.checked = false;
+          els.hideDockOnCloseToggle.disabled = true;
+        }
+        if (els.hideDockOnCloseCopy) {
+          els.hideDockOnCloseCopy.textContent = "桌面版可开启简约模式：只保留菜单栏和桌面 Mira。";
+        }
+        if (els.hideDockOnCloseTitle) {
+          setReadinessState(els.hideDockOnCloseTitle, "preview", "桌面版可用");
+        }
         renderDesktopReadiness();
         return null;
       }
@@ -11683,6 +11778,22 @@
       setSystemStatus(els.desktopVersionTag, "optional", `EyeFlow ${settings.version || "0.1.1"}`);
       els.launchAtLoginToggle.disabled = !launchAvailable;
       els.launchAtLoginToggle.checked = Boolean(settings.launchAtLogin);
+      if (els.hideDockOnCloseToggle) {
+        els.hideDockOnCloseToggle.disabled = !launchAvailable;
+        els.hideDockOnCloseToggle.checked = Boolean(settings.hideDockOnClose);
+      }
+      if (els.hideDockOnCloseCopy) {
+        els.hideDockOnCloseCopy.textContent = settings.hideDockOnClose
+          ? "开启后只保留菜单栏图标和桌面 Mira，关闭主窗口也不占用 Dock；从菜单栏可再打开 EyeFlow。"
+          : "开启后只保留菜单栏图标和桌面 Mira，关闭主窗口也不占用 Dock。";
+      }
+      if (els.hideDockOnCloseTitle) {
+        setReadinessState(
+          els.hideDockOnCloseTitle,
+          settings.hideDockOnClose ? "enabled" : "optional",
+          settings.hideDockOnClose ? "只留菜单栏和 Mira" : "保留 Dock 图标"
+        );
+      }
       if (!launchAvailable) {
         setSystemStatus(els.launchAtLoginTag, "unavailable", "不适用");
         els.desktopLaunchCopy.textContent = "当前平台不使用 macOS 开机启动项。";
@@ -11830,6 +11941,24 @@
         setSystemStatus(els.launchAtLoginTag, "action", "未生效");
         els.desktopLaunchCopy.textContent = "macOS 没有完成这次开机启动设置。请确认 EyeFlow 位于“应用程序”文件夹后再试。";
         showToast("Mira：开机启动没有设置成功。先确认 EyeFlow 在“应用程序”文件夹。");
+      }
+    }
+
+    async function setHideDockOnClose() {
+      if (!window.eyeflowDesktop?.setHideDockOnClose || !latestDesktopSettings || !els.hideDockOnCloseToggle) return;
+      const requested = els.hideDockOnCloseToggle.checked;
+      els.hideDockOnCloseToggle.disabled = true;
+      try {
+        const settings = await window.eyeflowDesktop.setHideDockOnClose(requested);
+        renderDesktopSettings(settings);
+        showToast(settings.hideDockOnClose
+          ? "Mira：简约模式开启，关闭主窗口后只留菜单栏和我。"
+          : "Mira：之后关闭主窗口，Dock 里会保留 EyeFlow。");
+      } catch (error) {
+        console.warn("[EyeFlow] hide-Dock-on-close update failed", error);
+        els.hideDockOnCloseToggle.checked = !requested;
+        els.hideDockOnCloseToggle.disabled = false;
+        showToast("Mira：这次没有更新简约模式。");
       }
     }
 
