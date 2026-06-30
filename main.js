@@ -1940,7 +1940,9 @@ function buildTrayMenu() {
     { type: "separator" },
     { label: "打开 EyeFlow", click: showDashboard },
     { label: "休息一下", click: startTrayRest },
-    { label: trayMiraVisibilityLabel(), click: toggleCompanionVisibility }
+    { label: trayMiraVisibilityLabel(), click: toggleCompanionVisibility },
+    { type: "separator" },
+    { role: "quit", label: "退出 EyeFlow" }
   ]);
 }
 
