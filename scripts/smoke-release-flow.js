@@ -138,6 +138,7 @@ function main() {
   assertPackageScript(pkg, "smoke:core", "node scripts/smoke-core.js");
   assertPackageScript(pkg, "smoke:metrics", "node scripts/smoke-metrics.js");
   assertPackageScript(pkg, "smoke:readiness", "electron scripts/smoke-readiness-sync.js");
+  assertPackageScript(pkg, "smoke:theme", "electron scripts/smoke-theme-sync.js");
   assertPackageScript(pkg, "smoke:session", "node scripts/smoke-session-flow.js");
   assertPackageScript(pkg, "smoke:current-capture", "node scripts/smoke-current-visual-capture.js");
   assertPackageScript(pkg, "smoke:onboarding", "node scripts/smoke-onboarding-flow.js");
@@ -178,6 +179,7 @@ function main() {
   assertMatches(refreshLocalJs, /run\("Check visual smoke helper",\s*"npm",\s*\["run",\s*"smoke:visual"\]/, "refresh checks visual helper smoke");
   assertMatches(refreshLocalJs, /run\("Check release wiring",\s*"npm",\s*\["run",\s*"smoke:release"\]/, "refresh checks release wiring");
   assertMatches(refreshLocalJs, /run\("Check readiness render sync[^"]*",\s*"npm",\s*\["run",\s*"smoke:readiness"\]/, "refresh checks readiness render sync smoke");
+  assertMatches(refreshLocalJs, /run\("Check dark-mode theme render[^"]*",\s*"npm",\s*\["run",\s*"smoke:theme"\]/, "refresh checks dark-mode theme render smoke");
   assertMatches(refreshLocalJs, /run\("Build local app bundle",\s*"npm",\s*\["run",\s*"build:app"\]/, "refresh builds app bundle");
   assertMatches(refreshLocalJs, /run\("Install \/Applications\/EyeFlow\.app",\s*"npm",\s*\["run",\s*"install:local"\]/, "refresh installs local app");
   assertMatches(refreshLocalJs, /run\("Check installed app bundle",\s*"npm",\s*\["run",\s*"smoke:installed"\]/, "refresh checks installed app");

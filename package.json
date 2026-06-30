@@ -18,6 +18,7 @@
     "smoke:core": "node scripts/smoke-core.js",
     "smoke:metrics": "node scripts/smoke-metrics.js",
     "smoke:readiness": "electron scripts/smoke-readiness-sync.js",
+    "smoke:theme": "electron scripts/smoke-theme-sync.js",
     "smoke:session": "node scripts/smoke-session-flow.js",
     "smoke:current-capture": "node scripts/smoke-current-visual-capture.js",
     "smoke:onboarding": "node scripts/smoke-onboarding-flow.js",
