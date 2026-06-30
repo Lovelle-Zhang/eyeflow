@@ -17,7 +17,6 @@
       --mira-mouth: rgba(126, 244, 216, 0.54);
       --mira-antenna: rgba(15, 23, 21, 0.32);
       --mira-antenna-glow: rgba(107, 224, 203, 0.14);
-      --mira-rest-mouth: rgba(255, 214, 225, 0.74);
       --mira-signal: #80d7bd;
       --mira-signal-glow: rgba(128, 215, 189, 0.42);
       --mira-line: calc(var(--ef-icon-stroke-base) * 1px);
@@ -91,7 +90,7 @@
 
     .companion.speaking {
       width: calc(100vw - var(--ef-space-6));
-      height: 76px;
+      height: calc(var(--ef-mira-avatar-size) + var(--ef-space-8));
     }
 
     .companion::after {
@@ -173,8 +172,9 @@
 
     .companion.speaking .pet {
       left: auto;
-      right: 7px;
-      top: 9px;
+      right: var(--ef-space-5);
+      top: calc(50% - (var(--ef-mira-avatar-size) / 2));
+      z-index: 2;
     }
 
     .companion.settling .pet::after,
@@ -378,13 +378,10 @@
 
     .mira-bubble {
       position: absolute;
-      right: 83px;
-      top: 8px;
-      width: min(268px, calc(100vw - 118px));
-      min-height: 58px;
-      padding: var(--ef-space-5) var(--ef-space-6);
-      border-radius: var(--ef-radius-lg);
-      border: 1px solid var(--popover-line);
+      inset: 0;
+      padding: var(--ef-space-5) calc(var(--ef-mira-avatar-size) + var(--ef-space-8) + var(--ef-space-5)) var(--ef-space-5) var(--ef-space-6);
+      border-radius: var(--ef-radius-xl);
+      border: 0.5px solid var(--popover-line);
       background: var(--popover-bg);
       color: var(--popover-text);
       box-shadow: var(--popover-shadow);
@@ -393,7 +390,7 @@
       display: grid;
       align-content: center;
       opacity: 0;
-      transform: translateX(var(--ef-space-3)) scale(0.98);
+      transform: translateY(var(--ef-space-2)) scale(0.985);
       pointer-events: none;
       transition:
         opacity var(--ef-motion-base) var(--ef-ease-calm),
@@ -401,16 +398,7 @@
     }
 
     .mira-bubble::after {
-      content: "";
-      position: absolute;
-      right: -7px;
-      top: 28px;
-      width: 14px;
-      height: 14px;
-      border-radius: var(--ef-radius-xs);
-      background: inherit;
-      transform: rotate(45deg);
-      box-shadow: 1px -1px 0 var(--popover-line);
+      display: none;
     }
 
     .companion.speaking .mira-bubble {
@@ -421,9 +409,13 @@
     .mira-bubble span {
       position: relative;
       z-index: 1;
-      font-size: var(--ef-text-body);
+      font-size: var(--ef-text-body-sm);
       line-height: var(--ef-line-body);
       overflow-wrap: anywhere;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
     }
 
     strong {
@@ -578,34 +570,6 @@
         linear-gradient(150deg, #fbfcf6 0%, #f7dde5 52%, #f5ead3 100%);
     }
 
-    .rest .mouth {
-      width: 14px;
-      height: 15px;
-      top: calc(var(--ef-mira-mouth-top) + var(--ef-space-1));
-      border: 0;
-      background: transparent;
-      transform: translateX(-50%);
-      display: grid;
-      place-items: center;
-      opacity: 0.95;
-    }
-
-    .rest .mouth::before {
-      content: "Ɛ";
-      font-family: ui-rounded, "SF Pro Rounded", Inter, system-ui, sans-serif;
-      font-size: var(--ef-text-body-sm);
-      font-weight: 700;
-      line-height: 1;
-      color: var(--mira-rest-mouth);
-      text-shadow: 0 1px 0 rgba(255, 255, 255, 0.14);
-      transform: translateY(-1px) rotate(-4deg) scaleX(0.82);
-    }
-
-    .theme-day.rest .mouth::before {
-      color: rgba(214, 82, 125, 0.72);
-      text-shadow: 0 1px 0 rgba(255, 255, 255, 0.56);
-    }
-
     @keyframes idleFloat {
       0%, 100% {
         transform: translateY(0) rotate(0deg);
@@ -710,7 +674,7 @@
       ["", "Mira 很安静", "我会在旁边看着节奏，先轻提醒陪伴。"],
       ["focus", "Mira 陪你专注", "到恢复断点我再轻轻提示，不会突然打断。"],
       ["blink", "Mira 在提醒眨眼", "轻轻眨几次眼，让眼睛重新湿润一点。"],
-      ["rest", "Mira 想让你恢复一下", "找一个恢复断点，看远处 20 秒。"]
+      ["rest", "Mira 想让你恢复一下", "看远处 20 秒。"]
     ];
     let moodIndex = 0;
     let hasLiveState = false;
@@ -787,7 +751,7 @@
       companion.className = `companion theme-${theme} ${mood} ${booting} ${ready} ${settling} ${expanded} ${speaking}`.trim();
       title.textContent = state.title || "Mira 很安静";
       message.textContent = mood === "rest"
-        ? `${state.message || "找一个恢复断点，看远处 20 秒。"} 点我会打开休息指引。`
+        ? "看远处 20 秒。点我打开指引。"
         : state.message || "我会在旁边看着节奏，先轻提醒陪伴。";
       contextLine.textContent = state.continuityLine || `${state.loadZone || "舒适区"} · ${state.intensityLabel || "L1 安静"}`;
       if (shouldNotifyRest(state, mood)) {
@@ -1013,11 +977,11 @@
       companion.classList.remove("dragging");
       if (!wasDrag && event.target.closest(".pet")) {
         event.preventDefault();
-        if (isMiraSpeaking) return;
         if (isDesktopShell && currentMood === "rest") {
           openDashboard({ restGuide: true });
           return;
         }
+        if (isMiraSpeaking) return;
         toggleExpanded();
       }
     });
@@ -1036,7 +1000,11 @@
 
     function openDashboard(options = {}) {
       if (window.eyeflowDesktop) {
-        window.eyeflowDesktop.showDashboard(options);
+        const shouldFocusManualStart = !options.restGuide && !options.view && !options.focus;
+        const dashboardOptions = shouldFocusManualStart
+          ? { view: "todayView", focus: "manualStart" }
+          : options;
+        window.eyeflowDesktop.showDashboard(dashboardOptions);
         return;
       }
       window.location.href = "index.html";
