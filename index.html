@@ -10110,7 +10110,13 @@
         render();
         persist();
       });
-      input.addEventListener("change", () => recordManualRhythmAdjustment(input.id));
+      input.addEventListener("change", () => {
+        // recordManualRhythmAdjustment sets manualHoldRounds=3; re-render so the
+        // 建议 cards pick up the user-hold immediately (otherwise they linger on the
+        // pre-hold suggestion when paused/stopped, with no tick to refresh them).
+        recordManualRhythmAdjustment(input.id);
+        render();
+      });
     });
 
     if (window.eyeflowDesktop?.onActivity) {
