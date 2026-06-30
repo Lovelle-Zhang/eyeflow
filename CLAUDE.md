@@ -25,3 +25,6 @@ codex 默认只读复审（`--sandbox read-only`），不改文件。需要 code
 验证类操作（代码 / 菜单 / 进程 / 构建）优先用命令行：asar 解包、grep、ps、smoke 脚本。
 避免用 computer-use 桌面接管（慢、易卡、触发权限弹窗）。
 仅当必须肉眼确认渲染时才截图，且优先用项目内的截图脚本，而非接管整个桌面。
+
+用 asar 验证内容时，一律用 `asar extract <archive> <临时目录>` 解到临时目录再读，
+绝不用 `asar extract-file`（它会写进当前工作目录、可能覆盖源文件）。
