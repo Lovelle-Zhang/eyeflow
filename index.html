@@ -13903,7 +13903,7 @@
       els.todayFlowCopy.classList.toggle("force", state.settings.intensity === "force");
     }
 
-    function renderTodayPlan(load) {
+    function renderTodayPlan(load, suggestion = rhythmSuggestion(load)) {
       const focus = Number(els.focusTarget.value);
       const rest = Number(els.breakTarget.value);
       const assessedToday = state.lastAssessmentDay === todayKey();
@@ -13911,7 +13911,6 @@
         els.todayPlanCopy.innerHTML = "";
         return;
       }
-      const suggestion = rhythmSuggestion(load);
       const currentReason = suggestion.focus === focus
         && suggestion.rest === rest
         && suggestion.intensity === state.settings.intensity
@@ -13939,6 +13938,14 @@
       const analysis = computeEyeAnalysis();
       state.lastAnalysis = scoreAnalysisSnapshot(analysis);
       const load = analysis.load;
+      // Compute the rhythm suggestion ONCE per render and pass it to every
+      // consumer below, so all "建议" surfaces agree and memory is written once.
+      // Tradeoff: if renderInterventionStrategy() below records a reminder this
+      // frame, these cards show the pre-mutation suggestion for one render and
+      // self-correct on the next — cross-surface consistency is worth more than
+      // being one frame fresher on the rare reminder-recording frame.
+      const rhythmPlan = rhythmSuggestion(load);
+      recordRhythmRecommendation(rhythmPlan);
       const mins = Math.floor(elapsedSeconds / 60);
       const secs = elapsedSeconds % 60;
 	      const restDue = computeRestDue({
@@ -13968,17 +13975,17 @@
 
       renderTodayRhythm();
       renderTodayMode();
-      renderTodayPlan(load);
+      renderTodayPlan(load, rhythmPlan);
       renderAssessmentReminder();
       renderFeedbackPreview();
       if (renderInterventionStrategy(load)) return;
       renderPendingReminder();
       renderReminderFeedback();
       renderDailySummary(load);
-      renderRhythmSuggestion(load);
+      renderRhythmSuggestion(load, rhythmPlan);
       renderCompanion(load);
       renderRecommendations(load);
-      renderProfile(load, analysis);
+      renderProfile(load, analysis, rhythmPlan);
       renderTrend(load);
       renderLogs();
     }
@@ -15023,7 +15030,7 @@
 
     // Today's results so far, from the same user-initiated signals as 这几天:
     // closed focus segments + user-completed rests in today's events.
-    function renderProfile(load, analysis = computeEyeAnalysis()) {
+    function renderProfile(load, analysis = computeEyeAnalysis(), suggestion = rhythmSuggestion(load)) {
       const profileStats = renderProfileWindow();
       const symptoms = analysis.symptoms || currentSymptoms();
       const entries = [
@@ -15047,7 +15054,6 @@
       document.querySelector("#profileView")?.classList.toggle("profile-building", !hasProfileEvidence);
       const confidence = analysis.confidenceLabel || "低";
       const overall = profileOverallState(load, peakLoad);
-      const suggestion = rhythmSuggestion(load);
       const rhythmSummary = rhythmMemorySummary();
       const nextAction = profileNextAction(suggestion, load);
       const nextCopy = profileNextActionCopy(nextAction, suggestion);
@@ -15331,9 +15337,6 @@
         copy = "你刚调整过节奏，Mira 会先观察几轮再建议覆盖。";
         reason = `Mira 记住了你调整过的节奏：先保留 ${focus} 分 / ${rest} 秒，还观察 ${manualHoldRounds} 轮。`;
         source = "manual_hold";
-        memory.lastRecommendationReason = reason;
-        memory.recommendationSource = "rule-local";
-        memory.lastRecommendationAt = new Date().toISOString();
         return { focus, rest, intensity, title, copy, reason, learning, source, recommendationSource: "rule-local" };
       }
 
@@ -15374,14 +15377,26 @@
         source = "rule-first-break";
       }
 
-      memory.lastRecommendationReason = reason;
-      memory.recommendationSource = "rule-local";
-      memory.lastRecommendationAt = new Date().toISOString();
       return { focus, rest, intensity, title, copy, reason, learning, source, recommendationSource: "rule-local" };
     }
 
-    function renderRhythmSuggestion(load) {
-      const suggestion = rhythmSuggestion(load);
+    // Persist the recommendation memory ONCE per render (see render()), not on
+    // every rhythmSuggestion() read — that function is now a pure getter. Change-
+    // detect on the actual decision fields (focus/rest/intensity/source), not just
+    // the reason text — some branches change rest/intensity without changing reason —
+    // so lastRecommendationAt bumps exactly when the recommendation really changes
+    // and stops thrashing every render.
+    function recordRhythmRecommendation(suggestion) {
+      const memory = ensureRhythmMemory();
+      const signature = `${suggestion.focus}|${suggestion.rest}|${suggestion.intensity}|${suggestion.source}`;
+      if (memory.lastRecommendationSignature === signature) return;
+      memory.lastRecommendationSignature = signature;
+      memory.lastRecommendationReason = suggestion.reason;
+      memory.recommendationSource = suggestion.recommendationSource;
+      memory.lastRecommendationAt = new Date().toISOString();
+    }
+
+    function renderRhythmSuggestion(load, suggestion = rhythmSuggestion(load)) {
       els.rhythmPlanTitle.textContent = suggestion.title;
       els.rhythmPlanCopy.textContent = suggestion.copy;
       els.suggestFocusTarget.textContent = `${suggestion.focus} 分钟`;
