@@ -85,7 +85,9 @@ function main() {
   assertIncludes(recoveryDataJs, "好了，回来时别急着盯屏幕。", "rest return line");
   assertIncludes(indexHtml, 'id="breakCompanionLine"', "rest companion line appears in rest overlay");
   assertIncludes(recoveryDataJs, "relationshipLines", "relationship line library");
-  assertIncludes(recoveryDataJs, "你已经连续{days}没有跳过休息了。", "gentle streak line");
+  assertIncludes(recoveryDataJs, "你已经连续{days}把恢复接住了。", "gentle streak line");
+  assertIncludes(recoveryDataJs, "最近{days}里，你都给眼睛留了恢复。", "gentle streak copy avoids impossible week math");
+  assertNotMatches(recoveryDataJs, /这周有\{days\}|一周\{days\}|一周[一二三四五六七八九十]+天|周[^\n"]*[八九十]天/, "streak copy cannot say impossible week lengths");
   assertIncludes(recoveryDataJs, "回来了。今天眼睛怎么样？", "returning user line");
   assertIncludes(recoveryDataJs, "你的节奏还在，不用补。", "no catch-up pressure line");
   assertIncludes(indexHtml, "function gentleStreakDays", "gentle streak calculation");
@@ -94,13 +96,13 @@ function main() {
   assertIncludes(indexHtml, "gentleStreakLine()", "completion can surface gentle streak");
   assertNotMatches(indexHtml + recoveryDataJs, /火焰|streak freeze|断签|补签/, "no anxiety streak language");
 
-  assertIncludes(indexHtml, "第 3 天开始你可能会自然忽略 Mira。", "third-day retention cliff copy");
+  assertIncludes(indexHtml, "第 3 天开始你可能会自然把提醒留到稍后。", "third-day retention cliff copy");
   assertIncludes(indexHtml, "窗口切换、键鼠停顿这类自然断点", "third-day alternate presence strategy");
   assertIncludes(indexHtml, "今天先不说休息的事了。你看起来在赶什么，专注完再说。", "occasional silence copy");
 
   assertIncludes(indexHtml, "档案正在成形", "seventh-day value proof");
   assertIncludes(indexHtml, "EyeFlow 会更清楚哪些提醒真的适合你", "seventh-day forward plan");
-  assertIncludes(indexHtml, "次提醒被你接住", "weekly handled-reminder proof");
+  assertIncludes(indexHtml, "其中一部分来自被你接住的提醒", "weekly handled-reminder proof");
   assertIncludes(indexHtml, "Mira Insight", "profile review opens with Mira insight");
   assertIncludes(indexHtml, "先完成几轮，Mira 再给建议。", "first-day profile uses a direct empty state before enough evidence");
   assertIncludes(indexHtml, "先完成几轮专注和恢复。之后这里会整理出更适合你的提醒节奏。", "first-day profile defers insight until usage evidence exists");

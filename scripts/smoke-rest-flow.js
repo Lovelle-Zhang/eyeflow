@@ -87,6 +87,8 @@ function main() {
   assertIncludes(indexHtml, 'data-recovery-feedback="better"', "better recovery feedback");
   assertIncludes(indexHtml, 'data-recovery-feedback="same"', "same recovery feedback");
   assertIncludes(indexHtml, 'data-recovery-feedback="tired"', "tired recovery feedback");
+  assertIncludes(indexHtml, '<button class="ghost" type="button" data-recovery-feedback="tired">还累</button>', "tired recovery feedback uses a lightweight label");
+  assertNotIncludes(indexHtml, "还想休息", "tired recovery feedback no longer sounds like another operation");
   assertIncludes(indexHtml, "点“休息”，Mira 带你。", "rest guide hint copy");
   assertIncludes(indexHtml, "max-height: calc(100vh - var(--ef-space-12));", "break dialog stays inside short desktop windows");
   assertIncludes(indexHtml, "overscroll-behavior: contain;", "break dialog scroll is contained");
@@ -96,6 +98,8 @@ function main() {
   assertMatches(indexHtml, /els\.finishBreakBtn\.addEventListener\("click",\s*finishBreak\);/, "finish rest button asks feedback");
   assertMatches(indexHtml, /function\s+showBreak\(reason\)[\s\S]*restBreakView\(\{/, "showBreak uses extracted rest view");
   assertMatches(indexHtml, /function\s+finishBreak\(\)[\s\S]*recoveryFeedbackView\(\)/, "finishBreak uses extracted feedback view");
+  assertMatches(indexHtml, /function\s+restartVisibleBreakTimerAfterResume\(\)[\s\S]*startBreakRestTimer\(breakRestTotalSeconds \|\| Number\(els\.breakTarget\.value\) \|\| 20\);/, "visible rest countdown restarts after system resume");
+  assertMatches(indexHtml, /function\s+pauseVisibleBreakTimerForSystemRest\(\)[\s\S]*stopBreakRestTimer\(\);/, "visible rest countdown pauses during system sleep or lock");
   assertMatches(indexHtml, /button\.addEventListener\("click",\s*\(\)\s*=>\s*completeRecovery\(button\.dataset\.recoveryFeedback\)\);/, "feedback buttons complete recovery");
   assertMatches(indexHtml, /function\s+completeRecovery\(feedback\)[\s\S]*state\.breaks\s*\+=\s*1;[\s\S]*elapsedSeconds\s*=\s*0;/, "completeRecovery records rest and resets timer");
   assertMatches(indexHtml, /function\s+completeRecovery\(feedback\)[\s\S]*recoveryCompletionPlan\(\{[\s\S]*showBreak\("extended"\);/, "completeRecovery uses extracted recovery plan");
@@ -117,7 +121,7 @@ function main() {
   assertEqual(restFlow.recoveryCompletionPlan({ feedback: "same", focusTarget: 20 }).nextFocusTarget, 15, "same feedback shortens focus");
   assertEqual(restFlow.recoveryCompletionPlan({ feedback: "tired", breakTarget: 210 }).nextBreakTarget, 240, "tired feedback extends rest cap");
 
-  assertMatches(companionHtml, /currentMood\s*===\s*"rest"[\s\S]*openDashboard\(\{\s*restGuide:\s*true\s*\}\);/, "pink Mira opens rest guide");
+  assertMatches(companionHtml, /currentMood\s*===\s*"rest"[\s\S]*openDashboard\(\{\s*restGuide:\s*true\s*\}\);[\s\S]*return;[\s\S]*if \(isMiraSpeaking\) return;/, "pink Mira opens rest guide even while its prompt is visible");
   assertIncludes(companionHtml, "function shouldNotifyRest", "companion gates rest notifications");
   assertIncludes(companionHtml, "restNotifyCooldown = 12 * 60 * 1000", "companion rest notifications have a cooldown");
   assertMatches(companionHtml, /if \(state\.forceMode \|\| state\.forceBreakActive\) return false;/, "force mode suppresses companion rest notifications");
@@ -126,6 +130,7 @@ function main() {
   assertMatches(mainJs, /const hasReminderOpening = Boolean\(state\.isRunning \|\| state\.reminderOpening \|\| state\.naturalBreak \|\| state\.reminderPending\);/, "desktop panel requires an interruption opening");
   assertIncludes(breakLockHtml, "再点一次确认退出", "break lock emergency exit requires confirmation");
   assertIncludes(breakLockHtml, "interrupted: true", "break lock reports interrupted force exits");
+  assertMatches(mainJs, /if \(label === "break-lock-complete"\) \{[\s\S]*window\.clearInterval\(ticker\);[\s\S]*completionShown = false;[\s\S]*showCompletion\(\);/, "debug break-lock complete capture stops the timer before forcing the completed state");
   assertMatches(mainJs, /dashboardWindow\.webContents\.send\("dashboard:restGuide"/, "desktop forwards rest guide");
   assertMatches(indexHtml, /onRestGuide\?\.\(\(payload = \{\}\) => \{[\s\S]*focusSessionPanel\(\{\s*target:\s*"rest",\s*guideLevel:\s*level\s*\}\);/, "dashboard rest guide focuses rest button");
 

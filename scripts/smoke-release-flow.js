@@ -128,6 +128,7 @@ function main() {
   assertScript("eyeflow-session-flow.js");
   assertScript("eyeflow-rest-flow.js");
   assertScript("eyeflow-ui-utils.js");
+  assertScript("eyeflow-metrics.js");
 
   assertPackageScript(pkg, "build:app", "electron-builder --mac dir --publish never");
   assertPackageScript(pkg, "install:local", "node scripts/install-local-app.js");
@@ -135,6 +136,7 @@ function main() {
   assertPackageScript(pkg, "verify", "node scripts/verify.js");
   assertPackageScript(pkg, "capture:current", "node scripts/current-visual-capture.js");
   assertPackageScript(pkg, "smoke:core", "node scripts/smoke-core.js");
+  assertPackageScript(pkg, "smoke:metrics", "node scripts/smoke-metrics.js");
   assertPackageScript(pkg, "smoke:session", "node scripts/smoke-session-flow.js");
   assertPackageScript(pkg, "smoke:current-capture", "node scripts/smoke-current-visual-capture.js");
   assertPackageScript(pkg, "smoke:onboarding", "node scripts/smoke-onboarding-flow.js");
@@ -157,6 +159,7 @@ function main() {
     "eyeflow-session-flow.js",
     "eyeflow-rest-flow.js",
     "eyeflow-ui-utils.js",
+    "eyeflow-metrics.js",
     "companion.html",
     "break-lock.html",
     "main.js",
@@ -222,8 +225,8 @@ function main() {
   assertIncludes(installedSmokeJs, "installed session card uses tokenized rhythm-panel structure", "installed smoke checks session card rhythm tokens");
   assertIncludes(installedSmokeJs, "installed session panel title uses current-round language", "installed smoke checks session current-round title");
   assertIncludes(installedSmokeJs, "installed session panel title follows session state", "installed smoke checks session title state");
-  assertIncludes(installedSmokeJs, "installed running session title uses rhythm language", "installed smoke checks running session title copy");
-  assertIncludes(installedSmokeJs, "installed session workflow hint hides first-round timing details", "installed smoke checks reduced workflow hint");
+  assertIncludes(installedSmokeJs, "installed session flow has a single normalized state model", "installed smoke checks normalized session state");
+  assertIncludes(installedSmokeJs, "installed session workflow hint shows remaining and target inside the timer", "installed smoke checks timer hint context");
   assertIncludes(installedSmokeJs, "installed mode/state pill is the low-key tonal sage pill (no border)", "installed smoke checks session status pill tokens");
   assertIncludes(installedSmokeJs, "installed session timer controls (primary + ② tonal) go large at 40px", "installed smoke checks session control height token");
   assertIncludes(installedSmokeJs, "installed session controls use quiet design-system icon size", "installed smoke checks session icon size token");
@@ -232,14 +235,13 @@ function main() {
   assertIncludes(installedSmokeJs, "installed session settings expand into a full-width setting area", "installed smoke checks expanded session settings tokens");
   assertIncludes(installedSmokeJs, "installed rhythm tuning is folded below the primary rhythm row", "installed smoke checks rhythm tuning disclosure");
   assertIncludes(installedSmokeJs, "installed rest action icon uses quiet stroke weight", "installed smoke checks session icon stroke weight");
-  assertIncludes(installedSmokeJs, "installed metrics render as one quiet integrated progress strip", "installed smoke checks metrics container tokens");
-  assertIncludes(installedSmokeJs, "installed metrics cells use low-burden signal density", "installed smoke checks metrics cell density tokens");
-  assertIncludes(installedSmokeJs, "installed secondary metrics avoid KPI-scale type", "installed smoke checks metrics type tokens");
-  assertIncludes(installedSmokeJs, "installed round progress groups focused, remaining, and target together", "installed smoke checks round progress grouping");
-  assertIncludes(installedSmokeJs, "installed round progress uses quiet internal dividers", "installed smoke checks round progress dividers");
-  assertIncludes(installedSmokeJs, "installed round target runtime unit stays Chinese", "installed smoke checks target unit");
-  assertIncludes(installedSmokeJs, "installed remaining runtime unit stays Chinese", "installed smoke checks remaining unit");
-  assertIncludes(installedSmokeJs, "installed summary separates focused time from user records", "installed smoke checks honest summary copy");
+  assertIncludes(installedSmokeJs, "installed today no longer renders a separate round metrics strip", "installed smoke checks metrics strip removal");
+  assertIncludes(installedSmokeJs, "installed today no longer repeats focused time below the timer bar", "installed smoke checks focused-time duplication removal");
+  assertIncludes(installedSmokeJs, "installed today no longer repeats the target below the timer bar", "installed smoke checks target duplication removal");
+  assertIncludes(installedSmokeJs, "installed today timer bar carries remaining and target time", "installed smoke checks timer-bar time context");
+  assertIncludes(installedSmokeJs, "installed round target is no longer rendered as a duplicate metric", "installed smoke checks target duplicate removal");
+  assertIncludes(installedSmokeJs, "installed remaining time is no longer rendered as a duplicate metric", "installed smoke checks remaining duplicate removal");
+  assertIncludes(installedSmokeJs, "installed summary shares focus total and recovery duration without rest counts", "installed smoke checks honest summary copy");
   assertIncludes(installedSmokeJs, "installed quick log summary uses tokenized spacing", "installed smoke checks quick log summary tokens");
   assertIncludes(installedSmokeJs, "installed quick log symbol uses tokenized weight", "installed smoke checks quick log symbol tokens");
   assertIncludes(installedSmokeJs, "installed quick log prompt invites anytime logging", "installed smoke checks quick log anytime prompt");
@@ -261,9 +263,8 @@ function main() {
   assertIncludes(installedSmokeJs, "installed session workflow header aligns status with the title", "installed smoke checks workflow header alignment");
   assertIncludes(installedSmokeJs, "installed folded rhythm settings stay with the workflow title", "installed smoke checks folded rhythm settings alignment");
   assertIncludes(installedSmokeJs, "installed expanded rhythm settings can use the full workflow width", "installed smoke checks expanded rhythm settings width");
-  assertIncludes(installedSmokeJs, "installed today lower signals do not create a blank first screen", "installed smoke checks today lower-signal spacing");
   assertIncludes(installedSmokeJs, "installed today hides timer panel before focus starts", "installed smoke checks today timer panel downgrade");
-  assertIncludes(installedSmokeJs, "installed today hides metric strip before focus starts", "installed smoke checks today metric strip downgrade");
+  assertIncludes(installedSmokeJs, "installed today removes the metric strip instead of separately hiding it", "installed smoke checks today metric strip removal");
   assertIncludes(installedSmokeJs, "installed today hides secondary panels before focus starts", "installed smoke checks today secondary panel downgrade");
   assertIncludes(installedSmokeJs, "installed today main state no longer renders unclear folded meta row", "installed smoke checks today meta row removal");
   assertIncludes(installedSmokeJs, "installed today main state no longer renders first-screen quick feedback", "installed smoke checks today first-screen feedback removal");
@@ -276,20 +277,20 @@ function main() {
   assertIncludes(installedSmokeJs, "installed today Mira eyes use canonical geometry tokens", "installed smoke checks today Mira eye alignment");
   assertIncludes(installedSmokeJs, "installed today Mira mouth aligns with the face center", "installed smoke checks today Mira mouth alignment");
   assertIncludes(installedSmokeJs, "installed today Mira antenna arc uses canonical geometry tokens", "installed smoke checks today Mira antenna arc alignment");
-  assertIncludes(installedSmokeJs, "installed today main state uses a preparation headline", "installed smoke checks today preparation headline");
-  assertIncludes(installedSmokeJs, "installed today explains Mira presence without repeating timer copy", "installed smoke checks today timing explanation");
+  assertIncludes(installedSmokeJs, "installed today no longer renders a preparation headline", "installed smoke checks removed preparation headline");
+  assertIncludes(installedSmokeJs, "installed running state explains reminder, pause, and rest paths", "installed smoke checks today running explanation");
   assertIncludes(installedSmokeJs, "installed today primary action sits outside the judgement column", "installed smoke checks today action column order");
   assertIncludes(installedSmokeJs, "installed today flow is supporting rhythm context inside the judgement column", "installed smoke checks today flow tokens");
   assertIncludes(installedSmokeJs, "installed today primary action stays in the right-side hero column aligned to the copy exit point", "installed smoke checks today action placement");
   assertIncludes(installedSmokeJs, "installed today action column hides when no action is visible", "installed smoke checks today action column empty state");
-  assertIncludes(installedSmokeJs, "installed hero primary action starts workflow immediately", "installed smoke checks hero workflow action");
+  assertIncludes(installedSmokeJs, "installed fallback hero primary action still starts workflow when shown", "installed smoke checks fallback hero workflow action");
   assertIncludes(installedSmokeJs, "installed dashboard focus can locate the manual start entry", "installed smoke checks dashboard manual-start focus");
-  assertIncludes(installedSmokeJs, "installed today main state leads with Mira's companion role", "installed smoke checks today Mira companion role");
-  assertIncludes(installedSmokeJs, "installed running state separates auto and manual session meaning", "installed smoke checks running state wording");
+  assertIncludes(installedSmokeJs, "installed today auto-starts timing on app open unless the user explicitly paused", "installed smoke checks today auto-start");
+  assertIncludes(installedSmokeJs, "installed running state uses one title for automatic and manual sessions", "installed smoke checks running state wording");
   assertIncludes(installedSmokeJs, "installed today hides secondary rhythm explanation from first glance", "installed smoke checks today hides secondary rhythm detail");
-  assertIncludes(installedSmokeJs, "installed today first glance keeps Mira as the remembered subject", "installed smoke checks today Mira-first copy");
+  assertIncludes(installedSmokeJs, "installed today opens directly in the running state", "installed smoke checks today running first screen");
   assertIncludes(installedSmokeJs, "installed today primary action is the ① solid primary (tokenized, unified 36px)", "installed smoke checks today primary action style");
-  assertIncludes(installedSmokeJs, "installed today first glance uses a lighter link-like primary action", "installed smoke checks today lighter action copy");
+  assertIncludes(installedSmokeJs, "installed today keeps the duplicate hero start hidden by default", "installed smoke checks hidden duplicate start");
   assertIncludes(installedSmokeJs, "installed settings current mode renders as a quiet summary", "installed smoke checks settings current mode summary");
   assertIncludes(installedSmokeJs, "installed settings current mode does not repeat the same label and value row", "installed smoke checks settings current mode repetition");
   assertIncludes(installedSmokeJs, "installed settings folds advanced reminder boundaries", "installed smoke checks settings boundary disclosure");
@@ -359,8 +360,10 @@ function main() {
   assertIncludes(installedSmokeJs, "installed navigation uses tokenized control rhythm", "installed smoke checks nav control tokens");
   assertIncludes(installedSmokeJs, "installed app icons use tokenized size", "installed smoke checks app icon size tokens");
   assertIncludes(installedSmokeJs, "installed app avoids heavy inline icon strokes", "installed smoke checks heavy icon stroke removal");
-  assertIncludes(installedSmokeJs, "点我会打开休息指引。", "installed smoke checks pink Mira copy");
+  assertIncludes(installedSmokeJs, "installed pink Mira uses one-line rest copy", "installed smoke checks short pink Mira copy");
   assertIncludes(installedSmokeJs, "installed companion uses helper body text token", "installed smoke checks companion body typography token");
+  assertIncludes(installedSmokeJs, "installed Mira toast renders as a contained prompt without a speech-tail", "installed smoke checks main toast no-tail prompt style");
+  assertIncludes(installedSmokeJs, "installed companion Mira bubble uses the same contained no-tail prompt style", "installed smoke checks companion no-tail prompt style");
   assertIncludes(installedSmokeJs, "installed onboarding sells the companion feeling first", "installed smoke checks onboarding companion-first sentence");
   assertIncludes(installedSmokeJs, "installed onboarding creates a first-five-minute aha moment", "installed smoke checks onboarding aha moment");
   assertIncludes(installedSmokeJs, "installed onboarding has one primary action", "installed smoke checks onboarding single primary action");
@@ -368,11 +371,13 @@ function main() {
   assertIncludes(installedSmokeJs, "installed onboarding removes first-run state presets", "installed smoke checks onboarding removes state presets");
   assertIncludes(installedSmokeJs, "installed onboarding removes permission wording from first-run", "installed smoke checks onboarding removes permission wording");
   assertIncludes(installedSmokeJs, "installed onboarding overlay centers the first-run dialog in the dashboard window", "installed smoke checks onboarding dialog centering");
-  assertIncludes(installedSmokeJs, "installed main creates the companion window by default unless the user hides Mira", "installed smoke checks companion default visible");
+  assertIncludes(installedSmokeJs, "installed main reveals the companion window by default unless the user hides Mira", "installed smoke checks companion default visible");
+  assertIncludes(installedSmokeJs, "installed main self-heals enabled desktop Mira when settings are read", "installed smoke checks companion enabled-state self-heal");
   assertIncludes(installedSmokeJs, "installed main can migrate old hidden desktop Mira preferences", "installed smoke checks old hidden companion migration");
   assertIncludes(installedSmokeJs, "installed main marks explicit desktop Mira visibility choices", "installed smoke checks explicit companion preference marker");
   assertIncludes(installedSmokeJs, "installed temporary companion hides do not persist the hidden preference", "installed smoke checks lifecycle hide does not persist");
   assertIncludes(installedSmokeJs, "installed renderer lifecycle hide keeps desktop Mira default visible", "installed smoke checks renderer lifecycle hide");
+  assertIncludes(installedSmokeJs, "installed companion open button returns to Today manual focus by default", "installed smoke checks companion opens manual focus");
   assertIncludes(installedSmokeJs, "installed main does not call System Events unless enhanced sensing is enabled", "installed smoke checks System Events gated");
   assertIncludes(installedSmokeJs, "installed onboarding intro centers and subtly lifts the first-run card content", "installed smoke checks onboarding centered lifted intro");
   assertIncludes(installedSmokeJs, "installed onboarding keeps bottom whitespace restrained", "installed smoke checks onboarding bottom whitespace");
@@ -399,24 +404,26 @@ function main() {
   assertIncludes(installedSmokeJs, "installed profile review opens with Mira insight", "installed smoke checks profile Mira insight opening");
   assertIncludes(installedSmokeJs, "installed profile review answers the next-round plan directly", "installed smoke checks profile next-round overview");
   assertIncludes(installedSmokeJs, "installed profile review labels the reminder timing directly", "installed smoke checks profile reminder timing");
-  assertIncludes(installedSmokeJs, "installed profile review adds a daily share card", "installed smoke checks profile daily share card");
+  assertIncludes(installedSmokeJs, "installed profile observation can detect hard-hold patterns from local reminder and recovery events", "installed smoke checks hard-hold observation");
+  assertIncludes(installedSmokeJs, "installed profile observation uses tired-after-rest feedback", "installed smoke checks tired feedback observation");
+  assertIncludes(installedSmokeJs, "installed daily share card contains summary and action", "installed smoke checks today daily share card");
+  assertIncludes(installedSmokeJs, "installed today no longer renders a separate daily summary section", "installed smoke checks no duplicate daily summary");
+  assertIncludes(installedSmokeJs, "installed daily share card is no longer a separate panel", "installed smoke checks share card is merged");
   assertIncludes(installedSmokeJs, "installed profile review hides technical status signal from main flow", "installed smoke checks profile signal hidden");
-  assertIncludes(installedSmokeJs, "installed profile share card has a ritual transition after rhythm memory", "installed smoke checks profile share ritual transition");
-  assertIncludes(installedSmokeJs, "installed profile share transition uses quiet tokenized text", "installed smoke checks profile share transition type");
-  assertIncludes(installedSmokeJs, "installed profile share transition uses quiet, theme-adaptive divider lines", "installed smoke checks profile share transition divider");
-  assertIncludes(installedSmokeJs, "installed profile share card exposes focus and rest in the first row", "installed smoke checks profile share first-row data");
-  assertIncludes(installedSmokeJs, "installed profile share card renders a visual card preview", "installed smoke checks profile share visual card");
-  assertIncludes(installedSmokeJs, "installed profile share card preview follows the theme surface (no fixed bright block in dark)", "installed smoke checks profile share card themes correctly");
-  assertIncludes(installedSmokeJs, "installed profile share card exposes rhythm as the third data point", "installed smoke checks profile share rhythm data");
+  assertIncludes(installedSmokeJs, "installed daily share image uses the merged card recommendation as its rhythm", "installed smoke checks profile share rhythm data");
   assertIncludes(installedSmokeJs, "installed profile share card includes restrained domain branding", "installed smoke checks profile share domain branding");
-  assertIncludes(installedSmokeJs, "installed profile share card uses the source app icon asset", "installed smoke checks profile share app icon mark");
+  assertIncludes(installedSmokeJs, "installed daily share card uses the source app icon asset", "installed smoke checks daily share app icon mark");
   assertIncludes(installedSmokeJs, "installed profile share image draws the real app icon mark", "installed smoke checks profile share generated app icon mark");
-  assertIncludes(installedSmokeJs, "installed profile share card uses a card-level copy action", "installed smoke checks profile share card-level action");
-  assertIncludes(installedSmokeJs, "installed profile share card keeps privacy copy beside the action", "installed smoke checks profile share privacy copy");
+  assertIncludes(installedSmokeJs, "installed profile share card uses a compact copy action", "installed smoke checks profile share compact action");
+  assertIncludes(installedSmokeJs, "installed daily share action opens a full-card preview overlay", "installed smoke checks share preview overlay");
+  assertIncludes(installedSmokeJs, "installed daily share preview has a separate copy confirmation", "installed smoke checks share preview confirmation");
+  assertIncludes(installedSmokeJs, "installed daily share compact action does not copy before preview", "installed smoke checks share preview before copy");
+  assertIncludes(installedSmokeJs, "installed daily share full preview performs the actual copy", "installed smoke checks share preview copy action");
+  assertIncludes(installedSmokeJs, "installed profile share card keeps privacy copy hidden until feedback", "installed smoke checks profile share hidden privacy copy");
   assertIncludes(installedSmokeJs, "installed profile share card confirms image-card copying", "installed smoke checks profile share copied state");
   assertIncludes(installedSmokeJs, "installed profile share image draws a textured card artifact", "installed smoke checks profile share generated image");
   assertIncludes(installedSmokeJs, "installed profile share action copies the generated image card first", "installed smoke checks profile share image-first action");
-  assertIncludes(installedSmokeJs, "installed profile share fallback text includes focus, rhythm, rest, and Mira line", "installed smoke checks profile share fallback text");
+  assertIncludes(installedSmokeJs, "installed profile share fallback text includes focus, recovery duration, rhythm, and Mira line", "installed smoke checks profile share fallback text");
   assertIncludes(installedSmokeJs, "installed preload exposes share-card image clipboard IPC", "installed smoke checks share image IPC");
   assertIncludes(installedSmokeJs, "installed share card copies a verified PNG image", "installed smoke checks share image clipboard write");
   assertIncludes(installedSmokeJs, "installed profile review keeps today's state line as a lower-weight disclosure", "installed smoke checks profile trend disclosure");

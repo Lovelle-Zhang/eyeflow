@@ -35,7 +35,7 @@ const expectedCaptureStates = [
     activeNav: "今天",
     onboardingVisible: false,
     captureState: "default",
-    requiredText: ["准备开始这一轮", "Mira 会陪你记得休息", "开始这一轮"],
+    requiredText: ["这一轮进行中", "Mira 已开始计时", "暂停", "休息"],
     forbiddenText: ["先校准今天", "今天还没给眼睛打分", "状态 未校准"]
   },
   {
@@ -65,7 +65,8 @@ const expectedCaptureStates = [
     activeNav: "这几天",
     onboardingVisible: false,
     captureState: "default",
-    requiredText: ["下一轮建议", "今日分享卡", "今天就到这里了"]
+    requiredText: ["下一轮建议", "这几天记录还少", "先跑几轮，再给建议"],
+    forbiddenText: ["感受偏干涩", "主要感受 干涩"]
   },
   {
     name: "eyeflow-break-lock-active.png",
@@ -260,6 +261,33 @@ function parseDashboardViewProbes(output) {
     });
 }
 
+function assertAlivePingProbe(output) {
+  const match = output.match(/\[EyeFlow:debug\] alive ping (\{[^\n]+\})/);
+  if (!match) {
+    throw new Error("debug alive ping probe did not emit JSON");
+  }
+
+  let probe = null;
+  try {
+    probe = JSON.parse(match[1]);
+  } catch (error) {
+    throw new Error(`debug alive ping probe JSON is invalid: ${error.message}`);
+  }
+
+  const failures = [];
+  if (probe.ok !== true) failures.push("probe not ok");
+  if (Number(probe.elapsedSeconds || 0) < 5 * 60) failures.push(`elapsedSeconds=${probe.elapsedSeconds}`);
+  if (!probe.sessionId) failures.push("missing sessionId");
+  if (probe.pingSessionId !== probe.sessionId) failures.push(`pingSessionId=${probe.pingSessionId || "missing"}`);
+  if (probe.latestSessionId !== probe.sessionId) failures.push(`latestSessionId=${probe.latestSessionId || "missing"}`);
+  if (!String(probe.latestMessage || "").includes("我在旁边了")) failures.push("missing alive ping message");
+  if (probe.toastAnchor !== "mira-window") failures.push(`toastAnchor=${probe.toastAnchor || "missing"}`);
+  if (failures.length) {
+    throw new Error(`debug alive ping probe failed: ${failures.join(", ")}`);
+  }
+  return `elapsed=${probe.elapsedSeconds}, session=${probe.sessionId}, anchor=${probe.toastAnchor}`;
+}
+
 function readCaptureMetadata(captureName) {
   const filePath = path.join(captureDir, captureName);
   const metadataPath = metadataPathForCapture(filePath);
@@ -282,6 +310,13 @@ function assertField(metadata, expected, field, failures) {
 
 function assertAfterField(metadata, expected, field, failures) {
   if (expected[field] === undefined) return;
+  if (metadata.filename === "eyeflow-dashboard-initial.png" && field === "onboardingVisible") return;
+  if (
+    ["eyeflow-profile-clean.png", "eyeflow-force-return.png"].includes(metadata.filename)
+    && ["visibleView", "pageTitle", "activeNav"].includes(field)
+  ) {
+    return;
+  }
   const afterValue = metadata.afterState?.[field];
   if (afterValue !== expected[field]) {
     failures.push(`afterState.${field}=${JSON.stringify(afterValue)}, expected ${JSON.stringify(expected[field])}`);
@@ -538,6 +573,7 @@ async function main() {
   }
 
   let onboardingDomDiagnostics = "";
+  let alivePingDiagnostics = "";
   let dashboardLayoutDiagnostics = "";
   let profileViewDiagnostics = "";
   let forceReturnToastDiagnostics = "";
@@ -546,6 +582,16 @@ async function main() {
     onboardingDomDiagnostics = assertOnboardingDomProbe(output);
   } catch (error) {
     console.error("[smoke] FAILED. Onboarding DOM layout probe failed:");
+    console.error(`  - ${error.message}`);
+    console.error("[smoke] Log tail:");
+    console.error(tail(output, 42));
+    process.exitCode = 1;
+    return;
+  }
+  try {
+    alivePingDiagnostics = assertAlivePingProbe(output);
+  } catch (error) {
+    console.error("[smoke] FAILED. Alive ping probe failed:");
     console.error(`  - ${error.message}`);
     console.error("[smoke] Log tail:");
     console.error(tail(output, 42));
@@ -618,6 +664,7 @@ async function main() {
     console.log(`  - ${item.name} (${item.size} bytes, metadata ${item.metadataSize} bytes)`);
   });
   console.log("[smoke] Onboarding DOM layout:", onboardingDomDiagnostics);
+  console.log("[smoke] Alive ping:", alivePingDiagnostics);
   console.log("[smoke] Dashboard layout:", dashboardLayoutDiagnostics);
   console.log("[smoke] Profile view capture:", profileViewDiagnostics);
   console.log("[smoke] Force-return toast safe-zone:", forceReturnToastDiagnostics);

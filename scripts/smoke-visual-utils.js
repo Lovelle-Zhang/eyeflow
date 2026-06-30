@@ -136,7 +136,12 @@ function isLightMintPixel(r, g, b, a) {
 }
 
 function isDarkPrimaryButtonPixel(r, g, b, a) {
-  return a > 180 && r <= 46 && g <= 68 && b <= 64 && g >= r && b >= r - 4;
+  return a > 180
+    && r <= 46
+    && g <= 68
+    && b <= 64
+    && g >= r + 8
+    && b >= r + 4;
 }
 
 function isLightButtonTextPixel(r, g, b, a) {
