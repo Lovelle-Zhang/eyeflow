@@ -10486,7 +10486,16 @@
         resetSessionClock();
         render();
         persist();
+        return;
       }
+      // Returning to an assessed day with no live session (most often an
+      // inactivity gap reset the clock while away): auto-start the next round so
+      // the today view never sits idle — same "open = start, no decision cost"
+      // intent as launch. autoStartSessionOnOpen() no-ops if already running /
+      // auto-tracking / manually paused.
+      autoStartSessionOnOpen();
+      render();
+      persist();
     }
 
     function refreshDesktopReadinessOnResume() {
@@ -10589,6 +10598,9 @@
         restartVisibleBreakTimerAfterResume();
         if (isRunning && lastSessionTickAt && Date.now() - lastSessionTickAt > SYSTEM_SESSION_GAP_MS) {
           completeSessionForSystemRest("system-inactive-gap");
+          // The gap was just recorded as a rest and the clock reset to idle; the
+          // user is back, so start the next round instead of leaving today idle.
+          autoStartSessionOnOpen();
           return;
         }
         if (isRunning) lastSessionTickAt = Date.now();
@@ -11616,6 +11628,10 @@
       if (!ensureTodayReadyForAutoStart()) return;
       if (isRunning || isAutoTracking()) return;
       if (sessionSource === "manual-paused" && elapsedSeconds > 0) return;
+      // Never start a focus round while the user is resting (active rest overlay
+      // or a forced return) — rest resets the clock to idle, which would otherwise
+      // look auto-startable. Resuming the window mid-rest must not yank them back.
+      if (forceBreakActive || els.breakOverlay.classList.contains("show")) return;
       startSession();
     }
 
@@ -14078,16 +14094,17 @@
       } else if (sessionStarted) {
         els.stateHeadline.textContent = "这一轮进行中";
         els.stateAction.textContent = "Mira 已开始计时。";
-        els.stateExplain.textContent = "到恢复断点我再提醒；需要停下就点暂停或休息。";
-        renderStateCues([]);
-        els.primaryActionBtn.hidden = true;
-      } else if (load >= 48) {
-        els.stateHeadline.textContent = "这一轮进行中";
-        els.stateAction.textContent = "Mira 已开始计时。";
-        els.stateExplain.textContent = "状态偏高时我会先轻提醒；需要停下就点暂停或休息。";
+        els.stateExplain.textContent = load >= 48
+          ? "状态偏高时我会先轻提醒；需要停下就点暂停或休息。"
+          : "到恢复断点我再提醒；需要停下就点暂停或休息。";
         renderStateCues([]);
         els.primaryActionBtn.hidden = true;
       } else {
+        // By design there is no idle preparation page (it was removed to cut
+        // decision cost; smoke-installed guards against the old headline coming
+        // back). Auto-start (launch + resume + system-gap) keeps the today view in
+        // a round, so this branch is effectively unreachable; mirror the running
+        // copy rather than reintroduce the removed preparation headline.
         els.stateHeadline.textContent = "这一轮进行中";
         els.stateAction.textContent = "Mira 已开始计时。";
         els.stateExplain.textContent = "到恢复断点我再提醒；需要停下就点暂停或休息。";

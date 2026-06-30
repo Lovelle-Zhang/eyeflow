@@ -245,7 +245,12 @@ function main() {
   assertMatches(indexHtml, /function\s+completeInitialAssessment\(options = \{\}\)[\s\S]*startSession\(\);[\s\S]*recordOnboardingEvent\("first_focus_started"[\s\S]*focusSessionPanel\(\{\s*focusTarget:\s*"panel"\s*\}\);/, "assessment confirmation starts timing and focuses the timer panel directly");
   assertIncludes(indexHtml, 'els.stateHeadline.textContent = "这一轮进行中";', "first round uses one running title for automatic and manual starts");
   assertIncludes(indexHtml, 'els.stateAction.textContent = "Mira 已开始计时。";', "first round confirms timing has started");
-  assertIncludes(indexHtml, 'els.stateExplain.textContent = "到恢复断点我再提醒；需要停下就点暂停或休息。";', "manual first round explains the reminder and pause path");
+  assertMatches(indexHtml, /els\.stateExplain\.textContent = load >= 48[\s\S]{0,160}?"到恢复断点我再提醒；需要停下就点暂停或休息。"/, "running first round explains the reminder and pause path (load-branched)");
+  // No idle "准备开始" preparation page may come back (smoke-installed also guards
+  // this). Instead the residual is prevented at the source: returning to the app
+  // auto-starts a round so today never sits idle.
+  assertNotMatches(indexHtml, /els\.stateHeadline\.textContent\s*=\s*"准备开始这一轮"/, "today never reintroduces a 准备开始 preparation headline");
+  assertMatches(indexHtml, /function\s+handleResumeCheck\(\)[\s\S]*?autoStartSessionOnOpen\(\);/, "returning to the app auto-starts a round so today never sits idle");
   assertMatches(indexHtml, /function\s+completeInitialAssessment\(options = \{\}\)[\s\S]*state\.settings\.intensity\s*=\s*"quiet";[\s\S]*setIntensity\(state\.settings\.intensity,\s*\{\s*persistChange:\s*false,\s*renderChange:\s*false,\s*userChange:\s*false\s*\}\);/, "assessment completion defaults to L1 quiet");
   assertNotMatches(indexHtml, /completeInitialAssessment[\s\S]*showFirstRoundLanding\(\);/, "onboarding no longer passes through a first-round landing page");
   assertMatches(indexHtml, /options\.focusTarget\s*===\s*"panel"[\s\S]*\?\s*els\.sessionPanel/, "focus helper can target session panel");
