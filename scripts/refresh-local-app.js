@@ -26,6 +26,7 @@ function run(label, command, args, options = {}) {
 
 function main() {
   run("Check core scoring logic", "npm", ["run", "smoke:core"], { timeout: 30000 });
+  run("Check metric口径 consistency", "npm", ["run", "smoke:metrics"], { timeout: 30000 });
   run("Check session UI state", "npm", ["run", "smoke:session"], { timeout: 30000 });
   run("Check current visual capture gate", "npm", ["run", "smoke:current-capture"], { timeout: 30000 });
   run("Check rest recovery flow", "npm", ["run", "smoke:rest"], { timeout: 30000 });
