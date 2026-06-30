@@ -22,6 +22,7 @@ const debugDashboardView = [
   wantsCurrentVisualCapture("settings-ordinary") ? "settings-ordinary" : "",
   wantsCurrentVisualCapture("rhythmView") ? "rhythmView" : "",
   wantsCurrentVisualCapture("profileView") ? "profileView" : "",
+  wantsCurrentVisualCapture("today-share-preview") ? "today-share-preview" : "",
   wantsCurrentVisualCapture("profile-share-card") ? "profile-share-card" : ""
 ].filter(Boolean).join(",");
 const debugDashboardViews = debugDashboardView
@@ -54,10 +55,11 @@ let companionVisibilityTimer = null;
 let startupPanelShown = false;
 let companionHiddenByLifecycle = false;
 let voiceProcess = null;
+let suppressNextActivate = false;
 const DASHBOARD_DEFAULT_SIZE = { width: 1280, height: 820 };
 const DASHBOARD_MIN_SIZE = { width: 1120, height: 760 };
 const DASHBOARD_SCREEN_PADDING = 18;
-const COMPANION_VISIBILITY_PREFERENCE_VERSION = 2;
+const COMPANION_VISIBILITY_PREFERENCE_VERSION = 3;
 const COMPANION_EXIT_HINT_TEXT = "双击我可以退出桌面 Mira";
 const COMPANION_EXIT_HINT_DURATION_MS = 3800;
 const ENHANCED_DESKTOP_SENSING_PREFERENCE_VERSION = 3;
@@ -78,7 +80,7 @@ if (debugRestState) {
   latestState = {
     mood: "rest",
     title: "Mira 想让你休息",
-    message: "不用立刻停下。找一个恢复断点，看远处、眨眼，然后再回来。",
+    message: "看远处 20 秒。",
     load: 82,
     isRunning: true,
     interventionLevel: 3
@@ -122,7 +124,7 @@ process.on("unhandledRejection", (reason) => {
 const appRoot = __dirname;
 const companionSizes = {
   compact: { width: 86, height: 86 },
-  bubble: { width: 390, height: 104 },
+  bubble: { width: 344, height: 104 },
   panel: { width: 292, height: 142 },
   expanded: { width: 360, height: 130 }
 };
@@ -231,6 +233,8 @@ function parseCurrentVisualCaptureTargets(input) {
     profile: "profileView",
     recap: "profileView",
     profileView: "profileView",
+    "today-share-preview": "today-share-preview",
+    todaySharePreview: "today-share-preview",
     "profile-share-card": "profile-share-card",
     profileShareCard: "profile-share-card",
     onboarding: "onboarding-active",
@@ -256,6 +260,7 @@ function parseCurrentVisualCaptureTargets(input) {
         "rhythmView",
         "settings-ordinary",
         "profileView",
+        "today-share-preview",
         "profile-share-card",
         "onboarding-active",
         "break-lock-active",
@@ -282,6 +287,7 @@ function debugCaptureFilename(label) {
     "dashboard-rhythmView": "eyeflow-settings-clean.png",
     "dashboard-settings-ordinary": "eyeflow-settings-ordinary.png",
     "dashboard-profileView": "eyeflow-profile-clean.png",
+    "dashboard-today-share-preview": "eyeflow-today-share-preview.png",
     "dashboard-profile-share-card": "eyeflow-profile-share-card.png",
     "dashboard-rest-guide": "eyeflow-rest-guide.png",
     "dashboard-force-return": "eyeflow-force-return.png",
@@ -377,6 +383,8 @@ function debugCaptureProbeScript(options = {}) {
     const onboardingVisible = Boolean(onboardingOverlay?.classList.contains("show")) && isVisible(onboardingOverlay);
     const breakOverlay = document.querySelector("#breakOverlay");
     const breakOverlayVisible = Boolean(breakOverlay?.classList.contains("show")) && isVisible(breakOverlay);
+    const sharePreviewOverlay = document.querySelector("#sharePreviewOverlay");
+    const sharePreviewVisible = Boolean(sharePreviewOverlay?.classList.contains("show")) && isVisible(sharePreviewOverlay);
     const measureButton = (selector) => {
       const element = document.querySelector(selector);
       if (!isVisible(element)) return null;
@@ -396,6 +404,8 @@ function debugCaptureProbeScript(options = {}) {
     };
     const textRoot = breakOverlayVisible
       ? breakOverlay
+      : sharePreviewVisible
+      ? sharePreviewOverlay
       : onboardingVisible
       ? onboardingOverlay
       : (visibleView ? document.querySelector("#" + CSS.escape(visibleView)) : null)
@@ -512,12 +522,12 @@ function debugPrepareCaptureScript(options = {}) {
       const sessionPill = document.querySelector("#sessionStatePill");
       const timerHint = document.querySelector("#timerHint");
       const startBtnText = document.querySelector("#startBtnText");
-      if (stateHeadline) stateHeadline.textContent = "Mira 正在自动记录";
-      if (stateAction) stateAction.textContent = "看到你已经开始工作，50 分钟后轻提醒。";
+      if (stateHeadline) stateHeadline.textContent = "这一轮进行中";
+      if (stateAction) stateAction.textContent = "Mira 已开始计时。";
       if (sessionPanelTitle) sessionPanelTitle.textContent = "本轮节奏";
-      if (sessionPill) sessionPill.textContent = "自动记录";
-      if (timerHint) timerHint.textContent = "自动记录中";
-      if (startBtnText) startBtnText.textContent = "手动专注";
+      if (sessionPill) sessionPill.textContent = "计时中";
+      if (timerHint) timerHint.textContent = "计时中";
+      if (startBtnText) startBtnText.textContent = "暂停";
       document.querySelector("#sessionPanel")?.scrollIntoView({ behavior: "auto", block: "center", inline: "nearest" });
     }
     if (${options.sessionSettingsOpen === true ? "true" : "false"}) {
@@ -591,6 +601,17 @@ async function performDebugCapture(win, label, options = {}) {
   try {
     fs.mkdirSync(debugCaptureDir, { recursive: true });
     await win.webContents.executeJavaScript(debugPrepareCaptureScript(options));
+    if (label === "break-lock-complete") {
+      await win.webContents.executeJavaScript(`(() => new Promise((resolve) => {
+        if (typeof ticker !== "undefined" && ticker) {
+          window.clearInterval(ticker);
+          ticker = null;
+        }
+        if (typeof completionShown !== "undefined") completionShown = false;
+        if (typeof showCompletion === "function") showCompletion();
+        window.requestAnimationFrame(() => window.requestAnimationFrame(resolve));
+      }))()`);
+    }
     const beforeState = await win.webContents.executeJavaScript(debugCaptureProbeScript(options));
     const image = await win.webContents.capturePage();
     const afterState = await win.webContents.executeJavaScript(debugCaptureProbeScript({ ...options, settleMs: 0 }));
@@ -643,21 +664,29 @@ function captureDebugDashboardView(viewName, extraDelayMs = 0) {
   if (!/^[a-z-]+$/i.test(viewName)) return;
   const targetViewName = viewName === "settings-ordinary"
     ? "rhythmView"
+    : viewName === "today-share-preview"
+      ? "todayView"
     : viewName === "profile-share-card"
       ? "profileView"
       : viewName;
   const captureState = viewName === "settings-ordinary"
     ? "ordinary mode"
+    : viewName === "today-share-preview"
+      ? "share preview"
     : viewName === "profile-share-card"
       ? "share card"
       : "default";
   const captureReason = viewName === "settings-ordinary"
     ? "ordinary settings debug view"
+    : viewName === "today-share-preview"
+      ? "today share preview debug view"
     : viewName === "profile-share-card"
       ? "profile share card debug view"
     : `clean ${targetViewName} debug view`;
   const focusSelector = viewName === "profile-share-card" ? ".profile-share-bridge" : "";
-  const requiredText = viewName === "profile-share-card"
+  const requiredText = viewName === "today-share-preview"
+    ? ["带走这张卡", "复制卡片", "eyeflow.app"]
+    : viewName === "profile-share-card"
     ? ["今天就到这里了", "今日分享卡", "eyeflow.app"]
     : [];
   setTimeout(() => {
@@ -698,6 +727,12 @@ function captureDebugDashboardView(viewName, extraDelayMs = 0) {
       }
       window.setTimeout(enforceView, 160);
       document.querySelector("#onboardingOverlay")?.classList.remove("show");
+      if ("${viewName}" === "today-share-preview") {
+        if (typeof isRunning !== "undefined") isRunning = true;
+        if (typeof elapsedSeconds !== "undefined") elapsedSeconds = Math.max(Number(elapsedSeconds || 0), 8 * 60);
+        if (typeof render === "function") render();
+        if (typeof openDailySharePreview === "function") openDailySharePreview();
+      }
       let feedbackProbe = null;
       if (${debugCopyFeedback ? "true" : "false"} && typeof buildFeedbackTemplate === "function") {
         const feedbackText = buildFeedbackTemplate();
@@ -747,7 +782,7 @@ function captureDebugDashboardView(viewName, extraDelayMs = 0) {
       const toastSafeZone = typeof window.__eyeflowToastSafeZoneProbe === "function"
         ? window.__eyeflowToastSafeZoneProbe()
         : { anchor: "", overlaps: [] };
-      const mainViewportText = Array.from(document.querySelectorAll("main h1, main h2, main h3, main h4, main p, main span, main strong, main button, main summary, main small"))
+      const mainViewportText = Array.from(document.querySelectorAll("main h1, main h2, main h3, main h4, main p, main span, main strong, main button, main summary, main small, #sharePreviewOverlay h1, #sharePreviewOverlay h2, #sharePreviewOverlay h3, #sharePreviewOverlay p, #sharePreviewOverlay span, #sharePreviewOverlay strong, #sharePreviewOverlay button"))
         .filter(isVisible)
         .filter((element) => {
           const rect = element.getBoundingClientRect();
@@ -905,6 +940,52 @@ function captureDebugOnboarding() {
   }, 1700);
 }
 
+function runDebugAlivePingProbe() {
+  if (!debugCapture || !dashboardWindow || dashboardWindow.isDestroyed()) return;
+  setTimeout(() => {
+    if (!dashboardWindow || dashboardWindow.isDestroyed()) return;
+    dashboardWindow.webContents.executeJavaScript(`(() => {
+      document.querySelector("#onboardingOverlay")?.classList.remove("show", "debug-capture");
+      if (typeof todayKey === "function") {
+        state.currentDay = todayKey();
+        state.lastAssessmentDay = todayKey();
+      }
+      state.onboardingDismissed = true;
+      state.initialAssessmentDone = true;
+      if (!Number(state.focusTarget)) state.focusTarget = 50;
+      if (!Number(state.breakTarget)) state.breakTarget = 120;
+      if (typeof render === "function") render();
+      if (typeof startSession === "function" && !isRunning) startSession();
+      const targetSeconds = Number(typeof FIRST_AHA_SECONDS === "number" ? FIRST_AHA_SECONDS : 300);
+      elapsedSeconds = Math.max(targetSeconds, Number(elapsedSeconds || 0));
+      startedAt = Date.now() - elapsedSeconds * 1000;
+      if (typeof maybeShowFirstAhaMoment === "function") maybeShowFirstAhaMoment();
+      const memory = typeof ensureMiraMemory === "function" ? ensureMiraMemory() : (state.miraMemory || {});
+      const events = Array.isArray(state.events)
+        ? state.events.filter((event) => event.type === "mira_aha_moment")
+        : [];
+      const latestEvent = events[events.length - 1] || {};
+      return {
+        ok: true,
+        elapsedSeconds,
+        sessionId: state.activeFocusSessionId || "",
+        pingSessionId: memory.lastAlivePingSessionId || "",
+        pingAt: memory.lastAlivePingAt || "",
+        firstAhaAt: memory.firstAhaAt || "",
+        eventCount: events.length,
+        latestMessage: latestEvent.message || "",
+        latestSessionId: latestEvent.sessionId || "",
+        toastAnchor: window.__eyeflowToastProbe?.anchor || "",
+        toastOverlaps: window.__eyeflowToastProbe?.overlaps || []
+      };
+    })()`).then((result) => {
+      console.log("[EyeFlow:debug] alive ping", JSON.stringify(result));
+    }).catch((error) => {
+      console.warn("[EyeFlow:debug] alive ping failed", error.message);
+    });
+  }, debugOnboarding ? 8200 : 2600);
+}
+
 function runDebugForcePreview() {
   if (!debugForcePreview || !dashboardWindow || dashboardWindow.isDestroyed()) return;
   const startDelay = debugCapture && debugRestClick ? 16000 : (debugRestClick ? 3600 : 1400);
@@ -1059,6 +1140,12 @@ function showDockIcon() {
   }
 }
 
+function hideDockIcon() {
+  if (process.platform === "darwin" && app.dock) {
+    app.dock.hide();
+  }
+}
+
 function getLaunchAtLogin() {
   if (process.platform !== "darwin") return false;
   return Boolean(app.getLoginItemSettings().openAtLogin);
@@ -1086,10 +1173,29 @@ function desktopPreferenceDefaults(settings = readSettings()) {
     enhancedDesktopSensingRequested: !systemEnhancedDesktopSensing
       && settings.enhancedDesktopSensingRequested === true
       && hasFreshEnhancedDesktopSensingRequest,
+    hideDockOnClose: settings.hideDockOnClose === true,
     showCompanionOnLaunch: hasCompanionVisibilityPreference
       ? settings.showCompanionOnLaunch !== false
       : true
   };
+}
+
+function isCompanionWindowVisible() {
+  return Boolean(companionWindow && !companionWindow.isDestroyed() && companionWindow.isVisible());
+}
+
+function ensureCompanionVisibleForPreference({ focus = false } = {}) {
+  if (!desktopPreferenceDefaults().showCompanionOnLaunch) return false;
+  if (isCompanionWindowVisible()) {
+    keepCompanionVisible();
+    if (focus) {
+      bringCompanionToFront(companionWindow);
+      companionWindow.focus();
+    }
+    return true;
+  }
+  revealCompanionWindow({ focus });
+  return isCompanionWindowVisible();
 }
 
 function reconcileDesktopPreferences(settings = readSettings()) {
@@ -1140,8 +1246,13 @@ function writeDesktopPreference(key, enabled) {
 
 function getDesktopSettings() {
   const settings = reconcileDesktopPreferences();
+  const preferences = desktopPreferenceDefaults(settings);
+  if (preferences.showCompanionOnLaunch) {
+    ensureCompanionVisibleForPreference();
+  }
   return {
-    ...desktopPreferenceDefaults(settings),
+    ...preferences,
+    companionVisible: isCompanionWindowVisible(),
     launchAtLogin: getLaunchAtLogin(),
     version: app.getVersion(),
     platform: process.platform
@@ -1339,26 +1450,48 @@ function bringCompanionToFront(win) {
   win.moveTop();
 }
 
+function sameWindowBounds(a, b) {
+  return Boolean(a && b)
+    && Math.abs(a.x - b.x) <= 1
+    && Math.abs(a.y - b.y) <= 1
+    && Math.abs(a.width - b.width) <= 1
+    && Math.abs(a.height - b.height) <= 1;
+}
+
+function repairCompanionBounds({ reset = false } = {}) {
+  if (!companionWindow || companionWindow.isDestroyed()) return false;
+  if (companionBubbleBaseBounds || companionExpandBaseBounds) return false;
+  const currentBounds = companionWindow.getBounds();
+  const nextBounds = visibleCompanionBounds(reset ? defaultCompanionBounds() : currentBounds);
+  if (sameWindowBounds(currentBounds, nextBounds)) return false;
+  companionWindow.setBounds(nextBounds, false);
+  saveCompanionBounds();
+  return true;
+}
+
 function revealCompanionWindow({ reset = false, focus = false } = {}) {
   if (!companionWindow || companionWindow.isDestroyed()) createCompanionWindow();
   if (!companionWindow || companionWindow.isDestroyed()) return;
   companionHiddenByLifecycle = false;
-  if (reset) {
-    companionWindow.setBounds(visibleCompanionBounds(defaultCompanionBounds()), false);
-  } else {
-    keepCompanionVisible();
-  }
-  companionWindow.showInactive();
-  bringCompanionToFront(companionWindow);
+  const wasVisible = companionWindow.isVisible();
+  const repaired = repairCompanionBounds({ reset });
+  if (!wasVisible) companionWindow.showInactive();
+  if (!wasVisible || reset || focus) bringCompanionToFront(companionWindow);
   if (focus) companionWindow.focus();
-  saveCompanionBounds();
+  if (!repaired && !wasVisible) saveCompanionBounds();
 }
 
 function ensureCompanionReachable() {
-  if (!companionWindow || companionWindow.isDestroyed()) return;
+  const shouldShowCompanion = desktopPreferenceDefaults().showCompanionOnLaunch;
+  if (!companionWindow || companionWindow.isDestroyed()) {
+    if (shouldShowCompanion) revealCompanionWindow();
+    return;
+  }
   keepCompanionVisible();
-  if (!companionWindow.isVisible()) return;
-  bringCompanionToFront(companionWindow);
+  if (!companionWindow.isVisible()) {
+    if (shouldShowCompanion) revealCompanionWindow();
+    return;
+  }
 }
 
 function startCompanionVisibilityMonitor() {
@@ -1489,10 +1622,7 @@ function maybeShowCompanionExitHint() {
 
 function keepCompanionVisible() {
   if (!companionWindow || companionWindow.isDestroyed()) return;
-  if (companionBubbleBaseBounds || companionExpandBaseBounds) return;
-  const nextBounds = visibleCompanionBounds(companionWindow.getBounds());
-  companionWindow.setBounds(nextBounds, false);
-  saveCompanionBounds();
+  repairCompanionBounds();
 }
 
 function resetCompanionPosition() {
@@ -1518,7 +1648,60 @@ function hideCompanionWindow({ persistPreference = true } = {}) {
   sendCompanionExpanded();
 }
 
-function createDashboardWindow() {
+function wasOpenedAtLogin() {
+  if (process.platform !== "darwin") return false;
+  return Boolean(app.getLoginItemSettings().wasOpenedAtLogin);
+}
+
+function wantsDashboardOnLaunch() {
+  return Boolean(debugCapture || debugOnboarding || process.env.EYEFLOW_SHOW_DASHBOARD_ON_LAUNCH === "1");
+}
+
+function launchBehavior() {
+  const openedAtLogin = wasOpenedAtLogin();
+  const showDashboard = wantsDashboardOnLaunch() || !openedAtLogin;
+  return {
+    openedAtLogin,
+    showDock: showDashboard,
+    showDashboard,
+    suppressInitialActivate: !showDashboard,
+    revealOnboarding: true
+  };
+}
+
+function applyLaunchDockBehavior(behavior) {
+  if (behavior.showDock) {
+    showDockIcon();
+  } else {
+    hideDockIcon();
+  }
+}
+
+function onboardingOverlayIsVisibleScript() {
+  return `(() => {
+    const overlay = document.querySelector("#onboardingOverlay");
+    if (!overlay || !overlay.classList.contains("show")) return false;
+    const style = window.getComputedStyle(overlay);
+    return style.display !== "none"
+      && style.visibility !== "hidden"
+      && Number(style.opacity || 0) > 0;
+  })()`;
+}
+
+function maybeRevealDashboardForOnboarding({ showOnReady, revealOnboarding } = {}) {
+  if (showOnReady || !revealOnboarding || debugCapture) return;
+  if (!dashboardWindow || dashboardWindow.isDestroyed()) return;
+  dashboardWindow.webContents.executeJavaScript(onboardingOverlayIsVisibleScript()).then((onboardingVisible) => {
+    if (!onboardingVisible || !dashboardWindow || dashboardWindow.isDestroyed()) return;
+    showDashboard({ view: "todayView", focus: "onboarding" });
+  }).catch((error) => {
+    console.warn("[EyeFlow:dashboard] onboarding reveal probe failed", error.message);
+  });
+}
+
+function createDashboardWindow(options = {}) {
+  const showOnReady = options.showOnReady !== false;
+  const revealOnboarding = options.revealOnboarding !== false;
   dashboardWindow = new BrowserWindow({
     ...dashboardWindowOptions(),
     minWidth: DASHBOARD_MIN_SIZE.width,
@@ -1540,13 +1723,14 @@ function createDashboardWindow() {
     : undefined);
 
   dashboardWindow.once("ready-to-show", () => {
-    dashboardWindow.show();
+    if (showOnReady) dashboardWindow.show();
   });
 
   dashboardWindow.on("close", (event) => {
     if (!app.isQuitting) {
       event.preventDefault();
       dashboardWindow.hide();
+      if (desktopPreferenceDefaults().hideDockOnClose) hideDockIcon();
     }
   });
 
@@ -1556,6 +1740,7 @@ function createDashboardWindow() {
   dashboardWindow.webContents.once("did-finish-load", () => {
     dashboardWindow.webContents.send("state:update", latestState);
     dashboardWindow.webContents.send("activity:update", latestActivity);
+    maybeRevealDashboardForOnboarding({ showOnReady, revealOnboarding });
     captureDebugPage(dashboardWindow, "dashboard", 600, {
       requestedView: "todayView",
       expectedOnboardingVisible: false,
@@ -1569,7 +1754,7 @@ function createDashboardWindow() {
         expectedOnboardingVisible: false,
         sessionActive: true,
         captureState: "session active",
-        requiredText: ["这一轮进行中", "先把注意力留给当前任务", "本轮"],
+        requiredText: ["这一轮进行中", "Mira 已开始计时", "本轮"],
         captureReason: "today session active"
       });
     }
@@ -1581,7 +1766,7 @@ function createDashboardWindow() {
         sessionActive: true,
         sessionSettingsOpen: true,
         captureState: "session settings open",
-        requiredText: ["调整节奏", "专注提醒", "休息长度"],
+        requiredText: ["节奏", "专注提醒", "休息长度"],
         captureReason: "today session settings open"
       });
     }
@@ -1592,7 +1777,7 @@ function createDashboardWindow() {
         expectedOnboardingVisible: false,
         autoTracking: true,
         captureState: "auto tracking",
-        requiredText: ["自动记录", "手动专注"],
+        requiredText: ["计时中", "暂停"],
         captureReason: "today auto tracking"
       });
     }
@@ -1601,6 +1786,7 @@ function createDashboardWindow() {
       captureDebugDashboardView(viewName, index * debugViewDelayStep);
     });
     captureDebugOnboarding();
+    runDebugAlivePingProbe();
     runDebugForcePreview();
     if (debugCapture) {
       dashboardWindow.webContents.executeJavaScript(`({
@@ -1657,7 +1843,7 @@ function createCompanionWindow() {
       captureState: "companion avatar",
       captureReason: "companion avatar"
     });
-    revealCompanionWindow();
+    ensureCompanionVisibleForPreference();
     setTimeout(() => maybeShowCompanionExitHint(), 650);
     runDebugRestClick();
     if (!startupPanelShown && Number(latestState.interventionLevel || 1) > 1) {
@@ -1679,42 +1865,105 @@ function createCompanionWindow() {
   });
 }
 
-function createTray() {
-  const icon = nativeImage.createFromDataURL(
+function createFallbackTrayIcon() {
+  return nativeImage.createFromDataURL(
     "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABYAAAAWCAYAAADEtGw7AAAACXBIWXMAAAsTAAALEwEAmpwYAAAAlElEQVR4nO2VwQ3DMAhFfYfdIbsDR2iH7A7dId0BO0R3yQ6ZITWqGPzQO+SbH5QBv4CkSkVN6ARwEXkHQq+AMwBam9wkvU8s6Z0RLgHEc9d5SZ3yXGaEApjUruc0DU2lVbwCzpQhyXwCTkpcdIF7YJru8iU0aGdFgWs+Gg5l+bC8j4K0rj6dX+5LzstC8yqQwW3EB3cdyasHctkAAAAASUVORK5CYII="
   );
+}
+
+function createDarwinTrayIcon() {
+  const icon = nativeImage.createEmpty();
+  icon.addRepresentation({
+    scaleFactor: 1,
+    buffer: fs.readFileSync(path.join(appRoot, "assets", "trayTemplate.png"))
+  });
+  icon.addRepresentation({
+    scaleFactor: 2,
+    buffer: fs.readFileSync(path.join(appRoot, "assets", "trayTemplate@2x.png"))
+  });
+  icon.setTemplateImage(true);
+  return icon;
+}
+
+function createTrayIcon() {
+  return process.platform === "darwin" ? createDarwinTrayIcon() : createFallbackTrayIcon();
+}
+
+function createTray() {
+  const icon = createTrayIcon();
   tray = new Tray(icon);
-  tray.setToolTip("EyeFlow");
+  updateTrayPresentation();
   updateTrayMenu();
-  tray.on("click", showDashboard);
+  tray.on("click", handleTrayClick);
+  tray.on("right-click", showTrayMenu);
+}
+
+function trayStatusTitle() {
+  const load = Math.round(Number(latestState.load || 0));
+  const level = Number(latestState.interventionLevel || 1);
+  if (latestState.mood === "rest" || level >= 3) return "休息";
+  if (load >= 75) return String(load);
+  return "";
+}
+
+function updateTrayPresentation() {
+  if (!tray) return;
+  const statusTitle = trayStatusTitle();
+  if (process.platform === "darwin") {
+    tray.setTitle(statusTitle);
+  }
+  tray.setToolTip(statusTitle ? `EyeFlow · ${statusTitle}` : "EyeFlow");
+}
+
+function trayMiraVisibilityLabel() {
+  return desktopPreferenceDefaults().showCompanionOnLaunch && isCompanionWindowVisible()
+    ? "退出 Mira"
+    : "显示 Mira";
+}
+
+function trayStatusLine() {
+  const load = Math.round(Number(latestState.load || 0));
+  const level = Number(latestState.interventionLevel || 1);
+  if (latestState.mood === "rest" || level >= 3) return "到恢复断点了";
+  if (latestState.isRunning || latestState.mood === "focus") return "本轮计时中";
+  if (load >= 75) return `状态偏高 · ${load}`;
+  return "Mira 安静待命";
+}
+
+function startTrayRest() {
+  showDashboard({ restGuide: true });
+}
+
+function buildTrayMenu() {
+  return Menu.buildFromTemplate([
+    { label: trayStatusLine(), enabled: false },
+    { type: "separator" },
+    { label: "打开 EyeFlow", click: showDashboard },
+    { label: "休息一下", click: startTrayRest },
+    { label: trayMiraVisibilityLabel(), click: toggleCompanionVisibility }
+  ]);
 }
 
 function updateTrayMenu() {
+  if (!tray) return null;
+  updateTrayPresentation();
+  const menu = buildTrayMenu();
+  if (process.platform !== "darwin") tray.setContextMenu(menu);
+  return menu;
+}
+
+function showTrayMenu() {
   if (!tray) return;
-  tray.setContextMenu(Menu.buildFromTemplate([
-    { label: latestState.title || "Mira 很安静", enabled: false },
-    { label: `用眼负荷 ${latestState.load || 0}`, enabled: false },
-    { label: `${latestActivity.activeApp || "未知 App"} · ${latestActivity.isWorking ? "活跃" : "空闲"}`, enabled: false },
-    { type: "separator" },
-    { label: "打开 EyeFlow", click: showDashboard },
-    { label: "显示/退出 Mira", click: toggleCompanionVisibility },
-    { label: "找回 Mira", click: resetCompanionPosition },
-    {
-      label: "开机自动启动",
-      type: "checkbox",
-      checked: getLaunchAtLogin(),
-      click: (menuItem) => setLaunchAtLogin(menuItem.checked)
-    },
-    { type: "separator" },
-    { label: "关于 EyeFlow", click: showAboutPanel },
-    {
-      label: "退出",
-      click: () => {
-        app.isQuitting = true;
-        app.quit();
-      }
-    }
-  ]));
+  const menu = updateTrayMenu();
+  tray.popUpContextMenu(menu);
+}
+
+function handleTrayClick() {
+  if (process.platform === "darwin") {
+    showTrayMenu();
+    return;
+  }
+  showDashboard();
 }
 
 function sendDashboardRestGuide() {
@@ -1749,7 +1998,7 @@ function sendDashboardFocus(payload = {}) {
 
 function showDashboard(options = {}) {
   showDockIcon();
-  if (!dashboardWindow) createDashboardWindow();
+  if (!dashboardWindow) createDashboardWindow({ showOnReady: true, revealOnboarding: false });
   keepDashboardVisible();
   dashboardWindow.show();
   dashboardWindow.focus();
@@ -1780,7 +2029,7 @@ function showCompanion() {
 }
 
 function toggleCompanionVisibility() {
-  if (desktopPreferenceDefaults().showCompanionOnLaunch) {
+  if (desktopPreferenceDefaults().showCompanionOnLaunch && isCompanionWindowVisible()) {
     hideCompanionWindow();
     return;
   }
@@ -1877,7 +2126,7 @@ function startBreakLock(payload = {}) {
       requestedView: "break-lock",
       expectedVisibleView: "",
       captureState: payload.preview ? "break-lock active" : "break-lock active",
-      requiredText: ["Mira 带你离开屏幕一下", "紧急退出"],
+      requiredText: ["看向远处", "紧急退出"],
       captureReason: payload.preview ? "force preview active" : "break lock active"
     });
     breakLockWindow.show();
@@ -1927,7 +2176,7 @@ function startBreakLock(payload = {}) {
       requestedView: "break-lock",
       expectedVisibleView: "",
       captureState: "break-lock active",
-      requiredText: ["Mira 带你离开屏幕一下", "紧急退出"],
+      requiredText: ["看向远处", "紧急退出"],
       captureReason: payload.preview ? "force preview active" : "break lock active"
     });
   });
@@ -2259,12 +2508,19 @@ function startSystemLifecycleMonitor() {
 }
 
 app.whenReady().then(() => {
-  showDockIcon();
   updateApplicationMenu();
 
-  createDashboardWindow();
+  const launch = launchBehavior();
+  applyLaunchDockBehavior(launch);
+  suppressNextActivate = launch.suppressInitialActivate;
+  createDashboardWindow({ showOnReady: launch.showDashboard, revealOnboarding: launch.revealOnboarding });
+  if (launch.suppressInitialActivate) {
+    setTimeout(() => {
+      suppressNextActivate = false;
+    }, 1200);
+  }
   if (desktopPreferenceDefaults().showCompanionOnLaunch || debugCapture) {
-    createCompanionWindow();
+    revealCompanionWindow();
   }
   createTray();
   startActivityMonitor();
@@ -2275,7 +2531,20 @@ app.whenReady().then(() => {
   screen.on("display-metrics-changed", ensureCompanionReachable);
 });
 
-app.on("activate", showDashboard);
+function handleActivate() {
+  if (suppressNextActivate && dashboardWindow && !dashboardWindow.isVisible()) {
+    suppressNextActivate = false;
+    return;
+  }
+  suppressNextActivate = false;
+  showDashboard();
+}
+
+app.on("activate", handleActivate);
+
+app.on("window-all-closed", () => {
+  if (process.platform !== "darwin") app.quit();
+});
 
 app.on("before-quit", () => {
   broadcastSystemLifecycle("quit");
@@ -2425,6 +2694,14 @@ ipcMain.handle("desktopSettings:setCompanionVisible", (_event, enabled) => {
   } else {
     hideCompanionWindow();
   }
+  return {
+    ...getDesktopSettings(),
+    ...preferences
+  };
+});
+
+ipcMain.handle("desktopSettings:setHideDockOnClose", (_event, enabled) => {
+  const preferences = writeDesktopPreference("hideDockOnClose", enabled);
   return {
     ...getDesktopSettings(),
     ...preferences

@@ -54,7 +54,9 @@
       "preload.js",
       "package.json",
       "assets/icon.icns",
-      "assets/icon.svg"
+      "assets/icon.svg",
+      "assets/trayTemplate.png",
+      "assets/trayTemplate@2x.png"
     ],
     "mac": {
       "category": "public.app-category.productivity",

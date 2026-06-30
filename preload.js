@@ -20,6 +20,7 @@ contextBridge.exposeInMainWorld("eyeflowDesktop", {
   setLaunchAtLogin: (enabled) => ipcRenderer.invoke("desktopSettings:setLaunchAtLogin", enabled),
   setEnhancedSensing: (enabled) => ipcRenderer.invoke("desktopSettings:setEnhancedSensing", enabled),
   setCompanionVisible: (enabled) => ipcRenderer.invoke("desktopSettings:setCompanionVisible", enabled),
+  setHideDockOnClose: (enabled) => ipcRenderer.invoke("desktopSettings:setHideDockOnClose", enabled),
   getDiagnostics: () => ipcRenderer.invoke("diagnostics:get"),
   copyFeedbackText: (text) => ipcRenderer.invoke("feedback:copy", text),
   copyShareImage: (dataUrl) => ipcRenderer.invoke("share:copyImage", dataUrl),
