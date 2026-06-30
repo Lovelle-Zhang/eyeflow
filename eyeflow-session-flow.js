@@ -10,9 +10,21 @@ window.EyeFlowSessionFlow = (() => {
     rest: { color: "var(--mira)", glow: "var(--mira-soft)" }
   };
 
-  function computeRestDue({ isRunning = false, elapsedSeconds = 0, focusMinutes = 0 } = {}) {
+  function sessionState({
+    isRunning = false,
+    autoTracking = false,
+    paused = false,
+    resting = false
+  } = {}) {
+    if (resting) return "resting";
+    if (isRunning || autoTracking) return "running";
+    if (paused) return "paused";
+    return "idle";
+  }
+
+  function computeRestDue({ isRunning = false, autoTracking = false, elapsedSeconds = 0, focusMinutes = 0 } = {}) {
     const targetSeconds = Number(focusMinutes || 0) * 60;
-    return Boolean(isRunning && targetSeconds > 0 && Number(elapsedSeconds || 0) >= targetSeconds);
+    return Boolean((isRunning || autoTracking) && targetSeconds > 0 && Number(elapsedSeconds || 0) >= targetSeconds);
   }
 
   function sessionControlView({
@@ -25,14 +37,34 @@ window.EyeFlowSessionFlow = (() => {
   } = {}) {
     const restText = restDue ? `休息 ${restSeconds} 秒` : "休息";
     const restTitle = restDue ? `开始 ${restSeconds} 秒休息` : "主动休息";
+    const currentState = sessionState({
+      isRunning,
+      autoTracking,
+      paused,
+      resting: restDue
+    });
 
-	    if (isRunning) {
+    if (currentState === "resting") {
 	      return {
-	        panelTitle: restDue ? "恢复断点" : "本轮节奏",
-	        pillText: restDue ? "恢复断点" : "手动专注",
-	        pillState: restDue ? "due" : "manual",
+        panelTitle: "恢复断点",
+        pillText: "恢复断点",
+        pillState: "due",
         startText: "暂停",
-        startTitle: "暂停当前专注",
+        startTitle: "暂停当前计时",
+        startIcon: "pause",
+        startIsMode: false,
+        restText,
+        restTitle
+      };
+    }
+
+    if (currentState === "running") {
+      return {
+        panelTitle: "本轮节奏",
+        pillText: "计时中",
+        pillState: "running",
+        startText: "暂停",
+        startTitle: "暂停当前计时",
         startIcon: "pause",
         startIsMode: false,
         restText,
@@ -41,21 +73,17 @@ window.EyeFlowSessionFlow = (() => {
     }
 
 	    return {
-	      panelTitle: autoTracking ? "本轮节奏" : paused ? "这一轮已暂停" : "这一轮已安排",
-	      pillText: !assessedToday ? "已安排" : autoTracking ? "自动记录" : paused ? "已暂停" : "未开始",
-      pillState: !assessedToday ? "idle" : autoTracking ? "auto" : paused ? "paused" : "idle",
-      startText: !assessedToday ? "开始安静提醒" : autoTracking ? "手动专注" : paused ? "继续专注" : "开始安静提醒",
+	      panelTitle: currentState === "paused" ? "这一轮已暂停" : "这一轮已安排",
+	      pillText: !assessedToday ? "已安排" : currentState === "paused" ? "已暂停" : "未开始",
+      pillState: !assessedToday ? "idle" : currentState,
+      startText: !assessedToday ? "开始这一轮" : currentState === "paused" ? "继续这一轮" : "开始这一轮",
       startTitle: !assessedToday
-        ? "开始安静提醒"
-        : autoTracking
-          ? "切到手动专注并从 00:00 计时"
-          : paused
-            ? "继续当前专注"
-            : "开始安静提醒",
+        ? "开始这一轮"
+        : currentState === "paused"
+            ? "继续当前这一轮"
+            : "开始这一轮",
       startIcon: "play",
-      // "手动专注" while auto-tracking is a MODE TOGGLE, not a real action — the
-      // renderer styles it as the low-key mode pill instead of solid primary.
-      startIsMode: Boolean(assessedToday && autoTracking),
+      startIsMode: false,
       restText,
       restTitle
     };
@@ -78,6 +106,7 @@ window.EyeFlowSessionFlow = (() => {
 
   return {
     computeRestDue,
+    sessionState,
     sessionControlView,
     stageMiraView
   };
