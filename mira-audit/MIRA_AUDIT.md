@@ -2680,7 +2680,7 @@ window.EyeFlowRecoveryData = {
   relationshipLines: {
     streak: [
       "你已经连续{days}没有跳过休息了。",
-      "这周有{days}，眼睛都被你接住了。",
+      "最近{days}里，你都给眼睛留了恢复。",
       "这不是打卡，是你的眼睛开始有节奏了。"
     ],
     returning: [
@@ -3432,4 +3432,3 @@ Source: `index.html:1-165`
 - first-open onboarding Mira 使用单独坐标（如 visor top 24 / width 36），不是完全用 58-unit tokens；文档曾记录“onboarding has own layout rules”，但设计系统现在要求尽量使用 shared 58-unit geometry。
 - `rest` 嘴型在多处使用 “Ɛ” 字符绘制；stage、companion、break overlay 的字号/颜色/weight 略有差异，可能导致同一表情在不同界面气质不一致。
 - app icon SVG 注释写的是 “Mira icon-face standard”，但 Product Memory 后续又要求 “app icon is not the full Mira avatar”。这不是功能冲突，但命名上容易混淆。
-

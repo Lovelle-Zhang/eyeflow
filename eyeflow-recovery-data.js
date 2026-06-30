@@ -188,8 +188,8 @@ window.EyeFlowRecoveryData = {
   ],
   relationshipLines: {
     streak: [
-      "你已经连续{days}没有跳过休息了。",
-      "这周有{days}，眼睛都被你接住了。",
+      "你已经连续{days}把恢复接住了。",
+      "最近{days}里，你都给眼睛留了恢复。",
       "这不是打卡，是你的眼睛开始有节奏了。"
     ],
     returning: [
