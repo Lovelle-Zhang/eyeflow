@@ -15,6 +15,8 @@
       --amber-soft: #f5ead3;
       --rose-soft: #f7dde5;
       --mira-mouth: rgba(126, 244, 216, 0.54);
+      /* Eye fill — dimmed in night so the eyes don't glare on the dark face. */
+      --mira-eye-fill: #fbfcf6;
       --mira-antenna: rgba(15, 23, 21, 0.32);
       --mira-antenna-glow: rgba(107, 224, 203, 0.14);
       --mira-signal: #80d7bd;
@@ -272,8 +274,12 @@
       width: var(--ef-mira-eye-size);
       height: var(--ef-mira-eye-size);
       border-radius: 50%;
-      background: #fbfcf6;
+      background: var(--mira-eye-fill);
       animation: blink 5s ease-in-out infinite;
+    }
+
+    .companion.theme-night {
+      --mira-eye-fill: #cdd6d1;
     }
 
     .face::before {

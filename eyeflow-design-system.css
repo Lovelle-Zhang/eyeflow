@@ -467,6 +467,17 @@
   --share-frame-border: transparent;
   /* High eye-load state band — semantic warning tint (dark variant below). */
   --state-band-high: #f7dde5;
+
+  /* Focus ring — tracks --mira so it flips with the theme (dark variant below). */
+  --focus-ring: rgba(31, 122, 94, 0.40);
+
+  /* Rest/recovery semantic rose — soft informational surface + armed solid.
+     Light values here; dark variants in the dark block. */
+  --rest-rose-bg: rgba(255, 241, 245, 0.62);
+  --rest-rose-fg: rgba(107, 51, 67, 0.88);
+  --rest-rose-border: rgba(215, 79, 117, 0.18);
+  --rest-rose-solid-bg: #9b4058;
+  --rest-rose-solid-fg: #fff7f9;
 }
 
 /* ── Dark theme ────────────────────────────────────────────────
@@ -541,4 +552,11 @@
   --share-frame-bg: #1c1e1f;
   --share-frame-border: rgba(255, 255, 255, 0.06);
   --state-band-high: rgba(225, 120, 150, 0.18);
+
+  --focus-ring: rgba(79, 201, 156, 0.50);
+  --rest-rose-bg: rgba(225, 120, 150, 0.14);
+  --rest-rose-fg: #f2b8c8;
+  --rest-rose-border: rgba(225, 120, 150, 0.28);
+  --rest-rose-solid-bg: #b65574;
+  --rest-rose-solid-fg: #1c211d;
 }

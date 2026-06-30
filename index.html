@@ -609,7 +609,7 @@
     button:focus-visible,
     input:focus-visible,
     textarea:focus-visible {
-      outline: 2px solid rgba(31, 122, 94, 0.4);
+      outline: 2px solid var(--focus-ring);
       outline-offset: 2px;
     }
 
@@ -946,7 +946,7 @@
     }
 
     .timer-card.rest-guide {
-      border-color: rgba(201, 99, 127, 0.24);
+      border-color: var(--rest-rose-border);
       box-shadow: inset 0 0 0 1px rgba(201, 99, 127, 0.08);
     }
 
@@ -961,11 +961,11 @@
       margin: calc(var(--ef-space-1) * -1) 0 var(--ef-space-1);
       padding: var(--ef-space-3) var(--ef-space-4);
       border-radius: var(--ef-radius-md);
-      background: rgba(255, 241, 245, 0.62);
-      color: rgba(107, 51, 67, 0.88);
+      background: var(--rest-rose-bg);
+      color: var(--rest-rose-fg);
       font-size: var(--ef-text-helper);
       line-height: var(--ef-line-compact);
-      border: 1px solid rgba(215, 79, 117, 0.12);
+      border: 1px solid var(--rest-rose-border);
     }
 
     .session-start-hint {
@@ -985,15 +985,15 @@
     }
 
     .force-escape {
-      color: #7a3446;
-      border-color: rgba(201, 99, 127, 0.22);
-      background: rgba(255, 241, 245, 0.64);
+      color: var(--rest-rose-fg);
+      border-color: var(--rest-rose-border);
+      background: var(--rest-rose-bg);
     }
 
     .force-escape.armed {
-      color: #fff7f9;
-      border-color: rgba(201, 99, 127, 0.32);
-      background: #9b4058;
+      color: var(--rest-rose-solid-fg);
+      border-color: var(--rest-rose-border);
+      background: var(--rest-rose-solid-bg);
     }
 
 	    .session-settings {
@@ -2537,8 +2537,8 @@
       gap: var(--ef-space-4);
       padding: var(--ef-space-5);
       border-radius: var(--ef-radius-md);
-      background: rgba(255, 241, 245, 0.72);
-      border: 1px solid rgba(215, 79, 117, 0.16);
+      background: var(--rest-rose-bg);
+      border: 1px solid var(--rest-rose-border);
     }
 
     .force-confirm[hidden] {
