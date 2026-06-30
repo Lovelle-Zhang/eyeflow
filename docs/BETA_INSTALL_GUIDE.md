@@ -6,7 +6,7 @@
 
 ## 下载安装
 
-1. 下载 `EyeFlow-0.1.0-x64.dmg`。
+1. 下载 `EyeFlow-0.1.1-x64.dmg`。
 2. 打开 DMG。
 3. 把 `EyeFlow.app` 拖到 `Applications / 应用程序`。
 4. 在应用程序里打开 EyeFlow。

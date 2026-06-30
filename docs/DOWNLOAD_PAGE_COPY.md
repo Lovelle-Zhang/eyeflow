@@ -48,13 +48,13 @@ EyeFlow 是承载 Mira 的 macOS 应用。
 
 ## 下载
 
-当前版本：EyeFlow 0.1.0
+当前版本：EyeFlow 0.1.1
 
-- DMG：`EyeFlow-0.1.0-x64.dmg`
-- ZIP：`EyeFlow-0.1.0-x64.zip`
+- DMG：`EyeFlow-0.1.1-x64.dmg`
+- ZIP：`EyeFlow-0.1.1-x64.zip`
 - 安装说明：`docs/BETA_INSTALL_GUIDE.md`
 - 隐私说明：`docs/PRIVACY.md`
-- Release notes：`docs/RELEASE_NOTES_v0.1.0.md`
+- Release notes：`docs/RELEASE_NOTES_v0.1.1.md`
 
 ## 测试版提示
 
@@ -89,6 +89,5 @@ EyeFlow 是承载 Mira 的 macOS 应用。
 SHA256:
 
 ```text
-e976a5d31614e90d33b306658d24dec4db52b01dd413520b0003cc9417f6d386  EyeFlow-0.1.0-x64.dmg
-a154caa4625f1d813cf04c0b5665b8ff702643ca5c88ed85a3e925baedfc1e77  EyeFlow-0.1.0-x64.zip
+见同目录的 `EyeFlow-0.1.1-SHA256SUMS.txt`。
 ```
