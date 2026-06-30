@@ -39,6 +39,13 @@ const targets = {
     visibleView: "todayView",
     captureState: "auto tracking"
   },
+  "today-share-preview": {
+    aliases: ["today-share-preview", "todaySharePreview", "share-preview", "sharePreview"],
+    filename: "eyeflow-today-share-preview.png",
+    requestedView: "todayView",
+    visibleView: "todayView",
+    captureState: "share preview"
+  },
   rhythmView: {
     aliases: ["settings", "rhythm", "rhythmView"],
     filename: "eyeflow-settings-clean.png",

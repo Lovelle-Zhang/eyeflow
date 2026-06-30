@@ -749,11 +749,11 @@
       border-color: rgba(240, 198, 116, 0.3);
     }
 
-    /* Settings readiness pills — green = enabled, amber = action/warn. */
+    /* Settings readiness pills stay neutral; the small dot carries the state. */
     :root[data-theme="dark"] #rhythmView .readiness-status[data-state="enabled"] {
-      color: #5fcfa6;
-      background: rgba(79, 201, 156, 0.14);
-      border-color: rgba(79, 201, 156, 0.28);
+      color: var(--muted);
+      background: var(--pill-bg);
+      border-color: var(--line);
     }
 
     :root[data-theme="dark"] .readiness-status.warn,
@@ -795,10 +795,10 @@
       background: rgba(225, 120, 150, 0.12);
       border-color: rgba(225, 120, 150, 0.28);
     }
-    /* Hardcoded dark-ink text in settings — flip to legible light-on-dark tones. */
+    /* Settings values are content, not alerts; keep them neutral in dark mode. */
     :root[data-theme="dark"] #rhythmView #applyRhythmBtn.settings-rhythm-action,
     :root[data-theme="dark"] #rhythmView .readiness-item[data-state="enabled"] strong {
-      color: var(--mira-strong);
+      color: var(--ink);
     }
     :root[data-theme="dark"] #rhythmView .readiness-item[data-state="action"] strong {
       color: #f0c674;
@@ -926,12 +926,8 @@
       box-shadow: none;
     }
 
-    /* #startBtn as a MODE TOGGLE (手动专注 in auto-tracking) is still a real,
-       clickable action — render it as the ② tonal button (clearly pressable,
-       secondary emphasis), NOT the solid ① primary (too loud for a mode switch)
-       and NOT a flat mode/status pill (that reads as a dead label next to the
-       read-only 自动记录). Keeps the timer-control 40px geometry + icon, so it
-       reads as a sibling action to 休息. Toggled in renderSessionControls. */
+    /* Legacy mode-toggle guard: kept only so old class states cannot become a
+       solid primary action. The current flow treats auto/manual as one round. */
     #startBtn.is-mode {
       background: var(--btn-tonal-bg);
       color: var(--btn-tonal-fg);
@@ -1217,11 +1213,12 @@
       grid-template-columns: minmax(0, 1fr) repeat(2, minmax(calc(var(--ef-space-14) * 1.6), 0.18fr));
       gap: var(--ef-space-0);
       align-items: stretch;
-      padding: var(--ef-space-4) var(--ef-space-7);
-      border-radius: var(--radius-card);
-      background: var(--panel);
-      border: 0.5px solid var(--group-line);
-      box-shadow: var(--group-shadow);
+      padding: var(--ef-space-3) var(--ef-space-0) var(--ef-space-0);
+      border-radius: 0;
+      background: transparent;
+      border: 0;
+      border-top: 1px solid var(--group-line-soft);
+      box-shadow: none;
       overflow: hidden;
     }
 
@@ -1381,12 +1378,12 @@
     }
 
     .metrics .metric {
-      padding: var(--ef-space-2) var(--ef-space-5);
+      padding: var(--ef-space-0) var(--ef-space-5);
       background: transparent;
       border-color: transparent;
       border-radius: 0;
       box-shadow: none;
-      min-height: calc(var(--ef-control-lg) + var(--ef-space-2));
+      min-height: var(--ef-control-md);
       display: grid;
       /* Match .metric-pair so every column's label→value gap is identical. */
       gap: var(--ef-space-1);
@@ -1404,17 +1401,25 @@
     .metrics .metric:first-child {
       background: transparent;
       box-shadow: none;
+      padding-left: var(--ef-space-0);
     }
 
     .daily-summary {
       display: grid;
-      grid-template-columns: minmax(300px, 1.15fr) minmax(260px, 0.85fr);
+      grid-template-columns: minmax(0, 1fr);
       gap: var(--ef-space-0);
       border: 0.5px solid var(--group-line);
       border-radius: var(--radius-card);
       background: var(--panel);
       box-shadow: var(--group-shadow);
       overflow: hidden;
+    }
+
+    .daily-summary.daily-share-card {
+      min-height: calc(var(--ef-space-14) * 1.7);
+      background:
+        linear-gradient(90deg, var(--mira-soft), transparent 58%),
+        var(--panel);
     }
 
     .summary-card {
@@ -1434,7 +1439,7 @@
     }
 
     .summary-card.primary-summary {
-      background: linear-gradient(90deg, var(--mira-soft), transparent);
+      background: transparent;
       border-color: transparent;
     }
 
@@ -1454,6 +1459,28 @@
       color: var(--muted);
       font-size: var(--ef-text-body-sm);
       line-height: var(--ef-line-body);
+    }
+
+    .daily-share-content {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: var(--ef-space-8);
+      flex-wrap: wrap;
+    }
+
+    .daily-share-copy {
+      display: grid;
+      gap: var(--ef-space-2);
+      min-width: min(100%, calc(var(--ef-space-14) * 5));
+      max-width: 44ch;
+    }
+
+    .daily-share-actions {
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      margin-left: auto;
     }
 
 	    .state-center {
@@ -1982,20 +2009,11 @@
       border-color: rgba(201, 99, 127, 0.22);
     }
 
-	    #todayView .health-signals {
-	      margin-top: var(--ef-space-8);
-	    }
-
-    body.session-active #todayView .health-signals,
     body.session-active #todayView .note-dashboard,
     body.session-active #todayView .daily-summary {
       width: min(100%, var(--page-frame-width));
       justify-self: start;
     }
-
-	    body:not(.session-active) #todayView .health-signals {
-	      display: none;
-	    }
 
 	    body:not(.session-active) #todayView details.quick-log-panel,
 	    body:not(.session-active) #todayView .daily-summary {
@@ -2267,6 +2285,12 @@
       box-shadow:
         0 10px 24px rgba(32, 43, 37, 0.06),
         0 0 0 3px rgba(15, 159, 122, 0.08);
+    }
+
+    :root[data-theme="dark"] .symptom:focus-within {
+      border-color: rgba(79, 201, 156, 0.34);
+      background: var(--panel);
+      box-shadow: 0 0 0 3px rgba(79, 201, 156, 0.12);
     }
 
     .symptom b {
@@ -2754,7 +2778,7 @@
 
     #profileView .profile-window-stats {
       display: grid;
-      grid-template-columns: repeat(4, minmax(0, 1fr));
+      grid-template-columns: repeat(2, minmax(0, 1fr));
       gap: var(--ef-space-4);
     }
 
@@ -2790,27 +2814,8 @@
 
     @media (max-width: 860px) {
       #profileView .profile-window-stats {
-        grid-template-columns: repeat(2, minmax(0, 1fr));
+        grid-template-columns: minmax(0, 1fr);
       }
-    }
-
-    /* Lightweight Today → 这几天 entry: a quiet text link, never a card. */
-    #todayView .today-recap-link {
-      justify-self: start;
-      display: inline-flex;
-      align-items: center;
-      gap: var(--ef-space-2);
-      padding: var(--ef-space-2) 0;
-      border: 0;
-      background: transparent;
-      color: var(--muted);
-      font-size: var(--ef-text-body-sm);
-      cursor: pointer;
-      transition: color var(--ef-motion-fast) var(--ef-ease-calm);
-    }
-
-    #todayView .today-recap-link:hover {
-      color: var(--ink);
     }
 
     .profile-grid {
@@ -4556,15 +4561,15 @@
       left: var(--toast-left, auto);
       width: min(320px, calc(100vw - (var(--ef-space-10) * 2)));
       padding: var(--ef-space-5) var(--ef-space-6);
-      border: 1px solid rgba(231, 241, 236, 0.08);
-      border-radius: var(--ef-radius-lg);
+      border: 0.5px solid rgba(231, 241, 236, 0.08);
+      border-radius: var(--ef-radius-xl);
       background: rgba(15, 23, 21, 0.96);
       color: rgba(248, 252, 250, 0.96);
       box-shadow:
-        0 14px 38px rgba(0, 0, 0, 0.18),
+        0 12px 30px rgba(0, 0, 0, 0.20),
         inset 0 1px 0 rgba(255, 255, 255, 0.06);
       opacity: 0;
-      transform: translateY(var(--toast-enter-y, var(--ef-space-3))) scale(0.98);
+      transform: translateY(var(--toast-enter-y, var(--ef-space-2))) scale(0.985);
       pointer-events: none;
       transition:
         opacity var(--ef-motion-base) var(--ef-ease-calm),
@@ -4572,20 +4577,14 @@
       z-index: 11;
       font-size: var(--ef-text-body-sm);
       line-height: var(--ef-line-body);
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
     }
 
     .pet-toast::after {
-      content: "";
-      position: absolute;
-      right: var(--toast-tail-right, var(--ef-space-8));
-      bottom: calc(var(--ef-space-2) * -1);
-      width: var(--ef-space-4);
-      height: var(--ef-space-4);
-      border-right: 1px solid rgba(231, 241, 236, 0.08);
-      border-bottom: 1px solid rgba(231, 241, 236, 0.08);
-      border-radius: var(--ef-radius-xs);
-      background: rgba(15, 23, 21, 0.96);
-      transform: rotate(45deg);
+      display: none;
     }
 
     body.toast-dense .pet-toast {
@@ -4593,11 +4592,7 @@
     }
 
     .pet-toast[data-anchor="mira-below"]::after {
-      top: calc(var(--ef-space-2) * -1);
-      bottom: auto;
-      border: 0;
-      border-left: 1px solid rgba(231, 241, 236, 0.08);
-      border-top: 1px solid rgba(231, 241, 236, 0.08);
+      display: none;
     }
 
     .pet-toast[data-anchor="mira-below"] {
@@ -5890,6 +5885,7 @@
       stroke-width: var(--ef-icon-stroke-base);
     }
 
+    #todayView,
     #profileView {
       --profile-calm-line: var(--group-line);
       --profile-calm-surface: var(--panel);
@@ -5915,6 +5911,7 @@
     #profileView .profile-visual-panel,
     #profileView .profile-rhythm-memory,
     #profileView .profile-next-action,
+    #todayView .profile-share-card,
     #profileView .profile-share-card,
     #profileView .profile-archive-disclosure,
     #profileView .archive-panel,
@@ -5929,6 +5926,7 @@
     #profileView .profile-visual-panel,
     #profileView .profile-rhythm-memory,
     #profileView .profile-next-action,
+    #todayView .profile-share-card,
     #profileView .profile-share-card,
     #profileView .profile-archive-disclosure,
     #profileView .archive-panel,
@@ -5955,6 +5953,7 @@
       margin-top: var(--ef-space-4);
     }
 
+    #todayView .profile-share-card,
     #profileView .profile-share-card {
       position: relative;
       overflow: hidden;
@@ -5962,6 +5961,13 @@
       background: var(--profile-share-surface);
     }
 
+    #todayView .profile-share-card {
+      display: grid;
+      gap: var(--ef-space-5);
+      padding: var(--ef-space-7) var(--ef-space-8);
+    }
+
+    #todayView .profile-share-head,
     #profileView .profile-share-head {
       display: flex;
       align-items: flex-start;
@@ -5969,6 +5975,17 @@
       gap: var(--ef-space-8);
     }
 
+    #todayView .profile-share-head {
+      align-items: center;
+      gap: var(--ef-space-6);
+    }
+
+    #todayView .profile-share-head > div:first-child {
+      min-width: 20ch;
+      max-width: 36ch;
+    }
+
+    #todayView .profile-share-head-side,
     #profileView .profile-share-head-side {
       display: flex;
       align-items: center;
@@ -5977,6 +5994,7 @@
       flex-wrap: wrap;
     }
 
+    #todayView .profile-share-quick-metrics,
     #profileView .profile-share-quick-metrics {
       display: flex;
       align-items: center;
@@ -5984,25 +6002,18 @@
       flex-wrap: wrap;
     }
 
+    #todayView .profile-share-quick-metrics {
+      gap: var(--ef-space-5);
+    }
+
+    #todayView .profile-share-copy,
     #profileView .profile-share-copy {
       margin: var(--ef-space-3) 0 0;
       color: var(--muted);
     }
 
-    #profileView .profile-share-bridge {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      text-align: center;
-      gap: var(--ef-space-5);
-    }
-
-    #profileView .profile-share-bridge::before,
-    #profileView .profile-share-bridge::after {
-      content: "";
-      height: 1px;
-      flex: 1 1 auto;
-      background: var(--group-line);
+    #todayView .profile-share-copy {
+      margin-top: var(--ef-space-1);
     }
 
     /* ===== 这几天: warm observation (top) + one gentle fold (raw data) ===== */
@@ -6107,6 +6118,7 @@
       border-top: 1px solid var(--group-line-soft);
     }
 
+    #todayView .profile-share-preview,
     #profileView .profile-share-preview {
       /* No mat — the card sits directly on the panel (panel → card, two layers).
          An intermediate frame tone read as a visible third layer / 色差. */
@@ -6117,6 +6129,11 @@
       place-items: center;
     }
 
+    #todayView .profile-share-preview {
+      display: none;
+    }
+
+    #todayView .share-art-card,
     #profileView .share-art-card {
       /* Preview only — the shareable PNG is drawn separately on canvas
          (drawDailyShareCardCanvas), so this in-app card follows the theme and
@@ -6134,6 +6151,7 @@
       align-content: start;
     }
 
+    #todayView .share-art-date,
     #profileView .share-art-date {
       color: var(--muted);
       font-size: var(--ef-text-body);
@@ -6141,6 +6159,7 @@
       font-weight: var(--ef-symbol-weight-base);
     }
 
+    #todayView .share-art-quote,
     #profileView .share-art-quote {
       color: var(--ink);
       font-family: "Songti SC", STSong, "Noto Serif CJK SC", Georgia, serif;
@@ -6149,6 +6168,7 @@
       font-weight: 600;
     }
 
+    #todayView .share-art-metrics,
     #profileView .share-art-metrics {
       display: flex;
       align-items: flex-start;
@@ -6156,12 +6176,14 @@
       flex-wrap: wrap;
     }
 
+    #todayView .share-art-metric,
     #profileView .share-art-metric {
       display: grid;
       gap: var(--ef-space-2);
       min-width: calc(var(--ef-space-14) * 1.35);
     }
 
+    #todayView .share-art-metric span,
     #profileView .share-art-metric span {
       color: var(--muted);
       font-size: var(--ef-text-body-sm);
@@ -6169,6 +6191,7 @@
       font-weight: var(--ef-symbol-weight-base);
     }
 
+    #todayView .share-art-metric strong,
     #profileView .share-art-metric strong {
       color: var(--ink);
       font-size: var(--ef-text-title-md);
@@ -6176,11 +6199,13 @@
       font-weight: 500;
     }
 
+    #todayView .share-art-divider,
     #profileView .share-art-divider {
       height: 1px;
       background: var(--group-line);
     }
 
+    #todayView .share-art-footer,
     #profileView .share-art-footer {
       display: flex;
       align-items: center;
@@ -6189,6 +6214,7 @@
       flex-wrap: wrap;
     }
 
+    #todayView .share-art-brand,
     #profileView .share-art-brand {
       display: flex;
       align-items: center;
@@ -6196,6 +6222,7 @@
       min-width: 0;
     }
 
+    #todayView .share-art-mark,
     #profileView .share-art-mark {
       width: calc(var(--ef-control-lg) + var(--ef-space-1));
       height: calc(var(--ef-control-lg) + var(--ef-space-1));
@@ -6204,6 +6231,8 @@
       flex: 0 0 auto;
     }
 
+    #todayView .share-art-brand strong,
+    #todayView .share-art-domain,
     #profileView .share-art-brand strong,
     #profileView .share-art-domain {
       color: var(--ink);
@@ -6212,6 +6241,7 @@
       font-weight: 500;
     }
 
+    #todayView .share-art-brand span span,
     #profileView .share-art-brand span span {
       display: block;
       color: var(--muted);
@@ -6220,6 +6250,7 @@
       font-weight: var(--ef-symbol-weight-base);
     }
 
+    #todayView .share-art-domain,
     #profileView .share-art-domain {
       min-height: var(--ef-control-md);
       padding: var(--ef-space-0) var(--ef-space-5);
@@ -6229,6 +6260,177 @@
       align-items: center;
     }
 
+    .share-preview-overlay {
+      position: fixed;
+      inset: var(--ef-space-0);
+      z-index: 95;
+      display: none;
+      place-items: center;
+      padding: var(--ef-space-12);
+      background: rgba(15, 23, 21, 0.68);
+      backdrop-filter: blur(var(--ef-space-6)) saturate(0.78);
+    }
+
+    .share-preview-overlay.show {
+      display: grid;
+    }
+
+    .share-preview-dialog {
+      width: min(760px, 100%);
+      max-height: calc(100vh - var(--ef-space-12));
+      overflow: auto;
+      overscroll-behavior: contain;
+      padding: var(--ef-space-8);
+      border: 1px solid var(--group-line);
+      border-radius: var(--ef-radius-xl);
+      background: var(--panel);
+      box-shadow: var(--group-shadow), 0 18px 42px rgba(0, 0, 0, 0.2);
+      display: grid;
+      gap: var(--ef-space-7);
+    }
+
+    .share-preview-head,
+    .share-preview-actions {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: var(--ef-space-6);
+      flex-wrap: wrap;
+    }
+
+    .share-preview-title {
+      display: grid;
+      gap: var(--ef-space-1);
+    }
+
+    .share-preview-title span,
+    .share-preview-note {
+      color: var(--muted);
+      font-size: var(--ef-text-meta);
+      line-height: var(--ef-line-body);
+    }
+
+    .share-preview-title strong {
+      color: var(--ink);
+      font-size: var(--ef-text-title-sm);
+      line-height: var(--ef-line-title);
+    }
+
+    .share-preview-stage {
+      display: grid;
+      place-items: center;
+      padding: var(--ef-space-2) var(--ef-space-0);
+    }
+
+    .share-preview-overlay .share-art-card {
+      width: min(100%, 680px);
+      min-height: 360px;
+      padding: var(--ef-space-12);
+      border: 1px solid var(--group-line);
+      border-radius: var(--ef-radius-xl);
+      background: var(--group-bg-strong);
+      box-shadow: var(--group-shadow);
+      display: grid;
+      gap: var(--ef-space-9);
+      align-content: start;
+    }
+
+    .share-preview-overlay .share-art-date {
+      color: var(--muted);
+      font-size: var(--ef-text-body);
+      line-height: var(--ef-line-body);
+      font-weight: var(--ef-symbol-weight-base);
+    }
+
+    .share-preview-overlay .share-art-quote {
+      color: var(--ink);
+      font-family: "Songti SC", STSong, "Noto Serif CJK SC", Georgia, serif;
+      font-size: var(--ef-text-display-sm);
+      line-height: var(--ef-line-reading);
+      font-weight: 600;
+    }
+
+    .share-preview-overlay .share-art-metrics {
+      display: flex;
+      align-items: flex-start;
+      gap: var(--ef-space-12);
+      flex-wrap: wrap;
+    }
+
+    .share-preview-overlay .share-art-metric {
+      display: grid;
+      gap: var(--ef-space-2);
+      min-width: calc(var(--ef-space-14) * 1.35);
+    }
+
+    .share-preview-overlay .share-art-metric span {
+      color: var(--muted);
+      font-size: var(--ef-text-body-sm);
+      line-height: var(--ef-line-compact);
+      font-weight: var(--ef-symbol-weight-base);
+    }
+
+    .share-preview-overlay .share-art-metric strong {
+      color: var(--ink);
+      font-size: var(--ef-text-title-md);
+      line-height: var(--ef-line-title);
+      font-weight: 500;
+    }
+
+    .share-preview-overlay .share-art-divider {
+      height: 1px;
+      background: var(--group-line);
+    }
+
+    .share-preview-overlay .share-art-footer {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: var(--ef-space-7);
+      flex-wrap: wrap;
+    }
+
+    .share-preview-overlay .share-art-brand {
+      display: flex;
+      align-items: center;
+      gap: var(--ef-space-4);
+      min-width: 0;
+    }
+
+    .share-preview-overlay .share-art-mark {
+      width: calc(var(--ef-control-lg) + var(--ef-space-1));
+      height: calc(var(--ef-control-lg) + var(--ef-space-1));
+      background: url("./assets/icon.svg") center / contain no-repeat;
+      position: relative;
+      flex: 0 0 auto;
+    }
+
+    .share-preview-overlay .share-art-brand strong,
+    .share-preview-overlay .share-art-domain {
+      color: var(--ink);
+      font-size: var(--ef-text-body-lg);
+      line-height: var(--ef-line-title);
+      font-weight: 500;
+    }
+
+    .share-preview-overlay .share-art-brand span span {
+      display: block;
+      color: var(--muted);
+      font-size: var(--ef-text-body-sm);
+      line-height: var(--ef-line-body);
+      font-weight: var(--ef-symbol-weight-base);
+    }
+
+    .share-preview-overlay .share-art-domain {
+      min-height: var(--ef-control-md);
+      padding: var(--ef-space-0) var(--ef-space-5);
+      border-radius: var(--ef-radius-pill);
+      background: rgba(231, 228, 222, 0.72);
+      display: inline-flex;
+      align-items: center;
+    }
+
+    #todayView .profile-share-metric,
     #profileView .profile-share-metric {
       display: inline-grid;
       gap: var(--ef-space-2);
@@ -6241,6 +6443,20 @@
       align-items: baseline;
     }
 
+    #todayView .profile-share-metric {
+      min-height: 0;
+      padding: var(--ef-space-0) var(--ef-space-5) var(--ef-space-0) var(--ef-space-0);
+      border-right: 1px solid var(--group-line-soft);
+      border-radius: 0;
+      background: transparent;
+    }
+
+    #todayView .profile-share-metric:last-child {
+      padding-right: var(--ef-space-0);
+      border-right: 0;
+    }
+
+    #todayView .profile-share-actions,
     #profileView .profile-share-actions {
       display: flex;
       align-items: center;
@@ -6249,7 +6465,20 @@
       flex-wrap: wrap;
     }
 
+    #todayView .profile-share-actions {
+      justify-content: flex-end;
+      gap: var(--ef-space-4);
+      padding-top: var(--ef-space-0);
+      border-top: 0;
+    }
+
+    #todayView .profile-share-note {
+      margin-right: auto;
+      max-width: 32ch;
+    }
+
     #profileView .profile-summary-chips span,
+    #todayView .profile-trend-tag,
     #profileView .profile-trend-tag,
     #profileView .archive-window-pill {
       display: inline-flex;
@@ -6385,6 +6614,8 @@
     #profileView .archive-head h3,
     #profileView .history-panel-head h3,
     #profileView .weekly-market-head h4,
+    #todayView .profile-share-head h3,
+    #profileView .profile-share-head h3,
     #profileView .archive-disclosure-title > strong,
     #profileView .data-console-title > strong {
       margin: 0;
@@ -6400,6 +6631,7 @@
     #profileView .profile-insight-row strong,
     #profileView .profile-memory-item strong,
     #profileView .profile-mini-stat strong,
+    #todayView .profile-share-metric strong,
     #profileView .profile-share-metric strong,
     #profileView .reason b,
     #profileView .profile-evidence strong,
@@ -6415,9 +6647,10 @@
     #profileView .profile-overview-head p,
     #profileView .profile-insight-text,
     #profileView .profile-insight-row p,
+    #todayView .profile-share-copy,
+    #todayView .profile-share-note,
     #profileView .profile-share-copy,
     #profileView .profile-share-note,
-    #profileView .profile-share-bridge,
     #profileView .profile-method-row p,
     #profileView .profile-lineage-copy,
     #profileView .profile-chart-copy span,
@@ -6437,9 +6670,11 @@
     #profileView .profile-summary-chips span,
     #profileView .profile-insight-label,
     #profileView .profile-insight-row span,
+    #todayView .profile-trend-tag,
     #profileView .profile-trend-tag,
     #profileView .profile-memory-item span,
     #profileView .profile-mini-stat span,
+    #todayView .profile-share-metric span,
     #profileView .profile-share-metric span,
     #profileView .reason span,
     #profileView .profile-evidence span,
@@ -6923,7 +7158,11 @@
     }
 
     #rhythmView #applyRhythmBtn.settings-rhythm-action {
-      color: #24584c;
+      color: var(--muted);
+    }
+
+    #rhythmView #applyRhythmBtn.settings-rhythm-action:hover {
+      color: var(--ink);
     }
 
     #profileView .profile-overview,
@@ -7440,9 +7679,15 @@
 
     #rhythmView .readiness-status[data-state="enabled"],
     #rhythmView .tag[data-state="enabled"] {
-      color: #24584c;
-      background: rgba(217, 244, 235, 0.72);
-      border-color: rgba(15, 159, 122, 0.16);
+      color: var(--muted);
+      background: var(--pill-bg);
+      border-color: var(--line);
+    }
+
+    #rhythmView .readiness-status[data-state="enabled"]::before,
+    #rhythmView .tag[data-state="enabled"]::before {
+      background: var(--mira);
+      opacity: 0.72;
     }
 
     #rhythmView .readiness-status[data-state="optional"],
@@ -7542,7 +7787,7 @@
     }
 
     #rhythmView .readiness-item[data-state="enabled"] strong {
-      color: #24584c;
+      color: var(--ink);
     }
 
     #rhythmView .readiness-item[data-state="optional"] strong,
@@ -7591,13 +7836,24 @@
       white-space: nowrap;
     }
 
-    /* 开启增强感知 — a real action → ② tonal. */
+    /* Enhanced sensing opens a system preference; keep it quiet, not brand-green. */
     #rhythmView .readiness-item .settings-action-button.primary-action {
+      color: var(--ink);
+      background: var(--btn-ghost-bg);
+      border: 1px solid transparent;
+      border-color: var(--btn-ghost-border);
+    }
+    #rhythmView .readiness-item .settings-action-button.primary-action:hover {
+      background: var(--btn-ghost-hover);
+    }
+
+    #rhythmView #readinessCompanionBtn.primary-action {
       color: var(--btn-tonal-fg);
       background: var(--btn-tonal-bg);
       border: 0;
     }
-    #rhythmView .readiness-item .settings-action-button.primary-action:hover {
+
+    #rhythmView #readinessCompanionBtn.primary-action:hover {
       background: var(--btn-tonal-bg-hover);
     }
 
@@ -7897,6 +8153,24 @@
       .metric-pair + .metric-pair {
         border-left: 0;
         border-top: 1px solid var(--group-line);
+      }
+
+      .share-preview-overlay {
+        padding: var(--ef-space-7);
+      }
+
+      .share-preview-dialog {
+        padding: var(--ef-space-6);
+      }
+
+      .share-preview-overlay .share-art-card {
+        min-height: 0;
+        padding: var(--ef-space-8);
+        gap: var(--ef-space-7);
+      }
+
+      .share-preview-overlay .share-art-quote {
+        font-size: var(--ef-text-title-md);
       }
 
       .profile-evidence-grid {
@@ -8441,20 +8715,20 @@
                 </div>
                 <span id="stageLoadValue">0m</span>
               </div>
-              <div class="state-copy">
-                <span class="state-label" id="stateBand">已专注 0 分钟</span>
-                <strong id="stateHeadline">准备开始这一轮</strong>
-                <p id="stateAction">Mira 会陪你记得休息。</p>
-                <p class="state-explain" id="stateExplain">开始后，她会安静待在旁边。</p>
+                <div class="state-copy">
+                  <span class="state-label" id="stateBand">已专注 0 分钟</span>
+                <strong id="stateHeadline">这一轮进行中</strong>
+                <p id="stateAction">Mira 已开始计时。</p>
+                <p class="state-explain" id="stateExplain">到恢复断点我再提醒；需要停下就点暂停或休息。</p>
                 <div class="state-cues" id="stateCues" aria-label="当前状态提示"></div>
                 <div class="today-flow" id="todayFlowCopy">
-                  <span id="todayRhythmCopy">基于你的手动节奏，先观察 2 轮。</span>
+                  <span id="todayRhythmCopy">基于你调整过的节奏，先观察 2 轮。</span>
                   <span class="today-flow-divider" aria-hidden="true"></span>
                   <span id="todayModeCopy">L1 安静 · Mira 轻陪伴</span>
                 </div>
               </div>
               <div class="actions state-action-row">
-                <button class="primary" id="primaryActionBtn" type="button" data-intent="start">开始这一轮 →</button>
+                <button class="primary" id="primaryActionBtn" type="button" data-intent="start" hidden="">开始这一轮 →</button>
                 <button class="ghost" id="explainBtn" type="button" hidden="">
                   <svg class="small-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><path d="M12 16v-4"></path><path d="M12 8h.01"></path></svg>
                   为什么
@@ -8501,7 +8775,7 @@
           <div class="timer-controls">
             <button class="primary" id="startBtn" type="button">
               <svg class="small-icon" id="startBtnIcon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5v14l11-7Z"></path></svg>
-              <span id="startBtnText">开始安静提醒</span>
+              <span id="startBtnText">开始这一轮</span>
             </button>
             <button class="btn-tonal" id="restSessionBtn" type="button">
               <svg class="small-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M12 2v6"></path><path d="M12 16v6"></path><path d="M2 12h6"></path><path d="M16 12h6"></path></svg>
@@ -8512,7 +8786,7 @@
           <p class="session-start-hint" id="sessionStartHint" hidden="">首轮已安排，只在断点提醒。</p>
 
           <details class="session-settings">
-            <summary>调整节奏</summary>
+              <summary>节奏</summary>
             <div class="field">
               <div class="value-row">
                 <label for="focusTarget">专注提醒</label>
@@ -8529,33 +8803,6 @@
             </div>
           </details>
         </div>
-
-        <section class="metrics health-signals" aria-label="今日计时与恢复">
-          <div class="metric metric-round-progress">
-            <div class="metric-main">
-              <div class="metric-pair">
-                <span>已专注</span>
-                <strong id="eyeLoad">—</strong>
-              </div>
-              <div class="metric-pair">
-                <span>剩余</span>
-                <strong class="load-band" id="loadBand">50 分钟</strong>
-              </div>
-              <div class="metric-pair">
-                <span>目标</span>
-                <strong id="focusMinutes">50 分钟</strong>
-              </div>
-            </div>
-          </div>
-          <div class="metric">
-            <span>恢复</span>
-            <strong id="breakCount">—</strong>
-          </div>
-          <div class="metric">
-            <span>记录</span>
-            <strong id="logCount">—</strong>
-          </div>
-        </section>
       </section>
 
       <section class="dashboard note-dashboard">
@@ -8614,34 +8861,32 @@
           <div id="recommendations">
         <div class="rec">
           <svg class="small-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="m12 2 3 7h7l-5.5 4.2 2.2 7L12 16l-6.7 4.2 2.2-7L2 9h7Z"></path></svg>
-          <div><strong>保持节奏</strong><p>现在状态不错。继续用短会话推进，别等到眼睛抗议才休息。</p></div>
+          <div><strong>保持平稳</strong><p>现在状态不错。继续用短会话推进，别等到眼睛抗议才休息。</p></div>
         </div>
       </div>
           <div id="trend"><div class="bar" style="--h:29px"><span>23</span></div><div class="bar" style="--h:18px"><span>11</span></div><div class="bar" style="--h:20px"><span>16</span></div></div>
         </div>
       </section>
 
-      <section class="daily-summary" aria-label="今日总结">
-        <div class="summary-card primary-summary">
-          <span id="summaryDayLabel">今日总结 · 2026-06-03</span>
-          <strong id="dailySummaryTitle">节奏平稳</strong>
-          <p id="dailySummaryCopy">今日专注 0 分钟 · 你记录了 2 次</p>
-        </div>
-        <div class="summary-card">
-          <span>明天建议</span>
-          <strong id="tomorrowPlan">保持当前节奏</strong>
-          <p id="tomorrowCopy">Mira 继续轻提醒。</p>
+      <section class="daily-summary daily-share-card" aria-label="今日分享卡">
+        <div class="summary-card primary-summary daily-share-content">
+          <div class="daily-share-copy">
+            <span id="summaryDayLabel">今日分享卡 · 2026-06-03</span>
+            <strong id="dailySummaryTitle">节奏平稳</strong>
+            <p id="dailySummaryCopy">今日专注 0 分钟 · 护眼恢复 0 分钟</p>
+            <span id="tomorrowPlan" hidden="">保持平稳</span>
+            <span id="tomorrowCopy" hidden="">Mira 继续轻提醒。</span>
+          </div>
+          <div class="daily-share-actions">
+            <p id="shareCardNote" hidden="">本地复制，不上传数据。</p>
+            <button class="ghost" id="copyShareBtn" type="button">带走</button>
+          </div>
         </div>
         <span id="responseRate" hidden="">暂无</span>
         <span id="responseRateCopy" hidden="">今天还没有触发 L2/L3 介入。</span>
-        <span id="recoveryScore" hidden="">2 次</span>
+            <span id="recoveryScore" hidden="">0 分钟</span>
         <span id="recoveryCopy" hidden="">主动或自动识别的休息都会计入。</span>
       </section>
-
-      <button type="button" class="today-recap-link" id="todayRecapLink">
-        看这几天的恢复趋势
-        <span aria-hidden="true">›</span>
-      </button>
 
       <div id="logs" hidden="">
           <article class="log-item">
@@ -8653,7 +8898,7 @@
         
           <article class="log-item">
             <header><span>21:10</span><span>状态信号 23</span></header>
-            <strong>完成一次护眼休息</strong>
+            <strong>完成一次护眼恢复</strong>
             <p>干涩 2 / 酸胀 3 / 模糊 1 / 畏光 1</p>
             <p>远眺和眨眼已记录。下一轮会重新计算本轮计时。</p>
           </article>
@@ -8681,7 +8926,7 @@
                 </div>
                 <div class="force-confirm" id="forceConfirm" hidden="">
                   <strong id="forceConfirmTitle">开启前确认</strong>
-                  <p id="forceConfirmCopy">只在手动专注后接管。预览会以窗口打开，正式开启后会进入全屏恢复。</p>
+                  <p id="forceConfirmCopy">这一轮到恢复断点后接管。预览会以窗口打开，正式开启后会进入全屏恢复。</p>
                   <div class="actions">
                     <button class="primary" id="enableForceBtn" type="button">开启强制爱</button>
                     <button class="btn-tonal" id="previewForceBreakBtn" type="button">预览 15 秒</button>
@@ -8739,7 +8984,7 @@
               </div>
             </div>
             <span id="suggestIntensity" hidden="">L1 安静</span>
-            <span id="rhythmPlanTitle" hidden="">保持当前节奏</span>
+            <span id="rhythmPlanTitle" hidden="">保持平稳</span>
             <span id="rhythmPlanCopy" hidden="">按今天状态安排。</span>
             <p class="settings-section-note" id="rhythmReasonCopy" hidden="">当前可用。</p>
           </section>
@@ -8838,7 +9083,7 @@
                   <p class="settings-row-value ef-preference-row-value" id="activityCopy">浏览器预览不会读取桌面活动。Electron 版会显示当前 App 和活跃时间。</p>
                   <span class="tag status-quiet" id="activityApp">当前 App 未知</span>
                   <span class="tag status-quiet" id="activityIdle" hidden="">空闲 0 秒</span>
-                  <span class="tag status-quiet" id="activityMode" hidden="">手动计时</span>
+                  <span class="tag status-quiet" id="activityMode" hidden="">正式记录</span>
                   <span class="tag status-quiet" id="naturalBreakTag" hidden="">等待恢复断点</span>
                 </div>
                 <div class="settings-row ef-preference-row" hidden="">
@@ -8847,8 +9092,8 @@
                   <span class="tag">触发 <b id="reminderShown">0</b></span>
                   <span class="tag" hidden="">完成 <b id="reminderCompleted">0</b></span>
                   <span class="tag" hidden="">稍后 <b id="reminderSnoozed">0</b></span>
-                  <span class="tag" hidden="">忽略 <b id="reminderIgnored">0</b></span>
-                  <span class="tag" hidden="">自动休息 <b id="autoBreaks">0</b></span>
+                  <span class="tag" hidden="">未处理 <b id="reminderIgnored">0</b></span>
+                  <span class="tag" hidden="">自然离屏 <b id="autoBreaks">0</b></span>
                 </div>
                 <div class="settings-row ef-preference-row">
                   <strong class="settings-row-label ef-preference-row-label">勿扰场景</strong>
@@ -8901,16 +9146,8 @@
               <strong class="profile-window-stat-value" id="profileWindowActive">0 分钟</strong>
             </div>
             <div class="profile-window-stat">
-              <span class="profile-window-stat-label">护眼休息</span>
+              <span class="profile-window-stat-label">护眼恢复</span>
               <strong class="profile-window-stat-value" id="profileWindowRest">0 分钟</strong>
-            </div>
-            <div class="profile-window-stat">
-              <span class="profile-window-stat-label">恢复</span>
-              <strong class="profile-window-stat-value" id="profileWindowCount">0 次</strong>
-            </div>
-            <div class="profile-window-stat">
-              <span class="profile-window-stat-label">记录</span>
-              <strong class="profile-window-stat-value" id="profileWindowLogs">0 条</strong>
             </div>
           </div>
           <p class="profile-window-empty" id="profileWindowEmpty" hidden="">恢复记录会在这里慢慢积累。</p>
@@ -8960,69 +9197,6 @@
           </div>
         </section>
 
-        <div class="profile-share-bridge" aria-label="收尾"><span>今天就到这里了</span></div>
-
-        <section class="panel profile-share-card" aria-label="今日分享卡">
-          <div class="profile-share-head">
-            <div>
-              <h3>今日分享卡</h3>
-              <p class="profile-share-copy">今天的节奏，可以带走一段。</p>
-            </div>
-            <div class="profile-share-head-side">
-              <div class="profile-share-quick-metrics" aria-label="今日分享数据">
-                <div class="profile-share-metric">
-                  <span>今日专注</span>
-                  <strong id="shareFocusTime">还没开始</strong>
-                </div>
-                <div class="profile-share-metric">
-                  <span>休息</span>
-                  <strong id="shareBreaks">0 次</strong>
-                </div>
-                <div class="profile-share-metric">
-                  <span>节奏</span>
-                  <strong id="shareRhythm">保持节奏</strong>
-                </div>
-              </div>
-              <span class="profile-trend-tag">可分享</span>
-            </div>
-          </div>
-          <div class="profile-share-preview" aria-label="今日分享卡预览">
-            <div class="share-art-card" id="shareArtCard">
-              <div class="share-art-date" id="shareDateLabel">2026年6月24日 · 周三</div>
-              <div class="share-art-quote" id="shareQuote">眼睛也需要看见远处，不只是看见任务。</div>
-              <div class="share-art-metrics" aria-label="今日分享卡数据">
-                <div class="share-art-metric">
-                  <span>今日专注</span>
-                  <strong id="shareCardFocusTime">还没开始</strong>
-                </div>
-                <div class="share-art-metric">
-                  <span>休息</span>
-                  <strong id="shareCardBreaks">0 次</strong>
-                </div>
-                <div class="share-art-metric">
-                  <span>节奏</span>
-                  <strong id="shareCardRhythm">保持节奏</strong>
-                </div>
-              </div>
-              <div class="share-art-divider" aria-hidden="true"></div>
-              <div class="share-art-footer">
-                <div class="share-art-brand">
-                  <span class="share-art-mark" aria-hidden="true"></span>
-                  <span>
-                    <strong>EyeFlow</strong>
-                    <span>Mira 的桌面陪伴空间</span>
-                  </span>
-                </div>
-                <span class="share-art-domain">eyeflow.app</span>
-              </div>
-            </div>
-          </div>
-          <div class="profile-share-actions">
-            <p class="profile-share-note" id="shareCardNote">只复制卡片，不上传数据。</p>
-            <button class="ghost" id="copyShareBtn" type="button">带走这张卡</button>
-          </div>
-        </section>
-
         <details class="panel profile-detail-fold" aria-label="这几天的明细">
           <summary class="profile-detail-fold-summary">
             <div class="profile-detail-fold-title">
@@ -9041,12 +9215,12 @@
               </div>
               <div class="profile-memory-grid">
                 <div class="profile-memory-item">
-                  <span>最近 7 天接受休息</span>
-                  <strong id="profileMemoryAccepted">0 次</strong>
+                  <span>完成恢复</span>
+                  <strong id="profileMemoryAccepted">暂无</strong>
                 </div>
                 <div class="profile-memory-item">
-                  <span>跳过休息</span>
-                  <strong id="profileMemorySkipped">0 次</strong>
+                  <span>稍后/未处理</span>
+                  <strong id="profileMemorySkipped">暂无</strong>
                 </div>
                 <div class="profile-memory-item">
                   <span>当前节奏来源</span>
@@ -9079,7 +9253,7 @@
             <div class="profile-chart-metrics">
               <div class="profile-mini-stat"><span>当前</span><strong id="profileTrendCurrent">16</strong></div>
               <div class="profile-mini-stat"><span>高峰</span><strong id="profileTrendPeak">16</strong></div>
-              <div class="profile-mini-stat"><span>已恢复</span><strong id="profileTrendBreaks">0 次</strong></div>
+              <div class="profile-mini-stat"><span>护眼恢复</span><strong id="profileTrendBreaks">0 分钟</strong></div>
               <div class="profile-mini-stat"><span>起伏</span><strong id="profileTrendRange">0</strong></div>
             </div>
             <div class="profile-symptom-bars" id="profileTags">
@@ -9110,8 +9284,8 @@
                   <b id="weeklyRecoveryDays">0 天</b>
                 </div>
                 <div class="reason">
-                  <span>累计恢复</span>
-                  <b id="weeklyRecoveryBreaks">0 次</b>
+                  <span>护眼恢复</span>
+                  <b id="weeklyRecoveryBreaks">0 分钟</b>
                 </div>
                 <div class="reason">
                   <span>提醒接住</span>
@@ -9152,7 +9326,7 @@
                 <div class="profile-evidence-grid profile-record-grid">
                   <div class="profile-evidence"><span>高峰</span><strong id="profilePeakLoad">16</strong></div>
                   <div class="profile-evidence"><span>样本</span><strong id="profileSampleCount">0</strong></div>
-                  <div class="profile-evidence"><span>恢复</span><strong id="profileBreaks">0</strong></div>
+                  <div class="profile-evidence"><span>护眼恢复</span><strong id="profileBreaks">0 分钟</strong></div>
                   <div class="profile-evidence"><span>计时</span><strong id="profileFocusTime">未记录</strong></div>
                   <div class="profile-evidence"><span>提醒</span><strong id="profileHandledRate">暂无</strong></div>
                   <div class="profile-evidence"><span>判断把握</span><strong id="profileConfidence">低</strong></div>
@@ -9217,6 +9391,46 @@
   </div>
 
   <div class="pet-toast" id="petToast" role="status" aria-live="polite"></div>
+
+  <div class="share-preview-overlay" id="sharePreviewOverlay" role="dialog" aria-modal="true" aria-labelledby="sharePreviewTitle" hidden="">
+    <div class="share-preview-dialog">
+      <div class="share-preview-head">
+        <div class="share-preview-title">
+          <span>今日分享卡</span>
+          <strong id="sharePreviewTitle">带走这张卡</strong>
+        </div>
+        <button class="icon-btn" id="sharePreviewCloseBtn" type="button" title="关闭">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M6 6l12 12"></path><path d="M18 6L6 18"></path></svg>
+        </button>
+      </div>
+      <div class="share-preview-stage">
+        <article class="share-art-card" aria-label="完整今日分享卡">
+          <span class="share-art-date" id="shareDateLabel">2026年6月29日 · 周一</span>
+          <strong class="share-art-quote" id="shareQuote">停二十秒，不是退后，是给下一步蓄力。</strong>
+          <div class="share-art-metrics" aria-label="今日节奏摘要">
+            <div class="share-art-metric"><span>今日专注</span><strong id="shareCardFocusTime">还没开始</strong></div>
+            <div class="share-art-metric"><span>护眼恢复</span><strong id="shareCardBreaks">0 分钟</strong></div>
+            <div class="share-art-metric"><span>节奏</span><strong id="shareCardRhythm">保持平稳</strong></div>
+          </div>
+          <div class="share-art-divider"></div>
+          <div class="share-art-footer">
+            <div class="share-art-brand">
+              <span class="share-art-mark" aria-hidden="true"></span>
+              <span><strong>EyeFlow</strong><span>Mira 的桌面陪伴空间</span></span>
+            </div>
+            <span class="share-art-domain">eyeflow.app</span>
+          </div>
+        </article>
+      </div>
+      <div class="share-preview-actions">
+        <span class="share-preview-note">本地复制，不上传数据。</span>
+        <div class="actions">
+          <button class="ghost" id="sharePreviewCancelBtn" type="button">先不带</button>
+          <button class="primary" id="copyShareConfirmBtn" type="button">复制卡片</button>
+        </div>
+      </div>
+    </div>
+  </div>
 
   <div class="onboarding-overlay" id="onboardingOverlay" role="dialog" aria-modal="true" aria-labelledby="onboardingTitle">
     <div class="onboarding-dialog">
@@ -9304,7 +9518,7 @@
         <div class="timer-controls">
           <button class="primary" type="button" data-recovery-feedback="better">好多了</button>
           <button class="ghost" type="button" data-recovery-feedback="same">差不多</button>
-          <button class="ghost" type="button" data-recovery-feedback="tired">还想休息</button>
+          <button class="ghost" type="button" data-recovery-feedback="tired">还累</button>
         </div>
       </div>
     </div>
@@ -9315,6 +9529,7 @@
   <script src="eyeflow-session-flow.js"></script>
   <script src="eyeflow-rest-flow.js"></script>
   <script src="eyeflow-ui-utils.js"></script>
+  <script src="eyeflow-metrics.js"></script>
   <script>
     const STORAGE_KEY = "eyeflow-v1";
     const HISTORY_ARCHIVE_LIMIT = 365;
@@ -9347,6 +9562,8 @@
       csvEscape,
       escapeHtml
     } = window.EyeFlowUiUtils;
+    const SYSTEM_SESSION_GAP_MS = 5 * 60 * 1000;
+    const NATURAL_AWAY_IDLE_SECONDS = 5 * 60;
     document.body.classList.toggle("desktop-shell", isDesktopShell);
     const state = loadState();
     rolloverDayIfNeeded(state);
@@ -9356,6 +9573,7 @@
     let elapsedSeconds = state.lastAssessmentDay === todayKey() ? state.elapsedSeconds || 0 : 0;
     let sessionSource = state.sessionSource || (elapsedSeconds > 0 ? "manual-paused" : "idle");
     let ticker = null;
+    let lastSessionTickAt = 0;
     let lastNudgeAt = state.lastNudgeAt || 0;
     let lastNaturalBreakNudgeAt = state.lastNaturalBreakNudgeAt || 0;
     let lastActiveSecondsBeforeIdle = state.lastActiveSecondsBeforeIdle || 0;
@@ -9380,6 +9598,7 @@
     let currentBreakStartedAt = "";
     let breakRestTimer = null;
     let breakRestEndsAt = 0;
+    let breakRestTotalSeconds = 0;
     let latestCompanionState = null;
     let latestActivity = null;
     let latestPermissionStatus = null;
@@ -9469,6 +9688,7 @@
     } = window.EyeFlowRecoveryData;
     const {
       computeRestDue,
+      sessionState,
       sessionControlView,
       stageMiraView
     } = window.EyeFlowSessionFlow;
@@ -9477,6 +9697,18 @@
       recoveryFeedbackView,
       recoveryCompletionPlan
     } = window.EyeFlowRestFlow;
+    const {
+      recordedMinutes,
+      focusSegmentSeconds,
+      isUserRecovery,
+      isUserRecord,
+      recoverySecondsForShareEvent,
+      recoverySecondsForDay,
+      naturalAwaySecondsForEvent,
+      naturalAwaySecondsForDay,
+      recordedSecondsForDay,
+      dayMetrics
+    } = window.EyeFlowMetrics;
     let activeRecoveryTasks = recoveryTasksForMode(state.settings.recoveryMode || "mixed");
     const sessionIcons = {
       pause: '<path d="M8 5h3v14H8zM13 5h3v14h-3z"></path>',
@@ -9503,7 +9735,6 @@
       breakTarget: document.querySelector("#breakTarget"),
       focusTargetValue: document.querySelector("#focusTargetValue"),
       breakTargetValue: document.querySelector("#breakTargetValue"),
-      eyeLoad: document.querySelector("#eyeLoad"),
       stateBand: document.querySelector("#stateBand"),
       stateHeadline: document.querySelector("#stateHeadline"),
       stateAction: document.querySelector("#stateAction"),
@@ -9619,13 +9850,9 @@
       systemNotifyToggle: document.querySelector("#systemNotifyToggle"),
       introWrap: document.querySelector("#introWrap"),
       introToggle: document.querySelector("#introToggle"),
-      loadBand: document.querySelector("#loadBand"),
       bandComfort: document.querySelector("#bandComfort"),
       bandMedium: document.querySelector("#bandMedium"),
       bandHigh: document.querySelector("#bandHigh"),
-      focusMinutes: document.querySelector("#focusMinutes"),
-      breakCount: document.querySelector("#breakCount"),
-      logCount: document.querySelector("#logCount"),
       pageTitle: document.querySelector("#pageTitle"),
       statusText: document.querySelector("#statusText"),
       note: document.querySelector("#note"),
@@ -9659,9 +9886,6 @@
       profileRhythmRest: document.querySelector("#profileRhythmRest"),
       profileRhythmWhy: document.querySelector("#profileRhythmWhy"),
       profileRecommendationSource: document.querySelector("#profileRecommendationSource"),
-      shareFocusTime: document.querySelector("#shareFocusTime"),
-      shareBreaks: document.querySelector("#shareBreaks"),
-      shareRhythm: document.querySelector("#shareRhythm"),
       shareDateLabel: document.querySelector("#shareDateLabel"),
       shareQuote: document.querySelector("#shareQuote"),
       shareCardFocusTime: document.querySelector("#shareCardFocusTime"),
@@ -9669,6 +9893,10 @@
       shareCardRhythm: document.querySelector("#shareCardRhythm"),
       shareCardNote: document.querySelector("#shareCardNote"),
       copyShareBtn: document.querySelector("#copyShareBtn"),
+      sharePreviewOverlay: document.querySelector("#sharePreviewOverlay"),
+      sharePreviewCloseBtn: document.querySelector("#sharePreviewCloseBtn"),
+      sharePreviewCancelBtn: document.querySelector("#sharePreviewCancelBtn"),
+      copyShareConfirmBtn: document.querySelector("#copyShareConfirmBtn"),
       profileHandledRate: document.querySelector("#profileHandledRate"),
       profileConfidence: document.querySelector("#profileConfidence"),
       profileIntensity: document.querySelector("#profileIntensity"),
@@ -9779,7 +10007,6 @@
       els.petMinimizeBtn.addEventListener("click", toggleCompanion);
       els.pet.addEventListener("click", expandCompanionFromPet);
     }
-    document.getElementById("todayRecapLink")?.addEventListener("click", () => switchView("profileView"));
     document.getElementById("profileWindowSwitch")?.querySelectorAll("button").forEach((btn) => {
       btn.addEventListener("click", () => {
         profileWindowDays = Number(btn.dataset.window) || 7;
@@ -9828,7 +10055,16 @@
     els.readinessRefreshBtn.addEventListener("click", () => refreshDesktopReadiness());
     els.testNotificationBtn.addEventListener("click", testSystemNotification);
     els.copyFeedbackBtn.addEventListener("click", copyFeedbackTemplate);
-    els.copyShareBtn?.addEventListener("click", copyDailyShareCard);
+    els.copyShareBtn?.addEventListener("click", openDailySharePreview);
+    els.sharePreviewCloseBtn?.addEventListener("click", closeDailySharePreview);
+    els.sharePreviewCancelBtn?.addEventListener("click", closeDailySharePreview);
+    els.copyShareConfirmBtn?.addEventListener("click", copyDailyShareCard);
+    els.sharePreviewOverlay?.addEventListener("click", (event) => {
+      if (event.target === els.sharePreviewOverlay) closeDailySharePreview();
+    });
+    document.addEventListener("keydown", (event) => {
+      if (event.key === "Escape" && !els.sharePreviewOverlay?.hidden) closeDailySharePreview();
+    });
     els.showOnboardingBtn.addEventListener("click", showOnboarding);
     els.launchAtLoginToggle.addEventListener("change", setLaunchAtLogin);
     els.hideDockOnCloseToggle?.addEventListener("change", setHideDockOnClose);
@@ -9988,6 +10224,8 @@
         miraMemory: {
           firstAssessment: null,
           firstAhaAt: "",
+          lastAlivePingAt: "",
+          lastAlivePingSessionId: "",
           modeSignals: {},
           lastQuietMercyAt: 0,
           lastMicroReplyAt: 0,
@@ -10029,10 +10267,69 @@
 	        ) {
 	          loaded.focusTarget = 50;
 	        }
+        repairStaleOpenFocusSession(loaded);
 	        return loaded;
       } catch {
         return fallback;
       }
+    }
+
+    function repairStaleOpenFocusSession(dayState) {
+      if (!dayState || dayState.lastAssessmentDay !== todayKey()) return dayState;
+      const elapsed = Math.max(0, Number(dayState.elapsedSeconds || 0));
+      const targetSeconds = Math.max(1, Number(dayState.focusTarget || 50)) * 60;
+      const staleThresholdSeconds = Math.max(targetSeconds + 30 * 60, 3 * 60 * 60);
+      const activeStartedAt = Date.parse(dayState.activeFocusStartedAt || "");
+      const wallSeconds = Number.isFinite(activeStartedAt)
+        ? Math.max(0, Math.floor((Date.now() - activeStartedAt) / 1000))
+        : 0;
+      const wallClockPolluted = !wallSeconds || wallSeconds >= elapsed - Math.floor(SYSTEM_SESSION_GAP_MS / 1000);
+      if (!dayState.activeFocusSessionId || elapsed < staleThresholdSeconds || !wallClockPolluted) {
+        return dayState;
+      }
+      const repairedSeconds = Math.min(elapsed, targetSeconds);
+      const endedAt = new Date().toISOString();
+      dayState.events = Array.isArray(dayState.events) ? dayState.events : [];
+      dayState.events.push({
+        type: "focus_session",
+        phase: "ended",
+        sessionId: dayState.activeFocusSessionId,
+        startedAt: dayState.activeFocusStartedAt || "",
+        endedAt,
+        durationSeconds: repairedSeconds,
+        sourceMode: dayState.sessionSource || "manual",
+        endedBy: "system-inactive-gap",
+        interruptedByBreak: true,
+        repairedFromStaleElapsedSeconds: elapsed
+      });
+      dayState.logs = Array.isArray(dayState.logs) ? dayState.logs : [];
+      dayState.logs.unshift({
+        at: endedAt,
+        load: Number(dayState.lastAnalysis?.load || 0),
+        symptoms: normalizeSymptoms(dayState.symptoms || ONBOARDING_PRESETS.fine),
+        label: "系统识别一次休息",
+        note: "上次电脑睡眠后，Mira 已把未关闭的这一轮结束；睡眠时间不会计入专注。",
+        modelVersion: dayState.lastAnalysis?.modelVersion || "",
+        analysis: dayState.lastAnalysis || null
+      });
+      dayState.logs = dayState.logs.slice(0, 20);
+      dayState.elapsedSeconds = 0;
+      dayState.sessionSource = "idle";
+      dayState.activeFocusSessionId = "";
+      dayState.activeFocusStartedAt = "";
+      dayState.activeFocusStartedLoad = 0;
+      dayState.lastAutoBreakAt = Date.now();
+      dayState.reminderStats = {
+        shown: 0,
+        completed: 0,
+        snoozed: 0,
+        ignored: 0,
+        autoBreaks: 0,
+        ...(dayState.reminderStats || {})
+      };
+      dayState.reminderStats.autoBreaks = Number(dayState.reminderStats.autoBreaks || 0) + 1;
+      dayState.breaks = Number(dayState.breaks || 0) + 1;
+      return dayState;
     }
 
     function hasAssessedToday(dayState = state) {
@@ -10059,6 +10356,8 @@
         dayState.miraMemory = {
           firstAssessment: null,
           firstAhaAt: "",
+          lastAlivePingAt: "",
+          lastAlivePingSessionId: "",
           modeSignals: {},
           lastQuietMercyAt: 0,
           lastMicroReplyAt: 0,
@@ -10148,6 +10447,7 @@
       startedAt = null;
       elapsedSeconds = 0;
       sessionSource = "idle";
+      lastSessionTickAt = 0;
       window.clearInterval(ticker);
       ticker = null;
       lastNudgeAt = 0;
@@ -10208,6 +10508,7 @@
     function completeSessionForSystemRest(reason) {
       const now = Date.now();
       if (now - lastSystemRestAt < 30000) return;
+      syncRunningSessionClock({ now, allowLongGap: false });
       if (!hasAssessedToday()) {
         resetSessionClock();
         persist();
@@ -10265,6 +10566,7 @@
       startedAt = null;
       elapsedSeconds = 0;
       sessionSource = "idle";
+      lastSessionTickAt = 0;
       autoElapsedSeconds = 0;
       lastNudgeAt = 0;
       lastNaturalBreakNudgeAt = 0;
@@ -10278,6 +10580,19 @@
       const reason = payload.reason || "system";
       if (reason === "resume") {
         handleResumeCheck();
+        restartVisibleBreakTimerAfterResume();
+        if (isRunning && lastSessionTickAt && Date.now() - lastSessionTickAt > SYSTEM_SESSION_GAP_MS) {
+          completeSessionForSystemRest("system-inactive-gap");
+          return;
+        }
+        if (isRunning) lastSessionTickAt = Date.now();
+        render();
+        persist();
+        return;
+      }
+      if (reason === "lock-screen" || reason === "suspend") {
+        pauseVisibleBreakTimerForSystemRest();
+        completeSessionForSystemRest(reason);
         return;
       }
       completeSessionForSystemRest(reason);
@@ -10378,8 +10693,6 @@
         showBreak("manual");
         return;
       }
-      els.sessionStartHint.textContent = "安静提醒已开始";
-      showToast("Mira：安静提醒已开始。");
       startSession();
       recordOnboardingEvent("first_focus_started", {
         computedLoad: load,
@@ -10387,7 +10700,7 @@
         rhythmRestSeconds: initialRhythm.rest
       });
       persist();
-      showFirstRoundLanding();
+      focusSessionPanel({ focusTarget: "panel" });
     }
 
     function startSession() {
@@ -10399,17 +10712,14 @@
         return;
       }
       if (isRunning) return;
-      if (sessionSource === "auto") {
-        elapsedSeconds = 0;
-        startedAt = null;
-        lastNudgeAt = 0;
-        lastNaturalBreakNudgeAt = 0;
-      }
+      const sourceMode = sessionSource === "auto" && elapsedSeconds > 0 ? "auto" : "manual";
       isRunning = true;
-      sessionSource = "manual";
+      sessionSource = sourceMode;
       state.forceEscapeUntil = 0;
-      startedAt = Date.now() - elapsedSeconds * 1000;
-      openFocusSession();
+      const now = Date.now();
+      startedAt = now - elapsedSeconds * 1000;
+      lastSessionTickAt = now;
+      openFocusSession(sourceMode);
       ticker = window.setInterval(tick, 1000);
       tick();
     }
@@ -10420,18 +10730,42 @@
         pauseSession();
         return;
       }
+      if (isAutoTracking()) {
+        pauseAutoTracking();
+        return;
+      }
       startSession();
+    }
+
+    function pauseAutoTracking() {
+      sessionSource = elapsedSeconds > 0 ? "manual-paused" : "idle";
+      lastActivityRecordAt = 0;
+      persist();
+      render();
     }
 
     function pauseSession(endedBy = "paused") {
       if (!isRunning) return;
+      syncRunningSessionClock();
       closeFocusSession(endedBy);
       isRunning = false;
       window.clearInterval(ticker);
       ticker = null;
+      lastSessionTickAt = 0;
       sessionSource = elapsedSeconds > 0 ? "manual-paused" : "idle";
       persist();
       render();
+    }
+
+    function syncRunningSessionClock({ now = Date.now(), allowLongGap = true } = {}) {
+      if (!isRunning || !startedAt) return true;
+      if (!lastSessionTickAt) lastSessionTickAt = now;
+      if (!allowLongGap && now - lastSessionTickAt > SYSTEM_SESSION_GAP_MS) {
+        return false;
+      }
+      elapsedSeconds = Math.max(elapsedSeconds, Math.floor((now - startedAt) / 1000));
+      lastSessionTickAt = now;
+      return true;
     }
 
     function tick() {
@@ -10440,7 +10774,12 @@
         persist();
         return;
       }
-      elapsedSeconds = Math.floor((Date.now() - startedAt) / 1000);
+      const now = Date.now();
+      if (lastSessionTickAt && now - lastSessionTickAt > SYSTEM_SESSION_GAP_MS) {
+        completeSessionForSystemRest("system-inactive-gap");
+        return;
+      }
+      syncRunningSessionClock({ now });
       maybeShowFirstAhaMoment();
       const targetSeconds = Number(els.focusTarget.value) * 60;
       if (elapsedSeconds >= targetSeconds) {
@@ -10452,17 +10791,19 @@
 
     function maybeShowFirstAhaMoment() {
       const memory = ensureMiraMemory();
-      if (memory.firstAhaAt) return;
       if (!hasAssessedToday()) return;
       if (!(isRunning || isAutoTracking())) return;
       if (elapsedSeconds < FIRST_AHA_SECONDS) return;
-      if ((state.summaryHistory || []).some((day) => hasDailyActivity(day))) {
-        memory.firstAhaAt = "skipped-existing-history";
-        return;
-      }
-      memory.firstAhaAt = new Date().toISOString();
+      const sessionId = state.activeFocusSessionId
+        || (isAutoTracking() ? `auto:${todayKey()}` : `${sessionSource || "session"}:${todayKey()}`);
+      if (memory.lastAlivePingSessionId === sessionId) return;
+      const now = new Date().toISOString();
+      memory.lastAlivePingAt = now;
+      memory.lastAlivePingSessionId = sessionId;
+      memory.firstAhaAt = memory.firstAhaAt || now;
       appendDataEvent("mira_aha_moment", {
         elapsedSeconds,
+        sessionId,
         sourceMode: sessionSource || "local",
         message: "我在旁边了。你继续专注，休息点到了我再轻轻提醒。"
       });
@@ -10486,7 +10827,8 @@
         return;
       }
       const group = lightReminderGroup(load);
-      showToast(modeMemoryLine("overrun") || `Mira：${lightReminderLine(group, "nudge") || "看一眼远处，再回来。"}`);
+      const memoryLine = modeMemoryLine("overrun");
+      showToast(memoryLine ? `Mira：${memoryLine}` : `Mira：${lightReminderLine(group, "nudge") || "看一眼远处，再回来。"}`);
       if (elapsedSeconds >= targetSeconds + 10 * 60) {
         showToast("Mira：你已经超时 10 分钟了。我建议现在休息一下。");
       }
@@ -10494,6 +10836,19 @@
 
     function isAutoTracking() {
       return Boolean(hasAssessedToday() && !isRunning && sessionSource === "auto" && elapsedSeconds > 0);
+    }
+
+    function currentSessionState({ resting = false } = {}) {
+      return sessionState({
+        isRunning,
+        autoTracking: isAutoTracking(),
+        paused: sessionSource === "manual-paused" && elapsedSeconds > 0,
+        resting
+      });
+    }
+
+    function isRecordingSession() {
+      return currentSessionState() === "running";
     }
 
     function requestLocalFullscreen() {
@@ -10616,6 +10971,7 @@
       stopBreakRestTimer();
       els.breakOverlay.classList.remove("rest-ready");
       const total = Math.max(5, Number(seconds) || 20);
+      breakRestTotalSeconds = total;
       breakRestEndsAt = Date.now() + total * 1000;
       const update = () => {
         const remaining = Math.max(0, Math.ceil((breakRestEndsAt - Date.now()) / 1000));
@@ -10624,6 +10980,23 @@
       };
       update();
       breakRestTimer = window.setInterval(update, 250);
+    }
+
+    function restartVisibleBreakTimerAfterResume() {
+      if (!els.breakOverlay.classList.contains("show") || els.breakOverlay.classList.contains("feedback-mode")) return;
+      if (forceBreakActive) {
+        if (forceBreakPreview) return;
+        const totalSeconds = Math.max(15, Number(els.breakTarget.value) || 120);
+        forceBreakEndsAt = Date.now() + totalSeconds * 1000;
+        return;
+      }
+      if (els.breakMiniTimer.hidden) return;
+      startBreakRestTimer(breakRestTotalSeconds || Number(els.breakTarget.value) || 20);
+    }
+
+    function pauseVisibleBreakTimerForSystemRest() {
+      if (!els.breakOverlay.classList.contains("show")) return;
+      stopBreakRestTimer();
     }
 
     function showBreak(reason) {
@@ -11068,7 +11441,7 @@
       if (pending?.status === "pending" && now - Date.parse(pending.at) > 12 * 60 * 1000) {
         closePendingReminder("ignored");
         recordMiraModeSignal("overrun");
-        addSystemLog("忽略一次 Mira 提醒", "这次提醒没有被处理。EyeFlow 会用它来判断提醒是否太频繁。");
+        addSystemLog("一次提醒未处理", "这次提醒没有被处理。EyeFlow 会用它来判断提醒是否太频繁。");
       }
       if (level < 2) return;
       if (!shouldSurfaceReminder(intervention, load)) return;
@@ -11132,16 +11505,27 @@
     }
 
     function maybeAutoCompleteBreak(activity) {
-      if (!activity || isRunning) return;
+      if (!activity) return;
       if (activity.isWorking) {
-        lastActiveSecondsBeforeIdle = activity.activeSeconds || lastActiveSecondsBeforeIdle;
+        lastActiveSecondsBeforeIdle = isRunning
+          ? Math.max(lastActiveSecondsBeforeIdle, elapsedSeconds)
+          : activity.activeSeconds || lastActiveSecondsBeforeIdle;
         return;
       }
-      const breakSeconds = Number(els.breakTarget.value);
+      const naturalAwaySeconds = Math.max(NATURAL_AWAY_IDLE_SECONDS, Number(els.breakTarget.value || 0));
       const now = Date.now();
-      if (activity.idleSeconds < breakSeconds) return;
-      if (lastActiveSecondsBeforeIdle < Number(els.focusTarget.value) * 60 * 0.5) return;
-      if (now - (state.lastAutoBreakAt || 0) < 12 * 60 * 1000) return;
+      if (activity.idleSeconds < naturalAwaySeconds) return;
+      if (!isRunning && lastActiveSecondsBeforeIdle < Number(els.focusTarget.value) * 60 * 0.5) return;
+      if (!isRunning && now - (state.lastAutoBreakAt || 0) < 12 * 60 * 1000) return;
+      if (isRunning) {
+        syncRunningSessionClock({ now });
+        elapsedSeconds = Math.max(0, elapsedSeconds - Number(activity.idleSeconds || 0));
+        closeFocusSession("idle");
+        isRunning = false;
+        window.clearInterval(ticker);
+        ticker = null;
+        lastSessionTickAt = 0;
+      }
       state.lastAutoBreakAt = now;
       state.breaks += 1;
       state.reminderStats.autoBreaks += 1;
@@ -11150,7 +11534,7 @@
       sessionSource = "idle";
       lastNudgeAt = 0;
       lastActiveSecondsBeforeIdle = 0;
-      addSystemLog("自动识别一次休息", `检测到你离开键鼠约 ${activity.idleSeconds} 秒，已记为护眼休息。`);
+      addSystemLog("自动识别一次自然离屏", `检测到你离开键鼠约 ${activity.idleSeconds} 秒，已作为自然离屏信号记录。`);
       appendRhythmMemory("recovery_feedback", {
         endedAt: new Date().toISOString(),
         durationSeconds: Number(activity.idleSeconds || 0),
@@ -11189,8 +11573,10 @@
 
     function handlePrimaryAction() {
       if (!hasAssessedToday()) {
-        showOnboarding();
-        return;
+        if (!ensureTodayReadyForAutoStart()) {
+          showOnboarding();
+          return;
+        }
       }
       const analysis = computeEyeAnalysis();
       const load = analysis.load;
@@ -11202,6 +11588,30 @@
 	      startSession();
 	      focusSessionPanel({ focusTarget: "panel" });
 	    }
+
+    function ensureTodayReadyForAutoStart() {
+      if (hasAssessedToday()) return true;
+      if (forceOnboarding) return false;
+      state.currentDay = todayKey();
+      state.lastAssessmentDay = todayKey();
+      state.initialAssessmentDone = true;
+      state.onboardingDismissed = true;
+      state.symptoms = normalizeSymptoms(state.symptoms || ONBOARDING_PRESETS.fine);
+      if (!Number(state.focusTarget)) state.focusTarget = 50;
+      if (!Number(state.breakTarget)) state.breakTarget = 120;
+      els.focusTarget.value = state.focusTarget;
+      els.breakTarget.value = state.breakTarget;
+      setRangeFill(els.focusTarget);
+      setRangeFill(els.breakTarget);
+      return true;
+    }
+
+    function autoStartSessionOnOpen() {
+      if (!ensureTodayReadyForAutoStart()) return;
+      if (isRunning || isAutoTracking()) return;
+      if (sessionSource === "manual-paused" && elapsedSeconds > 0) return;
+      startSession();
+    }
 
     function focusSessionPanel(options = {}) {
       const guideLevel = Number(options.guideLevel || 1);
@@ -11243,15 +11653,7 @@
     function focusManualStartEntry() {
       switchView("todayView");
       clearRestGuideFocus();
-      if (isFocusTargetVisible(els.startBtn) && isFocusTargetVisible(els.sessionPanel)) {
-        focusSessionPanel({ focusTarget: "start" });
-        return;
-      }
-      if (!isFocusTargetVisible(els.primaryActionBtn)) return;
-      els.primaryActionBtn.scrollIntoView({ behavior: "smooth", block: "center" });
-      window.setTimeout(() => {
-        els.primaryActionBtn.focus({ preventScroll: true });
-      }, 520);
+      focusSessionPanel({ focusTarget: "panel" });
     }
 
     function showFirstRoundLanding() {
@@ -11314,7 +11716,7 @@
       els.forceConfirmTitle.textContent = forceActive ? "强制爱已开启" : "开启前确认";
       els.forceConfirmCopy.textContent = forceActive
         ? "恢复断点会进入全屏恢复；可预览，也可随时切回安静。"
-        : "只在手动专注后接管。预览会以窗口打开，正式开启后会进入全屏恢复。";
+        : "这一轮到恢复断点后接管。预览会以窗口打开，正式开启后会进入全屏恢复。";
       els.enableForceBtn.hidden = forceActive;
       els.cancelForceBtn.textContent = forceActive ? "切回安静" : "先不用";
     }
@@ -11323,7 +11725,7 @@
       const forceActive = state.settings.intensity === "force";
       els.forcePreviewResultTitle.textContent = forceActive ? "预览完成，强制爱已开启" : "预览完成";
       els.forcePreviewResultCopy.textContent = forceActive
-        ? "这个节奏已经会用于手动专注后的全屏恢复；如果太强，可以随时切回安静。"
+        ? "这个节奏已经会用于这一轮后的全屏恢复；如果太强，可以随时切回安静。"
         : "如果这个节奏适合你，可以开启强制爱；不适合就先保持轻提醒。";
       els.forcePreviewResult.hidden = false;
       window.setTimeout(() => {
@@ -11389,7 +11791,7 @@
           : level === "clear"
             ? "偏载明显时提醒更清楚。"
         : level === "force"
-          ? "只在手动专注后接管。"
+          ? "这一轮到恢复断点后接管。"
           : "选择一个提醒边界。";
       state.settings.intensity = level;
       if (options.userChange !== false && previousLevel !== level) {
@@ -11476,10 +11878,10 @@
       });
       els.activityApp.textContent = app;
       els.activityIdle.textContent = `空闲 ${latestActivity.idleSeconds || 0} 秒`;
-      els.activityMode.textContent = isRunning ? "手动计时" : !assessedToday ? "等待开始" : latestActivity.isWorking ? "自动记录" : "自动感知";
+      els.activityMode.textContent = isRunning || isAutoTracking() ? "正式记录" : !assessedToday ? "等待开始" : latestActivity.isWorking ? "Mira 记录" : "安静感知";
       els.naturalBreakTag.textContent = naturalBreakLabel(latestActivity);
       if (!assessedToday) {
-        els.activityCopy.textContent = "开始安静提醒后，EyeFlow 才记录本地计时。";
+        els.activityCopy.textContent = "开始这一轮后，EyeFlow 会记录本地计时。";
       } else if (!latestActivity.enhancedDesktopSensing) {
         els.activityCopy.textContent = "普通模式中：只做本地计时和休息提醒。";
       } else if (!latestActivity.isWorking) {
@@ -12059,8 +12461,8 @@
       setReadinessState(els.readyCompanionTitle, desktopMiraVisible ? "enabled" : "optional");
       els.readinessCompanionBtn.disabled = !desktopKnown;
       els.readinessCompanionBtn.textContent = desktopMiraVisible ? "退出 Mira" : "显示 Mira";
-      els.readinessCompanionBtn.classList.remove("primary-action");
-      els.readinessCompanionBtn.classList.add("secondary-action");
+      els.readinessCompanionBtn.classList.toggle("primary-action", !desktopMiraVisible);
+      els.readinessCompanionBtn.classList.toggle("secondary-action", desktopMiraVisible);
 
       if (!isMac) {
         els.readyLaunchTitle.textContent = "不适用";
@@ -12155,10 +12557,10 @@
         `评分模型：${analysis.modelVersion || "未知"} / 置信度 ${analysis.confidenceLabel || "低"}`,
         `缺失信号：${(analysis.missingSignals || []).map(missingSignalLabel).join("、") || "无"}`,
         `今日专注：${formatFeedbackDuration(elapsedSeconds)}`,
-        `今日休息次数：${state.breaks || 0}`,
+        `今日护眼恢复：${shareRecoveryLabel(recoverySecondsForDay({ events: state.events || [] }))}`,
         `rhythmMemoryDays：${rhythmSummary.rhythmMemoryDays}`,
         `acceptedBreaks：${rhythmSummary.acceptedBreaks}`,
-        `skippedBreaks：${rhythmSummary.skippedBreaks}`,
+        `laterOrUnhandled：${rhythmSummary.skippedBreaks}`,
         `recommendationSource：${rhythmSummary.recommendationSource}`,
         `lastRecommendationReason：${rhythmSummary.lastRecommendationReason || "暂无"}`,
         `当前 App：${latestActivity?.activeApp || "未知"}`,
@@ -12258,7 +12660,7 @@
       if (isNaturalBreak(activity)) return "适合轻休息";
       const targetSeconds = Number(els.focusTarget.value) * 60;
       if (!isRunning && activity.activeSeconds >= targetSeconds) return "等你停一下";
-      if (isRunning) return "手动节奏";
+      if (isRunning || isAutoTracking()) return "本轮节奏";
       return "等待恢复断点";
     }
 
@@ -12745,7 +13147,7 @@
         better: "好多了",
         same: "还好",
         tired: "仍然累",
-        auto: "自动记录"
+        auto: "自动完成"
       }[feedback] || feedback || "";
     }
 
@@ -12911,11 +13313,11 @@
       };
     }
 
-    function openFocusSession() {
+    function openFocusSession(sourceMode = "manual") {
       if (state.activeFocusSessionId) return;
       const analysis = computeEyeAnalysis();
       state.activeFocusSessionId = `focus-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`;
-      state.activeFocusStartedAt = new Date().toISOString();
+      state.activeFocusStartedAt = new Date(Date.now() - Math.max(0, Number(elapsedSeconds || 0)) * 1000).toISOString();
       state.activeFocusStartedLoad = analysis.load;
       appendRhythmMemory("round_started", {
         roundId: state.activeFocusSessionId,
@@ -12929,7 +13331,7 @@
         phase: "started",
         sessionId: state.activeFocusSessionId,
         startedAt: state.activeFocusStartedAt,
-        sourceMode: "manual",
+        sourceMode,
         loadAtStart: analysis.load,
         confidence: analysis.confidence,
         ...rhythmEventContext(analysis)
@@ -13007,7 +13409,7 @@
         recs.push(["缩短下一轮", "下一轮短 5 分钟，先眨眼。"]);
       }
       if (load < 48 && recs.length === 0) {
-        recs.push(["保持节奏", "状态不错，下一轮继续轻提醒。"]);
+        recs.push(["保持平稳", "状态不错，下一轮继续轻提醒。"]);
       }
       return recs.slice(0, 3);
     }
@@ -13020,6 +13422,8 @@
       state.miraMemory = {
         firstAssessment: null,
         firstAhaAt: "",
+        lastAlivePingAt: "",
+        lastAlivePingSessionId: "",
         modeSignals: {},
         lastQuietMercyAt: 0,
         lastMicroReplyAt: 0,
@@ -13194,7 +13598,7 @@
             return {
               mood: "focus",
               title: "强制爱待命中",
-              message: "我先只记录节奏。点开始手动专注后，会从新一轮开始并启用全屏恢复。"
+              message: "Mira 正在为这一轮计时。需要停下时点暂停；到恢复断点我会接管。"
             };
           }
         }
@@ -13213,10 +13617,10 @@
         if (isAutoTracking()) {
           return {
             mood: "focus",
-            title: state.settings.intensity === "force" ? "强制爱待命中" : "Mira 在陪你计时",
+            title: state.settings.intensity === "force" ? "强制爱待命中" : "计时中",
             message: state.settings.intensity === "force"
-              ? "我先只记录节奏。点开始手动专注后，会从新一轮开始并启用全屏恢复。"
-              : "你已经工作一会儿了。点开始手动专注后，会从新一轮开始。"
+              ? "Mira 正在为这一轮计时。需要停下时点暂停；到恢复断点我会接管。"
+              : "这一轮已经开始计时。你继续就好，休息点到了我再提醒。"
           };
         }
       }
@@ -13254,7 +13658,7 @@
             level: 1,
             displayLevel: 4,
             title: "强制爱临时退出",
-            copy: `这次强制恢复已中断，Mira 会安静 ${remainingMinutes} 分钟。重新开始手动专注后会恢复 L4 规则。`
+            copy: `这次强制恢复已中断，Mira 会安静 ${remainingMinutes} 分钟。下一轮到恢复断点后会恢复 L4 规则。`
           };
         }
         if (!isRunning) {
@@ -13263,8 +13667,8 @@
             displayLevel: 4,
             title: "强制爱待命",
             copy: isAutoTracking()
-              ? "正在自动记录连续计时。点开始手动专注后，会从 00:00 开始并启用恢复断点全屏恢复。"
-              : "Mira 会先安静陪伴；开始手动专注后，到恢复断点才进入全屏恢复。"
+              ? "Mira 正在记录这一轮。需要停下时点暂停；到恢复断点我会接管。"
+              : "Mira 会先安静陪伴；这一轮到恢复断点后进入全屏恢复。"
           };
         }
         if (elapsedMinutes >= focusTargetMinutes) {
@@ -13388,7 +13792,7 @@
       if (stats.shown === 0) {
         els.reminderFeedbackCopy.textContent = "Mira 会记录提醒有没有被接住，用来慢慢让提醒更轻。";
       } else if (stats.ignored > stats.completed + stats.snoozed) {
-        els.reminderFeedbackCopy.textContent = "今天忽略偏多，后续可以降低介入频率或更依赖恢复断点。";
+        els.reminderFeedbackCopy.textContent = "今天未处理的提醒偏多，后续可以降低介入频率或更依赖恢复断点。";
       } else {
         els.reminderFeedbackCopy.textContent = "今天的提醒已有反馈，EyeFlow 会用这些信号调整节奏。";
       }
@@ -13397,52 +13801,57 @@
     function renderDailySummary(load) {
       const stats = state.reminderStats;
       const [symptom, symptomValue] = topSymptom();
-      const focusMinutes = Math.floor(elapsedSeconds / 60);
+      const focusSeconds = currentDayFocusSeconds();
+      const recoverySeconds = recoverySecondsForDay({ events: state.events || [] });
+      const focusMinutes = Math.floor(focusSeconds / 60);
+      const focusLabel = shareFocusLabel(focusSeconds);
+      const recoveryLabel = shareRecoveryLabel(recoverySeconds);
+      const summaryLine = `今日专注 ${focusLabel} · 护眼恢复 ${recoveryLabel}`;
       const handled = stats.completed + stats.snoozed;
       const responsePercent = stats.shown ? Math.round(handled / stats.shown * 100) : null;
       const totalBreaks = state.breaks;
       const recordCount = state.logs.length;
-      els.summaryDayLabel.textContent = `今日总结 · ${state.currentDay || todayKey()}`;
+      els.summaryDayLabel.textContent = `今日分享卡 · ${state.currentDay || todayKey()}`;
 
       if (load >= 74) {
         els.dailySummaryTitle.textContent = "先休息";
-        els.dailySummaryCopy.textContent = `今日专注 ${focusMinutes} 分钟 · 你记录了 ${recordCount} 次`;
+        els.dailySummaryCopy.textContent = summaryLine;
       } else if (load >= 48) {
         els.dailySummaryTitle.textContent = "接近休息点";
-        els.dailySummaryCopy.textContent = `今日专注 ${focusMinutes} 分钟 · 你记录了 ${recordCount} 次`;
-      } else if (state.logs.length || focusMinutes > 0 || totalBreaks > 0) {
+        els.dailySummaryCopy.textContent = summaryLine;
+      } else if (state.logs.length || focusMinutes > 0 || totalBreaks > 0 || recoverySeconds > 0) {
         els.dailySummaryTitle.textContent = "节奏平稳";
-        els.dailySummaryCopy.textContent = `今日专注 ${focusMinutes} 分钟 · 你记录了 ${recordCount} 次`;
+        els.dailySummaryCopy.textContent = summaryLine;
       } else {
         els.dailySummaryTitle.textContent = "等待首轮";
-        els.dailySummaryCopy.textContent = "开始后生成总结。";
+        els.dailySummaryCopy.textContent = "开始后生成。";
       }
 
       els.responseRate.textContent = responsePercent === null ? "暂无" : `${responsePercent}%`;
       if (stats.shown === 0) {
         els.responseRateCopy.textContent = "暂无 L2/L3。";
       } else if (stats.ignored > handled) {
-        els.responseRateCopy.textContent = `${stats.shown} 次 · 忽略偏多`;
+        els.responseRateCopy.textContent = `${stats.shown} 次 · 未处理偏多`;
       } else {
         els.responseRateCopy.textContent = `${stats.shown} 次 · 处理 ${handled}`;
       }
 
-      els.recoveryScore.textContent = `${totalBreaks} 次`;
+      els.recoveryScore.textContent = recoveryLabel;
       els.recoveryCopy.textContent = stats.autoBreaks
-        ? `自动 ${stats.autoBreaks} 次`
-        : "含主动/自动";
+        ? "另有自然离屏"
+        : "来自完成的恢复";
 
       if (load >= 74 || symptomValue >= 7) {
-        els.tomorrowPlan.textContent = "明天提前休息";
+        els.tomorrowPlan.textContent = "早点恢复";
         els.tomorrowCopy.textContent = `${symptom}优先 · 提前 5-10 分`;
       } else if (stats.ignored > handled && stats.shown >= 2) {
-        els.tomorrowPlan.textContent = "明天更安静";
+        els.tomorrowPlan.textContent = "少一点打扰";
         els.tomorrowCopy.textContent = "少气泡，多等断点。";
       } else if (totalBreaks === 0 && focusMinutes >= 15) {
-        els.tomorrowPlan.textContent = "明天补一次休息";
+        els.tomorrowPlan.textContent = "补一段恢复";
         els.tomorrowCopy.textContent = "至少 120 秒。";
       } else {
-        els.tomorrowPlan.textContent = "保持当前节奏";
+        els.tomorrowPlan.textContent = "保持平稳";
         els.tomorrowCopy.textContent = "Mira 继续轻提醒。";
       }
     }
@@ -13482,19 +13891,22 @@
 	    }
 
     function sessionHintText() {
+      const focusTargetMinutes = Number(els.focusTarget.value);
+      const remainingMinutes = Math.max(0, focusTargetMinutes - Math.floor(elapsedSeconds / 60));
+      const remainingLabel = remainingMinutes > 0 ? `剩余 ${remainingMinutes} 分钟` : "休息点";
       if (!hasAssessedToday()) {
-        return "安静提醒待开始";
+        return `${remainingLabel} · 目标 ${focusTargetMinutes} 分钟`;
       }
       const targetSeconds = Number(els.focusTarget.value) * 60;
-      if (isRunning && elapsedSeconds >= targetSeconds) {
+      if (isRecordingSession() && elapsedSeconds >= targetSeconds) {
         const overMinutes = Math.floor((elapsedSeconds - targetSeconds) / 60);
         const prefix = overMinutes > 0 ? `超时 ${overMinutes} 分` : "到断点";
-        return `${prefix} · 可以休息`;
+        return `${prefix} · 目标 ${focusTargetMinutes} 分钟`;
       }
       if (isAutoTracking()) {
-        return "自动记录中";
+        return `计时中 · 目标 ${focusTargetMinutes} 分钟`;
       }
-      return isRunning || elapsedSeconds > 0 ? "本地计时中" : "安静提醒中";
+      return `${remainingLabel} · 目标 ${focusTargetMinutes} 分钟`;
     }
 
     function renderTodayMode() {
@@ -13543,11 +13955,12 @@
       const secs = elapsedSeconds % 60;
 	      const restDue = computeRestDue({
 	        isRunning,
+	        autoTracking: isAutoTracking(),
 	        elapsedSeconds,
 	        focusMinutes: Number(els.focusTarget.value)
 	      });
 	      document.body.classList.toggle("today-state-focus", !document.querySelector("#todayView").hidden);
-	      document.body.classList.toggle("session-active", isRunning || elapsedSeconds > 0 || restDue);
+	      document.body.classList.toggle("session-active", currentSessionState({ resting: restDue }) !== "idle" || elapsedSeconds > 0);
 
 	      els.timerText.textContent = `${String(mins).padStart(2, "0")}:${String(secs).padStart(2, "0")}`;
       els.timerRing.style.setProperty("--progress", `${progress}%`);
@@ -13558,13 +13971,7 @@
       setRangeFill(els.focusTarget);
       setRangeFill(els.breakTarget);
       renderSessionControls();
-      const focusTargetMinutes = Number(els.focusTarget.value);
-      els.eyeLoad.textContent = mins > 0 ? `${mins} 分钟` : `—`;
-      renderLoadBand(load);
       renderStateCenter(load);
-      els.focusMinutes.textContent = `${focusTargetMinutes} 分钟`;
-      els.breakCount.textContent = state.breaks > 0 ? `${state.breaks} 次` : `—`;
-      els.logCount.textContent = state.logs.length > 0 ? `${state.logs.length} 条` : `—`;
       renderActivity();
       if (!document.querySelector("#todayView").hidden) {
         els.statusText.textContent = statusCopy(load, isRunning);
@@ -13593,6 +14000,7 @@
         isRunning,
         restDue: computeRestDue({
           isRunning,
+          autoTracking: isAutoTracking(),
           elapsedSeconds,
           focusMinutes: Number(els.focusTarget.value)
         }),
@@ -13608,7 +14016,7 @@
       els.startBtnText.textContent = controls.startText;
       els.startBtn.title = controls.startTitle;
       els.startBtnIcon.innerHTML = sessionIcons[controls.startIcon] || sessionIcons.play;
-      // Mode-toggle state (手动专注) renders as the low-key mode pill, not ① primary.
+      // Kept for compatibility; auto/manual now render as one formal round.
       els.startBtn.classList.toggle("is-mode", Boolean(controls.startIsMode));
       els.restSessionBtn.innerHTML = `${restButtonIcon}<span>${controls.restText}</span>`;
       els.restSessionBtn.title = controls.restTitle;
@@ -13655,7 +14063,6 @@
         input.style.setProperty("--range-glow", stageTone.glow);
       });
       const sessionStarted = isRunning || elapsedSeconds > 0;
-      const autoTracking = isAutoTracking();
 
       if (load >= 74) {
         els.stateHeadline.textContent = "现在休息";
@@ -13668,29 +14075,23 @@
         els.primaryActionBtn.dataset.intent = "rest";
         els.primaryActionBtn.textContent = "立即休息";
       } else if (sessionStarted) {
-        els.stateHeadline.textContent = autoTracking ? "正在记录这一轮" : "这一轮进行中";
-        els.stateAction.textContent = autoTracking
-          ? "保持当前节奏。"
-          : "先把注意力留给当前任务。";
-        els.stateExplain.textContent = "需要休息时，Mira 再轻提醒。";
+        els.stateHeadline.textContent = "这一轮进行中";
+        els.stateAction.textContent = "Mira 已开始计时。";
+        els.stateExplain.textContent = "到恢复断点我再提醒；需要停下就点暂停或休息。";
         renderStateCues([]);
         els.primaryActionBtn.hidden = true;
       } else if (load >= 48) {
-        els.stateHeadline.textContent = "先放慢一点";
-        els.stateAction.textContent = "这轮从短一点开始。";
-        els.stateExplain.textContent = "Mira 会按轻提醒节奏陪你。";
+        els.stateHeadline.textContent = "这一轮进行中";
+        els.stateAction.textContent = "Mira 已开始计时。";
+        els.stateExplain.textContent = "状态偏高时我会先轻提醒；需要停下就点暂停或休息。";
         renderStateCues([]);
-        els.primaryActionBtn.hidden = false;
-        els.primaryActionBtn.dataset.intent = "start";
-        els.primaryActionBtn.textContent = "开始这一轮 →";
+        els.primaryActionBtn.hidden = true;
       } else {
-        els.stateHeadline.textContent = "准备开始这一轮";
-        els.stateAction.textContent = "Mira 会陪你记得休息。";
-        els.stateExplain.textContent = "开始后，她会安静待在旁边。";
+        els.stateHeadline.textContent = "这一轮进行中";
+        els.stateAction.textContent = "Mira 已开始计时。";
+        els.stateExplain.textContent = "到恢复断点我再提醒；需要停下就点暂停或休息。";
         renderStateCues([]);
-        els.primaryActionBtn.hidden = false;
-        els.primaryActionBtn.dataset.intent = "start";
-        els.primaryActionBtn.textContent = "开始这一轮 →";
+        els.primaryActionBtn.hidden = true;
       }
     }
 
@@ -13768,7 +14169,7 @@
       els.profileTrendCurrent.textContent = currentLoad;
       els.profileTrendPeak.textContent = peak;
       els.profileTrendRange.textContent = range;
-      els.profileTrendBreaks.textContent = `${state.breaks || 0} 次`;
+      els.profileTrendBreaks.textContent = shareRecoveryLabel(recoverySecondsForDay({ events: state.events || [] }));
       if (els.profileTrendTag) {
         els.profileTrendTag.textContent = currentLoad >= 74 ? "需要恢复" : range >= 28 ? "起伏明显" : peak >= 74 ? "曾有高峰" : peak >= 48 ? "中段观察" : "今日平稳";
       }
@@ -13833,7 +14234,7 @@
       const stats = state.reminderStats || {};
       const handled = Number(stats.completed || 0) + Number(stats.snoozed || 0);
       const shown = Number(stats.shown || 0);
-      els.profileDataLineage.textContent = `输入来自本地自评 ${sampleCount} 条、${recordedDurationLine(recordedSecondsForDay({ elapsedSeconds, autoElapsedSeconds }))}、恢复 ${state.breaks || 0} 次、提醒处理 ${shown ? `${handled} 次` : "暂无"}。${baselineCopy} 硬件信号未接入时，不推断眨眼、视距或环境。`;
+      els.profileDataLineage.textContent = `输入来自本地自评 ${sampleCount} 条、${recordedDurationLine(currentDayFocusSeconds())}、恢复 ${state.breaks || 0} 次、提醒处理 ${shown ? `${handled} 次` : "暂无"}。${baselineCopy} 硬件信号未接入时，不推断眨眼、视距或环境。`;
       const missing = Array.isArray(analysis.missingSignals) ? analysis.missingSignals : [];
       els.profileMissingSignals.innerHTML = missing.length
         ? missing.map((signal) => `<span>${escapeHtml(missingSignalLabel(signal))}</span>`).join("")
@@ -13884,14 +14285,14 @@
       const currentRest = Number(els.breakTarget.value);
       if (suggestion.source === "rule-skipped") return "少提醒一点";
       if (suggestion.rest > currentRest) return "多休息一会儿";
-      if (suggestion.focus < currentFocus || load >= 48 || suggestion.source === "rule-first-break") return "早点提醒";
+      if (suggestion.focus < currentFocus || load >= 48 || suggestion.source === "rule-first-break") return "早点恢复";
       return "照常提醒";
     }
 
     function profileNextActionCopy(action, suggestion) {
       if (action === "少提醒一点") return `下一轮先少打扰一点，更多等自然断点再提醒。`;
       if (action === "多休息一会儿") return `下一轮休息 ${suggestion.rest} 秒，让眼睛和肩颈都缓一下。`;
-      if (action === "早点提醒") return `下一轮 ${suggestion.focus} 分钟先提醒一次，避免拖到偏累。`;
+      if (action === "早点恢复") return `下一轮 ${suggestion.focus} 分钟先留恢复断点，避免拖到偏累。`;
       return `下一轮先按 ${suggestion.focus} 分钟工作、${suggestion.rest} 秒休息来走。`;
     }
 
@@ -13912,7 +14313,7 @@
     function profilePlanTitle(action) {
       if (action === "少提醒一点") return "这轮少提醒一点";
       if (action === "多休息一会儿") return "这轮多留点恢复";
-      if (action === "早点提醒") return "这轮早一点提醒";
+      if (action === "早点恢复") return "这轮早点恢复";
       return "保持轻提醒节奏";
     }
 
@@ -13952,6 +14353,69 @@
       return "mixed";
     }
 
+    function profileObservationEventTime(event) {
+      return Date.parse(event?.respondedAt || event?.endedAt || event?.shownAt || event?.at || "");
+    }
+
+    function profileHardHoldPattern() {
+      const events = recentRhythmEvents(7);
+      const reminderResponses = events
+        .filter((event) => event.type === "reminder_event" && ["completed", "snoozed", "ignored"].includes(event.userResponse))
+        .sort((a, b) => profileObservationEventTime(b) - profileObservationEventTime(a));
+      const recoveries = events
+        .filter((event) => event.type === "recovery_event" && event.completed !== false)
+        .sort((a, b) => profileObservationEventTime(b) - profileObservationEventTime(a));
+      const skippedResponses = reminderResponses.filter((event) => event.userResponse === "snoozed" || event.userResponse === "ignored");
+      const latestTwoSkipped = reminderResponses.slice(0, 2).length === 2
+        && reminderResponses.slice(0, 2).every((event) => event.userResponse === "snoozed" || event.userResponse === "ignored");
+      const eveningSkipped = skippedResponses.filter((event) => {
+        const at = profileObservationEventTime(event);
+        if (!Number.isFinite(at)) return false;
+        return new Date(at).getHours() >= 18;
+      });
+      const daytimeSkipped = skippedResponses.length - eveningSkipped.length;
+      const tiredRecoveries = recoveries.filter((event) => (event.postRestFeedback || event.feedback) === "tired");
+      const betterRecoveries = recoveries.filter((event) => (event.postRestFeedback || event.feedback) === "better");
+      const betterSeconds = betterRecoveries
+        .map((event) => Number(event.durationSeconds || event.breakTargetSeconds || 0))
+        .filter((seconds) => seconds > 0);
+
+      if (latestTwoSkipped) {
+        return {
+          insightType: "hard_hold",
+          subjectKey: "skipped-reminders",
+          text: "你最近连续把恢复放到稍后。Mira 会少一点催促，多等自然断点帮你停一下。"
+        };
+      }
+      if (eveningSkipped.length >= 2 && eveningSkipped.length > daytimeSkipped) {
+        return {
+          insightType: "evening_delay",
+          subjectKey: "evening-reminders",
+          text: "晚上提醒更容易被你推迟。Mira 会把晚一点的提醒放轻，优先等你停下来的空隙。"
+        };
+      }
+      if (tiredRecoveries.length >= 1) {
+        return {
+          insightType: "recovery_still_tired",
+          subjectKey: "tired-after-rest",
+          text: "最近有恢复后仍觉得累的记录。下一轮更适合早点留恢复断点，别等到眼睛已经撑久了。"
+        };
+      }
+      if (betterRecoveries.length >= 2) {
+        const averageSeconds = betterSeconds.length
+          ? Math.round(betterSeconds.reduce((sum, seconds) => sum + seconds, 0) / betterSeconds.length / 30) * 30
+          : 0;
+        return {
+          insightType: "effective_rest",
+          subjectKey: "better-after-rest",
+          text: averageSeconds
+            ? `这个休息长度对你有效。Mira 会优先保留大约 ${averageSeconds} 秒的恢复窗口。`
+            : "最近几次短恢复对你有效。Mira 会先保持这条轻提醒节奏。"
+        };
+      }
+      return null;
+    }
+
     function profileObservationCandidate({
       hasEvidence,
       accepted,
@@ -13967,6 +14431,7 @@
       const symptomBand = profileObservationSymptomBand(symptomValue);
       const focusBand = profileObservationFocusBand(focusMinutes);
       const adjustedRhythm = state.rhythmSource === "manual" || Number(rhythmSummary?.manualHoldRounds || 0) > 0;
+      const hardHoldPattern = profileHardHoldPattern();
       let insightType = "calm";
       let subjectKey = "general";
       let text = "这几天眼睛整体还稳。Mira 会继续安静陪着，不主动加重提醒。";
@@ -13978,9 +14443,13 @@
         insightType = "high_signal";
         subjectKey = String(symptomName || "眼睛状态");
         text = `今天最明显的是${subjectKey}。Mira 会优先帮你留出恢复断点，先别拖到偏累。`;
+      } else if (hardHoldPattern) {
+        insightType = hardHoldPattern.insightType;
+        subjectKey = hardHoldPattern.subjectKey;
+        text = hardHoldPattern.text;
       } else if (restPattern === "skipped") {
         insightType = "skipped_rest";
-        text = "这几天休息常被跳过。Mira 会少一点催促，多等自然断点提醒你停一下。";
+        text = "这几天提醒常被放到稍后。Mira 会少一点催促，多等自然断点提醒你停一下。";
       } else if (adjustedRhythm) {
         insightType = "manual_rhythm";
         text = "你刚调整过这一轮节奏。Mira 先按你的设置走，观察几轮后再建议要不要改。";
@@ -14047,16 +14516,16 @@
         : "暂时没有明显不适";
       if (action === "少提醒一点") return `${signalCopy}，这一轮先少打扰一点，多等自然断点再提醒。`;
       if (action === "多休息一会儿") return `${signalCopy}，这一轮放慢一点，给眼睛多留些恢复。`;
-      if (action === "早点提醒") return `${signalCopy}，这一轮早一点轻提醒，别撑太久。`;
+      if (action === "早点恢复") return `${signalCopy}，这一轮早点留恢复断点，别撑太久。`;
       return `${signalCopy}，这一轮先放慢一点，按轻提醒的节奏走。`;
     }
 
-    function recordedMinutes(seconds) {
-      return Math.floor(Math.max(0, Number(seconds || 0)) / 60);
-    }
-
-    function recordedSecondsForDay(day = {}) {
-      return Math.max(0, Number(day.elapsedSeconds || 0), Number(day.autoElapsedSeconds || 0));
+    function currentDayFocusSeconds() {
+      const endedSeconds = (state.events || [])
+        .filter((event) => event?.type === "focus_session" && event.phase === "ended")
+        .reduce((total, event) => total + focusSegmentSeconds(event), 0);
+      const liveSeconds = isRunning || isAutoTracking() ? Math.max(0, Number(elapsedSeconds || 0)) : 0;
+      return Math.max(0, endedSeconds + liveSeconds, Number(autoElapsedSeconds || 0));
     }
 
     function recordedDurationLabel(seconds) {
@@ -14082,6 +14551,11 @@
       return safeSeconds >= 60 ? formatFeedbackDuration(safeSeconds) : "还没开始";
     }
 
+    function shareRecoveryLabel(seconds) {
+      const safeSeconds = Math.max(0, Number(seconds || 0));
+      return safeSeconds >= 60 ? formatFeedbackDuration(safeSeconds) : "0 分钟";
+    }
+
     function shareDateLabel(day = state.currentDay || todayKey()) {
       const parts = String(day || todayKey()).split("-").map((part) => Number(part));
       const date = parts.length === 3
@@ -14092,15 +14566,16 @@
     }
 
     function currentShareRhythmLabel() {
-      return els.shareRhythm?.textContent || els.profileNextStep?.textContent || "保持节奏";
+      return els.tomorrowPlan?.textContent || els.dailySummaryTitle?.textContent || els.profileNextStep?.textContent || "保持平稳";
     }
 
     function shareCardPayload() {
-      const recordedSeconds = recordedSecondsForDay({ elapsedSeconds, autoElapsedSeconds });
+      const focusSeconds = currentDayFocusSeconds();
+      const recoverySeconds = recoverySecondsForDay({ events: state.events || [] });
       return {
         date: shareDateLabel(),
-        focus: shareFocusLabel(recordedSeconds),
-        breaks: `${state.breaks || 0} 次`,
+        focus: shareFocusLabel(focusSeconds),
+        recovery: shareRecoveryLabel(recoverySeconds),
         rhythm: currentShareRhythmLabel(),
         quote: dailyShareQuote()
       };
@@ -14111,7 +14586,7 @@
       return [
         "Mira 今天陪我工作了一天。",
         `今日专注：${card.focus}`,
-        `休息：${card.breaks}`,
+        `护眼恢复：${card.recovery}`,
         `节奏：${card.rhythm}`,
         `Mira 今日小句：${card.quote}`,
         "",
@@ -14119,23 +14594,17 @@
       ].join("\n");
     }
 
-    function renderDailyShareCard(recordedSeconds, rhythmLabel = "保持节奏") {
-      if (!els.shareFocusTime) return;
-      const focusLabel = shareFocusLabel(recordedSeconds);
-      const breaksLabel = `${state.breaks || 0} 次`;
+    function renderDailyShareCard(focusSeconds, rhythmLabel = "保持平稳") {
+      const focusLabel = shareFocusLabel(focusSeconds);
+      const recoveryLabel = shareRecoveryLabel(recoverySecondsForDay({ events: state.events || [] }));
       const quote = dailyShareQuote();
       const dateLabel = shareDateLabel();
-      els.shareFocusTime.textContent = focusLabel;
-      els.shareBreaks.textContent = breaksLabel;
-      if (els.shareRhythm) els.shareRhythm.textContent = rhythmLabel;
       if (els.shareDateLabel) els.shareDateLabel.textContent = dateLabel;
-      els.shareQuote.textContent = quote;
+      if (els.shareQuote) els.shareQuote.textContent = quote;
       if (els.shareCardFocusTime) els.shareCardFocusTime.textContent = focusLabel;
-      if (els.shareCardBreaks) els.shareCardBreaks.textContent = breaksLabel;
+      if (els.shareCardBreaks) els.shareCardBreaks.textContent = recoveryLabel;
       if (els.shareCardRhythm) els.shareCardRhythm.textContent = rhythmLabel;
-      els.shareCardNote.textContent = focusLabel === "还没开始"
-        ? "开始一轮后，这张卡会更像今天；只复制卡片，不上传数据。"
-        : "只复制卡片，不上传数据。";
+      if (els.shareCardNote) els.shareCardNote.textContent = "本地复制，不上传数据。";
     }
 
     function roundedRect(ctx, x, y, width, height, radius) {
@@ -14250,7 +14719,7 @@
       const metricY = cardY + 348;
       [
         ["今日专注", card.focus],
-        ["休息", card.breaks],
+        ["护眼恢复", card.recovery],
         ["节奏", card.rhythm]
       ].forEach(([label, value], index) => {
         const x = contentX + index * 152;
@@ -14293,21 +14762,48 @@
       return drawDailyShareCardCanvas(shareCardPayload()).toDataURL("image/png");
     }
 
+    function refreshDailySharePreview() {
+      renderDailyShareCard(currentDayFocusSeconds(), currentShareRhythmLabel());
+    }
+
+    function openDailySharePreview() {
+      if (!els.sharePreviewOverlay) {
+        copyDailyShareCard();
+        return;
+      }
+      refreshDailySharePreview();
+      els.sharePreviewOverlay.hidden = false;
+      requestAnimationFrame(() => {
+        els.sharePreviewOverlay.classList.add("show");
+        els.copyShareConfirmBtn?.focus();
+      });
+    }
+
+    function closeDailySharePreview() {
+      if (!els.sharePreviewOverlay) return;
+      els.sharePreviewOverlay.classList.remove("show");
+      els.sharePreviewOverlay.hidden = true;
+      els.copyShareBtn?.focus();
+    }
+
     async function copyDailyShareCard() {
-      if (!els.copyShareBtn) return;
-      els.copyShareBtn.disabled = true;
+      const activeButton = els.copyShareConfirmBtn || els.copyShareBtn;
+      if (!activeButton) return;
+      activeButton.disabled = true;
       try {
         if (window.eyeflowDesktop?.copyShareImage) {
           const result = await window.eyeflowDesktop.copyShareImage(generateDailyShareImageDataUrl());
           if (result?.ok === false) {
             throw new Error(result.error || "desktop clipboard unavailable");
           }
-          els.shareCardNote.textContent = "卡片已复制。";
+          if (els.shareCardNote) els.shareCardNote.textContent = "卡片已复制。";
           showToast("Mira：今日分享卡已复制。");
+          closeDailySharePreview();
         } else if (navigator.clipboard?.writeText) {
           await navigator.clipboard.writeText(buildDailyShareText());
-          els.shareCardNote.textContent = "已复制文字版。";
+          if (els.shareCardNote) els.shareCardNote.textContent = "已复制文字版。";
           showToast("Mira：文字版已复制。");
+          closeDailySharePreview();
         } else {
           throw new Error("clipboard unavailable");
         }
@@ -14315,7 +14811,7 @@
         console.warn("[EyeFlow] share copy failed", error);
         showToast("Mira：复制失败了，可以先用桌面版再试一次。");
       } finally {
-        els.copyShareBtn.disabled = false;
+        activeButton.disabled = false;
       }
     }
 
@@ -14454,35 +14950,6 @@
     // A user-completed rest = completeRecovery only. Excludes auto idle-detection
     // (mode "system-detected"), system lock/sleep (mode "system-lifecycle"), and
     // interrupted/extended rests (completed === false).
-    function isUserRecovery(event) {
-      return Boolean(
-        event
-        && event.type === "recovery_event"
-        && event.completed !== false
-        && event.mode !== "system-detected"
-        && event.mode !== "system-lifecycle"
-      );
-    }
-
-    // A user-written status = saveLog, which emits a daily_assessment with
-    // trigger "manual_log". Excludes addSystemLog system entries (no such event).
-    function isUserRecord(event) {
-      return Boolean(event && event.type === "daily_assessment" && event.trigger === "manual_log");
-    }
-
-    // Real active time per focus segment = wall-clock (endedAt - startedAt).
-    // durationSeconds is cumulative across pause/resume, so summing it would
-    // double-count; the segment span never does.
-    function focusSegmentSeconds(event) {
-      if (!event || event.type !== "focus_session" || event.phase !== "ended") return 0;
-      const start = Date.parse(event.startedAt || "");
-      const end = Date.parse(event.endedAt || "");
-      if (Number.isFinite(start) && Number.isFinite(end) && end > start) {
-        return (end - start) / 1000;
-      }
-      return 0;
-    }
-
     // Per-day aggregation over stored events (current day + summaryHistory),
     // windowed by dayGap so 本周 = 7, 本月 = 30. Counts only user-initiated
     // activity so the three figures sit on the same real-usage scale.
@@ -14525,24 +14992,36 @@
       return rest ? `${hours} 小时 ${rest} 分` : `${hours} 小时`;
     }
 
+    function shareRhythmSummaryLabel(label = "") {
+      const text = String(label || "").trim();
+      if (/早点|提前|缩短/.test(text)) return "早点恢复";
+      if (/少|安静|减少/.test(text)) return "少打扰";
+      if (/补/.test(text)) return "补恢复";
+      if (/保持|平稳|个人/.test(text)) return "保持平稳";
+      return text || "轻提醒";
+    }
+
     let profileWindowDays = 7;
 
     function renderProfileWindow() {
       const labelEl = document.getElementById("profileWindowLabel");
-      if (!labelEl) return;
+      if (!labelEl) return profileWindowStats(profileWindowDays);
       const days = profileWindowDays;
       const stats = profileWindowStats(days);
       labelEl.textContent = days >= 30 ? "本月概览" : "本周概览";
       setOverviewText("profileWindowActive", formatDurationCompact(stats.activeSeconds));
       setOverviewText("profileWindowRest", formatDurationCompact(stats.restSeconds));
-      setOverviewText("profileWindowCount", `${stats.recoveryCount} 次`);
+      setOverviewText("profileWindowCount", shareRhythmSummaryLabel(currentShareRhythmLabel()));
       setOverviewText("profileWindowLogs", `${stats.recordCount} 条`);
       const emptyEl = document.getElementById("profileWindowEmpty");
       if (emptyEl) emptyEl.hidden = stats.hasData;
+      return stats;
     }
 
+    // Today's results so far, from the same user-initiated signals as 这几天:
+    // closed focus segments + user-completed rests in today's events.
     function renderProfile(load, analysis = computeEyeAnalysis()) {
-      renderProfileWindow();
+      const profileStats = renderProfileWindow();
       const symptoms = analysis.symptoms || currentSymptoms();
       const entries = [
         ["干涩", symptoms.dryness],
@@ -14554,13 +15033,14 @@
       const peakLoad = Math.max(load, ...state.logs.map((log) => Number(log.load || 0)));
       const stats = state.reminderStats || {};
       const handled = Number(stats.completed || 0) + Number(stats.snoozed || 0);
-      const recordedSeconds = recordedSecondsForDay({ elapsedSeconds, autoElapsedSeconds });
+      const recordedSeconds = currentDayFocusSeconds();
+      const recoverySeconds = recoverySecondsForDay({ events: state.events || [] });
       const focusMinutes = recordedMinutes(recordedSeconds);
       const sampleCount = currentSampleCount();
-      const hasProfileEvidence = state.logs.length > 0
-        || Number(state.breaks || 0) > 0
-        || focusMinutes >= 5
-        || activeHistoryDays() > 1;
+      const hasVisibleUsageEvidence = Math.round(Number(profileStats?.activeSeconds || 0) / 60) > 0
+        || Math.round(Number(profileStats?.restSeconds || 0) / 60) > 0
+        || Number(profileStats?.recoveryCount || 0) > 0;
+      const hasProfileEvidence = hasVisibleUsageEvidence;
       document.querySelector("#profileView")?.classList.toggle("profile-building", !hasProfileEvidence);
       const confidence = analysis.confidenceLabel || "低";
       const overall = profileOverallState(load, peakLoad);
@@ -14568,7 +15048,7 @@
       const rhythmSummary = rhythmMemorySummary();
       const nextAction = profileNextAction(suggestion, load);
       const nextCopy = profileNextActionCopy(nextAction, suggestion);
-      renderDailyShareCard(recordedSeconds, hasProfileEvidence ? nextAction : "保持节奏");
+      renderDailyShareCard(recordedSeconds, hasProfileEvidence ? nextAction : "保持平稳");
       const primaryCopy = Number(top[1] || 0) > 0
         ? `${top[0]} ${top[1]}/10，是今天最明显的信号。`
         : "暂时没有明显不适记录。";
@@ -14604,7 +15084,7 @@
         : "先让 Mira 陪你跑完几轮，再给出更有参考的判断。";
       els.profilePeakLoad.textContent = hasProfileEvidence ? peakLoad : "暂无";
       els.profileSampleCount.textContent = `${sampleCount}`;
-      els.profileBreaks.textContent = `${state.breaks || 0}`;
+      els.profileBreaks.textContent = shareRecoveryLabel(recoverySeconds);
       els.profileFocusTime.textContent = recordedDurationLabel(recordedSeconds);
       els.profilePrimarySymptom.textContent = hasProfileEvidence ? top[0] : "记录中";
       els.profilePrimaryCopy.textContent = hasProfileEvidence
@@ -14618,8 +15098,8 @@
       if (els.profileNextActionCopy) els.profileNextActionCopy.textContent = hasProfileEvidence
         ? nextCopy
         : "完成几轮后，Mira 会把提醒节奏调得更贴近你。";
-      els.profileMemoryAccepted.textContent = `${rhythmSummary.acceptedBreaks} 次`;
-      els.profileMemorySkipped.textContent = `${rhythmSummary.skippedBreaks} 次`;
+      els.profileMemoryAccepted.textContent = rhythmSummary.acceptedBreaks > 0 ? "有记录" : "暂无";
+      els.profileMemorySkipped.textContent = rhythmSummary.skippedBreaks > 0 ? "有记录" : "暂无";
       els.profileRhythmSource.textContent = profileRhythmSourceLabel(suggestion);
       els.profileRhythmRest.textContent = `${suggestion.rest} 秒`;
       els.profileRhythmWhy.textContent = hasProfileEvidence
@@ -14673,6 +15153,7 @@
         autoElapsedSeconds,
         breaks: state.breaks || 0,
         logs: state.logs || [],
+        events: state.events || [],
         reminderStats: currentStats,
         peakLoad: currentPeak
       };
@@ -14684,6 +15165,8 @@
       const days = weeklyRecoveryDays(currentLoad);
       const activeDays = days.filter((day) => hasDailyActivity(day) || day.peakLoad > 0);
       const breaks = days.reduce((total, day) => total + Number(day.breaks || 0), 0);
+      const recoverySeconds = days.reduce((total, day) => total + recoverySecondsForDay(day), 0);
+      const naturalAwaySeconds = days.reduce((total, day) => total + naturalAwaySecondsForDay(day), 0);
       const focusMinutes = days.reduce((total, day) => total + recordedMinutes(recordedSecondsForDay(day)), 0);
       const stats = days.reduce((total, day) => {
         const item = day.reminderStats || {};
@@ -14696,12 +15179,14 @@
       }, { shown: 0, completed: 0, snoozed: 0, ignored: 0, autoBreaks: 0 });
       const handled = stats.completed + stats.snoozed;
       const peak = Math.max(0, ...days.map((day) => Number(day.peakLoad || historyPeakLoad(day) || 0)));
-      const autoBreakCopy = stats.autoBreaks
-        ? `；其中 ${stats.autoBreaks} 次来自自然停顿`
-        : "";
+      const naturalAwayCopy = naturalAwaySeconds > 0
+        ? `；另有自然离屏 ${formatDurationCompact(naturalAwaySeconds)}，只用于减少重复提醒`
+        : stats.autoBreaks
+          ? "；另有自然离屏信号，只用于减少重复提醒"
+          : "";
 
       els.weeklyRecoveryDays.textContent = `${activeDays.length} 天`;
-      els.weeklyRecoveryBreaks.textContent = `${breaks} 次`;
+      els.weeklyRecoveryBreaks.textContent = shareRecoveryLabel(recoverySeconds);
       els.weeklyRecoveryHandled.textContent = stats.shown
         ? (handled >= stats.shown * 0.6 ? "大多接住" : handled > 0 ? "接住一部分" : "暂时不多")
         : "暂无";
@@ -14710,22 +15195,22 @@
 
       if (!activeDays.length) {
         els.weeklyRecoveryCopy.textContent = "开始一次专注或完成一次恢复后，这里会沉淀成你的长期轻提醒恢复档案。";
-      } else if (activeDays.length >= 30 && breaks > 0) {
-        els.weeklyRecoveryCopy.textContent = `长期档案已记录 ${activeDays.length} 天，Mira 帮你保留了 ${breaks} 次短恢复${autoBreakCopy}。后续会优先按你的真实节奏让提醒更轻。`;
-      } else if (activeDays.length >= 7 && breaks > 0) {
-        els.weeklyRecoveryCopy.textContent = `档案正在成形：已记录 ${activeDays.length} 天、${breaks} 次短恢复${autoBreakCopy}。继续积累后，EyeFlow 会更清楚哪些提醒真的适合你。`;
+      } else if (activeDays.length >= 30 && recoverySeconds > 0) {
+        els.weeklyRecoveryCopy.textContent = `长期档案已记录 ${activeDays.length} 天，Mira 帮你保留了 ${shareRecoveryLabel(recoverySeconds)} 的护眼恢复${naturalAwayCopy}。后续会优先按你的真实节奏让提醒更轻。`;
+      } else if (activeDays.length >= 7 && recoverySeconds > 0) {
+        els.weeklyRecoveryCopy.textContent = `档案正在成形：已记录 ${activeDays.length} 天、护眼恢复 ${shareRecoveryLabel(recoverySeconds)}${naturalAwayCopy}。继续积累后，EyeFlow 会更清楚哪些提醒真的适合你。`;
       } else if (activeDays.length >= 3 && stats.shown && stats.ignored > handled) {
-        els.weeklyRecoveryCopy.textContent = "第 3 天开始你可能会自然忽略 Mira。EyeFlow 会降低主动提示，更多等窗口切换、键鼠停顿这类自然断点再提醒。";
-      } else if (activeDays.length >= 3 && breaks === 0 && focusMinutes >= 20) {
+        els.weeklyRecoveryCopy.textContent = "第 3 天开始你可能会自然把提醒留到稍后。EyeFlow 会降低主动提示，更多等窗口切换、键鼠停顿这类自然断点再提醒。";
+      } else if (activeDays.length >= 3 && recoverySeconds === 0 && focusMinutes >= 20) {
         els.weeklyRecoveryCopy.textContent = "已经连续记录到第 3 天，但还没有完成恢复。Mira 会先换成更轻的存在方式，等你停下来时再提醒。";
       } else if (peak >= 74) {
         els.weeklyRecoveryCopy.textContent = "档案里出现过状态高峰。下一步更适合缩短连续计时，把恢复断点提前一点。";
-      } else if (breaks === 0 && focusMinutes >= 20) {
+      } else if (recoverySeconds === 0 && focusMinutes >= 20) {
         els.weeklyRecoveryCopy.textContent = "已经有连续计时记录，但还没有完成恢复。先让 Mira 带你做一次短恢复。";
       } else if (stats.shown && stats.ignored > handled) {
-        els.weeklyRecoveryCopy.textContent = "档案里忽略偏多。EyeFlow 应该继续降低主动介入，更多依赖状态变化和恢复断点。";
-      } else if (breaks > 0) {
-        els.weeklyRecoveryCopy.textContent = `Mira 已帮你保留 ${breaks} 次恢复记录，其中 ${handled} 次提醒被你接住。继续保持轻提醒节奏，让恢复自然插进工作间隙。`;
+        els.weeklyRecoveryCopy.textContent = "档案里未处理提醒偏多。EyeFlow 应该继续降低主动介入，更多依赖状态变化和恢复断点。";
+      } else if (recoverySeconds > 0) {
+        els.weeklyRecoveryCopy.textContent = `Mira 已帮你保留 ${shareRecoveryLabel(recoverySeconds)} 的护眼恢复，其中一部分来自被你接住的提醒。继续保持轻提醒节奏，让恢复自然插进工作间隙。`;
       } else {
         els.weeklyRecoveryCopy.textContent = "节奏正在建立。完成几次恢复后，Mira 会把这些记录沉淀成更具体的长期趋势。";
       }
@@ -14831,7 +15316,7 @@
       let focus = Number(els.focusTarget.value);
       let rest = Number(els.breakTarget.value);
       let intensity = state.settings.intensity || "quiet";
-      let title = "保持当前节奏";
+      let title = "保持平稳";
       let copy = "近 7 天证据还在形成，先继续观察当前节奏。";
       let reason = learning.daysWithData
         ? `Mira 参考近 7 天：当前 ${focus} 分 / ${rest} 秒仍可用。`
@@ -14841,7 +15326,7 @@
       if (state.rhythmSource === "manual" && manualHoldRounds > 0) {
         title = "保留用户自定";
         copy = "你刚调整过节奏，Mira 会先观察几轮再建议覆盖。";
-        reason = `Mira 记住了你的手动节奏：先保留 ${focus} 分 / ${rest} 秒，还观察 ${manualHoldRounds} 轮。`;
+        reason = `Mira 记住了你调整过的节奏：先保留 ${focus} 分 / ${rest} 秒，还观察 ${manualHoldRounds} 轮。`;
         source = "manual_hold";
         memory.lastRecommendationReason = reason;
         memory.recommendationSource = "rule-local";
@@ -14864,9 +15349,9 @@
         focus = boundedRhythmValue(Math.max(focus + 5, learnedFocus || 0), focus + 5, 15, 50, 5);
         rest = boundedRhythmValue(Math.max(90, learnedRest || rest), rest, 90, 240, 30);
         intensity = state.settings.intensity === "force" ? "force" : "quiet";
-        title = "减少主动提醒";
-        copy = "提醒被忽略偏多时，Mira 会更多等断点、少主动打断。";
-        reason = `Mira 参考近 7 天：忽略偏多，所以延到 ${focus} 分并保持 ${intensityLabel(intensity)}。`;
+        title = "少一点打扰";
+        copy = "提醒常被放到稍后时，Mira 会更多等断点、少主动打断。";
+        reason = `Mira 参考近 7 天：未处理偏多，所以延到 ${focus} 分并保持 ${intensityLabel(intensity)}。`;
         source = "rule-skipped";
       } else if (responsiveRhythm) {
         if (learnedFocus) focus = boundedRhythmValue(learnedFocus, focus, 15, 50, 5);
@@ -14880,9 +15365,9 @@
         focus = boundedRhythmValue(Math.min(focus, 20), 20, 15, 50, 5);
         rest = boundedRhythmValue(Math.max(rest, 120), 120, 90, 240, 30);
         intensity = state.settings.intensity === "force" ? "force" : "standard";
-        title = "先补一个恢复节奏";
-        copy = "今天已经有连续计时，但还没有休息记录，下一轮建议提前一点。";
-        reason = `Mira 参考今天节奏：还没有休息记录，所以先到 ${focus} 分提醒一次。`;
+        title = "补一段恢复";
+        copy = "今天已经有连续计时，但护眼恢复还少，下一轮建议提前一点。";
+        reason = `Mira 参考今天节奏：还没有护眼恢复记录，所以先到 ${focus} 分提醒一次。`;
         source = "rule-first-break";
       }
 
@@ -14970,6 +15455,7 @@
         const peakValue = peakLoad || 0;
         const zone = loadZone(peakValue);
         const symptomCopy = value ? `${symptom} ${value}/10` : "暂无明显信号";
+        const recoveryLabel = shareRecoveryLabel(recoverySecondsForDay(day));
         return `
           <article class="history-row" data-zone="${zone}" style="--history-load:${Math.max(0, Math.min(100, peakValue))}%;">
             <div class="history-date">
@@ -14982,8 +15468,8 @@
             </div>
             <div class="history-trend history-spark">${trend}</div>
             <div class="history-cell"><span>计时</span><strong>${focusLabel}</strong></div>
-            <div class="history-cell"><span>恢复</span><strong>${day.breaks || 0} 次</strong></div>
-            <div class="history-cell"><span>提醒接住</span><strong>${shown ? `${handled} 次` : "暂无"}</strong></div>
+            <div class="history-cell"><span>护眼恢复</span><strong>${recoveryLabel}</strong></div>
+            <div class="history-cell"><span>提醒处理</span><strong>${shown ? (handled >= shown * 0.6 ? "大多接住" : handled > 0 ? "接住一部分" : "暂时不多") : "暂无"}</strong></div>
           </article>
         `;
       }).join("");
@@ -14994,21 +15480,12 @@
             <span>状态范围</span>
             <span>日内趋势</span>
             <span>计时</span>
-            <span>恢复</span>
-            <span>提醒</span>
+            <span>护眼恢复</span>
+            <span>提醒处理</span>
           </div>
           ${rows}
         </div>
       `;
-    }
-
-    function renderLoadBand() {
-      const mins = Math.floor(elapsedSeconds / 60);
-      const focusTargetMinutes = Number(els.focusTarget.value);
-      const remainingMinutes = Math.max(0, focusTargetMinutes - mins);
-      els.loadBand.textContent = remainingMinutes > 0
-        ? `${remainingMinutes} 分钟`
-        : "休息点";
     }
 
     function currentAppearanceState() {
@@ -15093,7 +15570,7 @@
       if (isAutoTracking()) {
         const autoMinutes = Math.floor(elapsedSeconds / 60);
         const autoDuration = autoMinutes > 0 ? `${autoMinutes} 分钟` : "不到 1 分钟";
-        return `自动记录 ${autoDuration} · 可切到手动专注`;
+        return `这一轮计时中 · ${autoDuration}`;
       }
       if (load >= 74) return "该休息了。";
       return "可以开始这一轮。";
@@ -15163,6 +15640,7 @@
       };
     };
 
+    autoStartSessionOnOpen();
     render();
     maybeShowOnboarding();
 
