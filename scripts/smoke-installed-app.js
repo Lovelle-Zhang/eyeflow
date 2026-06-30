@@ -330,7 +330,7 @@ function main() {
   assertMatches(indexHtml, /const nextEnabled = !isEnhancedSensingActiveForUi\(\);/, "installed enhanced sensing toggle follows the effective UI state instead of stale saved settings");
   assertMatches(indexHtml, /setSystemStatus\(els\.desktopReadyTag,\s*"enabled",\s*"增强中"\)/, "installed settings shows enhanced sensing as enabled only after the system switch is on");
   assertMatches(indexHtml, /else if \(enhancedSensingRequested\) \{[\s\S]*setSystemStatus\(els\.desktopReadyTag,\s*"action",\s*"需系统开启"\)/, "installed settings has a separate non-enabled state for requested enhanced sensing");
-  assertMatches(indexHtml, /els\.readyPermissionTitle\.textContent = enhancedSensing[\s\S]*\? "已开启"[\s\S]*: enhancedSensingRequested[\s\S]*\? "需系统开启"[\s\S]*: "普通模式"/, "installed settings row title separates enabled, system-required, and ordinary states");
+  assertMatches(indexHtml, /setReadinessState\([\s\S]*?els\.readyPermissionTitle[\s\S]*?"已开启"[\s\S]*?enhancedSensingRequested[\s\S]*?"需系统开启"[\s\S]*?"普通模式"/, "installed settings row title separates enabled, system-required, and ordinary states (single render path)");
   assertMatches(indexHtml, /els\.readinessPermissionBtn\.textContent = enhancedSensing[\s\S]*\? "去系统设置管理"[\s\S]*: enhancedSensingRequested[\s\S]*\? "去系统设置开启"[\s\S]*: "开启增强感知"/, "installed settings button points requested enhanced sensing to system setup instead of management");
   assertIncludes(indexHtml, "settings-action-button primary-action", "installed settings enhanced sensing action has a distinct primary button style");
   assertIncludes(indexHtml, "settings-action-button secondary-action", "installed settings companion action has a distinct secondary button style");

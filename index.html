@@ -12059,10 +12059,18 @@
       if (text !== undefined) element.textContent = text;
     }
 
+    // Single render path for a readiness row: ONE call sets both the state dot
+    // and the title text, derived together at the call site so they cannot
+    // desync. Always pass a label — the dev guard flags any caller that splits
+    // the title back into a separate .textContent assignment.
     function setReadinessState(titleElement, state, label) {
       const item = titleElement?.closest(".readiness-item");
       if (item) item.dataset.state = state;
-      if (titleElement && typeof label === "string") titleElement.textContent = label;
+      if (titleElement && typeof label === "string") {
+        titleElement.textContent = label;
+      } else if (window.__eyeflowDebug) {
+        console.warn("[EyeFlow] setReadinessState called without a title label —", titleElement?.id || titleElement);
+      }
     }
 
     function renderPermissionStatus(status) {
@@ -12385,22 +12393,17 @@
         setSystemStatus(els.desktopReadyTag, "preview", "预览");
         els.desktopReadyTag.classList.add("preview");
         els.desktopReadyCopy.textContent = "桌面版可开启增强能力。";
-        els.readyPermissionTitle.textContent = "桌面版可用";
         els.readyPermissionCopy.textContent = "默认不读取屏幕内容。";
-        setReadinessState(els.readyPermissionTitle, "preview");
-        els.readyCompanionTitle.textContent = "桌面版可用";
+        setReadinessState(els.readyPermissionTitle, "preview", "桌面版可用");
         els.readyCompanionCopy.textContent = "桌面版默认显示 Mira，可随时隐藏。";
-        setReadinessState(els.readyCompanionTitle, "preview");
+        setReadinessState(els.readyCompanionTitle, "preview", "桌面版可用");
         els.readinessCompanionBtn.disabled = true;
-        els.readyLaunchTitle.textContent = "桌面版可用";
         els.readyLaunchCopy.textContent = "可手动启动。";
-        setReadinessState(els.readyLaunchTitle, "preview");
-        els.readyVersionTitle.textContent = "浏览器预览";
+        setReadinessState(els.readyLaunchTitle, "preview", "桌面版可用");
         els.readyVersionCopy.textContent = "本地诊断只在桌面版复制时导出。";
-        setReadinessState(els.readyVersionTitle, "preview");
-        els.readyNotifyTitle.textContent = "桌面版可用";
+        setReadinessState(els.readyVersionTitle, "preview", "浏览器预览");
         els.readyNotifyCopy.textContent = "可选开启。";
-        setReadinessState(els.readyNotifyTitle, "preview");
+        setReadinessState(els.readyNotifyTitle, "preview", "桌面版可用");
         els.readinessPermissionBtn.disabled = true;
         els.readinessLaunchBtn.disabled = true;
         els.readinessRefreshBtn.disabled = true;
@@ -12424,26 +12427,20 @@
       }
 
       if (!isMac) {
-        els.readyPermissionTitle.textContent = "普通模式";
         els.readyPermissionCopy.textContent = "当前平台不需要 macOS 权限。";
-        setReadinessState(els.readyPermissionTitle, "optional");
+        setReadinessState(els.readyPermissionTitle, "optional", "普通模式");
         els.readinessPermissionBtn.disabled = true;
       } else {
-        els.readyPermissionTitle.textContent = enhancedSensing
-          ? "已开启"
-          : enhancedSensingRequested
-            ? "需系统开启"
-            : "普通模式";
         els.readyPermissionCopy.textContent = enhancedSensing
           ? "识别当前 App 和空闲时间，用来判断是否在专注工作；不读取屏幕内容或具体操作。"
           : enhancedSensingRequested
             ? "系统设置里的 EyeFlow 开关变蓝后才会增强。"
             : "开启后识别当前 App 和空闲时间，用来判断是否在专注工作；需要时会打开 macOS 系统设置。";
-        setReadinessState(els.readyPermissionTitle, enhancedSensing
-          ? "enabled"
-          : enhancedSensingRequested
-            ? "action"
-            : "optional");
+        setReadinessState(
+          els.readyPermissionTitle,
+          enhancedSensing ? "enabled" : enhancedSensingRequested ? "action" : "optional",
+          enhancedSensing ? "已开启" : enhancedSensingRequested ? "需系统开启" : "普通模式"
+        );
         els.readinessPermissionBtn.disabled = false;
         els.readinessPermissionBtn.textContent = enhancedSensing
           ? "去系统设置管理"
@@ -12454,58 +12451,49 @@
         els.readinessPermissionBtn.classList.remove("secondary-action");
       }
 
-      els.readyCompanionTitle.textContent = desktopMiraVisible ? "默认显示" : "已隐藏";
       els.readyCompanionCopy.textContent = desktopMiraVisible
         ? "Mira 会留在桌面上，不读取屏幕内容。"
         : "Mira 只在主窗口内出现。";
-      setReadinessState(els.readyCompanionTitle, desktopMiraVisible ? "enabled" : "optional");
+      setReadinessState(els.readyCompanionTitle, desktopMiraVisible ? "enabled" : "optional", desktopMiraVisible ? "默认显示" : "已隐藏");
       els.readinessCompanionBtn.disabled = !desktopKnown;
       els.readinessCompanionBtn.textContent = desktopMiraVisible ? "退出 Mira" : "显示 Mira";
       els.readinessCompanionBtn.classList.toggle("primary-action", !desktopMiraVisible);
       els.readinessCompanionBtn.classList.toggle("secondary-action", desktopMiraVisible);
 
       if (!isMac) {
-        els.readyLaunchTitle.textContent = "不适用";
         els.readyLaunchCopy.textContent = "当前平台。";
-        setReadinessState(els.readyLaunchTitle, "unavailable");
+        setReadinessState(els.readyLaunchTitle, "unavailable", "不适用");
         els.readinessLaunchBtn.disabled = true;
       } else if (!desktopKnown) {
-        els.readyLaunchTitle.textContent = "检查启动项";
         els.readyLaunchCopy.textContent = "读取中。";
-        setReadinessState(els.readyLaunchTitle, "checking");
+        setReadinessState(els.readyLaunchTitle, "checking", "检查启动项");
         els.readinessLaunchBtn.disabled = true;
       } else {
-        els.readyLaunchTitle.textContent = desktop.launchAtLogin ? "已开启" : "手动";
         els.readyLaunchCopy.textContent = desktop.launchAtLogin
           ? "自动待命。"
           : "手动打开。";
-        setReadinessState(els.readyLaunchTitle, desktop.launchAtLogin ? "enabled" : "optional");
+        setReadinessState(els.readyLaunchTitle, desktop.launchAtLogin ? "enabled" : "optional", desktop.launchAtLogin ? "已开启" : "手动");
         els.readinessLaunchBtn.disabled = false;
         els.readinessLaunchBtn.textContent = desktop.launchAtLogin ? "关闭自启" : "开机启动";
       }
 
-      els.readyVersionTitle.textContent = `EyeFlow ${desktop.version || "0.1.1"}`;
       els.readyVersionCopy.textContent = diagnosticCount
         ? `本地诊断 ${diagnosticCount} 条，仅复制时导出。`
         : "本地诊断正常，不自动上传。";
-      setReadinessState(els.readyVersionTitle, "enabled");
+      setReadinessState(els.readyVersionTitle, "enabled", `EyeFlow ${desktop.version || "0.1.1"}`);
       const notificationSupported = Boolean(permission.notificationSupported);
       if (!notificationKnown) {
-        els.readyNotifyTitle.textContent = "检查中";
         els.readyNotifyCopy.textContent = "读取中。";
-        setReadinessState(els.readyNotifyTitle, "checking");
+        setReadinessState(els.readyNotifyTitle, "checking", "检查中");
       } else if (!notificationSupported) {
-        els.readyNotifyTitle.textContent = "不可用";
         els.readyNotifyCopy.textContent = "用 Mira 状态。";
-        setReadinessState(els.readyNotifyTitle, "unavailable");
+        setReadinessState(els.readyNotifyTitle, "unavailable", "不可用");
       } else if (state.settings.systemNotifyToggle) {
-        els.readyNotifyTitle.textContent = "已启用";
         els.readyNotifyCopy.textContent = "断点通知。";
-        setReadinessState(els.readyNotifyTitle, "enabled");
+        setReadinessState(els.readyNotifyTitle, "enabled", "已启用");
       } else {
-        els.readyNotifyTitle.textContent = "默认关闭";
         els.readyNotifyCopy.textContent = "可选开启。";
-        setReadinessState(els.readyNotifyTitle, "optional");
+        setReadinessState(els.readyNotifyTitle, "optional", "默认关闭");
       }
     }
 
