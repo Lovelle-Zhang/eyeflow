@@ -304,6 +304,13 @@ function main() {
   assertMatches(indexHtml, /case "idle":[\s\S]*?if \(!activityDetectionHealthy\(\)\)[\s\S]*?自动计时暂时不可用[\s\S]*?手动开始计时/, "idle surfaces a dead activity pipeline honestly with a manual-start fallback");
   assertMatches(indexHtml, /window\.setInterval\(\(\) => \{[\s\S]*?isRunning \|\| isAutoTracking\(\)[\s\S]*?#todayView[\s\S]*?render\(\);[\s\S]*?\}, 5000\)/, "a watchdog timer re-renders idle so a pipeline that goes quiet flips to the honest state");
 
+  // Entry hardening: one sessionStartBlocked() guard, shared by BOTH the manual and
+  // the activity-driven start, so no entry (shortcut / plan restart / future caller)
+  // can start a focus round mid forced-break or onboarding.
+  assertMatches(indexHtml, /function sessionStartBlocked\(\)[\s\S]*?forceBreakActive[\s\S]*?onboardingOverlay/, "a single sessionStartBlocked() guard centralizes the never-start invariant");
+  assertMatches(indexHtml, /function startSession\(\)[\s\S]*?if \(sessionStartBlocked\(\)\) return;/, "manual startSession routes through the shared start guard");
+  assertIncludes(indexHtml, "if (sessionStartBlocked() || forceQuietActive()) return false;", "activity-driven start shares the guard (plus the quiet-window it alone respects)");
+
   console.log("[smoke:session] PASSED. Session controls and Mira stage state are extracted and stable.");
 }
 

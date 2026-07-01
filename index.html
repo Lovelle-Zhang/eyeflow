@@ -10769,6 +10769,13 @@
       focusSessionPanel({ focusTarget: "panel" });
     }
 
+    // Single source of truth for "timing must not start now", shared by BOTH the
+    // manual startSession() and the activity-driven start. Centralizes the invariant
+    // so a new entry (shortcut, plan restart, a future caller) can't bypass it.
+    function sessionStartBlocked() {
+      return forceBreakActive || els.onboardingOverlay.classList.contains("show");
+    }
+
     function startSession() {
       if (!hasAssessedToday()) {
         if (!ensureTodayReadyForActivityStart()) {
@@ -10779,6 +10786,11 @@
           return;
         }
       }
+      // Hard guard against forced-break / onboarding — no manual or programmatic
+      // entry may start a focus round mid-break. (forceQuietActive is intentionally
+      // NOT here: an explicit manual start may override the post-escape quiet window;
+      // the activity path below still respects it.)
+      if (sessionStartBlocked()) return;
       if (isRunning) return;
       const sourceMode = sessionSource === "auto" && elapsedSeconds > 0 ? "auto" : "manual";
       isRunning = true;
@@ -10913,7 +10925,7 @@
     function startAutoTrackingFromActivity(activity) {
       if (!ensureTodayReadyForActivityStart()) return false;
       if (!activity?.isWorking) return false;
-      if (forceBreakActive || forceQuietActive() || els.onboardingOverlay.classList.contains("show")) return false;
+      if (sessionStartBlocked() || forceQuietActive()) return false;
       const detectedAt = Number(activity.detectedAt || Date.now());
       const activeSeconds = Math.max(1, Number(activity.activeSeconds || 0));
       elapsedSeconds = Math.max(elapsedSeconds, activeSeconds);
