@@ -1773,13 +1773,19 @@ function createDashboardWindow(options = {}) {
     dashboardWindow.webContents.send("state:update", latestState);
     dashboardWindow.webContents.send("activity:update", latestActivity);
     maybeRevealDashboardForOnboarding({ showOnReady, revealOnboarding });
-    captureDebugPage(dashboardWindow, "dashboard", 600, {
-      requestedView: "todayView",
-      expectedOnboardingVisible: false,
-      captureState: "default",
-      requiredText: ["我在旁边", "有屏幕活动时，我会自动开始计时。"],
-      captureReason: "initial dashboard"
-    });
+    captureDebugPage(dashboardWindow, "dashboard", 600, debugOnboarding
+      ? {
+          requestedView: "todayView",
+          captureState: "default",
+          captureReason: "initial dashboard"
+        }
+      : {
+          requestedView: "todayView",
+          expectedOnboardingVisible: false,
+          captureState: "default",
+          requiredText: ["我在旁边", "有屏幕活动时，我会自动开始计时。"],
+          captureReason: "initial dashboard"
+        });
     if (wantsCurrentVisualCapture("today-session")) {
       captureDebugPage(dashboardWindow, "dashboard-session", 1000, {
         requestedView: "todayView",

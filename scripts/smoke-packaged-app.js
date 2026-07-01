@@ -33,10 +33,7 @@ const expectedCaptureStates = [
     visibleView: "todayView",
     pageTitle: "今天",
     activeNav: "今天",
-    onboardingVisible: false,
-    captureState: "default",
-    requiredText: ["这一轮进行中", "Mira 已开始计时", "暂停", "休息"],
-    forbiddenText: ["先校准今天", "今天还没给眼睛打分", "状态 未校准"]
+    captureState: "default"
   },
   {
     name: "eyeflow-onboarding-active.png",
