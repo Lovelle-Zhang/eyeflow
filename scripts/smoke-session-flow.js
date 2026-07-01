@@ -307,7 +307,8 @@ function main() {
   // surface honestly ("自动计时暂时不可用" + manual fallback), never a silent 待命.
   assertMatches(indexHtml, /function activityDetectionHealthy\(\)[\s\S]*?lastActivityAt > 0[\s\S]*?ACTIVITY_STALE_MS/, "activity health is derived from a freshness watchdog with a startup grace");
   assertMatches(indexHtml, /case "idle":[\s\S]*?if \(!activityDetectionHealthy\(\)\)[\s\S]*?自动计时暂时不可用[\s\S]*?手动开始计时/, "idle surfaces a dead activity pipeline honestly with a manual-start fallback");
-  assertMatches(indexHtml, /window\.setInterval\(\(\) => \{[\s\S]*?isRunning \|\| isAutoTracking\(\)[\s\S]*?#todayView[\s\S]*?render\(\);[\s\S]*?\}, 5000\)/, "a watchdog timer re-renders idle so a pipeline that goes quiet flips to the honest state");
+  assertMatches(indexHtml, /function syncAutoTrackingClock\(\{ now = Date\.now\(\) \} = \{\}\)[\s\S]*?deltaSeconds = Math\.floor\(\(now - autoTrackLastTickAt\) \/ 1000\);[\s\S]*?elapsedSeconds \+= deltaSeconds;/, "auto tracking advances the visible timer one second at a time between activity updates");
+  assertMatches(indexHtml, /window\.setInterval\(\(\) => \{[\s\S]*?isAutoTracking\(\)[\s\S]*?!activityDetectionHealthy\(\)[\s\S]*?sessionSource = "idle";[\s\S]*?syncAutoTrackingClock\(\);[\s\S]*?\}, 1000\)/, "the one-second loop smooths auto tracking and stops it if the activity pipeline goes stale");
 
   // Entry hardening: one sessionStartBlocked() guard, shared by BOTH the manual and
   // the activity-driven start, so no entry (shortcut / plan restart / future caller)

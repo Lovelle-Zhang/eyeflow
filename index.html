@@ -9584,6 +9584,7 @@
     let autoTrackFreshStart = false;
     let autoTrackResumeStartedAt = 0;
     let autoTrackResumeElapsedBase = 0;
+    let autoTrackLastTickAt = 0;
     let toastTimer = null;
     let resetConfirmTimer = null;
     let restGuideTimer = null;
@@ -10161,9 +10162,7 @@
           } else if (sessionSource === "auto") {
             elapsedSeconds = 0;
             sessionSource = "idle";
-            autoTrackFreshStart = false;
-            autoTrackResumeStartedAt = 0;
-            autoTrackResumeElapsedBase = 0;
+            resetAutoTrackingClock();
           }
         }
         renderActivity();
@@ -10190,15 +10189,26 @@
       if (!document.hidden) handleResumeCheck();
     });
 
-    // Idle 待命 has no per-second tick, so re-render on a timer while the today view is
-    // visible and not actively timing — this is what flips the hero to "自动计时暂时
-    // 不可用" if the activity pipeline goes quiet, instead of a stale 待命. Uses the full
-    // render() (not just the state center) so peripheral UI / body classes stay in sync.
+    // Auto tracking is activity-gated, but the visible timer should still advance
+    // every second while the activity pipeline is healthy. The same loop also keeps
+    // idle 待命 honest when the pipeline goes quiet.
     window.setInterval(() => {
-      if (document.hidden || isRunning || isAutoTracking()) return;
+      if (document.hidden || isRunning) return;
       if (document.querySelector("#todayView")?.hidden) return;
+      if (isAutoTracking()) {
+        if (!activityDetectionHealthy()) {
+          elapsedSeconds = 0;
+          sessionSource = "idle";
+          resetAutoTrackingClock();
+        } else {
+          syncAutoTrackingClock();
+        }
+        render();
+        persist();
+        return;
+      }
       render();
-    }, 5000);
+    }, 1000);
 
     function loadState() {
       const fallback = {
@@ -10805,6 +10815,7 @@
       const sourceMode = sessionSource === "auto" && elapsedSeconds > 0 ? "auto" : "manual";
       isRunning = true;
       sessionSource = sourceMode;
+      autoTrackLastTickAt = 0;
       state.forceEscapeUntil = 0;
       const now = Date.now();
       startedAt = now - elapsedSeconds * 1000;
@@ -10834,6 +10845,7 @@
     function pauseAutoTracking() {
       sessionSource = "manual-paused";
       lastActivityRecordAt = 0;
+      autoTrackLastTickAt = 0;
       persist();
       render();
     }
@@ -10852,6 +10864,7 @@
       // button is real, not "跳回计时中". Resume returns to idle 待命.
       sessionSource = "manual-paused";
       lastActivityRecordAt = 0;
+      autoTrackLastTickAt = 0;
       persist();
       render();
     }
@@ -10865,8 +10878,32 @@
       autoTrackFreshStart = true;
       autoTrackResumeStartedAt = 0;
       autoTrackResumeElapsedBase = elapsedSeconds;
+      autoTrackLastTickAt = 0;
       persist();
       render();
+    }
+
+    function resetAutoTrackingClock() {
+      autoTrackFreshStart = false;
+      autoTrackResumeStartedAt = 0;
+      autoTrackResumeElapsedBase = 0;
+      autoTrackLastTickAt = 0;
+    }
+
+    function syncAutoTrackingClock({ now = Date.now() } = {}) {
+      if (!isAutoTracking() || !activityDetectionHealthy()) {
+        autoTrackLastTickAt = 0;
+        return false;
+      }
+      if (!autoTrackLastTickAt) {
+        autoTrackLastTickAt = now;
+        return false;
+      }
+      const deltaSeconds = Math.floor((now - autoTrackLastTickAt) / 1000);
+      if (deltaSeconds <= 0) return false;
+      elapsedSeconds += deltaSeconds;
+      autoTrackLastTickAt += deltaSeconds * 1000;
+      return true;
     }
 
     function syncRunningSessionClock({ now = Date.now(), allowLongGap = true } = {}) {
@@ -10975,6 +11012,7 @@
       startedAt = null;
       sessionSource = "auto";
       lastActivityRecordAt = detectedAt;
+      autoTrackLastTickAt = Date.now();
       clearFirstRoundLanding();
       return true;
     }

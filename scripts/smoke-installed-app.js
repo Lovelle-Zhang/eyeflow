@@ -521,6 +521,8 @@ function main() {
   assertMatches(indexHtml, /function startAutoTrackingFromActivity[\s\S]*?if \(isManualPaused\(\)\) return false;/, "installed screen activity does not auto-restart while manually paused");
   assertNotMatches(indexHtml, /function pause(?:AutoTracking|Session)[\s\S]{0,260}?elapsedSeconds = 0;/, "installed manual pause preserves visible elapsed time");
   assertMatches(indexHtml, /case "paused":[\s\S]*?已暂停[\s\S]*?els\.primaryActionBtn\.hidden = true;/, "installed paused hero does not duplicate the timer-card resume action");
+  assertMatches(indexHtml, /function syncAutoTrackingClock\(\{ now = Date\.now\(\) \} = \{\}\)[\s\S]*?deltaSeconds = Math\.floor\(\(now - autoTrackLastTickAt\) \/ 1000\);[\s\S]*?elapsedSeconds \+= deltaSeconds;/, "installed auto tracking advances the visible timer one second at a time");
+  assertMatches(indexHtml, /window\.setInterval\(\(\) => \{[\s\S]*?isAutoTracking\(\)[\s\S]*?!activityDetectionHealthy\(\)[\s\S]*?sessionSource = "idle";[\s\S]*?syncAutoTrackingClock\(\);[\s\S]*?\}, 1000\)/, "installed one-second loop smooths auto tracking and stops it if activity goes stale");
   assertMatches(indexHtml, /autoTrackResumeElapsedBase = elapsedSeconds;[\s\S]*resumedSeconds = Math\.max\(0, Math\.round\(\(detectedAt - autoTrackResumeStartedAt\) \/ 1000\)\);[\s\S]*elapsedSeconds = Math\.max\(elapsedSeconds, autoTrackResumeElapsedBase \+ resumedSeconds\);/, "installed auto-track after resume continues from paused time without catching up paused activeSeconds");
   assertMatches(sessionFlowJs, /if \(currentState === "paused"\)\s*\{[\s\S]*?startText: "恢复自动计时",[\s\S]*?startDisabled: false,/, "installed paused timer control offers an enabled resume action");
   assertMatches(
