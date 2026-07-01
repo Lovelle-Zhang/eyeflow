@@ -1380,6 +1380,38 @@ function keepDashboardVisible() {
   dashboardWindow.setBounds(defaultDashboardBounds(), false);
 }
 
+let dashboardRevealTimer = null;
+
+// Bring the dashboard onto the CURRENT Space/desktop. Without this, a window created
+// on another Space "shows" off where the user can't see it — so open -a / dock-click
+// looked like it did nothing (the "偶发显示不稳" symptom). Pin to all workspaces so it
+// surfaces on the active Space, then revert on a delay: a SYNCHRONOUS revert can beat
+// the WindowServer's Space reassignment and leave it on the origin Space. clearTimeout
+// below cancels a pending revert if reveal fires again first. visibleOnFullScreen:true so an
+// explicit open even surfaces over a fullscreen Space (a user-invoked main window,
+// unlike the ambient companion).
+function revealDashboardOnCurrentSpace() {
+  if (!dashboardWindow || dashboardWindow.isDestroyed()) return;
+  if (dashboardWindow.isMinimized()) dashboardWindow.restore();
+  if (process.platform !== "darwin") {
+    dashboardWindow.show();
+    dashboardWindow.focus();
+    return;
+  }
+  dashboardWindow.setVisibleOnAllWorkspaces(true, { visibleOnFullScreen: true });
+  dashboardWindow.show();
+  dashboardWindow.moveTop();
+  dashboardWindow.focus();
+  app.focus({ steal: true });
+  clearTimeout(dashboardRevealTimer);
+  dashboardRevealTimer = setTimeout(() => {
+    dashboardRevealTimer = null;
+    if (dashboardWindow && !dashboardWindow.isDestroyed()) {
+      dashboardWindow.setVisibleOnAllWorkspaces(false);
+    }
+  }, 300);
+}
+
 function sendCompanionExpanded() {
   if (!companionWindow || companionWindow.isDestroyed()) return;
   companionWindow.webContents.send("companion:expanded", companionExpanded);
@@ -2003,9 +2035,7 @@ function showDashboard(options = {}) {
   showDockIcon();
   if (!dashboardWindow) createDashboardWindow({ showOnReady: true, revealOnboarding: false });
   keepDashboardVisible();
-  dashboardWindow.show();
-  dashboardWindow.focus();
-  if (process.platform === "darwin") app.focus({ steal: true });
+  revealDashboardOnCurrentSpace();
   if (options?.restGuide) {
     if (dashboardWindow.webContents.isLoading()) {
       dashboardWindow.webContents.once("did-finish-load", sendDashboardRestGuide);
