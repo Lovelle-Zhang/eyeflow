@@ -9601,6 +9601,13 @@
     let breakRestTotalSeconds = 0;
     let latestCompanionState = null;
     let latestActivity = null;
+    // Watchdog for the activity pipeline: timing now starts only from screen-activity
+    // events, so a dead pipeline (monitor not running / IPC broken) would leave the
+    // today view silently in 待命 forever — "thinks it's counting, isn't". Track when
+    // we last heard from it and surface an honest state if it goes quiet.
+    let lastActivityAt = 0;
+    const rendererStartedAt = Date.now();
+    const ACTIVITY_STALE_MS = 20000; // ~4 missed 5s activity ticks (tolerates one hiccup)
     let latestPermissionStatus = null;
     let latestDesktopSettings = null;
     let latestDiagnostics = null;
@@ -10122,6 +10129,7 @@
     if (window.eyeflowDesktop?.onActivity) {
       window.eyeflowDesktop.onActivity((activity) => {
         latestActivity = activity;
+        lastActivityAt = Date.now();
         ensureCurrentDay({ toast: true });
         const canUseActivity = hasAssessedToday() && !forceBreakActive && !els.onboardingOverlay.classList.contains("show");
         if (canUseActivity) {
@@ -10171,6 +10179,16 @@
     document.addEventListener("visibilitychange", () => {
       if (!document.hidden) handleResumeCheck();
     });
+
+    // Idle 待命 has no per-second tick, so re-render on a timer while the today view is
+    // visible and not actively timing — this is what flips the hero to "自动计时暂时
+    // 不可用" if the activity pipeline goes quiet, instead of a stale 待命. Uses the full
+    // render() (not just the state center) so peripheral UI / body classes stay in sync.
+    window.setInterval(() => {
+      if (document.hidden || isRunning || isAutoTracking()) return;
+      if (document.querySelector("#todayView")?.hidden) return;
+      render();
+    }, 5000);
 
     function loadState() {
       const fallback = {
@@ -14165,6 +14183,15 @@
         .join("");
     }
 
+    // The activity pipeline is "healthy" if we heard from it recently. On a fresh
+    // launch we allow one stale window as grace before the first tick arrives; in the
+    // browser there is no pipeline to fail, so never flag it there.
+    function activityDetectionHealthy() {
+      if (!isDesktopShell) return true;
+      if (lastActivityAt > 0) return Date.now() - lastActivityAt < ACTIVITY_STALE_MS;
+      return Date.now() - rendererStartedAt < ACTIVITY_STALE_MS;
+    }
+
     function renderStateCenter(load, todayPhase = deriveTodayPhase()) {
       const [symptom, value] = topSymptom();
       const mins = Math.floor(elapsedSeconds / 60);
@@ -14238,11 +14265,23 @@
           break;
         case "idle":
         default:
-          els.stateHeadline.textContent = "我在旁边";
-          els.stateAction.textContent = "现在先不计时。";
-          els.stateExplain.textContent = "有屏幕活动时，我会自动开始计时。";
-          renderStateCues([]);
-          els.primaryActionBtn.hidden = true;
+          if (!activityDetectionHealthy()) {
+            // Pipeline is quiet — never silently pretend we'll auto-start. Say so, and
+            // give a manual start so timing isn't stuck behind a broken watcher.
+            els.stateHeadline.textContent = "自动计时暂时不可用";
+            els.stateAction.textContent = "没有收到屏幕活动信号。";
+            els.stateExplain.textContent = "Mira 现在不会自动开始；可以先手动开始，或重开 EyeFlow / 检查系统权限。";
+            renderStateCues([]);
+            els.primaryActionBtn.hidden = false;
+            els.primaryActionBtn.dataset.intent = "start";
+            els.primaryActionBtn.textContent = "手动开始计时";
+          } else {
+            els.stateHeadline.textContent = "我在旁边";
+            els.stateAction.textContent = "现在先不计时。";
+            els.stateExplain.textContent = "有屏幕活动时，我会自动开始计时。";
+            renderStateCues([]);
+            els.primaryActionBtn.hidden = true;
+          }
           break;
       }
     }

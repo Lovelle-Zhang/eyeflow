@@ -298,6 +298,12 @@ function main() {
     assertEqual(tone.glow, "var(--mira-soft)", `${mood} Mira glow is the single accent`);
   });
 
+  // Activity-pipeline watchdog: timing is activity-driven, so a dead pipeline must
+  // surface honestly ("自动计时暂时不可用" + manual fallback), never a silent 待命.
+  assertMatches(indexHtml, /function activityDetectionHealthy\(\)[\s\S]*?lastActivityAt > 0[\s\S]*?ACTIVITY_STALE_MS/, "activity health is derived from a freshness watchdog with a startup grace");
+  assertMatches(indexHtml, /case "idle":[\s\S]*?if \(!activityDetectionHealthy\(\)\)[\s\S]*?自动计时暂时不可用[\s\S]*?手动开始计时/, "idle surfaces a dead activity pipeline honestly with a manual-start fallback");
+  assertMatches(indexHtml, /window\.setInterval\(\(\) => \{[\s\S]*?isRunning \|\| isAutoTracking\(\)[\s\S]*?#todayView[\s\S]*?render\(\);[\s\S]*?\}, 5000\)/, "a watchdog timer re-renders idle so a pipeline that goes quiet flips to the honest state");
+
   console.log("[smoke:session] PASSED. Session controls and Mira stage state are extracted and stable.");
 }
 
