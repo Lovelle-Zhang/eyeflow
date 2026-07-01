@@ -82,6 +82,7 @@ function main() {
   assertIncludes(mainJs, "webContents.capturePage()", "current visual capture uses Electron capturePage");
   assertIncludes(mainJs, "currentCaptureMismatches", "main capture records state mismatch details");
   assertIncludes(mainJs, "expectedEqualReadinessActionButtons", "main capture can gate equal settings action button sizes");
+  assertIncludes(mainJs, 'requiredText: ["这一轮进行中", "Mira 已开始计时"]', "default Today capture must fail if the start card returns");
   assertIncludes(mainJs, "readinessActionButtonMetrics", "main capture records settings action button dimensions");
   assertIncludes(mainJs, "logCurrentCaptureBasis", "main capture prints scoring basis");
   assertIncludes(mainJs, "[EyeFlow:current-capture] 本次评分基于：", "main capture prints required basis header");

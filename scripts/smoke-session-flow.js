@@ -120,6 +120,11 @@ function main() {
   );
   assertMatches(
     indexHtml,
+    /function\s+canAutoPrepareToday\(\)[\s\S]*if \(hasAssessedToday\(\)\) return true;[\s\S]*if \(forceOnboarding\) return false;[\s\S]*return true;[\s\S]*function\s+deriveTodayPhase\(\)[\s\S]*if \(!hasAssessedToday\(\) && !canAutoPrepareToday\(\)\) return "needs-onboarding";[\s\S]*return "auto-startable-idle";/,
+    "active Today opens auto-prepare even on clean data instead of stopping on the start card"
+  );
+  assertMatches(
+    indexHtml,
     /function\s+isTodayContinuityBlocked\([\s\S]*?\)\s*\{[\s\S]*"needs-onboarding"[\s\S]*"break-active"[\s\S]*"force-quiet"[\s\S]*"manual-paused"/,
     "today continuity has explicit blocked reasons"
   );

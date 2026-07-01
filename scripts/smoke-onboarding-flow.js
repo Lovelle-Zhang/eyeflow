@@ -254,16 +254,18 @@ function main() {
   // The resume "not assessed today" branch (day rolled over, lastAssessmentDay cleared)
   // must route to onboarding / auto-start, not strand the today view on an empty idle
   // hero. Guards against the "刚打开还是空白页" regression.
-  assertMatches(indexHtml, /if \(!hasAssessedToday\(\)\) \{[\s\S]*?if \(!state\.hasEverOnboarded\) \{[\s\S]*?showOnboarding\(\);[\s\S]*?\} else \{[\s\S]*?autoStartSessionOnOpen\(\);/, "resume with an unassessed (rolled-over) day routes to onboarding/auto-start, never a stranded idle page");
-  // First-ever open must show the guide, not be silently auto-assessed + auto-started
-  // (init runs auto-start before maybeShowOnboarding, so the gate must bail here).
-  assertMatches(indexHtml, /function\s+ensureTodayReadyForAutoStart\(\)[\s\S]*?if \(!state\.hasEverOnboarded\) return false;/, "genuine first open shows onboarding instead of auto-starting past it");
+  assertMatches(indexHtml, /if \(!hasAssessedToday\(\)\) \{[\s\S]*?if \(!canAutoPrepareToday\(\)\) \{[\s\S]*?showOnboarding\(\);[\s\S]*?\} else \{[\s\S]*?autoStartSessionOnOpen\(\);/, "resume with an unassessed (rolled-over) day routes to onboarding/auto-start, never a stranded idle page");
+  // Normal active launches should auto-prepare even on clean data; only explicit
+  // debug/manual onboarding should block continuity.
+  assertMatches(indexHtml, /function\s+canAutoPrepareToday\(\)[\s\S]*?if \(forceOnboarding\) return false;[\s\S]*?return true;/, "normal active launches auto-prepare while explicit debug onboarding stays blocked");
+  assertMatches(indexHtml, /function\s+ensureTodayReadyForAutoStart\(\)[\s\S]*?if \(!canAutoPrepareToday\(\)\) return false;/, "today auto-start respects only explicit onboarding blocks");
   // hasEverOnboarded must persist across day rollover, else returning users get
   // the guide re-shown every new day (regression codex caught).
   assertNotMatches(indexHtml, /function rolloverDayIfNeeded\(dayState\) \{(?:(?!\n    \})[\s\S])*?hasEverOnboarded/, "day rollover must not reset hasEverOnboarded");
+  assertMatches(indexHtml, /const priorUseSignal = Boolean\([\s\S]*saved\.initialAssessmentDone[\s\S]*saved\.lastAssessmentDay[\s\S]*saved\.onboardingDismissed[\s\S]*saved\.summaryHistory[\s\S]*saved\.logs[\s\S]*saved\.rhythmMemory\?\.recentEvents[\s\S]*if \(saved\.hasEverOnboarded === undefined \|\| \(!loaded\.hasEverOnboarded && priorUseSignal\)\) \{[\s\S]*loaded\.hasEverOnboarded = priorUseSignal;/, "loadState repairs explicit false hasEverOnboarded when prior use exists");
   // Cross-day-while-open / resume rollover follows the same rule as cold launch:
-  // only never-onboarded users see the guide; returning users auto-start.
-  assertMatches(indexHtml, /function ensureCurrentDay\(options = \{\}\)[\s\S]*?options\.showOnboarding !== false && !state\.hasEverOnboarded[\s\S]*?showOnboarding\(\);[\s\S]*?autoStartSessionOnOpen\(\);/, "cross-day rollover onboards only never-onboarded users; returning users auto-start");
+  // auto-start unless explicit onboarding was requested.
+  assertMatches(indexHtml, /function ensureCurrentDay\(options = \{\}\)[\s\S]*?options\.showOnboarding !== false && !canAutoPrepareToday\(\)[\s\S]*?showOnboarding\(\);[\s\S]*?autoStartSessionOnOpen\(\);/, "cross-day rollover auto-starts unless explicit onboarding is active");
   assertMatches(indexHtml, /function\s+completeInitialAssessment\(options = \{\}\)[\s\S]*state\.settings\.intensity\s*=\s*"quiet";[\s\S]*setIntensity\(state\.settings\.intensity,\s*\{\s*persistChange:\s*false,\s*renderChange:\s*false,\s*userChange:\s*false\s*\}\);/, "assessment completion defaults to L1 quiet");
   assertNotMatches(indexHtml, /completeInitialAssessment[\s\S]*showFirstRoundLanding\(\);/, "onboarding no longer passes through a first-round landing page");
   assertMatches(indexHtml, /options\.focusTarget\s*===\s*"panel"[\s\S]*\?\s*els\.sessionPanel/, "focus helper can target session panel");

@@ -1745,6 +1745,7 @@ function createDashboardWindow(options = {}) {
       requestedView: "todayView",
       expectedOnboardingVisible: false,
       captureState: "default",
+      requiredText: ["这一轮进行中", "Mira 已开始计时"],
       captureReason: "initial dashboard"
     });
     if (wantsCurrentVisualCapture("today-session")) {
