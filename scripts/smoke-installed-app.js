@@ -520,8 +520,8 @@ function main() {
   assertNotIncludes(indexHtml, '"到休息点再提醒你。"', "installed running hero does not repeat the reminder copy");
   assertMatches(indexHtml, /els\.todayFlowCopy\.hidden\s*=\s*true;/, "installed today hides secondary rhythm explanation from first glance");
   assertIncludes(indexHtml, 'focusTarget: 50', "installed today default rhythm starts from 50 minutes");
-  assertIncludes(indexHtml, 'id="focusTarget" type="range" min="20" max="70" step="5" value="50"', "installed today focus control keeps room around Mira judgement");
-  assertIncludes(indexHtml, 'id="breakTarget" type="range" min="60" max="300" step="30" value="120"', "installed today recovery control keeps a wider manual span");
+  assertIncludes(indexHtml, 'id="focusTarget" type="range" min="15" max="60" step="5" value="50"', "installed today focus control uses the reasonable 15–60 min range");
+  assertIncludes(indexHtml, 'id="breakTarget" type="range" min="20" max="240" step="10" value="120"', "installed today rest control uses the 20–240s range (step 10) so 休息长度 drives the actual rest");
   assertMatches(indexHtml, /\.today-plan\s*\{[\s\S]*display:\s*none;/, "installed today plan is downgraded out of the first screen");
   assertIncludes(indexHtml, '<span class="state-label" id="stateBand">已专注 0 分钟</span>', "installed state band shows focused time without a pseudo score");
   assertIncludes(indexHtml, '<strong id="stateHeadline">这一轮进行中</strong>', "installed today opens directly in the running state");
