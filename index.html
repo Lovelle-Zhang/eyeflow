@@ -9579,6 +9579,9 @@
     let lastActiveSecondsBeforeIdle = state.lastActiveSecondsBeforeIdle || 0;
     let autoElapsedSeconds = state.lastAssessmentDay === todayKey() ? Number(state.autoElapsedSeconds || 0) : 0;
     let lastActivityRecordAt = 0;
+    // Set on resume-from-pause so the next activity-driven round starts fresh instead
+    // of catching up to activity.activeSeconds (which includes paused-but-working time).
+    let autoTrackFreshStart = false;
     let toastTimer = null;
     let resetConfirmTimer = null;
     let restGuideTimer = null;
@@ -10131,7 +10134,9 @@
         latestActivity = activity;
         lastActivityAt = Date.now();
         ensureCurrentDay({ toast: true });
-        const canUseActivity = hasAssessedToday() && !forceBreakActive && !els.onboardingOverlay.classList.contains("show");
+        // Manual pause suspends ALL activity-driven session logic (auto-start AND the
+        // natural-break auto-complete that could otherwise clear paused → idle → auto).
+        const canUseActivity = hasAssessedToday() && !forceBreakActive && !isManualPaused() && !els.onboardingOverlay.classList.contains("show");
         if (canUseActivity) {
           maybeAutoCompleteBreak(activity);
         }
@@ -10280,7 +10285,7 @@
             ? loaded.currentDay
             : "";
         }
-	        if (!saved.sessionSource || saved.sessionSource === "manual-paused") {
+	        if (!saved.sessionSource) {
 	          loaded.sessionSource = "idle";
 	          loaded.elapsedSeconds = 0;
 	        }
@@ -10814,12 +10819,16 @@
         pauseAutoTracking();
         return;
       }
+      if (isManualPaused()) {
+        resumeFromManualPause();
+        return;
+      }
       startSession();
     }
 
     function pauseAutoTracking() {
       elapsedSeconds = 0;
-      sessionSource = "idle";
+      sessionSource = "manual-paused";
       lastActivityRecordAt = 0;
       persist();
       render();
@@ -10835,8 +10844,23 @@
       lastSessionTickAt = 0;
       elapsedSeconds = 0;
       startedAt = null;
-      sessionSource = "idle";
+      // Explicit manual pause: a distinct state the state machine RESPECTS — screen
+      // activity will NOT auto-restart timing (unlike plain idle 待命), so the pause
+      // button is real, not "跳回计时中". Resume returns to idle 待命.
+      sessionSource = "manual-paused";
       lastActivityRecordAt = 0;
+      persist();
+      render();
+    }
+
+    // Leave manual pause → back to idle 待命; the next screen-activity signal then
+    // auto-starts a round again (same as normal 待命).
+    function resumeFromManualPause() {
+      if (!isManualPaused()) return;
+      sessionSource = "idle";
+      elapsedSeconds = 0;
+      lastActivityRecordAt = 0;
+      autoTrackFreshStart = true;
       persist();
       render();
     }
@@ -10925,10 +10949,17 @@
     function startAutoTrackingFromActivity(activity) {
       if (!ensureTodayReadyForActivityStart()) return false;
       if (!activity?.isWorking) return false;
+      // Explicit manual pause must be respected — screen activity does NOT restart
+      // timing (the whole point of the pause button). Manual resume clears it.
+      if (isManualPaused()) return false;
       if (sessionStartBlocked() || forceQuietActive()) return false;
       const detectedAt = Number(activity.detectedAt || Date.now());
       const activeSeconds = Math.max(1, Number(activity.activeSeconds || 0));
-      elapsedSeconds = Math.max(elapsedSeconds, activeSeconds);
+      // After a manual pause→resume, start the new round fresh rather than catching up
+      // to activity.activeSeconds (continuous since desktop activity began — it would
+      // jump the timer forward by the time spent paused-but-working).
+      elapsedSeconds = autoTrackFreshStart ? 1 : Math.max(elapsedSeconds, activeSeconds);
+      autoTrackFreshStart = false;
       startedAt = null;
       sessionSource = "auto";
       lastActivityRecordAt = detectedAt;
@@ -10941,7 +10972,7 @@
     }
 
     function isManualPaused() {
-      return false;
+      return sessionSource === "manual-paused";
     }
 
     function canAutoPrepareToday() {
@@ -10955,6 +10986,7 @@
       if (forceBreakActive || els.breakOverlay.classList.contains("show")) return "break-active";
       if (forceQuietActive()) return "force-quiet";
       if (isRunning || isAutoTracking()) return "running";
+      if (isManualPaused()) return "paused";
       return "idle";
     }
 
@@ -11693,6 +11725,10 @@
     }
 
     function handlePrimaryAction() {
+      if (isManualPaused()) {
+        resumeFromManualPause();
+        return;
+      }
       if (!hasAssessedToday()) {
         if (!ensureTodayReadyForActivityStart()) {
           showOnboarding();
@@ -14110,7 +14146,7 @@
 	        focusMinutes: Number(els.focusTarget.value)
 		      });
 		      document.body.classList.toggle("today-state-focus", !document.querySelector("#todayView").hidden);
-		      document.body.classList.toggle("session-active", ["running", "break-active", "idle"].includes(todayPhase));
+		      document.body.classList.toggle("session-active", ["running", "break-active", "idle", "paused"].includes(todayPhase));
 
 	      els.timerText.textContent = `${String(mins).padStart(2, "0")}:${String(secs).padStart(2, "0")}`;
       els.timerRing.style.setProperty("--progress", `${progress}%`);
@@ -14243,7 +14279,7 @@
         return;
       }
 
-      if (load >= 74) {
+      if (load >= 74 && !isManualPaused()) {
         els.stateHeadline.textContent = "现在休息";
         els.stateAction.textContent = sessionStarted
           ? "到恢复断点了。"
@@ -14274,6 +14310,15 @@
           els.primaryActionBtn.hidden = false;
           els.primaryActionBtn.dataset.intent = "start";
           els.primaryActionBtn.textContent = "开始这一轮";
+          break;
+        case "paused":
+          els.stateHeadline.textContent = "已暂停";
+          els.stateAction.textContent = "已暂停自动计时。";
+          els.stateExplain.textContent = "恢复后，有屏幕活动时会继续开始。";
+          renderStateCues([]);
+          els.primaryActionBtn.hidden = false;
+          els.primaryActionBtn.dataset.intent = "resume-auto";
+          els.primaryActionBtn.textContent = "恢复自动计时";
           break;
         case "idle":
         default:

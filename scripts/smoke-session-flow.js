@@ -124,8 +124,8 @@ function main() {
   );
   assertMatches(
     indexHtml,
-    /function\s+pauseSession\(endedBy = "paused"\)[\s\S]*closeFocusSession\(endedBy\);[\s\S]*elapsedSeconds = 0;[\s\S]*sessionSource = "idle";/,
-    "pausing returns Today to idle standby instead of a manual-paused blocker"
+    /function\s+pauseSession\(endedBy = "paused"\)[\s\S]*closeFocusSession\(endedBy\);[\s\S]*elapsedSeconds = 0;[\s\S]*sessionSource = "manual-paused";/,
+    "pausing enters a respected manual-paused state (activity won't auto-restart it)"
   );
   assertMatches(
     indexHtml,
@@ -134,7 +134,7 @@ function main() {
   );
   assertMatches(
     indexHtml,
-    /function\s+render\(\)\s*\{[\s\S]*const todayPhase = deriveTodayPhase\(\);(?![\s\S]*queueTodayContinuity\("render"\))[\s\S]*document\.body\.classList\.toggle\("session-active", \["running", "break-active", "idle"\]\.includes\(todayPhase\)\);/,
+    /function\s+render\(\)\s*\{[\s\S]*const todayPhase = deriveTodayPhase\(\);(?![\s\S]*queueTodayContinuity\("render"\))[\s\S]*document\.body\.classList\.toggle\("session-active", \["running", "break-active", "idle", "paused"\]\.includes\(todayPhase\)\);/,
     "render keeps one Today surface and never starts timing by rendering"
   );
   assertMatches(
@@ -278,8 +278,13 @@ function main() {
   );
   assertEqual(
     sessionFlow.sessionControlView({ assessedToday: true, paused: true }).startText,
-    "待命",
-    "paused state falls back to standby"
+    "恢复自动计时",
+    "paused is a respected state offering resume, not a standby fallback"
+  );
+  assertEqual(
+    sessionFlow.sessionControlView({ assessedToday: true, paused: true }).startDisabled,
+    false,
+    "the paused resume control is clickable"
   );
 
   assertEqual(sessionFlow.stageMiraView({ load: 80 }).mood, "rest", "high load Mira mood");
@@ -310,6 +315,23 @@ function main() {
   assertMatches(indexHtml, /function sessionStartBlocked\(\)[\s\S]*?forceBreakActive[\s\S]*?onboardingOverlay/, "a single sessionStartBlocked() guard centralizes the never-start invariant");
   assertMatches(indexHtml, /function startSession\(\)[\s\S]*?if \(sessionStartBlocked\(\)\) return;/, "manual startSession routes through the shared start guard");
   assertIncludes(indexHtml, "if (sessionStartBlocked() || forceQuietActive()) return false;", "activity-driven start shares the guard (plus the quiet-window it alone respects)");
+
+  // Explicit manual pause is a REAL state the machine respects: pause → manual-paused,
+  // screen activity does NOT auto-restart, resume → idle 待命. The pause button is no
+  // longer "名义存在实际无用".
+  assertMatches(indexHtml, /function isManualPaused\(\)\s*\{\s*return sessionSource === "manual-paused";/, "isManualPaused reflects the manual-paused source");
+  assertMatches(indexHtml, /function pauseSession[\s\S]*?sessionSource = "manual-paused";/, "pausing enters the respected manual-paused state, not plain idle");
+  assertMatches(indexHtml, /function pauseAutoTracking\(\)[\s\S]*?sessionSource = "manual-paused";/, "pausing auto tracking also enters manual-paused instead of bouncing back to auto");
+  assertMatches(indexHtml, /if \(!saved\.sessionSource\) \{[\s\S]*?loaded\.sessionSource = "idle";/, "loading state preserves persisted manual-paused now that it has a real UI");
+  assertMatches(indexHtml, /function startAutoTrackingFromActivity[\s\S]*?if \(isManualPaused\(\)\) return false;/, "screen activity does NOT auto-restart timing while manually paused");
+  assertMatches(indexHtml, /function deriveTodayPhase\(\)[\s\S]*?if \(isManualPaused\(\)\) return "paused";/, "manual pause is its own Today phase");
+  assertMatches(indexHtml, /case "paused":[\s\S]*?已暂停[\s\S]*?恢复自动计时/, "paused hero is honest (已暂停) with a 恢复自动计时 action");
+  assertMatches(indexHtml, /function resumeFromManualPause\(\)[\s\S]*?sessionSource = "idle";/, "resume returns to idle 待命 so activity can auto-start again");
+  assertMatches(indexHtml, /const canUseActivity = [\s\S]{0,120}?!isManualPaused\(\)/, "manual pause suspends ALL activity-driven session logic (incl. natural-break auto-complete)");
+  assertMatches(indexHtml, /elapsedSeconds = autoTrackFreshStart \? 1 : Math\.max\(elapsedSeconds, activeSeconds\);/, "auto-track after resume starts fresh, not caught up to continuous activeSeconds (no timer jump)");
+  assertMatches(indexHtml, /if \(load >= 74 && !isManualPaused\(\)\)/, "manual pause takes priority over the high-load rest CTA (button text matches action)");
+  const sessionFlowJs = read("eyeflow-session-flow.js");
+  assertMatches(sessionFlowJs, /if \(currentState === "paused"\)\s*\{[\s\S]*?startText: "恢复自动计时",[\s\S]*?startDisabled: false,/, "the timer control shows an enabled 恢复自动计时 button when paused");
 
   console.log("[smoke:session] PASSED. Session controls and Mira stage state are extracted and stable.");
 }

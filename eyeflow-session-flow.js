@@ -72,16 +72,27 @@ window.EyeFlowSessionFlow = (() => {
       };
     }
 
+    if (currentState === "paused") {
+      return {
+        panelTitle: "本轮节奏",
+        pillText: "已暂停",
+        pillState: "paused",
+        startText: "恢复自动计时",
+        startTitle: "恢复后，有屏幕活动时会自动开始计时",
+        startIcon: "play",
+        startDisabled: false,
+        startIsMode: false,
+        restText,
+        restTitle
+      };
+    }
+
 	    return {
 	      panelTitle: "本轮节奏",
-	      pillText: !assessedToday ? "待命中" : currentState === "paused" ? "待命中" : "待命中",
+	      pillText: "待命中",
       pillState: !assessedToday ? "idle" : currentState,
       startText: "待命",
-      startTitle: !assessedToday
-        ? "有屏幕活动时自动开始计时"
-        : currentState === "paused"
-            ? "有屏幕活动时自动开始计时"
-            : "有屏幕活动时自动开始计时",
+      startTitle: "有屏幕活动时自动开始计时",
       startIcon: "play",
       startDisabled: true,
       startIsMode: false,

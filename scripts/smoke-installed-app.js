@@ -439,7 +439,7 @@ function main() {
   assertMatches(sessionFlowJs, /if \(currentState === "running"\) \{[\s\S]*panelTitle: "本轮节奏"[\s\S]*pillText: "计时中"[\s\S]*startText: "暂停"/, "installed auto-tracking controls render as a unified timing state");
   assertIncludes(sessionFlowJs, "暂停当前计时", "installed auto-tracking start title follows the timing state");
   assertMatches(indexHtml, /function\s+toggleSession\(\)\s*\{[\s\S]*if \(isAutoTracking\(\)\) \{[\s\S]*pauseAutoTracking\(\);[\s\S]*return;[\s\S]*startSession\(\);/, "installed auto-tracking primary action pauses the current automatic round instead of starting another state");
-  assertMatches(indexHtml, /function\s+pauseAutoTracking\(\)[\s\S]*elapsedSeconds = 0;[\s\S]*sessionSource = "idle";[\s\S]*lastActivityRecordAt = 0;[\s\S]*persist\(\);[\s\S]*render\(\);/, "installed auto-tracking pause returns to idle standby");
+  assertMatches(indexHtml, /function\s+pauseAutoTracking\(\)[\s\S]*elapsedSeconds = 0;[\s\S]*sessionSource = "manual-paused";[\s\S]*lastActivityRecordAt = 0;[\s\S]*persist\(\);[\s\S]*render\(\);/, "installed auto-tracking pause enters manual-paused instead of bouncing back to auto");
   assertNotIncludes(indexHtml, "手动从 00:00", "installed auto-tracking hint avoids internal reset wording");
   assertNotIncludes(indexHtml, "可切到手动专注", "installed auto-tracking status no longer asks users to choose a mode");
   assertMatches(indexHtml, /function\s+startSession\(\)[\s\S]*?const sourceMode = sessionSource === "auto" && elapsedSeconds > 0 \? "auto" : "manual";[\s\S]*?startedAt = now - elapsedSeconds \* 1000;[\s\S]*lastSessionTickAt = now;/, "installed continuing an automatic round preserves accumulated time and resets the active tick baseline");
@@ -517,14 +517,17 @@ function main() {
   assertMatches(indexHtml, /function\s+ensureTodayReadyForActivityStart\(\)[\s\S]*state\.lastAssessmentDay = todayKey\(\);[\s\S]*state\.initialAssessmentDone = true;[\s\S]*state\.onboardingDismissed = true;[\s\S]*return true;/, "installed today creates a lightweight daily state before activity-driven timing");
   assertNotIncludes(indexHtml, "autoStartSessionOnOpen", "installed app no longer starts timing before the first Today render");
   assertMatches(indexHtml, /function\s+startAutoTrackingFromActivity\(activity\)[\s\S]*if \(!ensureTodayReadyForActivityStart\(\)\) return false;[\s\S]*if \(!activity\?\.isWorking\) return false;[\s\S]*sessionSource = "auto";/, "installed screen activity starts automatic timing from idle");
+  assertMatches(indexHtml, /function isManualPaused\(\)\s*\{\s*return sessionSource === "manual-paused";/, "installed manual pause is a real source state");
+  assertMatches(indexHtml, /function startAutoTrackingFromActivity[\s\S]*?if \(isManualPaused\(\)\) return false;/, "installed screen activity does not auto-restart while manually paused");
+  assertMatches(sessionFlowJs, /if \(currentState === "paused"\)\s*\{[\s\S]*?startText: "恢复自动计时",[\s\S]*?startDisabled: false,/, "installed paused timer control offers an enabled resume action");
   assertMatches(
     indexHtml,
-    /function\s+deriveTodayPhase\(\)\s*\{[\s\S]*return "needs-onboarding";[\s\S]*return "break-active";[\s\S]*return "force-quiet";[\s\S]*return "running";[\s\S]*return "idle";/,
+    /function\s+deriveTodayPhase\(\)\s*\{[\s\S]*return "needs-onboarding";[\s\S]*return "break-active";[\s\S]*return "force-quiet";[\s\S]*return "running";[\s\S]*return "paused";[\s\S]*return "idle";/,
     "installed Today phase centrally enumerates display states"
   );
   assertMatches(
     indexHtml,
-    /function\s+render\(\)\s*\{[\s\S]*const todayPhase = deriveTodayPhase\(\);(?![\s\S]*queueTodayContinuity\("render"\))[\s\S]*document\.body\.classList\.toggle\("session-active", \["running", "break-active", "idle"\]\.includes\(todayPhase\)\);/,
+    /function\s+render\(\)\s*\{[\s\S]*const todayPhase = deriveTodayPhase\(\);(?![\s\S]*queueTodayContinuity\("render"\))[\s\S]*document\.body\.classList\.toggle\("session-active", \["running", "break-active", "idle", "paused"\]\.includes\(todayPhase\)\);/,
     "installed Today keeps one surface and never starts timing by rendering"
   );
   assertMatches(
