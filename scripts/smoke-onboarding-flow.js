@@ -247,25 +247,24 @@ function main() {
   assertIncludes(indexHtml, 'els.stateAction.textContent = "Mira 已开始计时。";', "first round confirms timing has started");
   assertMatches(indexHtml, /els\.stateExplain\.textContent = load >= 48[\s\S]{0,160}?"到恢复断点我再提醒；需要停下就点暂停或休息。"/, "running first round explains the reminder and pause path (load-branched)");
   // No idle "准备开始" preparation page may come back (smoke-installed also guards
-  // this). Instead the residual is prevented at the source: returning to the app
-  // auto-starts a round so today never sits idle.
+  // this). Idle is now an in-page standby state that starts only from activity.
   assertNotMatches(indexHtml, /els\.stateHeadline\.textContent\s*=\s*"准备开始这一轮"/, "today never reintroduces a 准备开始 preparation headline");
-  assertMatches(indexHtml, /function\s+handleResumeCheck\(\)[\s\S]*?autoStartSessionOnOpen\(\);/, "returning to the app auto-starts a round so today never sits idle");
+  assertMatches(indexHtml, /function\s+handleResumeCheck\(\)[\s\S]*?ensureTodayReadyForActivityStart\(\);/, "returning to the app prepares Today for activity-driven timing");
   // The resume "not assessed today" branch (day rolled over, lastAssessmentDay cleared)
-  // must route to onboarding / auto-start, not strand the today view on an empty idle
-  // hero. Guards against the "刚打开还是空白页" regression.
-  assertMatches(indexHtml, /if \(!hasAssessedToday\(\)\) \{[\s\S]*?if \(!canAutoPrepareToday\(\)\) \{[\s\S]*?showOnboarding\(\);[\s\S]*?\} else \{[\s\S]*?autoStartSessionOnOpen\(\);/, "resume with an unassessed (rolled-over) day routes to onboarding/auto-start, never a stranded idle page");
+  // must route to onboarding / standby preparation, not strand the today view on an
+  // empty start-card hero. Guards against the "刚打开还是空白页" regression.
+  assertMatches(indexHtml, /if \(!hasAssessedToday\(\)\) \{[\s\S]*?if \(!canAutoPrepareToday\(\)\) \{[\s\S]*?showOnboarding\(\);[\s\S]*?\} else \{[\s\S]*?ensureTodayReadyForActivityStart\(\);/, "resume with an unassessed day routes to onboarding/standby preparation, never a start page");
   // Normal active launches should auto-prepare even on clean data; only explicit
-  // debug/manual onboarding should block continuity.
+  // debug/manual onboarding should block Today preparation.
   assertMatches(indexHtml, /function\s+canAutoPrepareToday\(\)[\s\S]*?if \(forceOnboarding\) return false;[\s\S]*?return true;/, "normal active launches auto-prepare while explicit debug onboarding stays blocked");
-  assertMatches(indexHtml, /function\s+ensureTodayReadyForAutoStart\(\)[\s\S]*?if \(!canAutoPrepareToday\(\)\) return false;/, "today auto-start respects only explicit onboarding blocks");
+  assertMatches(indexHtml, /function\s+ensureTodayReadyForActivityStart\(\)[\s\S]*?if \(!canAutoPrepareToday\(\)\) return false;/, "today activity preparation respects only explicit onboarding blocks");
   // hasEverOnboarded must persist across day rollover, else returning users get
   // the guide re-shown every new day (regression codex caught).
   assertNotMatches(indexHtml, /function rolloverDayIfNeeded\(dayState\) \{(?:(?!\n    \})[\s\S])*?hasEverOnboarded/, "day rollover must not reset hasEverOnboarded");
   assertMatches(indexHtml, /const priorUseSignal = Boolean\([\s\S]*saved\.initialAssessmentDone[\s\S]*saved\.lastAssessmentDay[\s\S]*saved\.onboardingDismissed[\s\S]*saved\.summaryHistory[\s\S]*saved\.logs[\s\S]*saved\.rhythmMemory\?\.recentEvents[\s\S]*if \(saved\.hasEverOnboarded === undefined \|\| \(!loaded\.hasEverOnboarded && priorUseSignal\)\) \{[\s\S]*loaded\.hasEverOnboarded = priorUseSignal;/, "loadState repairs explicit false hasEverOnboarded when prior use exists");
   // Cross-day-while-open / resume rollover follows the same rule as cold launch:
-  // auto-start unless explicit onboarding was requested.
-  assertMatches(indexHtml, /function ensureCurrentDay\(options = \{\}\)[\s\S]*?options\.showOnboarding !== false && !canAutoPrepareToday\(\)[\s\S]*?showOnboarding\(\);[\s\S]*?autoStartSessionOnOpen\(\);/, "cross-day rollover auto-starts unless explicit onboarding is active");
+  // prepare the same Today page unless explicit onboarding was requested.
+  assertMatches(indexHtml, /function ensureCurrentDay\(options = \{\}\)[\s\S]*?options\.showOnboarding !== false && !canAutoPrepareToday\(\)[\s\S]*?showOnboarding\(\);[\s\S]*?ensureTodayReadyForActivityStart\(\);/, "cross-day rollover prepares standby Today unless explicit onboarding is active");
   assertMatches(indexHtml, /function\s+completeInitialAssessment\(options = \{\}\)[\s\S]*state\.settings\.intensity\s*=\s*"quiet";[\s\S]*setIntensity\(state\.settings\.intensity,\s*\{\s*persistChange:\s*false,\s*renderChange:\s*false,\s*userChange:\s*false\s*\}\);/, "assessment completion defaults to L1 quiet");
   assertNotMatches(indexHtml, /completeInitialAssessment[\s\S]*showFirstRoundLanding\(\);/, "onboarding no longer passes through a first-round landing page");
   assertMatches(indexHtml, /options\.focusTarget\s*===\s*"panel"[\s\S]*\?\s*els\.sessionPanel/, "focus helper can target session panel");

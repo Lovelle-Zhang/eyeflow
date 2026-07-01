@@ -8717,9 +8717,9 @@
               </div>
                 <div class="state-copy">
                   <span class="state-label" id="stateBand">已专注 0 分钟</span>
-                <strong id="stateHeadline">这一轮进行中</strong>
-                <p id="stateAction">Mira 已开始计时。</p>
-                <p class="state-explain" id="stateExplain">到恢复断点我再提醒；需要停下就点暂停或休息。</p>
+                <strong id="stateHeadline">我在旁边</strong>
+                <p id="stateAction">现在先不计时。</p>
+                <p class="state-explain" id="stateExplain">有屏幕活动时，我会自动开始计时。</p>
                 <div class="state-cues" id="stateCues" aria-label="当前状态提示"></div>
                 <div class="today-flow" id="todayFlowCopy">
                   <span id="todayRhythmCopy">基于你调整过的节奏，先观察 2 轮。</span>
@@ -8759,8 +8759,8 @@
 
 	        <div class="panel timer-card" id="sessionPanel" tabindex="-1">
 	          <div class="session-card-head">
-	            <h3 id="sessionPanelTitle">这一轮已安排</h3>
-	            <span class="session-state-pill" id="sessionStatePill" data-state="idle">未开始</span>
+	            <h3 id="sessionPanelTitle">本轮节奏</h3>
+	            <span class="session-state-pill" id="sessionStatePill" data-state="idle">待命中</span>
 	          </div>
           <div class="rhythm-space">
             <div class="rhythm-guide" aria-hidden="true"></div>
@@ -8775,7 +8775,7 @@
           <div class="timer-controls">
             <button class="primary" id="startBtn" type="button">
               <svg class="small-icon" id="startBtnIcon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5v14l11-7Z"></path></svg>
-              <span id="startBtnText">开始这一轮</span>
+              <span id="startBtnText">待命</span>
             </button>
             <button class="btn-tonal" id="restSessionBtn" type="button">
               <svg class="small-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M12 2v6"></path><path d="M12 16v6"></path><path d="M2 12h6"></path><path d="M16 12h6"></path></svg>
@@ -9571,7 +9571,7 @@
     let isRunning = false;
     let startedAt = null;
     let elapsedSeconds = state.lastAssessmentDay === todayKey() ? state.elapsedSeconds || 0 : 0;
-    let sessionSource = state.sessionSource || (elapsedSeconds > 0 ? "manual-paused" : "idle");
+    let sessionSource = state.sessionSource || "idle";
     let ticker = null;
     let lastSessionTickAt = 0;
     let lastNudgeAt = state.lastNudgeAt || 0;
@@ -9583,7 +9583,6 @@
     let resetConfirmTimer = null;
     let restGuideTimer = null;
     let sessionStartHintTimer = null;
-    let todayContinuityQueued = false;
     let resetConfirmArmed = false;
     let restStartedBeforeAssessment = false;
     let forceBreakActive = false;
@@ -10141,10 +10140,9 @@
         } else {
           lastActivityRecordAt = 0;
         }
-        if (!isRunning && sessionSource !== "manual-paused") {
+        if (!isRunning) {
           if (canUseActivity && activity.isWorking) {
-            elapsedSeconds = activity.activeSeconds;
-            sessionSource = "auto";
+            startAutoTrackingFromActivity(activity);
           } else if (sessionSource === "auto") {
             elapsedSeconds = 0;
             sessionSource = "idle";
@@ -10264,8 +10262,9 @@
             ? loaded.currentDay
             : "";
         }
-	        if (!saved.sessionSource) {
-	          loaded.sessionSource = loaded.elapsedSeconds > 0 ? "manual-paused" : "idle";
+	        if (!saved.sessionSource || saved.sessionSource === "manual-paused") {
+	          loaded.sessionSource = "idle";
+	          loaded.elapsedSeconds = 0;
 	        }
 	        if (
 	          loaded.rhythmSource === "default"
@@ -10485,8 +10484,8 @@
       resetSessionClock();
       const back = returningLine();
       // Cross-day while the app is open / on resume follows the same rule as cold
-      // launch: active Today opens get zero-decision auto-start unless onboarding
-      // was explicitly forced.
+      // launch: prepare the same Today surface unless onboarding was explicitly
+      // forced. Timing resumes from the next activity update.
       if (options.showOnboarding !== false && !canAutoPrepareToday()) {
         if (options.toast) {
           showToast(back ? `Mira：${back}` : "Mira：新的一天开始了，先记录一下今天的状态。");
@@ -10495,9 +10494,9 @@
         return true;
       }
       if (options.toast) {
-        showToast(back ? `Mira：${back}` : "Mira：新的一天，我先接着为你计时。");
+        showToast(back ? `Mira：${back}` : "Mira：新的一天，我在旁边等你开始动。");
       }
-      autoStartSessionOnOpen();
+      ensureTodayReadyForActivityStart();
       return true;
     }
 
@@ -10511,24 +10510,18 @@
       if (!hasAssessedToday()) {
         // Day rolled over earlier (lastAssessmentDay cleared) but we're already on
         // today's key, so ensureCurrentDay() didn't fire this time. Route through the
-        // same rule as launch instead of stranding the today view on an empty idle
-        // hero: normal opens auto-start, explicit onboarding remains blocked.
+        // same rule as launch instead of stranding the today view on a start-card
+        // hero: normal opens prepare standby, explicit onboarding remains blocked.
         resetSessionClock();
         if (!canAutoPrepareToday()) {
           showOnboarding();
         } else {
-          autoStartSessionOnOpen();
+          ensureTodayReadyForActivityStart();
         }
         render();
         persist();
         return;
       }
-      // Returning to an assessed day with no live session (most often an
-      // inactivity gap reset the clock while away): auto-start the next round so
-      // the today view never sits idle — same "open = start, no decision cost"
-      // intent as launch. autoStartSessionOnOpen() no-ops if already running /
-      // auto-tracking / manually paused.
-      autoStartSessionOnOpen();
       render();
       persist();
     }
@@ -10633,9 +10626,10 @@
         restartVisibleBreakTimerAfterResume();
         if (isRunning && lastSessionTickAt && Date.now() - lastSessionTickAt > SYSTEM_SESSION_GAP_MS) {
           completeSessionForSystemRest("system-inactive-gap");
-          // The gap was just recorded as a rest and the clock reset to idle; the
-          // user is back, so start the next round instead of leaving today idle.
-          autoStartSessionOnOpen();
+          // The gap was just recorded as rest and the clock reset to idle. The
+          // next activity update will start timing if the user is working again.
+          render();
+          persist();
           return;
         }
         if (isRunning) lastSessionTickAt = Date.now();
@@ -10759,11 +10753,13 @@
 
     function startSession() {
       if (!hasAssessedToday()) {
-        resetSessionClock();
-        showOnboarding();
-        render();
-        persist();
-        return;
+        if (!ensureTodayReadyForActivityStart()) {
+          resetSessionClock();
+          showOnboarding();
+          render();
+          persist();
+          return;
+        }
       }
       if (isRunning) return;
       const sourceMode = sessionSource === "auto" && elapsedSeconds > 0 ? "auto" : "manual";
@@ -10792,7 +10788,8 @@
     }
 
     function pauseAutoTracking() {
-      sessionSource = "manual-paused";
+      elapsedSeconds = 0;
+      sessionSource = "idle";
       lastActivityRecordAt = 0;
       persist();
       render();
@@ -10806,7 +10803,10 @@
       window.clearInterval(ticker);
       ticker = null;
       lastSessionTickAt = 0;
-      sessionSource = "manual-paused";
+      elapsedSeconds = 0;
+      startedAt = null;
+      sessionSource = "idle";
+      lastActivityRecordAt = 0;
       persist();
       render();
     }
@@ -10892,12 +10892,26 @@
       return Boolean(hasAssessedToday() && !isRunning && sessionSource === "auto" && elapsedSeconds > 0);
     }
 
+    function startAutoTrackingFromActivity(activity) {
+      if (!ensureTodayReadyForActivityStart()) return false;
+      if (!activity?.isWorking) return false;
+      if (forceBreakActive || forceQuietActive() || els.onboardingOverlay.classList.contains("show")) return false;
+      const detectedAt = Number(activity.detectedAt || Date.now());
+      const activeSeconds = Math.max(1, Number(activity.activeSeconds || 0));
+      elapsedSeconds = Math.max(elapsedSeconds, activeSeconds);
+      startedAt = null;
+      sessionSource = "auto";
+      lastActivityRecordAt = detectedAt;
+      clearFirstRoundLanding();
+      return true;
+    }
+
     function forceQuietActive(now = Date.now()) {
       return Number(state.forceEscapeUntil || 0) > now;
     }
 
     function isManualPaused() {
-      return sessionSource === "manual-paused";
+      return false;
     }
 
     function canAutoPrepareToday() {
@@ -10910,19 +10924,8 @@
       if (!hasAssessedToday() && !canAutoPrepareToday()) return "needs-onboarding";
       if (forceBreakActive || els.breakOverlay.classList.contains("show")) return "break-active";
       if (forceQuietActive()) return "force-quiet";
-      if (isManualPaused()) return "manual-paused";
-      if (isRunning || isAutoTracking() || elapsedSeconds > 0) return "running";
-      return "auto-startable-idle";
-    }
-
-    function isTodayContinuityBlocked(todayPhase = deriveTodayPhase()) {
-      return [
-        "needs-onboarding",
-        "break-active",
-        "force-quiet",
-        "manual-paused",
-        "running"
-      ].includes(todayPhase);
+      if (isRunning || isAutoTracking()) return "running";
+      return "idle";
     }
 
     function currentSessionState({ resting = false } = {}) {
@@ -11230,7 +11233,7 @@
           showToast("Mira：预览已退出。你可以再调整提醒边界。");
         } else {
           state.forceEscapeUntil = Date.now() + SNOOZE_MINUTES * 60 * 1000;
-          sessionSource = elapsedSeconds > 0 ? "manual-paused" : "idle";
+          sessionSource = "idle";
           appendDataEvent("recovery_event", {
             startedAt: currentBreakStartedAt || "",
             endedAt: new Date().toISOString(),
@@ -11661,7 +11664,7 @@
 
     function handlePrimaryAction() {
       if (!hasAssessedToday()) {
-        if (!ensureTodayReadyForAutoStart()) {
+        if (!ensureTodayReadyForActivityStart()) {
           showOnboarding();
           return;
         }
@@ -11677,10 +11680,10 @@
 	      focusSessionPanel({ focusTarget: "panel" });
 	    }
 
-    function ensureTodayReadyForAutoStart() {
+    function ensureTodayReadyForActivityStart() {
       if (hasAssessedToday()) return true;
-      // Active launches auto-fill today's lightweight state before starting; an
-      // explicit onboarding/debug path is the only blocker here.
+      // Active launches auto-fill today's lightweight state; the actual clock
+      // starts only from a later activity signal.
       if (!canAutoPrepareToday()) return false;
       state.currentDay = todayKey();
       state.lastAssessmentDay = todayKey();
@@ -11695,28 +11698,6 @@
       setRangeFill(els.focusTarget);
       setRangeFill(els.breakTarget);
       return true;
-    }
-
-    function queueTodayContinuity(reason = "render") {
-      if (todayContinuityQueued) return;
-      if (deriveTodayPhase() !== "auto-startable-idle") return;
-      todayContinuityQueued = true;
-      queueMicrotask(() => {
-        todayContinuityQueued = false;
-        if (deriveTodayPhase() !== "auto-startable-idle") return;
-        autoStartSessionOnOpen();
-        if (deriveTodayPhase() === "auto-startable-idle") return;
-        render();
-        persist();
-      });
-    }
-
-    function autoStartSessionOnOpen() {
-      if (!ensureTodayReadyForAutoStart()) return;
-      const todayPhase = deriveTodayPhase();
-      if (isTodayContinuityBlocked(todayPhase)) return;
-      if (todayPhase !== "auto-startable-idle") return;
-      startSession();
     }
 
     function focusSessionPanel(options = {}) {
@@ -13036,9 +13017,6 @@
       els.navButtons.forEach((button) => {
         button.classList.toggle("active", button.dataset.viewTarget === targetId);
       });
-      if (targetId === "todayView") {
-        queueTodayContinuity("switch-view");
-      }
       // The topbar subtitle is hidden only on Today (today-state-focus). Sync the
       // class here so the subtitle appears in the SAME frame as the page title on
       // navigation — otherwise it stays display:none (carried over from Today)
@@ -14093,12 +14071,6 @@
       const rhythmPlan = rhythmSuggestion(load);
       recordRhythmRecommendation(rhythmPlan);
       const todayPhase = deriveTodayPhase();
-      if (todayPhase === "auto-startable-idle") {
-        if (!document.querySelector("#todayView").hidden) {
-          queueTodayContinuity("render");
-          return;
-        }
-      }
       const mins = Math.floor(elapsedSeconds / 60);
       const secs = elapsedSeconds % 60;
 		      const restDue = computeRestDue({
@@ -14108,7 +14080,7 @@
 	        focusMinutes: Number(els.focusTarget.value)
 		      });
 		      document.body.classList.toggle("today-state-focus", !document.querySelector("#todayView").hidden);
-		      document.body.classList.toggle("session-active", todayPhase === "running" || todayPhase === "break-active");
+		      document.body.classList.toggle("session-active", ["running", "break-active", "idle"].includes(todayPhase));
 
 	      els.timerText.textContent = `${String(mins).padStart(2, "0")}:${String(secs).padStart(2, "0")}`;
       els.timerRing.style.setProperty("--progress", `${progress}%`);
@@ -14163,6 +14135,7 @@
       els.sessionStatePill.dataset.state = controls.pillState;
       els.startBtnText.textContent = controls.startText;
       els.startBtn.title = controls.startTitle;
+      els.startBtn.disabled = Boolean(controls.startDisabled);
       els.startBtnIcon.innerHTML = sessionIcons[controls.startIcon] || sessionIcons.play;
       // Kept for compatibility; auto/manual now render as one formal round.
       els.startBtn.classList.toggle("is-mode", Boolean(controls.startIsMode));
@@ -14254,15 +14227,6 @@
           renderStateCues([]);
           els.primaryActionBtn.hidden = true;
           break;
-        case "manual-paused":
-          els.stateHeadline.textContent = "这一轮已暂停";
-          els.stateAction.textContent = "Mira 会等你回来。";
-          els.stateExplain.textContent = "点继续后，我再接着陪你守这一轮。";
-          renderStateCues([]);
-          els.primaryActionBtn.hidden = false;
-          els.primaryActionBtn.dataset.intent = "start";
-          els.primaryActionBtn.textContent = "继续这一轮";
-          break;
         case "needs-onboarding":
           els.stateHeadline.textContent = "先看一下今天状态";
           els.stateAction.textContent = "Mira 需要知道今天的眼睛状态。";
@@ -14272,11 +14236,11 @@
           els.primaryActionBtn.dataset.intent = "start";
           els.primaryActionBtn.textContent = "开始这一轮";
           break;
-        case "auto-startable-idle":
+        case "idle":
         default:
-          els.stateHeadline.textContent = "Mira 正在接上这一轮";
-          els.stateAction.textContent = "马上开始计时。";
-          els.stateExplain.textContent = "如果这句话停住不动，就是 continuity guard 没有接上。";
+          els.stateHeadline.textContent = "我在旁边";
+          els.stateAction.textContent = "现在先不计时。";
+          els.stateExplain.textContent = "有屏幕活动时，我会自动开始计时。";
           renderStateCues([]);
           els.primaryActionBtn.hidden = true;
           break;
@@ -15882,7 +15846,7 @@
       };
     };
 
-    autoStartSessionOnOpen();
+    ensureTodayReadyForActivityStart();
     render();
     maybeShowOnboarding();
 

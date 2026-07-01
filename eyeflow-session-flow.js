@@ -73,16 +73,17 @@ window.EyeFlowSessionFlow = (() => {
     }
 
 	    return {
-	      panelTitle: currentState === "paused" ? "这一轮已暂停" : "这一轮已安排",
-	      pillText: !assessedToday ? "已安排" : currentState === "paused" ? "已暂停" : "未开始",
+	      panelTitle: "本轮节奏",
+	      pillText: !assessedToday ? "待命中" : currentState === "paused" ? "待命中" : "待命中",
       pillState: !assessedToday ? "idle" : currentState,
-      startText: !assessedToday ? "开始这一轮" : currentState === "paused" ? "继续这一轮" : "开始这一轮",
+      startText: "待命",
       startTitle: !assessedToday
-        ? "开始这一轮"
+        ? "有屏幕活动时自动开始计时"
         : currentState === "paused"
-            ? "继续当前这一轮"
-            : "开始这一轮",
+            ? "有屏幕活动时自动开始计时"
+            : "有屏幕活动时自动开始计时",
       startIcon: "play",
+      startDisabled: true,
       startIsMode: false,
       restText,
       restTitle

@@ -429,7 +429,7 @@ function main() {
   assertIncludes(indexHtml, "第一条恢复样本已建立。", "installed recovery records first sample value");
   assertMatches(indexHtml, /\.timer-card\s*\{[\s\S]*gap:\s*var\(--ef-space-5\);[\s\S]*padding:\s*var\(--ef-space-7\) var\(--ef-space-8\);[\s\S]*border-radius:\s*var\(--ef-radius-md\);/, "installed session card uses tokenized rhythm-panel structure");
   assertMatches(indexHtml, /:root\[data-theme="dark"\] \.symptom:focus-within\s*\{[\s\S]*background:\s*var\(--panel\);[\s\S]*box-shadow:\s*0 0 0 3px rgba\(79,\s*201,\s*156,\s*0\.12\);/, "installed quick-log symptom focus stays dark-readable in night mode");
-  assertIncludes(indexHtml, '<h3 id="sessionPanelTitle">这一轮已安排</h3>', "installed session panel title uses current-round language");
+  assertIncludes(indexHtml, '<h3 id="sessionPanelTitle">本轮节奏</h3>', "installed session panel title uses one Today rhythm surface");
   assertMatches(indexHtml, /els\.sessionPanelTitle\.textContent\s*=\s*controls\.panelTitle;/, "installed session panel title follows session state");
   assertIncludes(sessionFlowJs, 'function sessionState({', "installed session flow has a single normalized state model");
   assertIncludes(sessionFlowJs, 'if (isRunning || autoTracking) return "running";', "installed auto tracking normalizes to the running state");
@@ -439,7 +439,7 @@ function main() {
   assertMatches(sessionFlowJs, /if \(currentState === "running"\) \{[\s\S]*panelTitle: "本轮节奏"[\s\S]*pillText: "计时中"[\s\S]*startText: "暂停"/, "installed auto-tracking controls render as a unified timing state");
   assertIncludes(sessionFlowJs, "暂停当前计时", "installed auto-tracking start title follows the timing state");
   assertMatches(indexHtml, /function\s+toggleSession\(\)\s*\{[\s\S]*if \(isAutoTracking\(\)\) \{[\s\S]*pauseAutoTracking\(\);[\s\S]*return;[\s\S]*startSession\(\);/, "installed auto-tracking primary action pauses the current automatic round instead of starting another state");
-  assertMatches(indexHtml, /function\s+pauseAutoTracking\(\)[\s\S]*sessionSource = "manual-paused";[\s\S]*lastActivityRecordAt = 0;[\s\S]*persist\(\);[\s\S]*render\(\);/, "installed auto-tracking pause preserves explicit pause even at zero seconds");
+  assertMatches(indexHtml, /function\s+pauseAutoTracking\(\)[\s\S]*elapsedSeconds = 0;[\s\S]*sessionSource = "idle";[\s\S]*lastActivityRecordAt = 0;[\s\S]*persist\(\);[\s\S]*render\(\);/, "installed auto-tracking pause returns to idle standby");
   assertNotIncludes(indexHtml, "手动从 00:00", "installed auto-tracking hint avoids internal reset wording");
   assertNotIncludes(indexHtml, "可切到手动专注", "installed auto-tracking status no longer asks users to choose a mode");
   assertMatches(indexHtml, /function\s+startSession\(\)[\s\S]*?const sourceMode = sessionSource === "auto" && elapsedSeconds > 0 \? "auto" : "manual";[\s\S]*?startedAt = now - elapsedSeconds \* 1000;[\s\S]*lastSessionTickAt = now;/, "installed continuing an automatic round preserves accumulated time and resets the active tick baseline");
@@ -454,11 +454,7 @@ function main() {
     /function\s+finishForceBreak\(payload = \{\}\)[\s\S]*state\.forceEscapeUntil = Date\.now\(\) \+ SNOOZE_MINUTES \* 60 \* 1000;[\s\S]*render\(\);[\s\S]*persist\(\);/,
     "installed force escape quiet window is preserved through render"
   );
-  assertMatches(
-    indexHtml,
-    /function\s+switchView\(targetId\)[\s\S]*if \(targetId === "todayView"\) \{[\s\S]*queueTodayContinuity\("switch-view"\);[\s\S]*\}/,
-    "installed Today navigation invokes the central continuity guard"
-  );
+  assertNotIncludes(indexHtml, "queueTodayContinuity", "installed Today navigation no longer starts timing just by rendering");
   assertMatches(indexHtml, /\.timer-inner span\s*\{[\s\S]*white-space:\s*nowrap;[\s\S]*text-overflow:\s*ellipsis;/, "installed timer hint stays on one line");
   assertMatches(indexHtml, /\.session-state-pill\s*\{[\s\S]*width:\s*fit-content;[\s\S]*border:\s*0;[\s\S]*border-radius:\s*var\(--ef-radius-md\);[\s\S]*min-height:\s*var\(--ef-control-sm\);[\s\S]*background:\s*var\(--mode-pill-bg\);/, "installed mode/state pill is the low-key tonal sage pill (no border)");
   assertMatches(indexHtml, /\.timer-card > \.timer-controls \.primary,[\s\S]*\.timer-card > \.timer-controls \.btn-tonal\s*\{[\s\S]*min-height:\s*var\(--ef-control-lg\);/, "installed session timer controls (primary + ② tonal) go large at 40px");
@@ -515,26 +511,26 @@ function main() {
   assertMatches(indexHtml, /\.state-center \.timer-card \.session-card-head\s*\{[\s\S]*justify-items:\s*start;[\s\S]*align-content:\s*center;/, "installed session workflow header aligns status with the title");
   assertMatches(indexHtml, /\.state-center \.timer-card \.session-settings\s*\{[\s\S]*grid-column:\s*1;[\s\S]*grid-row:\s*2;/, "installed folded rhythm settings stay with the workflow title");
   assertMatches(indexHtml, /\.state-center \.timer-card \.session-settings\[open\]\s*\{[\s\S]*grid-column:\s*1 \/ -1;/, "installed expanded rhythm settings can use the full workflow width");
-  assertMatches(indexHtml, /body:not\(\.session-active\) #todayView \.state-center \.timer-card\s*\{[\s\S]*display:\s*none;/, "installed today hides timer panel before focus starts");
+  assertMatches(indexHtml, /body:not\(\.session-active\) #todayView \.state-center \.timer-card\s*\{[\s\S]*display:\s*none;/, "installed onboarding-only layout can hide timer panel");
   assertNotMatches(indexHtml, /#todayView \.health-signals/, "installed today removes the metric strip instead of separately hiding it");
-  assertMatches(indexHtml, /body:not\(\.session-active\) #todayView details\.quick-log-panel,[\s\S]*body:not\(\.session-active\) #todayView \.daily-summary\s*\{[\s\S]*display:\s*none;/, "installed today hides secondary panels before focus starts");
-  assertMatches(indexHtml, /function\s+ensureTodayReadyForAutoStart\(\)[\s\S]*state\.lastAssessmentDay = todayKey\(\);[\s\S]*state\.initialAssessmentDone = true;[\s\S]*state\.onboardingDismissed = true;[\s\S]*return true;/, "installed today creates a lightweight daily state before auto-starting");
-  assertMatches(indexHtml, /function\s+autoStartSessionOnOpen\(\)[\s\S]*if \(!ensureTodayReadyForAutoStart\(\)\) return;[\s\S]*const todayPhase = deriveTodayPhase\(\);[\s\S]*if \(isTodayContinuityBlocked\(todayPhase\)\) return;[\s\S]*if \(todayPhase !== "auto-startable-idle"\) return;[\s\S]*startSession\(\);/, "installed today auto-starts timing only from the central auto-startable idle phase");
-  assertMatches(indexHtml, /autoStartSessionOnOpen\(\);\s*render\(\);[\s\S]*maybeShowOnboarding\(\);/, "installed app starts timing before the first Today render");
+  assertMatches(indexHtml, /body:not\(\.session-active\) #todayView details\.quick-log-panel,[\s\S]*body:not\(\.session-active\) #todayView \.daily-summary\s*\{[\s\S]*display:\s*none;/, "installed onboarding-only layout can hide secondary panels");
+  assertMatches(indexHtml, /function\s+ensureTodayReadyForActivityStart\(\)[\s\S]*state\.lastAssessmentDay = todayKey\(\);[\s\S]*state\.initialAssessmentDone = true;[\s\S]*state\.onboardingDismissed = true;[\s\S]*return true;/, "installed today creates a lightweight daily state before activity-driven timing");
+  assertNotIncludes(indexHtml, "autoStartSessionOnOpen", "installed app no longer starts timing before the first Today render");
+  assertMatches(indexHtml, /function\s+startAutoTrackingFromActivity\(activity\)[\s\S]*if \(!ensureTodayReadyForActivityStart\(\)\) return false;[\s\S]*if \(!activity\?\.isWorking\) return false;[\s\S]*sessionSource = "auto";/, "installed screen activity starts automatic timing from idle");
   assertMatches(
     indexHtml,
-    /function\s+deriveTodayPhase\(\)\s*\{[\s\S]*return "needs-onboarding";[\s\S]*return "break-active";[\s\S]*return "force-quiet";[\s\S]*return "manual-paused";[\s\S]*return "running";[\s\S]*return "auto-startable-idle";/,
-    "installed Today phase centrally enumerates all display and continuity states"
+    /function\s+deriveTodayPhase\(\)\s*\{[\s\S]*return "needs-onboarding";[\s\S]*return "break-active";[\s\S]*return "force-quiet";[\s\S]*return "running";[\s\S]*return "idle";/,
+    "installed Today phase centrally enumerates display states"
   );
   assertMatches(
     indexHtml,
-    /function\s+render\(\)\s*\{[\s\S]*const todayPhase = deriveTodayPhase\(\);[\s\S]*document\.body\.classList\.toggle\("session-active", todayPhase === "running" \|\| todayPhase === "break-active"\);/,
-    "installed Today active layout follows the central phase"
+    /function\s+render\(\)\s*\{[\s\S]*const todayPhase = deriveTodayPhase\(\);(?![\s\S]*queueTodayContinuity\("render"\))[\s\S]*document\.body\.classList\.toggle\("session-active", \["running", "break-active", "idle"\]\.includes\(todayPhase\)\);/,
+    "installed Today keeps one surface and never starts timing by rendering"
   );
   assertMatches(
     indexHtml,
-    /function\s+renderStateCenter\(load, todayPhase = deriveTodayPhase\(\)\)[\s\S]*if \(todayPhase === "force-quiet"\)[\s\S]*els\.stateHeadline\.textContent = "Mira 先安静几分钟";[\s\S]*case "running":[\s\S]*els\.stateHeadline\.textContent = "这一轮进行中";[\s\S]*case "manual-paused":[\s\S]*els\.stateHeadline\.textContent = "这一轮已暂停";/,
-    "installed Today hero copy is truthful for running, manual pause, and force quiet"
+    /function\s+renderStateCenter\(load, todayPhase = deriveTodayPhase\(\)\)[\s\S]*if \(todayPhase === "force-quiet"\)[\s\S]*els\.stateHeadline\.textContent = "Mira 先安静几分钟";[\s\S]*case "running":[\s\S]*els\.stateHeadline\.textContent = "这一轮进行中";[\s\S]*case "idle":[\s\S]*els\.stateHeadline\.textContent = "我在旁边";/,
+    "installed Today hero copy is truthful for running, idle standby, and force quiet"
   );
   assertNotMatches(
     indexHtml,
@@ -554,7 +550,7 @@ function main() {
   assertIncludes(indexHtml, 'id="breakTarget" type="range" min="20" max="240" step="10" value="120"', "installed today rest control uses the 20–240s range (step 10) so 休息长度 drives the actual rest");
   assertMatches(indexHtml, /\.today-plan\s*\{[\s\S]*display:\s*none;/, "installed today plan is downgraded out of the first screen");
   assertIncludes(indexHtml, '<span class="state-label" id="stateBand">已专注 0 分钟</span>', "installed state band shows focused time without a pseudo score");
-  assertIncludes(indexHtml, '<strong id="stateHeadline">这一轮进行中</strong>', "installed today opens directly in the running state");
+  assertIncludes(indexHtml, '<strong id="stateHeadline">我在旁边</strong>', "installed today opens directly on the unified standby surface");
   assertIncludes(indexHtml, '<button class="primary" id="primaryActionBtn" type="button" data-intent="start" hidden="">开始这一轮 →</button>', "installed today keeps the duplicate hero start hidden by default");
   assertIncludes(indexHtml, "调整提醒边界", "installed settings folds advanced reminder boundaries behind a quiet disclosure");
   assertIncludes(indexHtml, 'id="currentIntensityValue">L1 安静 <span>最低提醒等级</span></strong>', "installed settings first screen shows current mode with context");

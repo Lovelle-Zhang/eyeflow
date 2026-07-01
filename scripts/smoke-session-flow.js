@@ -92,7 +92,7 @@ function main() {
   );
   assertMatches(
     indexHtml,
-    /function\s+finishForceBreak\(payload = \{\}\)[\s\S]*state\.forceEscapeUntil = Date\.now\(\) \+ SNOOZE_MINUTES \* 60 \* 1000;[\s\S]*sessionSource = elapsedSeconds > 0 \? "manual-paused" : "idle";[\s\S]*render\(\);[\s\S]*persist\(\);/,
+    /function\s+finishForceBreak\(payload = \{\}\)[\s\S]*state\.forceEscapeUntil = Date\.now\(\) \+ SNOOZE_MINUTES \* 60 \* 1000;[\s\S]*sessionSource = "idle";[\s\S]*render\(\);[\s\S]*persist\(\);/,
     "force escape keeps a quiet window that the central guard must respect"
   );
   assertMatches(
@@ -110,38 +110,37 @@ function main() {
     /function\s+handlePrimaryAction\(\)\s*\{[\s\S]*clearFirstRoundLanding\(\);[\s\S]*startSession\(\);[\s\S]*focusSessionPanel\(\{\s*focusTarget:\s*"panel"\s*\}\);/,
     "fallback hero primary action starts the workflow when shown"
   );
-  assertMatches(indexHtml, /function\s+ensureTodayReadyForAutoStart\(\)[\s\S]*state\.lastAssessmentDay = todayKey\(\);[\s\S]*state\.initialAssessmentDone = true;[\s\S]*state\.onboardingDismissed = true;[\s\S]*return true;/, "today creates a lightweight daily state before auto-starting");
-  assertMatches(indexHtml, /function\s+autoStartSessionOnOpen\(\)[\s\S]*if \(!ensureTodayReadyForAutoStart\(\)\) return;[\s\S]*const todayPhase = deriveTodayPhase\(\);[\s\S]*if \(isTodayContinuityBlocked\(todayPhase\)\) return;[\s\S]*if \(todayPhase !== "auto-startable-idle"\) return;[\s\S]*startSession\(\);/, "today auto-starts timing only from the central auto-startable idle phase");
-  assertMatches(indexHtml, /autoStartSessionOnOpen\(\);\s*render\(\);[\s\S]*maybeShowOnboarding\(\);/, "today starts timing before the first render");
+  assertMatches(indexHtml, /function\s+ensureTodayReadyForActivityStart\(\)[\s\S]*state\.lastAssessmentDay = todayKey\(\);[\s\S]*state\.initialAssessmentDone = true;[\s\S]*state\.onboardingDismissed = true;[\s\S]*return true;/, "today creates a lightweight daily state before activity-driven timing");
+  assertNotIncludes(indexHtml, "autoStartSessionOnOpen", "today no longer starts timing just because the page rendered");
   assertMatches(
     indexHtml,
-    /function\s+deriveTodayPhase\(\)\s*\{[\s\S]*return "needs-onboarding";[\s\S]*return "break-active";[\s\S]*return "force-quiet";[\s\S]*return "manual-paused";[\s\S]*return "running";[\s\S]*return "auto-startable-idle";/,
-    "today phase centrally enumerates onboarding, break, force quiet, manual pause, running, and auto-startable idle"
+    /function\s+deriveTodayPhase\(\)\s*\{[\s\S]*return "needs-onboarding";[\s\S]*return "break-active";[\s\S]*return "force-quiet";[\s\S]*return "running";[\s\S]*return "idle";/,
+    "today phase centrally enumerates onboarding, break, force quiet, running, and idle"
   );
   assertMatches(
     indexHtml,
-    /function\s+canAutoPrepareToday\(\)[\s\S]*if \(hasAssessedToday\(\)\) return true;[\s\S]*if \(forceOnboarding\) return false;[\s\S]*return true;[\s\S]*function\s+deriveTodayPhase\(\)[\s\S]*if \(!hasAssessedToday\(\) && !canAutoPrepareToday\(\)\) return "needs-onboarding";[\s\S]*return "auto-startable-idle";/,
-    "active Today opens auto-prepare even on clean data instead of stopping on the start card"
+    /function\s+startAutoTrackingFromActivity\(activity\)[\s\S]*if \(!ensureTodayReadyForActivityStart\(\)\) return false;[\s\S]*if \(!activity\?\.isWorking\) return false;[\s\S]*sessionSource = "auto";/,
+    "screen activity is the only automatic path from idle into timing"
   );
   assertMatches(
     indexHtml,
-    /function\s+isTodayContinuityBlocked\([\s\S]*?\)\s*\{[\s\S]*"needs-onboarding"[\s\S]*"break-active"[\s\S]*"force-quiet"[\s\S]*"manual-paused"/,
-    "today continuity has explicit blocked reasons"
+    /function\s+pauseSession\(endedBy = "paused"\)[\s\S]*closeFocusSession\(endedBy\);[\s\S]*elapsedSeconds = 0;[\s\S]*sessionSource = "idle";/,
+    "pausing returns Today to idle standby instead of a manual-paused blocker"
   );
   assertMatches(
     indexHtml,
-    /let\s+todayContinuityQueued\s*=\s*false;[\s\S]*function\s+queueTodayContinuity\([^)]*\)\s*\{[\s\S]*if \(todayContinuityQueued\) return;[\s\S]*queueMicrotask\(\(\) => \{[\s\S]*if \(deriveTodayPhase\(\) !== "auto-startable-idle"\) return;[\s\S]*autoStartSessionOnOpen\(\);[\s\S]*render\(\);[\s\S]*persist\(\);/,
-    "today continuity queues auto-start outside the current render to avoid re-entrant rendering"
+    /if \(!isRunning\) \{[\s\S]*if \(canUseActivity && activity\.isWorking\) \{[\s\S]*startAutoTrackingFromActivity\(activity\);/,
+    "activity updates restart timing from idle when the screen is active"
   );
   assertMatches(
     indexHtml,
-    /function\s+render\(\)\s*\{[\s\S]*const todayPhase = deriveTodayPhase\(\);[\s\S]*if \(todayPhase === "auto-startable-idle"\) \{[\s\S]*queueTodayContinuity\("render"\);[\s\S]*return;[\s\S]*document\.body\.classList\.toggle\("session-active", todayPhase === "running" \|\| todayPhase === "break-active"\);/,
-    "render derives session-active from todayPhase and exits when continuity should start"
+    /function\s+render\(\)\s*\{[\s\S]*const todayPhase = deriveTodayPhase\(\);(?![\s\S]*queueTodayContinuity\("render"\))[\s\S]*document\.body\.classList\.toggle\("session-active", \["running", "break-active", "idle"\]\.includes\(todayPhase\)\);/,
+    "render keeps one Today surface and never starts timing by rendering"
   );
   assertMatches(
     indexHtml,
-    /function\s+switchView\(targetId\)[\s\S]*if \(targetId === "todayView"\) \{[\s\S]*queueTodayContinuity\("switch-view"\);[\s\S]*\}/,
-    "switching back to Today participates in the central continuity guard"
+    /case "idle":[\s\S]*els\.stateHeadline\.textContent = "我在旁边";[\s\S]*有屏幕活动时，我会自动开始计时。[\s\S]*els\.primaryActionBtn\.hidden = true;/,
+    "idle is a standby state on the same Today page, not a start page"
   );
   assertNotMatches(
     indexHtml,
@@ -224,8 +223,8 @@ function main() {
 	  );
 	  assertEqual(
 	    sessionFlow.sessionControlView({ isRunning: false, assessedToday: true }).panelTitle,
-	    "这一轮已安排",
-	    "planned session panel title"
+	    "本轮节奏",
+	    "idle session keeps the same panel title"
 	  );
   assertEqual(
     sessionFlow.sessionControlView({ isRunning: true, restDue: true, restSeconds: 150 }).restText,
@@ -234,13 +233,13 @@ function main() {
   );
   assertEqual(
     sessionFlow.sessionControlView({ assessedToday: false }).startText,
-    "开始这一轮",
-    "unassessed start button"
+    "待命",
+    "unassessed standby button"
   );
   assertEqual(
     sessionFlow.sessionControlView({ assessedToday: false }).pillText,
-    "已安排",
-    "unassessed pill stays arranged instead of calibration-led"
+    "待命中",
+    "unassessed pill stays in standby"
   );
   assertEqual(
     sessionFlow.sessionControlView({ assessedToday: true, autoTracking: true }).startText,
@@ -279,8 +278,8 @@ function main() {
   );
   assertEqual(
     sessionFlow.sessionControlView({ assessedToday: true, paused: true }).startText,
-    "继续这一轮",
-    "paused start button"
+    "待命",
+    "paused state falls back to standby"
   );
 
   assertEqual(sessionFlow.stageMiraView({ load: 80 }).mood, "rest", "high load Mira mood");
