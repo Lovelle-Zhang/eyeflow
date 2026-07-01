@@ -10216,6 +10216,7 @@
         },
         onboardingDismissed: false,
         initialAssessmentDone: false,
+        hasEverOnboarded: false,
         lastAssessmentDay: "",
         rhythmSource: "default",
         rhythmMemory: {
@@ -10273,6 +10274,20 @@
 	        ) {
 	          loaded.focusTarget = 50;
 	        }
+        // hasEverOnboarded is the persistent, cross-day "completed the guide at
+        // least once" signal (rollover resets the per-day initialAssessmentDone, so
+        // it can't gate first-run). Migrate existing users from any sign of prior
+        // use so an update never re-shows the guide; a genuine fresh install stays
+        // false and sees it.
+        if (saved.hasEverOnboarded === undefined) {
+          loaded.hasEverOnboarded = Boolean(
+            saved.initialAssessmentDone
+            || saved.lastAssessmentDay
+            || (Array.isArray(saved.summaryHistory) && saved.summaryHistory.length)
+            || (Array.isArray(saved.logs) && saved.logs.length)
+            || (Array.isArray(saved.rhythmMemory?.recentEvents) && saved.rhythmMemory.recentEvents.length)
+          );
+        }
         repairStaleOpenFocusSession(loaded);
 	        return loaded;
       } catch {
@@ -10465,13 +10480,21 @@
       const rolledOver = rolloverDayIfNeeded(state);
       if (!rolledOver) return false;
       resetSessionClock();
-      if (options.toast) {
-        const back = returningLine();
-        showToast(back ? `Mira：${back}` : "Mira：新的一天开始了，先记录一下今天的状态。");
-      }
-      if (options.showOnboarding !== false) {
+      const back = returningLine();
+      // Cross-day while the app is open / on resume must follow the same rule as
+      // cold launch: only a never-onboarded user sees the guide; a returning user
+      // gets zero-decision auto-start for the new day, not a re-onboard.
+      if (options.showOnboarding !== false && !state.hasEverOnboarded) {
+        if (options.toast) {
+          showToast(back ? `Mira：${back}` : "Mira：新的一天开始了，先记录一下今天的状态。");
+        }
         showOnboarding();
+        return true;
       }
+      if (options.toast) {
+        showToast(back ? `Mira：${back}` : "Mira：新的一天，我先接着为你计时。");
+      }
+      autoStartSessionOnOpen();
       return true;
     }
 
@@ -10689,6 +10712,7 @@
       const analysis = computeEyeAnalysis({ sampleCount: 1 });
       const load = analysis.load;
       state.initialAssessmentDone = true;
+      state.hasEverOnboarded = true;
       state.onboardingDismissed = true;
       state.lastAssessmentDay = todayKey();
       recordOnboardingEvent("quiet_entry_started", {
@@ -11610,9 +11634,16 @@
     function ensureTodayReadyForAutoStart() {
       if (hasAssessedToday()) return true;
       if (forceOnboarding) return false;
+      // Genuine first-ever open must see the guide, not be silently auto-assessed
+      // and auto-started (that swallowed onboarding, since init runs auto-start
+      // before maybeShowOnboarding). Gate on the persistent hasEverOnboarded, NOT
+      // initialAssessmentDone — the latter is reset every day by rollover, which
+      // would re-show the guide to returning users each new day.
+      if (!state.hasEverOnboarded) return false;
       state.currentDay = todayKey();
       state.lastAssessmentDay = todayKey();
       state.initialAssessmentDone = true;
+      state.hasEverOnboarded = true;
       state.onboardingDismissed = true;
       state.symptoms = normalizeSymptoms(state.symptoms || ONBOARDING_PRESETS.fine);
       if (!Number(state.focusTarget)) state.focusTarget = 50;
@@ -15667,6 +15698,7 @@
       state.lastAssessmentDay = todayKey();
       state.onboardingDismissed = true;
       state.initialAssessmentDone = true;
+      state.hasEverOnboarded = true;
       elapsedSeconds = Math.max(Number(elapsedSeconds || 0), 75);
       startedAt = null;
       isRunning = false;

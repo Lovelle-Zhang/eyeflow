@@ -251,6 +251,15 @@ function main() {
   // auto-starts a round so today never sits idle.
   assertNotMatches(indexHtml, /els\.stateHeadline\.textContent\s*=\s*"准备开始这一轮"/, "today never reintroduces a 准备开始 preparation headline");
   assertMatches(indexHtml, /function\s+handleResumeCheck\(\)[\s\S]*?autoStartSessionOnOpen\(\);/, "returning to the app auto-starts a round so today never sits idle");
+  // First-ever open must show the guide, not be silently auto-assessed + auto-started
+  // (init runs auto-start before maybeShowOnboarding, so the gate must bail here).
+  assertMatches(indexHtml, /function\s+ensureTodayReadyForAutoStart\(\)[\s\S]*?if \(!state\.hasEverOnboarded\) return false;/, "genuine first open shows onboarding instead of auto-starting past it");
+  // hasEverOnboarded must persist across day rollover, else returning users get
+  // the guide re-shown every new day (regression codex caught).
+  assertNotMatches(indexHtml, /function rolloverDayIfNeeded\(dayState\) \{(?:(?!\n    \})[\s\S])*?hasEverOnboarded/, "day rollover must not reset hasEverOnboarded");
+  // Cross-day-while-open / resume rollover follows the same rule as cold launch:
+  // only never-onboarded users see the guide; returning users auto-start.
+  assertMatches(indexHtml, /function ensureCurrentDay\(options = \{\}\)[\s\S]*?options\.showOnboarding !== false && !state\.hasEverOnboarded[\s\S]*?showOnboarding\(\);[\s\S]*?autoStartSessionOnOpen\(\);/, "cross-day rollover onboards only never-onboarded users; returning users auto-start");
   assertMatches(indexHtml, /function\s+completeInitialAssessment\(options = \{\}\)[\s\S]*state\.settings\.intensity\s*=\s*"quiet";[\s\S]*setIntensity\(state\.settings\.intensity,\s*\{\s*persistChange:\s*false,\s*renderChange:\s*false,\s*userChange:\s*false\s*\}\);/, "assessment completion defaults to L1 quiet");
   assertNotMatches(indexHtml, /completeInitialAssessment[\s\S]*showFirstRoundLanding\(\);/, "onboarding no longer passes through a first-round landing page");
   assertMatches(indexHtml, /options\.focusTarget\s*===\s*"panel"[\s\S]*\?\s*els\.sessionPanel/, "focus helper can target session panel");
