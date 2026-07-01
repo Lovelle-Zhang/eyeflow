@@ -111,7 +111,11 @@ function main() {
   assertEqual(restFlow.restBreakView({ reason: "manual" }).finishButtonText, "我回来了", "manual rest return button");
   assertEqual(restFlow.restBreakView({ reason: "manual" }).snoozeButtonText, "稍后提醒", "manual rest snooze button");
   assertEqual(restFlow.restBreakView({ reason: "manual" }).timerLabel, "剩余", "manual rest timer label is countdown-oriented");
-  assertEqual(restFlow.restBreakView({ reason: "manual" }).timerSeconds, 20, "manual rest uses 20 second look-away timer");
+  assertEqual(restFlow.restBreakView({ reason: "manual", breakSeconds: 120 }).timerSeconds, 120, "manual rest countdown follows the 休息长度 setting");
+  assertEqual(restFlow.restBreakView({ reason: "manual", breakSeconds: 60 }).timerSeconds, 60, "manual rest countdown honors a shorter setting");
+  assertMatches(restFlow.restBreakView({ reason: "manual", breakSeconds: 90 }).copy, /90 秒后再回来/, "manual rest copy states the actual rest length");
+  assertEqual(restFlow.restBreakView({ reason: "force" }).timerSeconds, 0, "force rest runs its own guided flow, not the countdown");
+  assertMatches(indexHtml, /restBreakView\(\{[\s\S]*?breakSeconds: Number\(els\.breakTarget\.value\)/, "showBreak passes the 休息长度 value into the rest view");
   assertEqual(restFlow.restBreakView({ reason: "force" }).showForceTask, true, "force rest shows guided task");
   assertEqual(restFlow.restBreakView({ reason: "force" }).showFinishButton, false, "force rest hides ordinary finish button");
   assertEqual(restFlow.restBreakView({ reason: "force" }).showForceEscapeButton, true, "force rest exposes emergency exit");

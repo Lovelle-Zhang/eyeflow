@@ -8792,14 +8792,14 @@
                 <label for="focusTarget">专注提醒</label>
                 <span><output id="focusTargetValue">20</output> 分钟</span>
               </div>
-              <input id="focusTarget" type="range" min="20" max="70" step="5" value="50">
+              <input id="focusTarget" type="range" min="15" max="60" step="5" value="50">
             </div>
             <div class="field">
               <div class="value-row">
                 <label for="breakTarget">休息长度</label>
                 <span><output id="breakTargetValue">120</output> 秒</span>
               </div>
-              <input id="breakTarget" type="range" min="60" max="300" step="30" value="120">
+              <input id="breakTarget" type="range" min="20" max="240" step="10" value="120">
             </div>
           </details>
         </div>
@@ -11056,7 +11056,8 @@
         reason,
         companionLine: restCompanionLine(reason),
         openingCompanionLine: restCompanionLine(`${reason}:open`),
-        microTask: restMicroTaskForReason(reason)
+        microTask: restMicroTaskForReason(reason),
+        breakSeconds: Number(els.breakTarget.value)
       });
       els.breakOverlay.classList.toggle("feedback-mode", view.feedbackMode);
       els.breakTitle.textContent = view.title;

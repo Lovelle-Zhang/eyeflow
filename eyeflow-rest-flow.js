@@ -8,17 +8,21 @@ window.EyeFlowRestFlow = (() => {
     reason = "manual",
     companionLine = "慢慢来，不急。",
     openingCompanionLine = "Mira 在这里守时间。",
-    microTask = defaultMicroTask
+    microTask = defaultMicroTask,
+    breakSeconds = 20
   } = {}) {
     const force = reason === "force";
     const task = { ...defaultMicroTask, ...microTask };
+    // The rest countdown follows the user's 休息长度 setting so the timer matches
+    // what they set (not a fixed value). Force breaks run their own guided flow.
+    const seconds = Math.max(5, Math.round(Number(breakSeconds) || 20));
     return {
       feedbackMode: false,
       relax: force ? "gaze" : "",
       title: force ? "Mira 带你离开屏幕一下" : "看向远处",
       copy: force
         ? companionLine
-        : "不用盯着屏幕，20 秒后再回来。",
+        : `不用盯着屏幕，${seconds} 秒后再回来。`,
       microTitle: task.title,
       microCopy: task.copy,
       microReply: "",
@@ -36,7 +40,7 @@ window.EyeFlowRestFlow = (() => {
       showFlow: force,
       showMiniTimer: true,
       timerLabel: "剩余",
-      timerSeconds: force ? 0 : 20,
+      timerSeconds: force ? 0 : seconds,
       showMira: force,
       showBreath: !force
     };
