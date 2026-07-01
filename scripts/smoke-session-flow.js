@@ -124,8 +124,8 @@ function main() {
   );
   assertMatches(
     indexHtml,
-    /function\s+pauseSession\(endedBy = "paused"\)[\s\S]*closeFocusSession\(endedBy\);[\s\S]*elapsedSeconds = 0;[\s\S]*sessionSource = "manual-paused";/,
-    "pausing enters a respected manual-paused state (activity won't auto-restart it)"
+    /function\s+pauseSession\(endedBy = "paused"\)[\s\S]*closeFocusSession\(endedBy\);[\s\S]*sessionSource = "manual-paused";/,
+    "pausing enters a respected manual-paused state without resetting elapsed time"
   );
   assertMatches(
     indexHtml,
@@ -322,13 +322,15 @@ function main() {
   assertMatches(indexHtml, /function isManualPaused\(\)\s*\{\s*return sessionSource === "manual-paused";/, "isManualPaused reflects the manual-paused source");
   assertMatches(indexHtml, /function pauseSession[\s\S]*?sessionSource = "manual-paused";/, "pausing enters the respected manual-paused state, not plain idle");
   assertMatches(indexHtml, /function pauseAutoTracking\(\)[\s\S]*?sessionSource = "manual-paused";/, "pausing auto tracking also enters manual-paused instead of bouncing back to auto");
+  assertNotMatches(indexHtml, /function pause(?:AutoTracking|Session)[\s\S]{0,260}?elapsedSeconds = 0;/, "manual pause preserves the visible elapsed time instead of resetting to 00:00");
   assertMatches(indexHtml, /if \(!saved\.sessionSource\) \{[\s\S]*?loaded\.sessionSource = "idle";/, "loading state preserves persisted manual-paused now that it has a real UI");
   assertMatches(indexHtml, /function startAutoTrackingFromActivity[\s\S]*?if \(isManualPaused\(\)\) return false;/, "screen activity does NOT auto-restart timing while manually paused");
   assertMatches(indexHtml, /function deriveTodayPhase\(\)[\s\S]*?if \(isManualPaused\(\)\) return "paused";/, "manual pause is its own Today phase");
-  assertMatches(indexHtml, /case "paused":[\s\S]*?已暂停[\s\S]*?恢复自动计时/, "paused hero is honest (已暂停) with a 恢复自动计时 action");
+  assertMatches(indexHtml, /case "paused":[\s\S]*?已暂停[\s\S]*?els\.primaryActionBtn\.hidden = true;/, "paused hero is honest but does not duplicate the timer-card resume action");
   assertMatches(indexHtml, /function resumeFromManualPause\(\)[\s\S]*?sessionSource = "idle";/, "resume returns to idle 待命 so activity can auto-start again");
   assertMatches(indexHtml, /const canUseActivity = [\s\S]{0,120}?!isManualPaused\(\)/, "manual pause suspends ALL activity-driven session logic (incl. natural-break auto-complete)");
-  assertMatches(indexHtml, /elapsedSeconds = autoTrackFreshStart \? 1 : Math\.max\(elapsedSeconds, activeSeconds\);/, "auto-track after resume starts fresh, not caught up to continuous activeSeconds (no timer jump)");
+  assertMatches(indexHtml, /autoTrackResumeElapsedBase = elapsedSeconds;[\s\S]*resumedSeconds = Math\.max\(0, Math\.round\(\(detectedAt - autoTrackResumeStartedAt\) \/ 1000\)\);[\s\S]*elapsedSeconds = Math\.max\(elapsedSeconds, autoTrackResumeElapsedBase \+ resumedSeconds\);/, "auto-track after resume continues from the paused time without catching up paused desktop activeSeconds");
+  assertNotIncludes(indexHtml, "elapsedSeconds = autoTrackFreshStart ? 1", "manual resume no longer jumps 00:00 → 00:01 before restoring elapsed time");
   assertMatches(indexHtml, /if \(load >= 74 && !isManualPaused\(\)\)/, "manual pause takes priority over the high-load rest CTA (button text matches action)");
   const sessionFlowJs = read("eyeflow-session-flow.js");
   assertMatches(sessionFlowJs, /if \(currentState === "paused"\)\s*\{[\s\S]*?startText: "恢复自动计时",[\s\S]*?startDisabled: false,/, "the timer control shows an enabled 恢复自动计时 button when paused");

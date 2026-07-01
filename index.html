@@ -9579,9 +9579,11 @@
     let lastActiveSecondsBeforeIdle = state.lastActiveSecondsBeforeIdle || 0;
     let autoElapsedSeconds = state.lastAssessmentDay === todayKey() ? Number(state.autoElapsedSeconds || 0) : 0;
     let lastActivityRecordAt = 0;
-    // Set on resume-from-pause so the next activity-driven round starts fresh instead
-    // of catching up to activity.activeSeconds (which includes paused-but-working time).
+    // Set on resume-from-pause so the next activity-driven round continues from the
+    // paused time without catching up paused-but-working desktop activeSeconds.
     let autoTrackFreshStart = false;
+    let autoTrackResumeStartedAt = 0;
+    let autoTrackResumeElapsedBase = 0;
     let toastTimer = null;
     let resetConfirmTimer = null;
     let restGuideTimer = null;
@@ -10159,6 +10161,9 @@
           } else if (sessionSource === "auto") {
             elapsedSeconds = 0;
             sessionSource = "idle";
+            autoTrackFreshStart = false;
+            autoTrackResumeStartedAt = 0;
+            autoTrackResumeElapsedBase = 0;
           }
         }
         renderActivity();
@@ -10827,7 +10832,6 @@
     }
 
     function pauseAutoTracking() {
-      elapsedSeconds = 0;
       sessionSource = "manual-paused";
       lastActivityRecordAt = 0;
       persist();
@@ -10842,7 +10846,6 @@
       window.clearInterval(ticker);
       ticker = null;
       lastSessionTickAt = 0;
-      elapsedSeconds = 0;
       startedAt = null;
       // Explicit manual pause: a distinct state the state machine RESPECTS — screen
       // activity will NOT auto-restart timing (unlike plain idle 待命), so the pause
@@ -10858,9 +10861,10 @@
     function resumeFromManualPause() {
       if (!isManualPaused()) return;
       sessionSource = "idle";
-      elapsedSeconds = 0;
       lastActivityRecordAt = 0;
       autoTrackFreshStart = true;
+      autoTrackResumeStartedAt = 0;
+      autoTrackResumeElapsedBase = elapsedSeconds;
       persist();
       render();
     }
@@ -10955,11 +10959,19 @@
       if (sessionStartBlocked() || forceQuietActive()) return false;
       const detectedAt = Number(activity.detectedAt || Date.now());
       const activeSeconds = Math.max(1, Number(activity.activeSeconds || 0));
-      // After a manual pause→resume, start the new round fresh rather than catching up
-      // to activity.activeSeconds (continuous since desktop activity began — it would
-      // jump the timer forward by the time spent paused-but-working).
-      elapsedSeconds = autoTrackFreshStart ? 1 : Math.max(elapsedSeconds, activeSeconds);
-      autoTrackFreshStart = false;
+      // After manual pause→resume, keep the paused time and only add activity after
+      // resume; desktop activeSeconds may include paused-but-working time.
+      if (autoTrackFreshStart) {
+        autoTrackFreshStart = false;
+        autoTrackResumeStartedAt = detectedAt;
+        autoTrackResumeElapsedBase = elapsedSeconds;
+      }
+      if (autoTrackResumeStartedAt) {
+        const resumedSeconds = Math.max(0, Math.round((detectedAt - autoTrackResumeStartedAt) / 1000));
+        elapsedSeconds = Math.max(elapsedSeconds, autoTrackResumeElapsedBase + resumedSeconds);
+      } else {
+        elapsedSeconds = Math.max(elapsedSeconds, activeSeconds);
+      }
       startedAt = null;
       sessionSource = "auto";
       lastActivityRecordAt = detectedAt;
@@ -14316,7 +14328,7 @@
           els.stateAction.textContent = "已暂停自动计时。";
           els.stateExplain.textContent = "恢复后，有屏幕活动时会继续开始。";
           renderStateCues([]);
-          els.primaryActionBtn.hidden = false;
+          els.primaryActionBtn.hidden = true;
           els.primaryActionBtn.dataset.intent = "resume-auto";
           els.primaryActionBtn.textContent = "恢复自动计时";
           break;
