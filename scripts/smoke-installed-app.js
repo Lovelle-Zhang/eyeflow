@@ -439,7 +439,7 @@ function main() {
   assertMatches(sessionFlowJs, /if \(currentState === "running"\) \{[\s\S]*panelTitle: "本轮节奏"[\s\S]*pillText: "计时中"[\s\S]*startText: "暂停"/, "installed auto-tracking controls render as a unified timing state");
   assertIncludes(sessionFlowJs, "暂停当前计时", "installed auto-tracking start title follows the timing state");
   assertMatches(indexHtml, /function\s+toggleSession\(\)\s*\{[\s\S]*if \(isAutoTracking\(\)\) \{[\s\S]*pauseAutoTracking\(\);[\s\S]*return;[\s\S]*startSession\(\);/, "installed auto-tracking primary action pauses the current automatic round instead of starting another state");
-  assertMatches(indexHtml, /function\s+pauseAutoTracking\(\)[\s\S]*sessionSource = elapsedSeconds > 0 \? "manual-paused" : "idle";[\s\S]*lastActivityRecordAt = 0;[\s\S]*persist\(\);[\s\S]*render\(\);/, "installed auto-tracking pause preserves elapsed time as a paused round");
+  assertMatches(indexHtml, /function\s+pauseAutoTracking\(\)[\s\S]*sessionSource = "manual-paused";[\s\S]*lastActivityRecordAt = 0;[\s\S]*persist\(\);[\s\S]*render\(\);/, "installed auto-tracking pause preserves explicit pause even at zero seconds");
   assertNotIncludes(indexHtml, "手动从 00:00", "installed auto-tracking hint avoids internal reset wording");
   assertNotIncludes(indexHtml, "可切到手动专注", "installed auto-tracking status no longer asks users to choose a mode");
   assertMatches(indexHtml, /function\s+startSession\(\)[\s\S]*?const sourceMode = sessionSource === "auto" && elapsedSeconds > 0 \? "auto" : "manual";[\s\S]*?startedAt = now - elapsedSeconds \* 1000;[\s\S]*lastSessionTickAt = now;/, "installed continuing an automatic round preserves accumulated time and resets the active tick baseline");
@@ -449,6 +449,16 @@ function main() {
   assertMatches(indexHtml, /function\s+handleSystemLifecycle\(payload = \{\}\)\s*\{[\s\S]*if \(reason === "resume"\) \{[\s\S]*Date\.now\(\) - lastSessionTickAt > SYSTEM_SESSION_GAP_MS[\s\S]*completeSessionForSystemRest\("system-inactive-gap"\);[\s\S]*if \(reason === "lock-screen" \|\| reason === "suspend"\) \{[\s\S]*pauseVisibleBreakTimerForSystemRest\(\);[\s\S]*completeSessionForSystemRest\(reason\);[\s\S]*return;/, "installed lock, sleep, and missed long gaps end the current work round instead of counting sleep time");
   assertMatches(indexHtml, /function\s+tick\(\)\s*\{[\s\S]*now - lastSessionTickAt > SYSTEM_SESSION_GAP_MS[\s\S]*completeSessionForSystemRest\("system-inactive-gap"\);[\s\S]*return;[\s\S]*syncRunningSessionClock\(\{ now \}\);/, "installed session tick rejects long inactive gaps before recomputing elapsed time");
   assertMatches(indexHtml, /function\s+maybeAutoCompleteBreak\(activity\)[\s\S]*lastActiveSecondsBeforeIdle = isRunning[\s\S]*naturalAwaySeconds = Math\.max\(NATURAL_AWAY_IDLE_SECONDS, Number\(els\.breakTarget\.value \|\| 0\)\);[\s\S]*if \(activity\.idleSeconds < naturalAwaySeconds\) return;[\s\S]*if \(!isRunning && lastActiveSecondsBeforeIdle < Number\(els\.focusTarget\.value\) \* 60 \* 0\.5\) return;[\s\S]*if \(!isRunning && now - \(state\.lastAutoBreakAt \|\| 0\) < 12 \* 60 \* 1000\) return;[\s\S]*if \(isRunning\) \{[\s\S]*elapsedSeconds = Math\.max\(0, elapsedSeconds - Number\(activity\.idleSeconds \|\| 0\)\);[\s\S]*closeFocusSession\("idle"\);[\s\S]*sessionSource = "idle";/, "installed manual timing treats long keyboard idle as natural rest and removes idle time from focus");
+  assertMatches(
+    indexHtml,
+    /function\s+finishForceBreak\(payload = \{\}\)[\s\S]*state\.forceEscapeUntil = Date\.now\(\) \+ SNOOZE_MINUTES \* 60 \* 1000;[\s\S]*render\(\);[\s\S]*persist\(\);/,
+    "installed force escape quiet window is preserved through render"
+  );
+  assertMatches(
+    indexHtml,
+    /function\s+switchView\(targetId\)[\s\S]*if \(targetId === "todayView"\) \{[\s\S]*queueTodayContinuity\("switch-view"\);[\s\S]*\}/,
+    "installed Today navigation invokes the central continuity guard"
+  );
   assertMatches(indexHtml, /\.timer-inner span\s*\{[\s\S]*white-space:\s*nowrap;[\s\S]*text-overflow:\s*ellipsis;/, "installed timer hint stays on one line");
   assertMatches(indexHtml, /\.session-state-pill\s*\{[\s\S]*width:\s*fit-content;[\s\S]*border:\s*0;[\s\S]*border-radius:\s*var\(--ef-radius-md\);[\s\S]*min-height:\s*var\(--ef-control-sm\);[\s\S]*background:\s*var\(--mode-pill-bg\);/, "installed mode/state pill is the low-key tonal sage pill (no border)");
   assertMatches(indexHtml, /\.timer-card > \.timer-controls \.primary,[\s\S]*\.timer-card > \.timer-controls \.btn-tonal\s*\{[\s\S]*min-height:\s*var\(--ef-control-lg\);/, "installed session timer controls (primary + ② tonal) go large at 40px");
@@ -509,13 +519,33 @@ function main() {
   assertNotMatches(indexHtml, /#todayView \.health-signals/, "installed today removes the metric strip instead of separately hiding it");
   assertMatches(indexHtml, /body:not\(\.session-active\) #todayView details\.quick-log-panel,[\s\S]*body:not\(\.session-active\) #todayView \.daily-summary\s*\{[\s\S]*display:\s*none;/, "installed today hides secondary panels before focus starts");
   assertMatches(indexHtml, /function\s+ensureTodayReadyForAutoStart\(\)[\s\S]*state\.lastAssessmentDay = todayKey\(\);[\s\S]*state\.initialAssessmentDone = true;[\s\S]*state\.onboardingDismissed = true;[\s\S]*return true;/, "installed today creates a lightweight daily state before auto-starting");
-  assertMatches(indexHtml, /function\s+autoStartSessionOnOpen\(\)[\s\S]*if \(!ensureTodayReadyForAutoStart\(\)\) return;[\s\S]*if \(isRunning \|\| isAutoTracking\(\)\) return;[\s\S]*if \(sessionSource === "manual-paused" && elapsedSeconds > 0\) return;[\s\S]*startSession\(\);/, "installed today auto-starts timing on app open unless the user explicitly paused");
+  assertMatches(indexHtml, /function\s+autoStartSessionOnOpen\(\)[\s\S]*if \(!ensureTodayReadyForAutoStart\(\)\) return;[\s\S]*const todayPhase = deriveTodayPhase\(\);[\s\S]*if \(isTodayContinuityBlocked\(todayPhase\)\) return;[\s\S]*if \(todayPhase !== "auto-startable-idle"\) return;[\s\S]*startSession\(\);/, "installed today auto-starts timing only from the central auto-startable idle phase");
   assertMatches(indexHtml, /autoStartSessionOnOpen\(\);\s*render\(\);[\s\S]*maybeShowOnboarding\(\);/, "installed app starts timing before the first Today render");
+  assertMatches(
+    indexHtml,
+    /function\s+deriveTodayPhase\(\)\s*\{[\s\S]*return "needs-onboarding";[\s\S]*return "break-active";[\s\S]*return "force-quiet";[\s\S]*return "manual-paused";[\s\S]*return "running";[\s\S]*return "auto-startable-idle";/,
+    "installed Today phase centrally enumerates all display and continuity states"
+  );
+  assertMatches(
+    indexHtml,
+    /function\s+render\(\)\s*\{[\s\S]*const todayPhase = deriveTodayPhase\(\);[\s\S]*document\.body\.classList\.toggle\("session-active", todayPhase === "running" \|\| todayPhase === "break-active"\);/,
+    "installed Today active layout follows the central phase"
+  );
+  assertMatches(
+    indexHtml,
+    /function\s+renderStateCenter\(load, todayPhase = deriveTodayPhase\(\)\)[\s\S]*if \(todayPhase === "force-quiet"\)[\s\S]*els\.stateHeadline\.textContent = "Mira 先安静几分钟";[\s\S]*case "running":[\s\S]*els\.stateHeadline\.textContent = "这一轮进行中";[\s\S]*case "manual-paused":[\s\S]*els\.stateHeadline\.textContent = "这一轮已暂停";/,
+    "installed Today hero copy is truthful for running, manual pause, and force quiet"
+  );
+  assertNotMatches(
+    indexHtml,
+    /else\s*\{\s*\/\/ By design there is no idle preparation page[\s\S]*els\.stateHeadline\.textContent = "这一轮进行中";[\s\S]*els\.stateAction\.textContent = "Mira 已开始计时。";/,
+    "installed Today idle branch does not reuse running copy"
+  );
   assertNotMatches(indexHtml, /els\.stateHeadline\.textContent\s*=\s*"准备开始这一轮"/, "installed today no longer renders a preparation headline");
   assertNotMatches(indexHtml, /els\.stateAction\.textContent\s*=\s*"点开始后，我会立刻开始计时。"/, "installed today no longer asks for a duplicate start click");
   assertIncludes(indexHtml, 'els.stateHeadline.textContent = "这一轮进行中";', "installed running state uses one title for automatic and manual sessions");
   assertIncludes(indexHtml, 'els.stateAction.textContent = "Mira 已开始计时。";', "installed running session confirms timing has started");
-  assertIncludes(indexHtml, 'els.stateExplain.textContent = "到恢复断点我再提醒；需要停下就点暂停或休息。";', "installed running state explains reminder, pause, and rest paths");
+  assertIncludes(indexHtml, '"到恢复断点我再提醒；需要停下就点暂停或休息。";', "installed running state explains reminder, pause, and rest paths");
   assertNotIncludes(indexHtml, '"本地计时中。"', "installed running hero does not repeat the timer status copy");
   assertNotIncludes(indexHtml, '"到休息点再提醒你。"', "installed running hero does not repeat the reminder copy");
   assertMatches(indexHtml, /els\.todayFlowCopy\.hidden\s*=\s*true;/, "installed today hides secondary rhythm explanation from first glance");

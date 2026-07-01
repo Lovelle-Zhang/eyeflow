@@ -289,7 +289,12 @@ function main() {
   assertIncludes(installedSmokeJs, "installed today action column hides when no action is visible", "installed smoke checks today action column empty state");
   assertIncludes(installedSmokeJs, "installed fallback hero primary action still starts workflow when shown", "installed smoke checks fallback hero workflow action");
   assertIncludes(installedSmokeJs, "installed dashboard focus can locate the manual start entry", "installed smoke checks dashboard manual-start focus");
-  assertIncludes(installedSmokeJs, "installed today auto-starts timing on app open unless the user explicitly paused", "installed smoke checks today auto-start");
+  assertIncludes(installedSmokeJs, "installed today auto-starts timing only from the central auto-startable idle phase", "installed smoke checks today auto-start");
+  assertIncludes(installedSmokeJs, "installed Today phase centrally enumerates all display and continuity states", "installed smoke checks today phase model");
+  assertIncludes(installedSmokeJs, "installed Today active layout follows the central phase", "installed smoke checks today phase layout");
+  assertIncludes(installedSmokeJs, "installed Today hero copy is truthful for running, manual pause, and force quiet", "installed smoke checks today truthful hero");
+  assertIncludes(installedSmokeJs, "installed force escape quiet window is preserved through render", "installed smoke checks force quiet render path");
+  assertIncludes(installedSmokeJs, "installed Today navigation invokes the central continuity guard", "installed smoke checks today navigation continuity");
   assertIncludes(installedSmokeJs, "installed running state uses one title for automatic and manual sessions", "installed smoke checks running state wording");
   assertIncludes(installedSmokeJs, "installed today hides secondary rhythm explanation from first glance", "installed smoke checks today hides secondary rhythm detail");
   assertIncludes(installedSmokeJs, "installed today opens directly in the running state", "installed smoke checks today running first screen");

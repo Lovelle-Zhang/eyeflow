@@ -9583,6 +9583,7 @@
     let resetConfirmTimer = null;
     let restGuideTimer = null;
     let sessionStartHintTimer = null;
+    let todayContinuityQueued = false;
     let resetConfirmArmed = false;
     let restStartedBeforeAssessment = false;
     let forceBreakActive = false;
@@ -10790,7 +10791,7 @@
     }
 
     function pauseAutoTracking() {
-      sessionSource = elapsedSeconds > 0 ? "manual-paused" : "idle";
+      sessionSource = "manual-paused";
       lastActivityRecordAt = 0;
       persist();
       render();
@@ -10804,7 +10805,7 @@
       window.clearInterval(ticker);
       ticker = null;
       lastSessionTickAt = 0;
-      sessionSource = elapsedSeconds > 0 ? "manual-paused" : "idle";
+      sessionSource = "manual-paused";
       persist();
       render();
     }
@@ -10890,11 +10891,38 @@
       return Boolean(hasAssessedToday() && !isRunning && sessionSource === "auto" && elapsedSeconds > 0);
     }
 
+    function forceQuietActive(now = Date.now()) {
+      return Number(state.forceEscapeUntil || 0) > now;
+    }
+
+    function isManualPaused() {
+      return sessionSource === "manual-paused";
+    }
+
+    function deriveTodayPhase() {
+      if (!hasAssessedToday()) return "needs-onboarding";
+      if (forceBreakActive || els.breakOverlay.classList.contains("show")) return "break-active";
+      if (forceQuietActive()) return "force-quiet";
+      if (isManualPaused()) return "manual-paused";
+      if (isRunning || isAutoTracking() || elapsedSeconds > 0) return "running";
+      return "auto-startable-idle";
+    }
+
+    function isTodayContinuityBlocked(todayPhase = deriveTodayPhase()) {
+      return [
+        "needs-onboarding",
+        "break-active",
+        "force-quiet",
+        "manual-paused",
+        "running"
+      ].includes(todayPhase);
+    }
+
     function currentSessionState({ resting = false } = {}) {
       return sessionState({
         isRunning,
         autoTracking: isAutoTracking(),
-        paused: sessionSource === "manual-paused" && elapsedSeconds > 0,
+        paused: isManualPaused(),
         resting
       });
     }
@@ -11666,14 +11694,25 @@
       return true;
     }
 
+    function queueTodayContinuity(reason = "render") {
+      if (todayContinuityQueued) return;
+      if (deriveTodayPhase() !== "auto-startable-idle") return;
+      todayContinuityQueued = true;
+      queueMicrotask(() => {
+        todayContinuityQueued = false;
+        if (deriveTodayPhase() !== "auto-startable-idle") return;
+        autoStartSessionOnOpen();
+        if (deriveTodayPhase() === "auto-startable-idle") return;
+        render();
+        persist();
+      });
+    }
+
     function autoStartSessionOnOpen() {
       if (!ensureTodayReadyForAutoStart()) return;
-      if (isRunning || isAutoTracking()) return;
-      if (sessionSource === "manual-paused" && elapsedSeconds > 0) return;
-      // Never start a focus round while the user is resting (active rest overlay
-      // or a forced return) — rest resets the clock to idle, which would otherwise
-      // look auto-startable. Resuming the window mid-rest must not yank them back.
-      if (forceBreakActive || els.breakOverlay.classList.contains("show")) return;
+      const todayPhase = deriveTodayPhase();
+      if (isTodayContinuityBlocked(todayPhase)) return;
+      if (todayPhase !== "auto-startable-idle") return;
       startSession();
     }
 
@@ -12994,6 +13033,9 @@
       els.navButtons.forEach((button) => {
         button.classList.toggle("active", button.dataset.viewTarget === targetId);
       });
+      if (targetId === "todayView") {
+        queueTodayContinuity("switch-view");
+      }
       // The topbar subtitle is hidden only on Today (today-state-focus). Sync the
       // class here so the subtitle appears in the SAME frame as the page title on
       // navigation — otherwise it stays display:none (carried over from Today)
@@ -14047,16 +14089,23 @@
       // being one frame fresher on the rare reminder-recording frame.
       const rhythmPlan = rhythmSuggestion(load);
       recordRhythmRecommendation(rhythmPlan);
+      const todayPhase = deriveTodayPhase();
+      if (todayPhase === "auto-startable-idle") {
+        if (!document.querySelector("#todayView").hidden) {
+          queueTodayContinuity("render");
+          return;
+        }
+      }
       const mins = Math.floor(elapsedSeconds / 60);
       const secs = elapsedSeconds % 60;
-	      const restDue = computeRestDue({
+		      const restDue = computeRestDue({
 	        isRunning,
 	        autoTracking: isAutoTracking(),
 	        elapsedSeconds,
 	        focusMinutes: Number(els.focusTarget.value)
-	      });
-	      document.body.classList.toggle("today-state-focus", !document.querySelector("#todayView").hidden);
-	      document.body.classList.toggle("session-active", currentSessionState({ resting: restDue }) !== "idle" || elapsedSeconds > 0);
+		      });
+		      document.body.classList.toggle("today-state-focus", !document.querySelector("#todayView").hidden);
+		      document.body.classList.toggle("session-active", todayPhase === "running" || todayPhase === "break-active");
 
 	      els.timerText.textContent = `${String(mins).padStart(2, "0")}:${String(secs).padStart(2, "0")}`;
       els.timerRing.style.setProperty("--progress", `${progress}%`);
@@ -14067,7 +14116,7 @@
       setRangeFill(els.focusTarget);
       setRangeFill(els.breakTarget);
       renderSessionControls();
-      renderStateCenter(load);
+      renderStateCenter(load, todayPhase);
       renderActivity();
       if (!document.querySelector("#todayView").hidden) {
         els.statusText.textContent = statusCopy(load, isRunning);
@@ -14102,7 +14151,7 @@
         }),
         assessedToday: hasAssessedToday(),
         autoTracking: isAutoTracking(),
-        paused: sessionSource === "manual-paused" && elapsedSeconds > 0,
+        paused: isManualPaused(),
         restSeconds: Number(els.breakTarget.value)
       });
 	
@@ -14140,7 +14189,7 @@
         .join("");
     }
 
-    function renderStateCenter(load) {
+    function renderStateCenter(load, todayPhase = deriveTodayPhase()) {
       const [symptom, value] = topSymptom();
       const mins = Math.floor(elapsedSeconds / 60);
       els.stateBand.textContent = `已专注 ${mins} 分钟`;
@@ -14158,7 +14207,26 @@
         input.style.setProperty("--range-color", stageTone.color);
         input.style.setProperty("--range-glow", stageTone.glow);
       });
-      const sessionStarted = isRunning || elapsedSeconds > 0;
+      const sessionStarted = todayPhase === "running";
+
+      if (todayPhase === "force-quiet") {
+        const remainingMinutes = Math.max(1, Math.ceil((Number(state.forceEscapeUntil || 0) - Date.now()) / 60000));
+        els.stateHeadline.textContent = "Mira 先安静几分钟";
+        els.stateAction.textContent = `强制恢复刚被退出，约 ${remainingMinutes} 分钟后再提醒。`;
+        els.stateExplain.textContent = "这段时间不会自动开启新一轮。";
+        renderStateCues([]);
+        els.primaryActionBtn.hidden = true;
+        return;
+      }
+
+      if (todayPhase === "break-active") {
+        els.stateHeadline.textContent = "正在恢复";
+        els.stateAction.textContent = "Mira 正带你离开屏幕一下。";
+        els.stateExplain.textContent = "完成恢复后再回到今天节奏。";
+        renderStateCues([]);
+        els.primaryActionBtn.hidden = true;
+        return;
+      }
 
       if (load >= 74) {
         els.stateHeadline.textContent = "现在休息";
@@ -14170,25 +14238,45 @@
         els.primaryActionBtn.hidden = false;
         els.primaryActionBtn.dataset.intent = "rest";
         els.primaryActionBtn.textContent = "立即休息";
-      } else if (sessionStarted) {
-        els.stateHeadline.textContent = "这一轮进行中";
-        els.stateAction.textContent = "Mira 已开始计时。";
-        els.stateExplain.textContent = load >= 48
-          ? "状态偏高时我会先轻提醒；需要停下就点暂停或休息。"
-          : "到恢复断点我再提醒；需要停下就点暂停或休息。";
-        renderStateCues([]);
-        els.primaryActionBtn.hidden = true;
-      } else {
-        // By design there is no idle preparation page (it was removed to cut
-        // decision cost; smoke-installed guards against the old headline coming
-        // back). Auto-start (launch + resume + system-gap) keeps the today view in
-        // a round, so this branch is effectively unreachable; mirror the running
-        // copy rather than reintroduce the removed preparation headline.
-        els.stateHeadline.textContent = "这一轮进行中";
-        els.stateAction.textContent = "Mira 已开始计时。";
-        els.stateExplain.textContent = "到恢复断点我再提醒；需要停下就点暂停或休息。";
-        renderStateCues([]);
-        els.primaryActionBtn.hidden = true;
+        return;
+      }
+
+      switch (todayPhase) {
+        case "running":
+          els.stateHeadline.textContent = "这一轮进行中";
+          els.stateAction.textContent = "Mira 已开始计时。";
+          els.stateExplain.textContent = load >= 48
+            ? "状态偏高时我会先轻提醒；需要停下就点暂停或休息。"
+            : "到恢复断点我再提醒；需要停下就点暂停或休息。";
+          renderStateCues([]);
+          els.primaryActionBtn.hidden = true;
+          break;
+        case "manual-paused":
+          els.stateHeadline.textContent = "这一轮已暂停";
+          els.stateAction.textContent = "Mira 会等你回来。";
+          els.stateExplain.textContent = "点继续后，我再接着陪你守这一轮。";
+          renderStateCues([]);
+          els.primaryActionBtn.hidden = false;
+          els.primaryActionBtn.dataset.intent = "start";
+          els.primaryActionBtn.textContent = "继续这一轮";
+          break;
+        case "needs-onboarding":
+          els.stateHeadline.textContent = "先看一下今天状态";
+          els.stateAction.textContent = "Mira 需要知道今天的眼睛状态。";
+          els.stateExplain.textContent = "完成后，我会直接进入陪伴节奏。";
+          renderStateCues([]);
+          els.primaryActionBtn.hidden = false;
+          els.primaryActionBtn.dataset.intent = "start";
+          els.primaryActionBtn.textContent = "开始这一轮";
+          break;
+        case "auto-startable-idle":
+        default:
+          els.stateHeadline.textContent = "Mira 正在接上这一轮";
+          els.stateAction.textContent = "马上开始计时。";
+          els.stateExplain.textContent = "如果这句话停住不动，就是 continuity guard 没有接上。";
+          renderStateCues([]);
+          els.primaryActionBtn.hidden = true;
+          break;
       }
     }
 

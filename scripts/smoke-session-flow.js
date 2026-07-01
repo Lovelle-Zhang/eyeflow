@@ -75,6 +75,31 @@ function main() {
   assertMatches(indexHtml, /function\s+handleSystemLifecycle\(payload = \{\}\)\s*\{[\s\S]*if \(reason === "resume"\) \{[\s\S]*Date\.now\(\) - lastSessionTickAt > SYSTEM_SESSION_GAP_MS[\s\S]*completeSessionForSystemRest\("system-inactive-gap"\);[\s\S]*if \(reason === "lock-screen" \|\| reason === "suspend"\) \{[\s\S]*pauseVisibleBreakTimerForSystemRest\(\);[\s\S]*completeSessionForSystemRest\(reason\);[\s\S]*return;/, "lock, sleep, and missed long gaps end the current work round instead of counting sleep time");
   assertMatches(indexHtml, /function\s+tick\(\)\s*\{[\s\S]*now - lastSessionTickAt > SYSTEM_SESSION_GAP_MS[\s\S]*completeSessionForSystemRest\("system-inactive-gap"\);[\s\S]*return;[\s\S]*syncRunningSessionClock\(\{ now \}\);/, "session tick rejects long inactive gaps before recomputing elapsed time");
   assertMatches(indexHtml, /function\s+maybeAutoCompleteBreak\(activity\)[\s\S]*lastActiveSecondsBeforeIdle = isRunning[\s\S]*naturalAwaySeconds = Math\.max\(NATURAL_AWAY_IDLE_SECONDS, Number\(els\.breakTarget\.value \|\| 0\)\);[\s\S]*if \(activity\.idleSeconds < naturalAwaySeconds\) return;[\s\S]*if \(!isRunning && lastActiveSecondsBeforeIdle < Number\(els\.focusTarget\.value\) \* 60 \* 0\.5\) return;[\s\S]*if \(!isRunning && now - \(state\.lastAutoBreakAt \|\| 0\) < 12 \* 60 \* 1000\) return;[\s\S]*if \(isRunning\) \{[\s\S]*elapsedSeconds = Math\.max\(0, elapsedSeconds - Number\(activity\.idleSeconds \|\| 0\)\);[\s\S]*closeFocusSession\("idle"\);[\s\S]*sessionSource = "idle";/, "manual timing treats long keyboard idle as natural rest and removes idle time from focus");
+  assertMatches(
+    indexHtml,
+    /function\s+tick\(\)\s*\{[\s\S]*completeSessionForSystemRest\("system-inactive-gap"\);[\s\S]*return;/,
+    "tick long-gap path still records the inactive gap before exiting"
+  );
+  assertMatches(
+    indexHtml,
+    /function\s+completeSessionForSystemRest\(reason\)[\s\S]*sessionSource = "idle";[\s\S]*render\(\);[\s\S]*persist\(\);/,
+    "system rest completion may reset to idle, relying on central continuity instead of local path patches"
+  );
+  assertMatches(
+    indexHtml,
+    /function\s+maybeAutoCompleteBreak\(activity\)[\s\S]*elapsedSeconds = 0;[\s\S]*sessionSource = "idle";[\s\S]*showToast\("Mira：你刚停下来一会儿，已自动记录一次休息。"\);/,
+    "natural away completion can reset to idle without needing a local auto-start patch"
+  );
+  assertMatches(
+    indexHtml,
+    /function\s+finishForceBreak\(payload = \{\}\)[\s\S]*state\.forceEscapeUntil = Date\.now\(\) \+ SNOOZE_MINUTES \* 60 \* 1000;[\s\S]*sessionSource = elapsedSeconds > 0 \? "manual-paused" : "idle";[\s\S]*render\(\);[\s\S]*persist\(\);/,
+    "force escape keeps a quiet window that the central guard must respect"
+  );
+  assertMatches(
+    indexHtml,
+    /function\s+resetDay\(\)[\s\S]*sessionSource = "idle";[\s\S]*state\.lastAssessmentDay = "";[\s\S]*render\(\);[\s\S]*persist\(\);/,
+    "reset day returns to an unassessed state rather than being auto-started"
+  );
   assertNotIncludes(indexHtml, 'class="state-meta-row"', "today main state no longer renders unclear folded meta row");
   assertNotIncludes(indexHtml, 'aria-label="快速反馈"', "today main state no longer renders first-screen quick feedback");
   assertNotIncludes(indexHtml, "手动从 00:00", "auto-tracking hint avoids internal reset wording");
@@ -86,8 +111,38 @@ function main() {
     "fallback hero primary action starts the workflow when shown"
   );
   assertMatches(indexHtml, /function\s+ensureTodayReadyForAutoStart\(\)[\s\S]*state\.lastAssessmentDay = todayKey\(\);[\s\S]*state\.initialAssessmentDone = true;[\s\S]*state\.onboardingDismissed = true;[\s\S]*return true;/, "today creates a lightweight daily state before auto-starting");
-  assertMatches(indexHtml, /function\s+autoStartSessionOnOpen\(\)[\s\S]*if \(!ensureTodayReadyForAutoStart\(\)\) return;[\s\S]*if \(sessionSource === "manual-paused" && elapsedSeconds > 0\) return;[\s\S]*startSession\(\);/, "today auto-starts timing on app open while respecting explicit pause");
+  assertMatches(indexHtml, /function\s+autoStartSessionOnOpen\(\)[\s\S]*if \(!ensureTodayReadyForAutoStart\(\)\) return;[\s\S]*const todayPhase = deriveTodayPhase\(\);[\s\S]*if \(isTodayContinuityBlocked\(todayPhase\)\) return;[\s\S]*if \(todayPhase !== "auto-startable-idle"\) return;[\s\S]*startSession\(\);/, "today auto-starts timing only from the central auto-startable idle phase");
   assertMatches(indexHtml, /autoStartSessionOnOpen\(\);\s*render\(\);[\s\S]*maybeShowOnboarding\(\);/, "today starts timing before the first render");
+  assertMatches(
+    indexHtml,
+    /function\s+deriveTodayPhase\(\)\s*\{[\s\S]*return "needs-onboarding";[\s\S]*return "break-active";[\s\S]*return "force-quiet";[\s\S]*return "manual-paused";[\s\S]*return "running";[\s\S]*return "auto-startable-idle";/,
+    "today phase centrally enumerates onboarding, break, force quiet, manual pause, running, and auto-startable idle"
+  );
+  assertMatches(
+    indexHtml,
+    /function\s+isTodayContinuityBlocked\([\s\S]*?\)\s*\{[\s\S]*"needs-onboarding"[\s\S]*"break-active"[\s\S]*"force-quiet"[\s\S]*"manual-paused"/,
+    "today continuity has explicit blocked reasons"
+  );
+  assertMatches(
+    indexHtml,
+    /let\s+todayContinuityQueued\s*=\s*false;[\s\S]*function\s+queueTodayContinuity\([^)]*\)\s*\{[\s\S]*if \(todayContinuityQueued\) return;[\s\S]*queueMicrotask\(\(\) => \{[\s\S]*if \(deriveTodayPhase\(\) !== "auto-startable-idle"\) return;[\s\S]*autoStartSessionOnOpen\(\);[\s\S]*render\(\);[\s\S]*persist\(\);/,
+    "today continuity queues auto-start outside the current render to avoid re-entrant rendering"
+  );
+  assertMatches(
+    indexHtml,
+    /function\s+render\(\)\s*\{[\s\S]*const todayPhase = deriveTodayPhase\(\);[\s\S]*if \(todayPhase === "auto-startable-idle"\) \{[\s\S]*queueTodayContinuity\("render"\);[\s\S]*return;[\s\S]*document\.body\.classList\.toggle\("session-active", todayPhase === "running" \|\| todayPhase === "break-active"\);/,
+    "render derives session-active from todayPhase and exits when continuity should start"
+  );
+  assertMatches(
+    indexHtml,
+    /function\s+switchView\(targetId\)[\s\S]*if \(targetId === "todayView"\) \{[\s\S]*queueTodayContinuity\("switch-view"\);[\s\S]*\}/,
+    "switching back to Today participates in the central continuity guard"
+  );
+  assertNotMatches(
+    indexHtml,
+    /else\s*\{\s*\/\/ By design there is no idle preparation page[\s\S]*els\.stateHeadline\.textContent = "这一轮进行中";[\s\S]*els\.stateAction\.textContent = "Mira 已开始计时。";/,
+    "idle state no longer masquerades as a running hero"
+  );
   assertMatches(
     indexHtml,
     /const behaviorLevel = Number\(intervention\.level \|\| 1\);[\s\S]*interventionLevel: behaviorLevel,[\s\S]*interventionDisplayLevel: displayLevel,/,
