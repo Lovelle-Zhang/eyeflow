@@ -251,6 +251,10 @@ function main() {
   // auto-starts a round so today never sits idle.
   assertNotMatches(indexHtml, /els\.stateHeadline\.textContent\s*=\s*"准备开始这一轮"/, "today never reintroduces a 准备开始 preparation headline");
   assertMatches(indexHtml, /function\s+handleResumeCheck\(\)[\s\S]*?autoStartSessionOnOpen\(\);/, "returning to the app auto-starts a round so today never sits idle");
+  // The resume "not assessed today" branch (day rolled over, lastAssessmentDay cleared)
+  // must route to onboarding / auto-start, not strand the today view on an empty idle
+  // hero. Guards against the "刚打开还是空白页" regression.
+  assertMatches(indexHtml, /if \(!hasAssessedToday\(\)\) \{[\s\S]*?if \(!state\.hasEverOnboarded\) \{[\s\S]*?showOnboarding\(\);[\s\S]*?\} else \{[\s\S]*?autoStartSessionOnOpen\(\);/, "resume with an unassessed (rolled-over) day routes to onboarding/auto-start, never a stranded idle page");
   // First-ever open must show the guide, not be silently auto-assessed + auto-started
   // (init runs auto-start before maybeShowOnboarding, so the gate must bail here).
   assertMatches(indexHtml, /function\s+ensureTodayReadyForAutoStart\(\)[\s\S]*?if \(!state\.hasEverOnboarded\) return false;/, "genuine first open shows onboarding instead of auto-starting past it");

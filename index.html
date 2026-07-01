@@ -10506,7 +10506,17 @@
         return;
       }
       if (!hasAssessedToday()) {
+        // Day rolled over earlier (lastAssessmentDay cleared) but we're already on
+        // today's key, so ensureCurrentDay() didn't fire this time. Route through the
+        // same rule as launch instead of stranding the today view on an empty idle
+        // hero: never-onboarded sees the guide, a returning user auto-starts (which
+        // auto-fills today's assessment).
         resetSessionClock();
+        if (!state.hasEverOnboarded) {
+          showOnboarding();
+        } else {
+          autoStartSessionOnOpen();
+        }
         render();
         persist();
         return;
