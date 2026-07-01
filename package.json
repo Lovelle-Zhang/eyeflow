@@ -1,6 +1,6 @@
 {
   "name": "eyeflow",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "A low-interruption recovery system for screen-heavy work.",
   "author": "EyeFlow",
   "main": "main.js",
