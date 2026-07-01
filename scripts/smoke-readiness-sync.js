@@ -168,6 +168,51 @@ async function main() {
     }
   }
 
+  // Both-sources-known gate: with only ONE async source arrived (the other still
+  // null), the panel must render a coherent "checking" state — never a half-snapshot
+  // built from fabricated defaults for the missing source.
+  if (!failures.length) {
+    const settings = { platform: "darwin", version: "0.1.1", launchAtLogin: false, hideDockOnClose: true, showCompanionOnLaunch: true, enhancedDesktopSensing: false };
+    const gateScript = `(function(){
+      const st = (id) => { const t = document.getElementById(id); const item = t && t.closest(".readiness-item"); return item ? item.dataset.state : null; };
+      const toggleDisabled = () => document.getElementById("hideDockOnCloseToggle").disabled;
+      const rows = () => ({ tag: document.getElementById("desktopReadyTag").dataset.state, permission: st("readyPermissionTitle"), launch: st("readyLaunchTitle") });
+      // desktop settings first, permission still missing -> checking (main rows)
+      latestPermissionStatus = null; latestDesktopSettings = null;
+      renderDesktopSettings(${JSON.stringify(settings)});
+      const desktopFirst = rows();
+      // inverse: permission first, desktop settings missing -> checking; the 简约模式
+      // toggle stays disabled by its static default (renderDesktopSettings never ran).
+      latestPermissionStatus = null; latestDesktopSettings = null;
+      renderPermissionStatus({ platform: "darwin", accessibilityTrusted: true, notificationSupported: true });
+      const permissionFirst = { ...rows(), toggleDisabled: toggleDisabled() };
+      // second source arrives -> full render must restore rows + re-enable the toggle.
+      renderDesktopSettings(${JSON.stringify(settings)});
+      const bothReady = { launch: st("readyLaunchTitle"), toggleDisabled: toggleDisabled() };
+      return { desktopFirst, permissionFirst, bothReady };
+    })()`;
+    try {
+      const gate = await win.webContents.executeJavaScript(gateScript, true);
+      for (const [name, g] of [["desktop-first", gate.desktopFirst], ["permission-first", gate.permissionFirst]]) {
+        check(`both-known-gate:${name}`, "tag", g.tag === "checking", `expected "checking", got "${g.tag}"`);
+        check(`both-known-gate:${name}`, "permission", g.permission === "checking", `expected "checking", got "${g.permission}"`);
+        check(`both-known-gate:${name}`, "launch", g.launch === "checking", `expected "checking", got "${g.launch}"`);
+      }
+      // The flippable-before-settings risk is closed structurally: the toggle ships
+      // disabled in the static markup, so it can't be clicked until settings enable it.
+      const indexSrc = fs.readFileSync(path.join(root, "index.html"), "utf8");
+      check("both-known-gate", "toggle-static-disabled", /id="hideDockOnCloseToggle"[^>]*\bdisabled\b/.test(indexSrc), "简约模式 toggle must be disabled in static markup until settings arrive");
+      // The refresh button stays enabled during checking so an IPC failure that
+      // leaves one source null is recoverable (manual retry), not a dead-end.
+      check("both-known-gate", "refresh-stays-usable", !/renderReadinessChecking[\s\S]*?readinessRefreshBtn/.test(indexSrc.slice(indexSrc.indexOf("function renderReadinessChecking"), indexSrc.indexOf("function renderDesktopReadiness"))), "checking must not disable the refresh button (keeps recovery path)");
+      // post-ready restore: no residual checking state, toggle usable again.
+      check("both-known-gate:both-ready", "launch-restored", gate.bothReady.launch !== "checking", `launch row must leave checking once both sources arrive, got "${gate.bothReady.launch}"`);
+      check("both-known-gate:both-ready", "toggle-restored", gate.bothReady.toggleDisabled === false, "简约模式 toggle must be re-enabled once desktop settings arrive (darwin)");
+    } catch (e) {
+      check("both-known-gate", "render", false, `threw: ${e && e.message}`);
+    }
+  }
+
   win.destroy();
   try { fs.unlinkSync(preloadPath); } catch (e) {}
 

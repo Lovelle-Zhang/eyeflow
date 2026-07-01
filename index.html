@@ -9019,7 +9019,7 @@
               <strong class="settings-row-value ef-preference-row-value" id="hideDockOnCloseTitle">保留 Dock 图标</strong>
               <p id="hideDockOnCloseCopy">开启后只保留菜单栏图标和桌面 Mira，关闭主窗口也不占用 Dock。</p>
               <div class="settings-row-action settings-action-stack ef-preference-row-action">
-                <input type="checkbox" class="ef-switch" id="hideDockOnCloseToggle" role="switch" aria-label="简约模式：开启后只保留菜单栏和桌面 Mira，关闭主窗口不占用 Dock">
+                <input type="checkbox" class="ef-switch" id="hideDockOnCloseToggle" role="switch" aria-label="简约模式：开启后只保留菜单栏和桌面 Mira，关闭主窗口不占用 Dock" disabled>
               </div>
             </div>
             <div class="settings-row readiness-item ef-preference-row" data-state="checking" hidden="">
@@ -12426,11 +12426,39 @@
       }
     }
 
+    // One coherent "checking" state for the readiness panel while its two async
+    // sources are still arriving — the both-sources-known gate renders this instead
+    // of a half-populated snapshot.
+    function renderReadinessChecking() {
+      setSystemStatus(els.desktopReadyTag, "checking", "检查中");
+      els.desktopReadyCopy.textContent = "正在读取桌面状态…";
+      // Only the rows renderDesktopReadiness itself owns. The 简约模式 row + toggle
+      // belong to renderDesktopSettings, so clobbering them here would leave that row
+      // stuck (the full ready render never restores it); its toggle is instead
+      // disabled by default in the static markup until settings arrive.
+      [
+        [els.readyPermissionTitle, els.readyPermissionCopy],
+        [els.readyCompanionTitle, els.readyCompanionCopy],
+        [els.readyLaunchTitle, els.readyLaunchCopy],
+        [els.readyVersionTitle, els.readyVersionCopy],
+        [els.readyNotifyTitle, els.readyNotifyCopy]
+      ].forEach(([title, copy]) => {
+        if (title) setReadinessState(title, "checking", "检查中");
+        if (copy) copy.textContent = "读取中。";
+      });
+      // Disable (only) the action buttons so nothing is clickable mid-load — the full
+      // render restores their disabled state. Leave text/class alone: some branches
+      // don't rewrite them, so a "检查中" label could otherwise persist after ready.
+      [els.readinessPermissionBtn, els.readinessCompanionBtn, els.readinessLaunchBtn]
+        .forEach((btn) => { if (btn) btn.disabled = true; });
+    }
+
     function renderDesktopReadiness() {
       const permission = latestPermissionStatus || { platform: isDesktopShell ? "darwin" : "browser", accessibilityTrusted: null };
       const desktop = latestDesktopSettings || { platform: permission.platform, version: "0.1.1", launchAtLogin: false };
       const platform = desktop.platform || permission.platform;
       const desktopKnown = Boolean(latestDesktopSettings);
+      const permissionKnown = Boolean(latestPermissionStatus);
       const isPreview = platform === "browser" || !isDesktopShell;
       const isMac = platform === "darwin";
       const permissionReady = !isMac || Boolean(permission.accessibilityTrusted);
@@ -12461,6 +12489,15 @@
         els.readinessPermissionBtn.disabled = true;
         els.readinessLaunchBtn.disabled = true;
         els.readinessRefreshBtn.disabled = true;
+        return;
+      }
+
+      // Both async sources (permission + desktop settings) feed this render. Until
+      // BOTH have arrived, show ONE coherent "checking" state rather than a
+      // half-snapshot built from fabricated defaults for whichever source is still
+      // null (which briefly flashed wrong rows on launch/refresh).
+      if (!desktopKnown || !permissionKnown) {
+        renderReadinessChecking();
         return;
       }
 
