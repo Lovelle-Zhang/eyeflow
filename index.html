@@ -13969,7 +13969,7 @@
         && suggestion.rest === rest
         && suggestion.intensity === state.settings.intensity
         ? suggestion.reason
-        : `Mira 参考近 7 天：建议下一轮改为 ${suggestion.focus} 分 / ${suggestion.rest} 秒。`;
+        : `Mira 建议下一轮 ${suggestion.focus} 分（${rhythmFocusRelation(suggestion)}，${rhythmSourceShortLabel(suggestion)}）/ ${suggestion.rest} 秒。`;
       els.todayPlanCopy.innerHTML = `<span>${escapeHtml(currentReason)}</span>`;
     }
 
@@ -14355,6 +14355,36 @@
     function profileNextActionShort(action, suggestion) {
       if (action === "少提醒一点") return "自然断点";
       return `${suggestion.focus} 分钟后`;
+    }
+
+    // F1/F4 legibility — make "建议 vs 当前" explicit so a suggested number never
+    // reads as a contradiction with 本轮节奏. Source label answers "凭什么"; the
+    // relation answers "相对现在差多少".
+    function rhythmSourceShortLabel(suggestion) {
+      // Trust suggestion.source (set inside rhythmSuggestion) — NOT state.rhythmSource,
+      // which can stay "manual" after the manual-hold window has expired and the
+      // suggestion has already reverted to a rule-* branch.
+      switch (suggestion?.source) {
+        case "manual_hold": return "你的设置";
+        case "rule-heavy": return "状态偏高";
+        case "rule-skipped": return "常被延后";
+        case "rule-responsive": return "近 7 天习惯";
+        case "rule-first-break": return "今天还没休息";
+        default: return "当前节奏";
+      }
+    }
+
+    function rhythmFocusRelation(suggestion) {
+      const delta = Math.round(Number(suggestion?.focus) - Number(els.focusTarget.value));
+      if (!Number.isFinite(delta) || delta === 0) return "和现在一样";
+      return delta > 0 ? `比现在 +${delta} 分` : `比现在 ${delta} 分`;
+    }
+
+    // B-style one-line relation for the main 下一轮建议 card.
+    function rhythmRelationLine(suggestion, action) {
+      const source = rhythmSourceShortLabel(suggestion);
+      if (action === "少提醒一点") return `改成等自然断点 · ${source}`;
+      return `${rhythmFocusRelation(suggestion)} · ${source}`;
     }
 
     // Left column is Mira's qualitative judgment only — the concrete numbers
@@ -15113,9 +15143,6 @@
       const nextAction = profileNextAction(suggestion, load);
       const nextCopy = profileNextActionCopy(nextAction, suggestion);
       renderDailyShareCard(recordedSeconds, hasProfileEvidence ? nextAction : "保持平稳");
-      const primaryCopy = Number(top[1] || 0) > 0
-        ? `${top[0]} ${top[1]}/10，是今天最明显的信号。`
-        : "暂时没有明显不适记录。";
       els.profileLoad.textContent = hasProfileEvidence ? load : "记录中";
       if (els.profileObservation) {
         els.profileObservation.textContent = profileObservationText({
@@ -15152,7 +15179,7 @@
       els.profileFocusTime.textContent = recordedDurationLabel(recordedSeconds);
       els.profilePrimarySymptom.textContent = hasProfileEvidence ? top[0] : "记录中";
       els.profilePrimaryCopy.textContent = hasProfileEvidence
-        ? primaryCopy
+        ? rhythmRelationLine(suggestion, nextAction)
         : "样本还少，先不急着判断。";
       els.profileNextStep.textContent = hasProfileEvidence ? profileNextActionShort(nextAction, suggestion) : `${suggestion.focus} 分钟后`;
       els.profileNextCopy.textContent = hasProfileEvidence
@@ -15454,7 +15481,10 @@
     function renderRhythmSuggestion(load, suggestion = rhythmSuggestion(load)) {
       els.rhythmPlanTitle.textContent = suggestion.title;
       els.rhythmPlanCopy.textContent = suggestion.copy;
-      els.suggestFocusTarget.textContent = `${suggestion.focus} 分钟`;
+      const suggestFocusDelta = Math.round(Number(suggestion.focus) - Number(els.focusTarget.value));
+      els.suggestFocusTarget.textContent = Number.isFinite(suggestFocusDelta) && suggestFocusDelta !== 0
+        ? `${suggestion.focus} 分钟（${suggestFocusDelta > 0 ? "+" : ""}${suggestFocusDelta}）`
+        : `${suggestion.focus} 分钟`;
       els.suggestBreakTarget.textContent = `${suggestion.rest} 秒`;
       els.suggestIntensity.textContent = intensityLabel(suggestion.intensity);
       els.rhythmReasonCopy.textContent = suggestion.reason;

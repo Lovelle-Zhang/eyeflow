@@ -552,6 +552,14 @@ function main() {
     "JS does not inject hardcoded colors that bypass the theme"
   );
 
+  // F1/F4 legibility: the suggested rhythm must show its relation to 当前 + its
+  // source, so a suggested number never reads as a contradiction with 本轮节奏.
+  assertMatches(indexHtml, /function rhythmFocusRelation\(suggestion\)[\s\S]*?比现在 \+\$\{delta\}/, "rhythm suggestion exposes its delta vs current focus");
+  assertMatches(indexHtml, /function rhythmSourceShortLabel\(suggestion\)[\s\S]*?rule-responsive[\s\S]*?近 7 天/, "rhythm suggestion maps its source to a plain-language label");
+  assertMatches(indexHtml, /els\.profilePrimaryCopy\.textContent = hasProfileEvidence\s*\?\s*rhythmRelationLine\(suggestion, nextAction\)/, "下一轮建议 card shows the current→suggested relation line");
+  assertMatches(indexHtml, /els\.suggestFocusTarget\.textContent = [\s\S]{0,80}?suggestFocusDelta[\s\S]*?\$\{suggestFocusDelta/, "恢复节奏 card shows the delta vs current focus");
+  assertMatches(indexHtml, /Mira 建议下一轮 \$\{suggestion\.focus\} 分（\$\{rhythmFocusRelation\(suggestion\)\}/, "今天计划文案 states the relation + source");
+
   console.log("[smoke:core] PASSED. EyeFlow core scoring and first-round rhythm are stable.");
 }
 
