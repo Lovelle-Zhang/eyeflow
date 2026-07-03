@@ -11833,6 +11833,20 @@
       // Active launches auto-fill today's lightweight state; the actual clock
       // starts only from a later activity signal.
       if (!canAutoPrepareToday()) return false;
+      // A manual start (startSession / handlePrimaryAction) can reach here across a
+      // midnight boundary WITHOUT ensureCurrentDay() having run first. Setting
+      // currentDay = today below would then make a later rolloverDayIfNeeded() see
+      // "already today" and never archive yesterday (nor reset the in-memory cumulative),
+      // losing the previous day. So archive + reset here first if the day actually
+      // changed. rolloverDayIfNeeded is a plain function (no callback into this one), so
+      // there is no recursion with ensureCurrentDay; when ensureCurrentDay already rolled
+      // over, currentDay === today and this guard is a no-op.
+      if (state.currentDay && state.currentDay !== todayKey() && rolloverDayIfNeeded(state)) {
+        resetSessionClock();
+        autoElapsedSeconds = 0;
+        lastActivityRecordAt = 0;
+        resetAutoTrackingClock();
+      }
       state.currentDay = todayKey();
       state.lastAssessmentDay = todayKey();
       state.initialAssessmentDone = true;
