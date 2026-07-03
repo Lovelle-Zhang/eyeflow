@@ -2494,6 +2494,14 @@ function isDeepWorkApp(appName) {
   ].some((name) => appName.toLowerCase().includes(name.toLowerCase()));
 }
 
+// "Present at the screen" idle ceiling. EyeFlow is an EYE-care app: passive screen use
+// (watching a video, reading a long page) is eye load with zero keyboard/mouse input, so
+// a 30s no-input window mislabeled it as a break and reset the round. 5 min matches the
+// renderer's NATURAL_AWAY_IDLE_SECONDS ("real away = rest"), so short idle now keeps the
+// round running / keeps reminding, and only a genuine ≥5min absence counts as rest. When
+// uncertain (idle but maybe still watching), we err toward protecting the eyes.
+const PRESENT_IDLE_SECONDS = 5 * 60;
+
 function startActivityMonitor() {
   setInterval(async () => {
     const idleSeconds = powerMonitor.getSystemIdleTime();
@@ -2502,7 +2510,7 @@ function startActivityMonitor() {
     const enhancedDesktopSensing = Boolean(desktopPrefs.enhancedDesktopSensing);
     const canReadActiveApp = enhancedDesktopSensing && accessibilityTrusted;
     const activeApp = canReadActiveApp ? await getActiveAppName() : "本地计时";
-    const isWorking = idleSeconds < 30;
+    const isWorking = idleSeconds < PRESENT_IDLE_SECONDS;
     if (isWorking && !activeWorkStartedAt) {
       activeWorkStartedAt = Date.now();
     }
