@@ -11092,7 +11092,17 @@
       if (isManualPaused()) return false;
       if (sessionStartBlocked() || forceQuietActive()) return false;
       const detectedAt = Number(activity.detectedAt || Date.now());
-      const activeSeconds = Math.max(1, Number(activity.activeSeconds || 0));
+      // Clamp the active-time seed to time elapsed since today's local midnight, so a
+      // session that spanned midnight (e.g. watching a video across 00:00) can't import
+      // yesterday's active seconds into the new day's round — that showed "03:43 / 今日
+      // 专注 3 分钟" at 00:01. activity.activeSeconds is continuous-active time from the
+      // main process and is not day-aware.
+      const dayParts = String(state.currentDay || todayKey()).split("-").map(Number);
+      const startOfTodayMs = dayParts.length === 3 && dayParts.every(Number.isFinite)
+        ? new Date(dayParts[0], dayParts[1] - 1, dayParts[2]).getTime()
+        : new Date().setHours(0, 0, 0, 0);
+      const sinceDayStart = Math.max(1, Math.floor((Date.now() - startOfTodayMs) / 1000));
+      const activeSeconds = Math.min(Math.max(1, Number(activity.activeSeconds || 0)), sinceDayStart);
       // After manual pause→resume, keep the paused time and only add activity after
       // resume; desktop activeSeconds may include paused-but-working time.
       if (autoTrackFreshStart) {
