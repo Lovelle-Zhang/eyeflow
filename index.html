@@ -10648,7 +10648,13 @@
       elapsedSeconds = 0;
       sessionSource = "idle";
       lastSessionTickAt = 0;
-      autoElapsedSeconds = 0;
+      // Do NOT reset autoElapsedSeconds here. It is the day's CUMULATIVE auto-tracked
+      // focus (loader keeps it within a day; onActivity does += ; only a real day
+      // rollover zeroes it). Locking the screen or letting the Mac sleep to step away
+      // must end the current segment (elapsedSeconds/sessionSource above) WITHOUT
+      // erasing the morning's total — otherwise a lunch break wipes the day and Today
+      // shows "还没开始". currentDayFocusSeconds() max()-dedupes it against the just-
+      // closed focus_session event, so keeping it does not double-count.
       lastNudgeAt = 0;
       lastNaturalBreakNudgeAt = 0;
       lastActiveSecondsBeforeIdle = 0;
