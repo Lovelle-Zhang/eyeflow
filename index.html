@@ -6316,6 +6316,36 @@
       line-height: var(--ef-line-title);
     }
 
+    .share-period-tabs {
+      display: inline-flex;
+      gap: var(--ef-space-1);
+      padding: var(--ef-space-1);
+      border-radius: var(--ef-radius-pill);
+      background: var(--wash-2);
+      align-self: start;
+      justify-self: start;
+    }
+
+    .share-period-tab {
+      border: 0;
+      background: transparent;
+      color: var(--muted);
+      font-size: var(--ef-text-body-sm);
+      font-weight: 500;
+      line-height: var(--ef-line-compact);
+      min-height: var(--ef-control-sm);
+      padding: var(--ef-space-2) var(--ef-space-5);
+      border-radius: var(--ef-radius-pill);
+      cursor: pointer;
+      transition: background 160ms ease, color 160ms ease;
+    }
+
+    .share-period-tab.is-active {
+      background: var(--panel);
+      color: var(--ink);
+      box-shadow: var(--group-shadow);
+    }
+
     .share-preview-stage {
       display: grid;
       place-items: center;
@@ -9432,14 +9462,19 @@
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M6 6l12 12"></path><path d="M18 6L6 18"></path></svg>
         </button>
       </div>
+      <div class="share-period-tabs" id="sharePeriodTabs" role="tablist" aria-label="选择回顾周期">
+        <button class="share-period-tab is-active" data-period="today" type="button" role="tab" aria-selected="true">今日</button>
+        <button class="share-period-tab" data-period="week" type="button" role="tab" aria-selected="false">本周</button>
+        <button class="share-period-tab" data-period="month" type="button" role="tab" aria-selected="false">本月</button>
+      </div>
       <div class="share-preview-stage">
-        <article class="share-art-card" aria-label="完整今日分享卡">
+        <article class="share-art-card" aria-label="完整分享卡">
           <span class="share-art-date" id="shareDateLabel">2026年6月29日 · 周一</span>
           <strong class="share-art-quote" id="shareQuote">停二十秒，不是退后，是给下一步蓄力。</strong>
-          <div class="share-art-metrics" aria-label="今日节奏摘要">
-            <div class="share-art-metric"><span>今日专注</span><strong id="shareCardFocusTime">还没开始</strong></div>
-            <div class="share-art-metric"><span>护眼恢复</span><strong id="shareCardBreaks">0 分钟</strong></div>
-            <div class="share-art-metric"><span>节奏</span><strong id="shareCardRhythm">保持平稳</strong></div>
+          <div class="share-art-metrics" aria-label="节奏摘要">
+            <div class="share-art-metric"><span id="shareCardLabel0">今日专注</span><strong id="shareCardFocusTime">还没开始</strong></div>
+            <div class="share-art-metric"><span id="shareCardLabel1">护眼恢复</span><strong id="shareCardBreaks">0 分钟</strong></div>
+            <div class="share-art-metric"><span id="shareCardLabel2">节奏</span><strong id="shareCardRhythm">保持平稳</strong></div>
           </div>
           <div class="share-art-divider"></div>
           <div class="share-art-footer">
@@ -9930,9 +9965,13 @@
       profileRecommendationSource: document.querySelector("#profileRecommendationSource"),
       shareDateLabel: document.querySelector("#shareDateLabel"),
       shareQuote: document.querySelector("#shareQuote"),
+      shareCardLabel0: document.querySelector("#shareCardLabel0"),
+      shareCardLabel1: document.querySelector("#shareCardLabel1"),
+      shareCardLabel2: document.querySelector("#shareCardLabel2"),
       shareCardFocusTime: document.querySelector("#shareCardFocusTime"),
       shareCardBreaks: document.querySelector("#shareCardBreaks"),
       shareCardRhythm: document.querySelector("#shareCardRhythm"),
+      sharePeriodTabs: document.querySelector("#sharePeriodTabs"),
       shareCardNote: document.querySelector("#shareCardNote"),
       copyShareBtn: document.querySelector("#copyShareBtn"),
       sharePreviewOverlay: document.querySelector("#sharePreviewOverlay"),
@@ -10101,6 +10140,10 @@
     els.sharePreviewCloseBtn?.addEventListener("click", closeDailySharePreview);
     els.sharePreviewCancelBtn?.addEventListener("click", closeDailySharePreview);
     els.copyShareConfirmBtn?.addEventListener("click", copyDailyShareCard);
+    els.sharePeriodTabs?.addEventListener("click", (event) => {
+      const tab = event.target.closest(".share-period-tab");
+      if (tab && tab.dataset.period) setSharePeriod(tab.dataset.period);
+    });
     els.sharePreviewOverlay?.addEventListener("click", (event) => {
       if (event.target === els.sharePreviewOverlay) closeDailySharePreview();
     });
@@ -14973,6 +15016,41 @@
       return minutes > 0 ? `计时 ${minutes} 分钟` : "计时少于 1 分钟";
     }
 
+    // The share card recaps three periods; the modal tabs switch this.
+    let sharePeriod = "today";
+
+    const MIRA_WEEK_SHARE_LINES = [
+      "这一周，你给眼睛留了不少空白。",
+      "一周下来，节奏比硬撑更重要。",
+      "这周的每一次远眺，都在替明天蓄力。",
+      "眼睛这一周，被好好记得过。"
+    ];
+    const MIRA_MONTH_SHARE_LINES = [
+      "这一个月，你一直记得给眼睛让路。",
+      "一个月的小停顿，攒成了对眼睛的温柔。",
+      "把这一个月的节奏，继续带下去。"
+    ];
+
+    function periodShareQuote(period) {
+      if (period === "week") return lineFromList(MIRA_WEEK_SHARE_LINES, `${todayKey()}:share-week`) || MIRA_WEEK_SHARE_LINES[0];
+      if (period === "month") return lineFromList(MIRA_MONTH_SHARE_LINES, `${todayKey()}:share-month`) || MIRA_MONTH_SHARE_LINES[0];
+      return dailyShareQuote();
+    }
+
+    // "M月D日 – M月D日" range for the last N days (today inclusive).
+    function shareRangeLabel(days) {
+      const end = new Date();
+      const start = new Date();
+      start.setDate(start.getDate() - (days - 1));
+      const fmt = (d) => `${d.getMonth() + 1}月${d.getDate()}日`;
+      return `${fmt(start)} – ${fmt(end)}`;
+    }
+
+    function shareStreakLabel() {
+      const streak = gentleStreakDays();
+      return streak >= 1 ? `${streak} 天` : "刚开始";
+    }
+
     function dailyShareQuote() {
       return lineFromList(MIRA_DAILY_SHARE_LINES, `${todayKey()}:share-card`) || MIRA_DAILY_SHARE_LINES[0];
     }
@@ -15000,42 +15078,76 @@
       return els.tomorrowPlan?.textContent || els.dailySummaryTitle?.textContent || els.profileNextStep?.textContent || "保持平稳";
     }
 
-    function shareCardPayload() {
+    // period: "today" | "week" | "month". Returns a generic 3-metric payload; the first
+    // metric is the hero (brand green). Week/month recap eye-rest first (not screen time —
+    // an eye-care app shouldn't glorify staring longest), then focus, then the gentle streak.
+    function shareCardPayload(period = sharePeriod) {
+      if (period === "week" || period === "month") {
+        const days = period === "week" ? 7 : 30;
+        const stats = profileWindowStats(days);
+        return {
+          period,
+          date: shareRangeLabel(days),
+          quote: periodShareQuote(period),
+          metrics: [
+            { label: period === "week" ? "本周护眼" : "本月护眼", value: formatDurationCompact(stats.restSeconds) },
+            { label: "专注", value: formatDurationCompact(stats.activeSeconds) },
+            { label: "连续", value: shareStreakLabel() }
+          ]
+        };
+      }
       const focusSeconds = currentDayFocusSeconds();
       const recoverySeconds = recoverySecondsForDay({ events: state.events || [] });
       return {
+        period: "today",
         date: shareDateLabel(),
-        focus: shareFocusLabel(focusSeconds),
-        recovery: shareRecoveryLabel(recoverySeconds),
-        rhythm: currentShareRhythmLabel(),
-        quote: dailyShareQuote()
+        quote: dailyShareQuote(),
+        metrics: [
+          { label: "今日专注", value: shareFocusLabel(focusSeconds) },
+          { label: "护眼恢复", value: shareRecoveryLabel(recoverySeconds) },
+          { label: "节奏", value: currentShareRhythmLabel() }
+        ]
       };
     }
 
     function buildDailyShareText() {
       const card = shareCardPayload();
+      const intro = card.period === "week" ? "Mira 陪我过完了这一周。"
+        : card.period === "month" ? "Mira 陪我过完了这一个月。"
+        : "Mira 今天陪我工作了一天。";
       return [
-        "Mira 今天陪我工作了一天。",
-        `今日专注：${card.focus}`,
-        `护眼恢复：${card.recovery}`,
-        `节奏：${card.rhythm}`,
-        `Mira 今日小句：${card.quote}`,
+        intro,
+        ...card.metrics.map((m) => `${m.label}：${m.value}`),
+        `Mira 小句：${card.quote}`,
         "",
         "来自 EyeFlow / Mira"
       ].join("\n");
     }
 
-    function renderDailyShareCard(focusSeconds, rhythmLabel = "保持平稳") {
-      const focusLabel = shareFocusLabel(focusSeconds);
-      const recoveryLabel = shareRecoveryLabel(recoverySecondsForDay({ events: state.events || [] }));
-      const quote = dailyShareQuote();
-      const dateLabel = shareDateLabel();
-      if (els.shareDateLabel) els.shareDateLabel.textContent = dateLabel;
-      if (els.shareQuote) els.shareQuote.textContent = quote;
-      if (els.shareCardFocusTime) els.shareCardFocusTime.textContent = focusLabel;
-      if (els.shareCardBreaks) els.shareCardBreaks.textContent = recoveryLabel;
-      if (els.shareCardRhythm) els.shareCardRhythm.textContent = rhythmLabel;
+    function renderDailyShareCard() {
+      const card = shareCardPayload(sharePeriod);
+      if (els.shareDateLabel) els.shareDateLabel.textContent = card.date;
+      if (els.shareQuote) els.shareQuote.textContent = card.quote;
+      const labelEls = [els.shareCardLabel0, els.shareCardLabel1, els.shareCardLabel2];
+      const valueEls = [els.shareCardFocusTime, els.shareCardBreaks, els.shareCardRhythm];
+      card.metrics.forEach((metric, i) => {
+        if (labelEls[i]) labelEls[i].textContent = metric.label;
+        if (valueEls[i]) valueEls[i].textContent = metric.value;
+      });
       if (els.shareCardNote) els.shareCardNote.textContent = "本地复制，不上传数据。";
+    }
+
+    function setSharePeriod(period) {
+      const next = ["today", "week", "month"].includes(period) ? period : "today";
+      sharePeriod = next;
+      if (els.sharePeriodTabs) {
+        els.sharePeriodTabs.querySelectorAll(".share-period-tab").forEach((tab) => {
+          const active = tab.dataset.period === next;
+          tab.classList.toggle("is-active", active);
+          tab.setAttribute("aria-selected", active ? "true" : "false");
+        });
+      }
+      renderDailyShareCard();
     }
 
     function roundedRect(ctx, x, y, width, height, radius) {
@@ -15183,18 +15295,17 @@
       });
 
       const metricY = cardY + 348;
-      [
-        ["今日专注", card.focus],
-        ["护眼恢复", card.recovery],
-        ["节奏", card.rhythm]
-      ].forEach(([label, value], index) => {
-        const x = contentX + index * 152;
+      // 168px columns (was 152) give week/month values like "42 小时 15 分" room so the
+      // canvas export doesn't overlap the next column (the DOM preview wraps; canvas can't).
+      card.metrics.forEach((metric, index) => {
+        const x = contentX + index * 168;
         ctx.fillStyle = cardColors.muted;
         ctx.font = '600 22px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
-        ctx.fillText(label, x, metricY);
+        ctx.fillText(metric.label, x, metricY);
+        // First metric is the hero (brand green); the rest stay ink.
         ctx.fillStyle = index === 0 ? cardColors.mira : cardColors.ink;
         ctx.font = '750 28px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
-        ctx.fillText(value, x, metricY + 44);
+        ctx.fillText(metric.value, x, metricY + 44);
       });
 
       ctx.strokeStyle = cardColors.line;
@@ -15229,7 +15340,7 @@
     }
 
     function refreshDailySharePreview() {
-      renderDailyShareCard(currentDayFocusSeconds(), currentShareRhythmLabel());
+      renderDailyShareCard();
     }
 
     function openDailySharePreview() {
@@ -15237,7 +15348,7 @@
         copyDailyShareCard();
         return;
       }
-      refreshDailySharePreview();
+      setSharePeriod("today"); // always open on Today; also resets the tabs + renders
       els.sharePreviewOverlay.hidden = false;
       requestAnimationFrame(() => {
         els.sharePreviewOverlay.classList.add("show");
@@ -15513,7 +15624,7 @@
       const rhythmSummary = rhythmMemorySummary();
       const nextAction = profileNextAction(suggestion, load);
       const nextCopy = profileNextActionCopy(nextAction, suggestion);
-      renderDailyShareCard(recordedSeconds, hasProfileEvidence ? nextAction : "保持平稳");
+      renderDailyShareCard();
       els.profileLoad.textContent = hasProfileEvidence ? load : "记录中";
       if (els.profileObservation) {
         els.profileObservation.textContent = profileObservationText({

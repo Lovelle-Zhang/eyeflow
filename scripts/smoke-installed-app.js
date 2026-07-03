@@ -693,7 +693,7 @@ function main() {
   assertMatches(indexHtml, /function\s+drawShareBrandMark\([\s\S]*iconSize = size \* 0\.84;[\s\S]*iconGradient\.addColorStop\(0,\s*"#EAFFF6"\);[\s\S]*iconGradient\.addColorStop\(0\.58,\s*"#BDEAFF"\);[\s\S]*iconGradient\.addColorStop\(1,\s*"#F3EEC7"\);[\s\S]*"#6FE7C3"/, "installed profile share image draws the real app icon mark");
   assertMatches(indexHtml, /function\s+drawDailyShareCardCanvas\([\s\S]*canvas\.width = 1200;[\s\S]*canvas\.height = 720;[\s\S]*#f5f3ee[\s\S]*eyeflow\.app/, "installed profile share image draws a textured card artifact");
   assertMatches(indexHtml, /window\.eyeflowDesktop\?\.copyShareImage[\s\S]*generateDailyShareImageDataUrl\(\)/, "installed profile share action copies the generated image card first");
-  assertMatches(indexHtml, /function\s+buildDailyShareText\(\)[\s\S]*今日专注[\s\S]*护眼恢复[\s\S]*节奏[\s\S]*Mira 今日小句/, "installed profile share fallback text includes focus, recovery duration, rhythm, and Mira line");
+  assertMatches(indexHtml, /function\s+shareCardPayload\([\s\S]*今日专注[\s\S]*护眼恢复[\s\S]*节奏[\s\S]*function\s+buildDailyShareText\(\)[\s\S]*card\.metrics\.map[\s\S]*Mira 小句/, "installed today share payload keeps focus/recovery/rhythm; text fallback composes the period metrics plus a Mira line");
   assertIncludes(indexHtml, "状态线", "installed profile review keeps today's state line as a lower-weight disclosure");
   assertIncludes(indexHtml, "查看长期档案", "installed profile review moves long-term records behind one archive disclosure");
   assertNotIncludes(indexHtml, "默认收起", "installed profile archive does not expose implementation state copy");

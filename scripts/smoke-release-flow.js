@@ -432,7 +432,7 @@ function main() {
   assertIncludes(installedSmokeJs, "installed profile share card confirms image-card copying", "installed smoke checks profile share copied state");
   assertIncludes(installedSmokeJs, "installed profile share image draws a textured card artifact", "installed smoke checks profile share generated image");
   assertIncludes(installedSmokeJs, "installed profile share action copies the generated image card first", "installed smoke checks profile share image-first action");
-  assertIncludes(installedSmokeJs, "installed profile share fallback text includes focus, recovery duration, rhythm, and Mira line", "installed smoke checks profile share fallback text");
+  assertIncludes(installedSmokeJs, "installed today share payload keeps focus/recovery/rhythm; text fallback composes the period metrics plus a Mira line", "installed smoke checks profile share fallback text");
   assertIncludes(installedSmokeJs, "installed preload exposes share-card image clipboard IPC", "installed smoke checks share image IPC");
   assertIncludes(installedSmokeJs, "installed share card copies a verified PNG image", "installed smoke checks share image clipboard write");
   assertIncludes(installedSmokeJs, "installed profile review keeps today's state line as a lower-weight disclosure", "installed smoke checks profile trend disclosure");

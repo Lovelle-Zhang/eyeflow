@@ -385,7 +385,7 @@ function main() {
   assertMatches(indexHtml, /function\s+drawShareBrandMark\([\s\S]*iconSize = size \* 0\.84;[\s\S]*iconGradient\.addColorStop\(0,\s*"#EAFFF6"\);[\s\S]*iconGradient\.addColorStop\(0\.58,\s*"#BDEAFF"\);[\s\S]*iconGradient\.addColorStop\(1,\s*"#F3EEC7"\);[\s\S]*"#6FE7C3"/, "profile share image draws the real app icon mark");
   assertMatches(indexHtml, /function\s+drawDailyShareCardCanvas\([\s\S]*canvas\.width = 1200;[\s\S]*canvas\.height = 720;[\s\S]*#f5f3ee[\s\S]*eyeflow\.app/, "profile share image draws a textured card artifact");
   assertMatches(indexHtml, /window\.eyeflowDesktop\?\.copyShareImage[\s\S]*generateDailyShareImageDataUrl\(\)/, "profile share action copies the generated image card first");
-  assertMatches(indexHtml, /function\s+buildDailyShareText\(\)[\s\S]*今日专注[\s\S]*护眼恢复[\s\S]*节奏[\s\S]*Mira 今日小句/, "profile share fallback text includes focus, recovery duration, rhythm, and Mira line");
+  assertMatches(indexHtml, /function\s+shareCardPayload\([\s\S]*今日专注[\s\S]*护眼恢复[\s\S]*节奏[\s\S]*function\s+buildDailyShareText\(\)[\s\S]*card\.metrics\.map[\s\S]*Mira 小句/, "today share payload keeps focus/recovery/rhythm; text fallback composes the period metrics plus a Mira line");
   assertIncludes(indexHtml, "function recordedDurationLabel", "profile duration fields distinguish missing timing from zero minutes");
   assertIncludes(metricsJs, "function recordedSecondsForDay", "profile duration uses the strongest available local timing signal");
   assertIncludes(indexHtml, "autoElapsedSeconds", "profile preserves accumulated automatic local timing across the day");
