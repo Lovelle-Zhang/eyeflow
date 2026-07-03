@@ -11704,6 +11704,16 @@
           : intervention.copy,
         status: "pending"
       };
+      // The primary reminder only renders in the dashboard card. If Mira is exited that
+      // card sits in a hidden window with no bubble channel, so also surface it as a
+      // system notification — otherwise an exited-Mira user never sees an L2/L3 reminder
+      // short of a forced break. Gate on !systemNotifyToggle: when the user has system
+      // notifications ON, the existing L3/rest notify paths (main.js, companion.html)
+      // already fire, so adding one here would double up. This fills only the silent
+      // default-off gap. (Rate-limited already by the reminder cooldown/dedup above.)
+      if (miraExited() && !state.settings.systemNotifyToggle && window.eyeflowDesktop?.notify) {
+        window.eyeflowDesktop.notify(`${state.pendingReminder.title} ${state.pendingReminder.copy}`);
+      }
       state.reminderStats.shown += 1;
       appendRhythmMemory("reminder_shown", {
         reminderId: state.pendingReminder.id,
@@ -12914,6 +12924,17 @@
       return "等待恢复断点";
     }
 
+    // When the desktop Mira is exited (companion window hidden), its speech-bubble
+    // channel is suppressed (main.js showCompanionBubble returns {ok:false,reason:"hidden"}),
+    // and the primary reminder only shows in the hidden dashboard. So a user who exits
+    // Mira gets NO visible reminder unless system notifications happen to be on (default
+    // off). Treat "Mira exited" as intent to still be reminded: fall back to a system
+    // notification so soft nudges aren't silently dropped. (When Mira is visible, the
+    // bubble / dashboard card already carry it — no extra notification.)
+    function miraExited() {
+      return latestDesktopSettings?.showCompanionOnLaunch === false;
+    }
+
     function maybeNudgeAtNaturalBreak(activity) {
       if (!isNaturalBreak(activity)) return;
       if (state.settings.intensity === "quiet") return;
@@ -12925,7 +12946,7 @@
       if (!miraOnly && state.settings.soundToggle) {
         playSoftBeep();
       }
-      if (!miraOnly && state.settings.systemNotifyToggle && window.eyeflowDesktop?.notify) {
+      if (!miraOnly && (state.settings.systemNotifyToggle || miraExited()) && window.eyeflowDesktop?.notify) {
         window.eyeflowDesktop.notify("现在像是一个恢复断点。看远处 20 秒。");
       }
     }
