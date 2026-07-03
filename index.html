@@ -10754,6 +10754,9 @@
     }
 
     function completeInitialAssessment(options = {}) {
+      // Onboarding can complete across a midnight boundary; archive yesterday before this
+      // marks today assessed, so the crossed day isn't lost / mis-attributed.
+      archiveIfDayCrossed();
       const onboardingSymptoms = { ...ONBOARDING_PRESETS.fine };
       const initialLoad = estimateInitialLoad(onboardingSymptoms);
       const initialRhythm = initialRhythmForLoad(initialLoad);
@@ -11828,25 +11831,30 @@
 	      focusSessionPanel({ focusTarget: "panel" });
 	    }
 
-    function ensureTodayReadyForActivityStart() {
-      if (hasAssessedToday()) return true;
-      // Active launches auto-fill today's lightweight state; the actual clock
-      // starts only from a later activity signal.
-      if (!canAutoPrepareToday()) return false;
-      // A manual start (startSession / handlePrimaryAction) can reach here across a
-      // midnight boundary WITHOUT ensureCurrentDay() having run first. Setting
-      // currentDay = today below would then make a later rolloverDayIfNeeded() see
-      // "already today" and never archive yesterday (nor reset the in-memory cumulative),
-      // losing the previous day. So archive + reset here first if the day actually
-      // changed. rolloverDayIfNeeded is a plain function (no callback into this one), so
-      // there is no recursion with ensureCurrentDay; when ensureCurrentDay already rolled
-      // over, currentDay === today and this guard is a no-op.
+    // Archive + reset if the calendar day changed since state.currentDay. The single
+    // rollover-safe guard for every path that sets currentDay / marks today assessed
+    // WITHOUT going through ensureCurrentDay first (manual start, onboarding, reset-today).
+    // Otherwise those paths clobber currentDay=today, so a later rolloverDayIfNeeded() sees
+    // "already today" and never archives yesterday nor resets the in-memory cumulative.
+    // rolloverDayIfNeeded is a plain function (no callback), so no recursion; a no-op when
+    // the day is already today. Mirrors ensureCurrentDay's own rollover-branch reset set.
+    function archiveIfDayCrossed() {
       if (state.currentDay && state.currentDay !== todayKey() && rolloverDayIfNeeded(state)) {
         resetSessionClock();
         autoElapsedSeconds = 0;
         lastActivityRecordAt = 0;
         resetAutoTrackingClock();
+        return true;
       }
+      return false;
+    }
+
+    function ensureTodayReadyForActivityStart() {
+      if (hasAssessedToday()) return true;
+      // Active launches auto-fill today's lightweight state; the actual clock
+      // starts only from a later activity signal.
+      if (!canAutoPrepareToday()) return false;
+      archiveIfDayCrossed();
       state.currentDay = todayKey();
       state.lastAssessmentDay = todayKey();
       state.initialAssessmentDone = true;
@@ -12084,8 +12092,17 @@
     }
 
     function resetDay() {
+      // Archive a crossed day BEFORE pauseSession() — pauseSession persists, and persist
+      // writes elapsedSeconds=0 while !hasAssessedToday, which would otherwise make the
+      // subsequent archive save yesterday with a zeroed session length. Also clear the
+      // cumulative auto-focus counter, which this reset previously left untouched — so
+      // 今日专注 didn't actually clear on reset.
+      archiveIfDayCrossed();
       pauseSession("reset");
       elapsedSeconds = 0;
+      autoElapsedSeconds = 0;
+      lastActivityRecordAt = 0;
+      resetAutoTrackingClock();
       sessionSource = "idle";
       lastNudgeAt = 0;
       state.breaks = 0;
@@ -16030,6 +16047,7 @@
     }
 
     window.__eyeflowDebugSetAutoTracking = () => {
+      archiveIfDayCrossed();
       state.currentDay = todayKey();
       state.lastAssessmentDay = todayKey();
       state.onboardingDismissed = true;
