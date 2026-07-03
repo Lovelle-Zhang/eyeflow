@@ -10493,7 +10493,15 @@
     function persist() {
       state.currentDay = state.currentDay || todayKey();
       state.elapsedSeconds = hasAssessedToday() ? elapsedSeconds : 0;
-      state.autoElapsedSeconds = hasAssessedToday() ? autoElapsedSeconds : 0;
+      // Persist the cumulative day total as-is — do NOT zero it when !hasAssessedToday.
+      // The loader (`autoElapsedSeconds = lastAssessmentDay === todayKey() ? … : 0`) and
+      // rolloverDayIfNeeded are the ONLY authorities that zero it on a real new day.
+      // Zeroing here caused a date-boundary race: a lock/suspend after midnight but
+      // before ensureCurrentDay() archived the day would persist 0 over yesterday's
+      // total before rollover could save it to summaryHistory. Persisting the stale
+      // value is harmless — the loader discards it on a day mismatch. (elapsedSeconds /
+      // sessionSource are transient session-clock state, so guarding those is fine.)
+      state.autoElapsedSeconds = autoElapsedSeconds;
       state.sessionSource = hasAssessedToday() ? sessionSource : "idle";
       state.lastNudgeAt = lastNudgeAt;
       state.lastNaturalBreakNudgeAt = lastNaturalBreakNudgeAt;
@@ -10520,6 +10528,14 @@
       const rolledOver = rolloverDayIfNeeded(state);
       if (!rolledOver) return false;
       resetSessionClock();
+      // A real new day: rolloverDayIfNeeded already archived yesterday to
+      // summaryHistory and zeroed state.autoElapsedSeconds, but the in-memory closure
+      // var is still yesterday's total. Reset it too, or the next persist() (once
+      // ensureTodayReadyForActivityStart re-marks today assessed) would write yesterday's
+      // number back as today's — bleeding the old total into the new day.
+      autoElapsedSeconds = 0;
+      lastActivityRecordAt = 0;
+      resetAutoTrackingClock();
       const back = returningLine();
       // Cross-day while the app is open / on resume follows the same rule as cold
       // launch: prepare the same Today surface unless onboarding was explicitly
