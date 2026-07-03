@@ -6323,6 +6323,8 @@
     }
 
     .share-preview-overlay .share-art-card {
+      position: relative;
+      overflow: hidden;
       width: min(100%, 680px);
       min-height: 360px;
       padding: var(--ef-space-12);
@@ -6335,11 +6337,32 @@
       align-content: start;
     }
 
+    /* Brand-gradient hairline — the mint→sky→cream identity gradient (theme-constant,
+       same as the app icon) as a restrained top accent. */
+    .share-preview-overlay .share-art-card::before {
+      content: "";
+      position: absolute;
+      inset: 0 0 auto 0;
+      height: 4px;
+      background: linear-gradient(90deg, #6FE7C3, #BDEAFF 55%, #F3EEC7);
+    }
+
     .share-preview-overlay .share-art-date {
       color: var(--muted);
       font-size: var(--ef-text-body);
       line-height: var(--ef-line-body);
       font-weight: var(--ef-symbol-weight-base);
+    }
+
+    .share-preview-overlay .share-art-date::before {
+      content: "";
+      display: inline-block;
+      width: 3px;
+      height: 0.92em;
+      margin-right: var(--ef-space-2);
+      border-radius: 2px;
+      background: var(--mira);
+      vertical-align: -1px;
     }
 
     .share-preview-overlay .share-art-quote {
@@ -6375,6 +6398,11 @@
       font-size: var(--ef-text-title-md);
       line-height: var(--ef-line-title);
       font-weight: 500;
+    }
+
+    /* Hero metric (今日专注) carries the brand accent; the rest stay ink. */
+    .share-preview-overlay .share-art-metric:first-child strong {
+      color: var(--mira);
     }
 
     .share-preview-overlay .share-art-divider {
@@ -6425,7 +6453,8 @@
       min-height: var(--ef-control-md);
       padding: var(--ef-space-0) var(--ef-space-5);
       border-radius: var(--ef-radius-pill);
-      background: rgba(231, 228, 222, 0.72);
+      background: var(--mira-soft);
+      color: var(--mira);
       display: inline-flex;
       align-items: center;
     }
@@ -15106,7 +15135,10 @@
         line: themeColor("--group-line", "rgba(24, 32, 31, 0.08)"),
         ink: themeColor("--ink", "rgba(31, 33, 31, 0.94)"),
         muted: themeColor("--muted", "rgba(73, 72, 68, 0.62)"),
-        pill: themeColor("--wash-2", "rgba(231, 228, 222, 0.78)")
+        pill: themeColor("--wash-2", "rgba(231, 228, 222, 0.78)"),
+        // Brand green — the app accent, theme-aware (dark green in light, mint in dark).
+        mira: themeColor("--mira", "#1f7a5e"),
+        miraSoft: themeColor("--mira-soft", "rgba(31, 122, 94, 0.13)")
       };
       ctx.fillStyle = cardColors.frame;
       ctx.fillRect(0, 0, canvas.width, canvas.height);
@@ -15122,10 +15154,27 @@
       ctx.lineWidth = 1;
       ctx.stroke();
 
+      // Brand-gradient hairline along the card top (mint→sky→cream identity gradient,
+      // theme-constant), clipped to the card's rounded corners.
+      ctx.save();
+      roundedRect(ctx, cardX, cardY, cardW, cardH, 30);
+      ctx.clip();
+      const brandStrip = ctx.createLinearGradient(cardX, cardY, cardX + cardW, cardY);
+      brandStrip.addColorStop(0, "#6FE7C3");
+      brandStrip.addColorStop(0.55, "#BDEAFF");
+      brandStrip.addColorStop(1, "#F3EEC7");
+      ctx.fillStyle = brandStrip;
+      ctx.fillRect(cardX, cardY, cardW, 5); // ~parity with the DOM card's 4px ::before hairline
+      ctx.restore();
+
       const contentX = cardX + 72;
+      // Green accent bar before the date.
+      roundedRect(ctx, contentX, cardY + 72, 5, 22, 2.5);
+      ctx.fillStyle = cardColors.mira;
+      ctx.fill();
       ctx.fillStyle = cardColors.muted;
       ctx.font = '600 24px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
-      ctx.fillText(card.date, contentX, cardY + 90);
+      ctx.fillText(card.date, contentX + 16, cardY + 90);
 
       ctx.fillStyle = cardColors.ink;
       ctx.font = '600 48px "Songti SC", STSong, "Noto Serif CJK SC", Georgia, serif';
@@ -15143,7 +15192,7 @@
         ctx.fillStyle = cardColors.muted;
         ctx.font = '600 22px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
         ctx.fillText(label, x, metricY);
-        ctx.fillStyle = cardColors.ink;
+        ctx.fillStyle = index === 0 ? cardColors.mira : cardColors.ink;
         ctx.font = '750 28px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
         ctx.fillText(value, x, metricY + 44);
       });
@@ -15167,9 +15216,9 @@
       const domainX = cardX + cardW - 72 - domainW;
       const domainY = cardY + 497;
       roundedRect(ctx, domainX, domainY, domainW, domainH, domainH / 2);
-      ctx.fillStyle = cardColors.pill;
+      ctx.fillStyle = cardColors.miraSoft;
       ctx.fill();
-      ctx.fillStyle = cardColors.muted;
+      ctx.fillStyle = cardColors.mira;
       ctx.font = '700 21px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
       ctx.fillText("eyeflow.app", domainX + 20, domainY + 28);
       return canvas;
