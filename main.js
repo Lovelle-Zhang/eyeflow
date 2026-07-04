@@ -96,6 +96,9 @@ let latestActivity = {
   detectedAt: Date.now()
 };
 let activeWorkStartedAt = null;
+// True between lock-screen and unlock-screen — a locked screen is definitively
+// not being looked at, regardless of how low system idle is.
+let screenLocked = false;
 const diagnosticsStartedAt = new Date().toISOString();
 const recentDiagnostics = [];
 
@@ -2503,14 +2506,41 @@ function isDeepWorkApp(appName) {
 const PRESENT_IDLE_SECONDS = 5 * 60;
 
 function startActivityMonitor() {
+  let lastActivityTickAt = Date.now();
   setInterval(async () => {
+    // A missed-tick gap means this process was suspended (sleep) or the clock
+    // jumped forward — continuous-active time cannot have continued through it.
+    // Drop the anchor so activeSeconds restarts from the wake instant; without
+    // this, wake-by-keypress (idle ≈ 0 at the first tick) keeps a pre-sleep
+    // anchor alive and the renderer's auto-tracking seed imports the whole
+    // sleep span as focus — 今日专注 shows hours right after opening the lid.
+    // The since-midnight clamp (24d1734) can't catch same-day sleep import.
+    const tickNow = Date.now();
+    if (tickNow - lastActivityTickAt > 15000) {
+      activeWorkStartedAt = null;
+    }
+    lastActivityTickAt = tickNow;
     const idleSeconds = powerMonitor.getSystemIdleTime();
+    // Self-heal the lock latch from the OS truth each tick (codex review):
+    // if lock-screen/unlock-screen was ever missed, the event-only latch would
+    // stick — permanently dead activity on a missed unlock, or a lock counted
+    // as watching on a missed lock. getSystemIdleState reports "locked"
+    // directly; "unknown" leaves the latch as-is.
+    const systemIdleState = powerMonitor.getSystemIdleState(1);
+    if (systemIdleState === "locked") {
+      screenLocked = true;
+    } else if (screenLocked && (systemIdleState === "active" || systemIdleState === "idle")) {
+      screenLocked = false;
+    }
     const accessibilityTrusted = hasAccessibilityPermission();
     const desktopPrefs = desktopPreferenceDefaults();
     const enhancedDesktopSensing = Boolean(desktopPrefs.enhancedDesktopSensing);
     const canReadActiveApp = enhancedDesktopSensing && accessibilityTrusted;
     const activeApp = canReadActiveApp ? await getActiveAppName() : "本地计时";
-    const isWorking = idleSeconds < PRESENT_IDLE_SECONDS;
+    // A locked screen is definitively not being looked at — idle alone can't
+    // tell (a <5min lock keeps idleSeconds under the present-idle threshold,
+    // so the anchor would survive and re-import the lock span on unlock).
+    const isWorking = !screenLocked && idleSeconds < PRESENT_IDLE_SECONDS;
     if (isWorking && !activeWorkStartedAt) {
       activeWorkStartedAt = Date.now();
     }
@@ -2536,9 +2566,15 @@ function startActivityMonitor() {
 
 function startSystemLifecycleMonitor() {
   powerMonitor.on("lock-screen", () => {
+    screenLocked = true;
+    activeWorkStartedAt = null;
     broadcastSystemLifecycle("lock-screen");
   });
+  powerMonitor.on("unlock-screen", () => {
+    screenLocked = false;
+  });
   powerMonitor.on("suspend", () => {
+    activeWorkStartedAt = null;
     broadcastSystemLifecycle("suspend");
   });
   powerMonitor.on("shutdown", () => {
