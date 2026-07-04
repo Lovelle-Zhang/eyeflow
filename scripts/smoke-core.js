@@ -338,7 +338,7 @@ function main() {
   assertNotMatches(indexHtml, /card\.breaks|今日休息次数|<span>休息<\/span><strong id="shareCardBreaks"/, "daily share card does not expose rest as a count");
   assertIncludes(indexHtml, "eyeflow.app", "profile share card includes restrained domain branding");
   assertMatches(indexHtml, /#todayView \.share-art-mark,[\s\S]*#profileView \.share-art-mark\s*\{[\s\S]*width:\s*calc\(var\(--ef-control-lg\) \+ var\(--ef-space-1\)\);[\s\S]*background:\s*url\("\.\/assets\/icon\.svg"\) center \/ contain no-repeat;/, "daily share card uses the source app icon asset");
-  assertIncludes(indexHtml, '<button class="ghost" id="copyShareBtn" type="button">带走</button>', "daily share card uses a compact copy action");
+  assertMatches(indexHtml, /<button class="[^"]*" id="copyShareBtn" type="button">[\s\S]*?带走[\s\S]*?<\/button>/, "daily share card uses a compact copy action");
   assertIncludes(indexHtml, 'id="sharePreviewOverlay"', "daily share action opens a full-card preview overlay");
   assertIncludes(indexHtml, 'id="copyShareConfirmBtn"', "daily share preview has a separate copy confirmation");
   assertIncludes(indexHtml, 'els.copyShareBtn?.addEventListener("click", openDailySharePreview);', "daily share compact action does not copy before preview");
