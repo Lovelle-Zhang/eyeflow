@@ -6349,7 +6349,14 @@
     .share-preview-stage {
       display: grid;
       place-items: center;
-      padding: var(--ef-space-2) var(--ef-space-0);
+      /* Recess the card's immediate backdrop a step below --panel so the white
+         (light) / elevated (dark) card visibly floats. You can't separate a
+         near-white card from a near-white panel by brightening the card — there's
+         no headroom — so the separation has to come from a deeper backdrop. */
+      padding: var(--ef-space-7);
+      background: var(--wash);
+      border-radius: var(--ef-radius-xl);
+      box-shadow: var(--share-stage-inset);
     }
 
     .share-preview-overlay .share-art-card {
