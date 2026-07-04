@@ -526,6 +526,45 @@ function main() {
   assertEqual(core.initialRhythmForLoad(80).focus, 15, "high focus minutes");
   assertEqual(core.initialRhythmForLoad(80).rest, 180, "high rest seconds");
 
+  // todayActionInsight — honest today-only lead line, priority order matters.
+  const insight = (o) => core.todayActionInsight(o);
+  assertEqual(insight({}), "新的一天。先照顾好眼睛，我在旁边陪着。", "insight: no activity → gentle opener");
+  assertEqual(
+    insight({ focusSeconds: 3600, breaks: 0, zone: "high", focusTargetMinutes: 50 }),
+    "今天眼睛偏累了。下一轮短一点，先让它松一下。",
+    "insight: high zone wins over long-focus"
+  );
+  assertEqual(
+    insight({ focusSeconds: 3600, breaks: 0, zone: "comfort", focusTargetMinutes: 50 }),
+    "今天专注攒了不少，还没停过。别一路撑到底——给眼睛一次远眺。",
+    "insight: past target with zero breaks"
+  );
+  assertEqual(
+    insight({ focusSeconds: 600, breaks: 0, zone: "medium", symptoms: { strain: 7, dryness: 3 } }),
+    "今天眼睛发酸偏明显。停一下、看看远处，比硬撑管用。",
+    "insight: dominant strain symptom"
+  );
+  assertEqual(
+    insight({ focusSeconds: 600, breaks: 0, zone: "medium", symptoms: { dryness: 8, strain: 2 } }),
+    "今天干涩偏明显。眨眨眼、看向远处，让眼睛润一下。",
+    "insight: dominant dryness picks the higher symptom"
+  );
+  assertEqual(
+    insight({ focusSeconds: 1200, breaks: 2, zone: "comfort", focusTargetMinutes: 50 }),
+    "今天有停下来护眼，这个节奏对眼睛刚好。保持。",
+    "insight: rested + comfortable → affirm"
+  );
+  assertEqual(
+    insight({ focusSeconds: 1200, breaks: 0, zone: "medium", focusTargetMinutes: 50, reminderStats: { shown: 4, ignored: 3 } }),
+    "今天的提醒你多半留到了稍后。不催你——累的时候早一点停，眼睛会更轻。",
+    "insight: high ignore rate"
+  );
+  assertEqual(
+    insight({ focusSeconds: 1200, breaks: 0, zone: "medium", focusTargetMinutes: 50 }),
+    "今天在稳稳地用眼。到断点时停一下，让节奏松一点。",
+    "insight: default steady-use fallback"
+  );
+
   assertEqual(core.intensityLabel("quiet"), "L1 安静", "quiet intensity label");
   assertEqual(core.intensityLabel("force"), "L4 强制爱", "force intensity label");
   assertIncludes(core.modeActionCopy("clear"), "明确介入", "clear mode action copy");

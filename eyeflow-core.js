@@ -213,6 +213,47 @@ window.EyeFlowCore = (() => {
     return "先轻提醒陪伴，不抢你的控制权";
   }
 
+  // The TODAY share-card lead line: one honest "what I see today + a gentle next
+  // step" sentence, computed only from TODAY's observable state (focus so far,
+  // breaks taken, load zone, self-reported symptoms, reminder responses). It makes
+  // NO multi-day behavioral claim — that needs the closed-loop rhythm engine, which
+  // is still open-loop, so faking a pattern here would be dishonest. Week/month lead
+  // lines stay unbuilt until that engine exists.
+  function todayActionInsight(input = {}) {
+    const focusSeconds = Math.max(0, Number(input.focusSeconds || 0));
+    const breaks = Math.max(0, Number(input.breaks || 0));
+    const focusTargetMinutes = Math.max(1, Number(input.focusTargetMinutes || 50));
+    const zone = input.zone || "comfort";
+    const symptoms = input.symptoms || {};
+    const reminderStats = input.reminderStats || {};
+    const focusMinutes = focusSeconds / 60;
+    const hasActivity = focusSeconds >= 60 || breaks > 0;
+
+    if (!hasActivity) return "新的一天。先照顾好眼睛，我在旁边陪着。";
+    if (zone === "high") return "今天眼睛偏累了。下一轮短一点，先让它松一下。";
+    if (focusMinutes >= focusTargetMinutes && breaks === 0) {
+      return "今天专注攒了不少，还没停过。别一路撑到底——给眼睛一次远眺。";
+    }
+    // Dominant self-reported symptom (only when clearly elevated).
+    const symptomLines = [
+      ["strain", Number(symptoms.strain || 0), "今天眼睛发酸偏明显。停一下、看看远处，比硬撑管用。"],
+      ["dryness", Number(symptoms.dryness || 0), "今天干涩偏明显。眨眨眼、看向远处，让眼睛润一下。"],
+      ["blur", Number(symptoms.blur || 0), "今天有点看不清。离屏幕远一点，给焦距换换气。"],
+      ["light", Number(symptoms.light || 0), "今天对光偏敏感。调暗一点、多远眺，眼睛会舒服些。"]
+    ].sort((a, b) => b[1] - a[1]);
+    if (symptomLines[0][1] >= 6) return symptomLines[0][2];
+
+    if (breaks >= 1 && zone === "comfort") {
+      return "今天有停下来护眼，这个节奏对眼睛刚好。保持。";
+    }
+    const shown = Number(reminderStats.shown || 0);
+    const ignored = Number(reminderStats.ignored || 0);
+    if (shown >= 2 && ignored >= shown / 2) {
+      return "今天的提醒你多半留到了稍后。不催你——累的时候早一点停，眼睛会更轻。";
+    }
+    return "今天在稳稳地用眼。到断点时停一下，让节奏松一点。";
+  }
+
   return {
     clampLoad,
     symptomLoadScore,
@@ -222,6 +263,7 @@ window.EyeFlowCore = (() => {
     classifyLoad,
     initialRhythmForLoad,
     intensityLabel,
-    modeActionCopy
+    modeActionCopy,
+    todayActionInsight
   };
 })();
