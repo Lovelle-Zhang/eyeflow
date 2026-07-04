@@ -1483,6 +1483,25 @@
       margin-left: auto;
     }
 
+    /* Share card is a takeaway, not a stats row: give "带走" a real
+       tonal-green presence + a calm lift so it reads as the door in. */
+    .daily-share-take {
+      font-weight: 600;
+      padding-inline: var(--ef-space-5);
+      box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--btn-tonal-fg) 22%, transparent);
+    }
+
+    .daily-share-take-icon {
+      flex: none;
+      margin-top: -1px;
+    }
+
+    /* Eyebrow announces the card as shareable rather than blending in. */
+    .daily-summary.daily-share-card #summaryDayLabel {
+      color: var(--btn-tonal-fg);
+      font-weight: 600;
+    }
+
 	    .state-center {
 	      --state-panel-width: var(--page-frame-width);
 	      display: grid;
@@ -8979,7 +8998,14 @@
           </div>
           <div class="daily-share-actions">
             <p id="shareCardNote" hidden="">本地复制，不上传数据。</p>
-            <button class="ghost" id="copyShareBtn" type="button">带走</button>
+            <button class="btn-tonal daily-share-take" id="copyShareBtn" type="button">
+              <svg class="daily-share-take-icon" viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M12 15V4" />
+                <path d="M8 8l4-4 4 4" />
+                <path d="M5 13v5a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-5" />
+              </svg>
+              带走
+            </button>
           </div>
         </div>
         <span id="responseRate" hidden="">暂无</span>
