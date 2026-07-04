@@ -36,7 +36,7 @@ function main() {
   run("Check release wiring", "npm", ["run", "smoke:release"], { timeout: 30000 });
   run("Check readiness render sync (Electron)", "npm", ["run", "smoke:readiness"], { timeout: 60000 });
   run("Check dark-mode theme render (Electron)", "npm", ["run", "smoke:theme"], { timeout: 60000 });
-  run("Build local app bundle", "npm", ["run", "build:app"], { timeout: 180000 });
+  run("Build local app bundle", "npm", ["run", "build:app"], { timeout: 360000 });
   run("Install /Applications/EyeFlow.app", "npm", ["run", "install:local"], { timeout: 180000 });
   run("Check installed app bundle", "npm", ["run", "smoke:installed"], { timeout: 30000 });
   console.log("[refresh:local] DONE. Installed EyeFlow.app is updated and verified.");
