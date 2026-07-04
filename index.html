@@ -10362,6 +10362,7 @@
           rhythmMemory: { ...fallback.rhythmMemory, ...(saved.rhythmMemory || {}) },
           summaryHistory: Array.isArray(saved.summaryHistory) ? saved.summaryHistory : [],
           events: Array.isArray(saved.events) ? saved.events : [],
+          logs: Array.isArray(saved.logs) ? saved.logs : [],
           profileObservation: saved.profileObservation || null,
           settings: { ...fallback.settings, ...(saved.settings || {}) }
         };
@@ -15952,7 +15953,11 @@
           </div>
         `;
       }).join("");
-      const active = days.filter((day) => hasDailyActivity(day) || historyPeakLoad(day) > 0);
+      // Count active days within the DISPLAYED 30-day window (displayDays), not the
+      // raw up-to-365-day history — the sentence says "近 30 天" and maxPeak already
+      // comes from displayDays, so counting `days` gave impossible copy like
+      // "近30天有 45 天形成记录" once a user had >30 active days. (D2)
+      const active = displayDays.filter((day) => !day.empty && (hasDailyActivity(day) || historyPeakLoad(day) > 0));
       els.weeklyKlineCopy.textContent = active.length
         ? `近 30 天有 ${active.length} 天形成记录，最高 ${maxPeak}。颜色越深代表状态越高。`
         : "开始记录后，这里会沉淀近 30 天状态趋势。";
