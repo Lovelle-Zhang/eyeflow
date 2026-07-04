@@ -9165,7 +9165,6 @@
                   <strong class="settings-row-label ef-preference-row-label">勿扰场景</strong>
                   <div class="settings-row-value settings-check-list">
                     <label><span>全屏时安静</span><input type="checkbox" class="ef-switch" id="quietFullscreenToggle" role="switch" checked=""></label>
-                    <label><span>会议中安静</span><input type="checkbox" class="ef-switch" id="quietMeetingToggle" role="switch" checked=""></label>
                     <label><span>深度工作时只显示 Mira</span><input type="checkbox" class="ef-switch" id="deepWorkMiraOnlyToggle" role="switch"></label>
                   </div>
                 </div>
@@ -9927,7 +9926,6 @@
         document.querySelector("#interventionBar4")
       ],
       quietFullscreenToggle: document.querySelector("#quietFullscreenToggle"),
-      quietMeetingToggle: document.querySelector("#quietMeetingToggle"),
       deepWorkMiraOnlyToggle: document.querySelector("#deepWorkMiraOnlyToggle"),
       miraStateToggle: document.querySelector("#miraStateToggle"),
       soundToggle: document.querySelector("#soundToggle"),
@@ -10172,7 +10170,6 @@
     els.cancelForceBtn.addEventListener("click", cancelForceMode);
     [
       els.quietFullscreenToggle,
-      els.quietMeetingToggle,
       els.deepWorkMiraOnlyToggle,
       els.miraStateToggle,
       els.soundToggle,
@@ -10322,7 +10319,6 @@
         settings: {
           intensity: "quiet",
           quietFullscreenToggle: true,
-          quietMeetingToggle: true,
           deepWorkMiraOnlyToggle: false,
           miraStateToggle: true,
           soundToggle: false,
@@ -10561,7 +10557,6 @@
       setIntensity(state.settings.intensity || "quiet", { persistChange: false, renderChange: false, userChange: false });
       setRecoveryMode(state.settings.recoveryMode || "mixed", { persistChange: false });
       els.quietFullscreenToggle.checked = Boolean(state.settings.quietFullscreenToggle);
-      els.quietMeetingToggle.checked = Boolean(state.settings.quietMeetingToggle);
       els.deepWorkMiraOnlyToggle.checked = Boolean(state.settings.deepWorkMiraOnlyToggle);
       els.miraStateToggle.checked = Boolean(state.settings.miraStateToggle);
       els.soundToggle.checked = Boolean(state.settings.soundToggle);
