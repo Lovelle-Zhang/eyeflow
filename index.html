@@ -9790,7 +9790,9 @@
       naturalAwaySecondsForEvent,
       naturalAwaySecondsForDay,
       recordedSecondsForDay,
-      dayMetrics
+      dayMetrics,
+      liveFocusSecondsForDay,
+      windowStats
     } = window.EyeFlowMetrics;
     let activeRecoveryTasks = recoveryTasksForMode(state.settings.recoveryMode || "mixed");
     const sessionIcons = {
@@ -15007,11 +15009,10 @@
     }
 
     function currentDayFocusSeconds() {
-      const endedSeconds = (state.events || [])
-        .filter((event) => event?.type === "focus_session" && event.phase === "ended")
-        .reduce((total, event) => total + focusSegmentSeconds(event), 0);
+      // Counting lives in eyeflow-metrics.js (one metric → one function); the
+      // page only supplies the live round's seconds while a session runs.
       const liveSeconds = isRunning || isAutoTracking() ? Math.max(0, Number(elapsedSeconds || 0)) : 0;
-      return Math.max(0, endedSeconds + liveSeconds, Number(autoElapsedSeconds || 0));
+      return liveFocusSecondsForDay({ events: state.events, autoElapsedSeconds }, liveSeconds);
     }
 
     function recordedDurationLabel(seconds) {
@@ -15543,33 +15544,15 @@
     // windowed by dayGap so 本周 = 7, 本月 = 30. Counts only user-initiated
     // activity so the three figures sit on the same real-usage scale.
     function profileWindowStats(days) {
+      // The page owns the WINDOW (todayKey/dayGap live here); the counting
+      // itself lives in eyeflow-metrics.js so 本周/本月 provably use the same
+      // event filters as every other view.
       const today = todayKey();
       const records = [
         { day: today, events: state.events || [] },
         ...(state.summaryHistory || [])
       ].filter((r) => r && r.day && dayGap(r.day, today) < days);
-
-      let activeSeconds = 0;
-      let restSeconds = 0;
-      let recoveryCount = 0;
-      let recordCount = 0;
-      records.forEach((r) => {
-        (Array.isArray(r.events) ? r.events : []).forEach((event) => {
-          if (!event) return;
-          if (event.type === "focus_session" && event.phase === "ended") {
-            activeSeconds += focusSegmentSeconds(event);
-          } else if (isUserRecovery(event)) {
-            recoveryCount += 1;
-            restSeconds += Math.max(0, Number(event.durationSeconds) || 0);
-          } else if (isUserRecord(event)) {
-            recordCount += 1;
-          }
-        });
-      });
-      // Mirror the displayed stats: the encouraging note shows whenever every
-      // metric reads zero, so sub-minute noise doesn't suppress it.
-      const hasData = Math.round(activeSeconds / 60) > 0 || recoveryCount > 0 || recordCount > 0;
-      return { activeSeconds, restSeconds, recoveryCount, recordCount, hasData };
+      return windowStats(records);
     }
 
     // "28 分钟" under an hour, "3 小时 20 分" beyond — keeps the read precise.

@@ -107,6 +107,44 @@ function main() {
   assertEqual(weekFocus, 2100, "week focus total === sum of per-day focus");
   assertEqual(weekRecovery, 240, "week recovery total === sum of per-day recovery");
 
+  // --- totalAwaySecondsForDay: the one sanctioned recovery+away sum ------
+  assertEqual(m.totalAwaySecondsForDay(day), 420, "total away = recovery(120) + natural-away(300)");
+  assertEqual(
+    m.totalAwaySecondsForDay(day),
+    m.recoverySecondsForDay(day) + m.naturalAwaySecondsForDay(day),
+    "total away === sum of its two components (never diverges from parts)"
+  );
+  assertEqual(m.totalAwaySecondsForDay({}), 0, "empty day total away is zero");
+
+  // --- liveFocusSecondsForDay: live口径 (ended + running round) ----------
+  assertEqual(m.liveFocusSecondsForDay(day, 60), 2160, "live focus = ended segments + live round seconds");
+  assertEqual(m.liveFocusSecondsForDay({ events, autoElapsedSeconds: 5000 }, 60), 5000, "cumulative auto counter floors the live figure");
+  assertEqual(m.liveFocusSecondsForDay({}, 0), 0, "empty live day is zero, never NaN");
+  // Pins the intentional live-vs-stored口径 relationship: with no live round and
+  // no snapshot fallbacks, both must agree on the same events.
+  assertEqual(m.liveFocusSecondsForDay(day, 0), m.recordedSecondsForDay(day), "live and stored口径 agree when nothing is running");
+  // ...and pins the intentional DIVERGENCE: the stored口径 honors the legacy
+  // elapsedSeconds snapshot fallback, the live口径 deliberately ignores it
+  // (live = ended + running round, floored only by the auto counter).
+  const legacyDay = { events, elapsedSeconds: 5000 };
+  assertEqual(m.recordedSecondsForDay(legacyDay), 5000, "stored口径 honors the legacy elapsedSeconds fallback");
+  assertEqual(m.liveFocusSecondsForDay(legacyDay, 0), 2100, "live口径 intentionally ignores the elapsedSeconds fallback");
+
+  // --- windowStats: 本周/本月 counting uses the same filters --------------
+  const win = m.windowStats([day1, day2]);
+  assertDeepEqual(
+    win,
+    { activeSeconds: 2100, restSeconds: 240, recoveryCount: 2, recordCount: 0, hasData: true },
+    "windowStats aggregates focus/rest/counts with the canonical filters"
+  );
+  assertEqual(win.activeSeconds, weekFocus, "windowStats.activeSeconds === sum of per-day recorded focus (same events)");
+  assertEqual(win.restSeconds, weekRecovery, "windowStats.restSeconds === sum of per-day recovery");
+  assertDeepEqual(
+    m.windowStats([]),
+    { activeSeconds: 0, restSeconds: 0, recoveryCount: 0, recordCount: 0, hasData: false },
+    "empty window has no data (encouraging note can show)"
+  );
+
   // --- structural: dashboard must route through the module, not re-define
   const indexHtml = read("index.html");
   assert(indexHtml.includes("window.EyeFlowMetrics"), "dashboard reads metrics from the single module");
@@ -116,10 +154,17 @@ function main() {
     "function recoverySecondsForDay",
     "function naturalAwaySecondsForDay",
     "function focusSegmentSeconds",
-    "function isUserRecovery"
+    "function isUserRecovery",
+    "function windowStats",
+    "function liveFocusSecondsForDay",
+    "function totalAwaySecondsForDay"
   ].forEach((sig) => {
     assert(!indexHtml.includes(sig), `dashboard must NOT re-define metric (one metric, one function): ${sig}`);
   });
+  // The two counting loops that used to live inline must stay dead — the page
+  // passes records/live seconds to the module instead of re-implementing.
+  assert(!indexHtml.includes("activeSeconds += focusSegmentSeconds"), "profile window counting must stay in eyeflow-metrics.js");
+  assert(!indexHtml.includes("endedSeconds + liveSeconds"), "live day-focus counting must stay in eyeflow-metrics.js");
 
   console.log("[smoke:metrics] PASSED. Day/period metrics are single-sourced and口径-consistent.");
 }

@@ -84,6 +84,55 @@ window.EyeFlowMetrics = (() => {
     };
   }
 
+  // Total time away from the screen for a day = deliberate eye-care recovery +
+  // system-detected natural away. The two stay separately queryable above; this
+  // is the one sanctioned way to add them (never re-add inline in a view).
+  function totalAwaySecondsForDay(day = {}) {
+    return recoverySecondsForDay(day) + naturalAwaySecondsForDay(day);
+  }
+
+  // Live "today so far" focus: ended segments PLUS the in-progress round's live
+  // seconds, floored by the day's cumulative auto counter. NOTE this口径 is
+  // intentionally different from recordedSecondsForDay (pure max, for STORED
+  // days): the live view layers the running round on top of finished ones.
+  // Extracted verbatim from the dashboard's currentDayFocusSeconds so the page
+  // passes live state in instead of re-implementing the counting.
+  function liveFocusSecondsForDay(day = {}, liveSeconds = 0) {
+    const endedSeconds = (Array.isArray(day.events) ? day.events : [])
+      .filter((event) => event?.type === "focus_session" && event.phase === "ended")
+      .reduce((total, event) => total + focusSegmentSeconds(event), 0);
+    const live = Math.max(0, Number(liveSeconds || 0));
+    return Math.max(0, endedSeconds + live, Number(day.autoElapsedSeconds || 0));
+  }
+
+  // Window aggregate over a set of day records (今天 + summaryHistory slice).
+  // The page owns picking WHICH records fall in the window (needs todayKey /
+  // dayGap); the counting itself lives here so 本周/本月 figures provably use
+  // the same event filters as every other view.
+  function windowStats(records = []) {
+    let activeSeconds = 0;
+    let restSeconds = 0;
+    let recoveryCount = 0;
+    let recordCount = 0;
+    (Array.isArray(records) ? records : []).forEach((record) => {
+      (Array.isArray(record?.events) ? record.events : []).forEach((event) => {
+        if (!event) return;
+        if (event.type === "focus_session" && event.phase === "ended") {
+          activeSeconds += focusSegmentSeconds(event);
+        } else if (isUserRecovery(event)) {
+          recoveryCount += 1;
+          restSeconds += Math.max(0, Number(event.durationSeconds) || 0);
+        } else if (isUserRecord(event)) {
+          recordCount += 1;
+        }
+      });
+    });
+    // Mirror the displayed stats: the encouraging note shows whenever every
+    // metric reads zero, so sub-minute noise doesn't suppress it.
+    const hasData = Math.round(activeSeconds / 60) > 0 || recoveryCount > 0 || recordCount > 0;
+    return { activeSeconds, restSeconds, recoveryCount, recordCount, hasData };
+  }
+
   return {
     recordedMinutes,
     focusSegmentSeconds,
@@ -94,6 +143,9 @@ window.EyeFlowMetrics = (() => {
     naturalAwaySecondsForEvent,
     naturalAwaySecondsForDay,
     recordedSecondsForDay,
-    dayMetrics
+    dayMetrics,
+    totalAwaySecondsForDay,
+    liveFocusSecondsForDay,
+    windowStats
   };
 })();
