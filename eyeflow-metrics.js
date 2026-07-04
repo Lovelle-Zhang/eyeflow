@@ -15,17 +15,27 @@ window.EyeFlowMetrics = (() => {
     return Math.floor(Math.max(0, Number(seconds || 0)) / 60);
   }
 
-  // Real active time per focus segment = wall-clock (endedAt - startedAt).
-  // durationSeconds is cumulative across pause/resume, so summing it would
-  // double-count; the segment span never does.
+  // Real active time per focus segment = the SMALLER of two independently-wrong-in-
+  // opposite-directions signals:
+  //   - wall span (endedAt - startedAt): correct normally, but a sleep/suspend gap
+  //     before a late close inflates it past the real active time (a 30-min round
+  //     closed at wake after a 4h sleep spans 4.5h). durationSeconds is gap-protected
+  //     (frozen while suspended) so it stays right in this case.
+  //   - durationSeconds (elapsed at close): correct normally, but could overshoot the
+  //     span if it ever carried cumulative/paused time; the span caps that.
+  // min() takes whichever is smaller, which is the honest one in both failure modes —
+  // and for an eye-care app, under-counting focus is the safe direction. Fall back to
+  // whichever exists when the other is missing/zero (legacy events without duration).
   function focusSegmentSeconds(event) {
     if (!event || event.type !== "focus_session" || event.phase !== "ended") return 0;
     const start = Date.parse(event.startedAt || "");
     const end = Date.parse(event.endedAt || "");
-    if (Number.isFinite(start) && Number.isFinite(end) && end > start) {
-      return (end - start) / 1000;
-    }
-    return 0;
+    const span = (Number.isFinite(start) && Number.isFinite(end) && end > start)
+      ? (end - start) / 1000
+      : 0;
+    const duration = Math.max(0, Number(event.durationSeconds || 0));
+    if (span > 0 && duration > 0) return Math.min(span, duration);
+    return span > 0 ? span : duration;
   }
 
   function isUserRecovery(event) {

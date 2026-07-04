@@ -47,10 +47,15 @@ function main() {
   const m = loadMetrics();
 
   // --- fixtures ---------------------------------------------------------
-  // Two ended focus segments: wall-clock 1500s + 600s = 2100s. durationSeconds
-  // is deliberately wrong (cumulative across pauses) to prove we use the span.
+  // Two ended focus segments: 1500s + 600s = 2100s. focusA's durationSeconds is a
+  // deliberately-inflated 99999 (the old "cumulative could overshoot" fear) — min()
+  // must cap it at the 1500s span. focusB has no durationSeconds (legacy) — falls
+  // back to the 600s span.
   const focusA = { type: "focus_session", phase: "ended", startedAt: "2026-06-20T10:00:00Z", endedAt: "2026-06-20T10:25:00Z", durationSeconds: 99999 };
   const focusB = { type: "focus_session", phase: "ended", startedAt: "2026-06-20T10:30:00Z", endedAt: "2026-06-20T10:40:00Z", durationSeconds: 0 };
+  // Sleep-gap segment: a 30-min round closed at wake after a 4h sleep. Wall span is
+  // 4.5h but durationSeconds is gap-protected at 1800 — the honest figure. (D1/F1)
+  const focusSleepGap = { type: "focus_session", phase: "ended", startedAt: "2026-06-20T09:00:00Z", endedAt: "2026-06-20T13:30:00Z", durationSeconds: 1800 };
   const focusRunning = { type: "focus_session", phase: "running", startedAt: "2026-06-20T11:00:00Z" }; // not ended -> 0
   const recUser = { type: "recovery_event", durationSeconds: 120 };                 // user-initiated
   const recIncomplete = { type: "recovery_event", durationSeconds: 200, completed: false };
@@ -62,9 +67,29 @@ function main() {
   const events = [focusA, focusB, focusRunning, recUser, recIncomplete, recAuto, recLifecycle, userRecord, systemRecord];
   const day = { events };
 
-  // --- focusSegmentSeconds: wall-clock, not durationSeconds -------------
-  assertEqual(m.focusSegmentSeconds(focusA), 1500, "focusSegmentSeconds uses wall-clock span, not durationSeconds");
+  // --- focusSegmentSeconds: min(wall span, durationSeconds), honest in both dirs -
+  assertEqual(m.focusSegmentSeconds(focusA), 1500, "inflated durationSeconds is capped by the wall span");
+  assertEqual(m.focusSegmentSeconds(focusB), 600, "missing durationSeconds falls back to the wall span");
+  assertEqual(m.focusSegmentSeconds(focusSleepGap), 1800, "sleep-inflated wall span is capped by gap-protected durationSeconds (D1/F1)");
   assertEqual(m.focusSegmentSeconds(focusRunning), 0, "focusSegmentSeconds ignores non-ended segments");
+  // Truly-absent durationSeconds (not just 0) still falls back to the span.
+  assertEqual(
+    m.focusSegmentSeconds({ type: "focus_session", phase: "ended", startedAt: "2026-06-20T10:00:00Z", endedAt: "2026-06-20T10:10:00Z" }),
+    600,
+    "absent durationSeconds falls back to the wall span"
+  );
+  // Invalid span + present duration → duration (a repaired event with unparseable dates).
+  assertEqual(
+    m.focusSegmentSeconds({ type: "focus_session", phase: "ended", startedAt: "", endedAt: "", durationSeconds: 1800 }),
+    1800,
+    "invalid span falls back to durationSeconds"
+  );
+  // D1/F1 propagation: a sleep-gap round must read honestly through EVERY consumer,
+  // not just focusSegmentSeconds directly.
+  const sleepDay = { events: [focusSleepGap] };
+  assertEqual(m.recordedSecondsForDay(sleepDay), 1800, "recordedSecondsForDay caps the sleep-gap round at 1800");
+  assertEqual(m.liveFocusSecondsForDay(sleepDay, 0), 1800, "liveFocusSecondsForDay caps the sleep-gap round at 1800");
+  assertEqual(m.windowStats([sleepDay]).activeSeconds, 1800, "windowStats caps the sleep-gap round at 1800");
 
   // --- recordedSecondsForDay: events sum, with snapshot fallback --------
   assertEqual(m.recordedSecondsForDay(day), 2100, "recordedSecondsForDay sums ended wall-clock segments");
