@@ -696,6 +696,21 @@
         box-shadow: 0 0 var(--ef-space-5) rgba(142, 223, 199, 0.42);
       }
     }
+
+    /* Honor macOS Reduce Motion on the full-screen rest window too — same
+       universal guard companion.html uses. Animations complete near-instantly
+       and fall back to the elements' underlying (neutral) styles; the step
+       text/voice/timer still carry the exercise. */
+    @media (prefers-reduced-motion: reduce) {
+      *,
+      *::before,
+      *::after {
+        animation-duration: 0.001ms !important;
+        animation-iteration-count: 1 !important;
+        scroll-behavior: auto !important;
+        transition-duration: 0.001ms !important;
+      }
+    }
   </style>
 </head>
 <body>
