@@ -10583,7 +10583,7 @@
       dayState.initialAssessmentDone = false;
       dayState.lastAssessmentDay = "";
       dayState.rhythmSource = "default";
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(dayState));
+      safeStore(JSON.stringify(dayState));
       return true;
     }
 
@@ -10595,6 +10595,24 @@
       els.soundToggle.checked = Boolean(state.settings.soundToggle);
       els.systemNotifyToggle.checked = Boolean(state.settings.systemNotifyToggle);
       els.forceVoiceGuideToggle.checked = state.settings.forceVoiceGuideToggle !== false;
+    }
+
+    // Never let a failed save throw. QuotaExceededError (months of heavy days —
+    // summaryHistory keeps full per-day events for a year) or private-mode denial
+    // must not break the caller: a throw from persist() kills the 1s tick loop; a
+    // throw from rolloverDayIfNeeded (which has already mutated state in memory
+    // before this line) would leave the day half-rolled — currentDay=today but the
+    // reset skipped — bleeding yesterday's totals into today. In-memory state stays
+    // correct either way; a later save may succeed once the day rolls and trims.
+    // (S3 stop-bleed; the real cure is a data diet — Phase 2.)
+    function safeStore(value) {
+      try {
+        localStorage.setItem(STORAGE_KEY, value);
+        return true;
+      } catch (error) {
+        try { console.warn("[eyeflow] state save failed:", error && error.message || error); } catch {}
+        return false;
+      }
     }
 
     function persist() {
@@ -10615,7 +10633,7 @@
       state.lastActiveSecondsBeforeIdle = lastActiveSecondsBeforeIdle;
       state.lastAnalysis = scoreAnalysisSnapshot(computeEyeAnalysis());
       pruneRhythmMemory();
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+      safeStore(JSON.stringify(state));
     }
 
     function resetSessionClock() {
