@@ -10402,10 +10402,46 @@
           loaded.hasEverOnboarded = priorUseSignal;
         }
         repairStaleOpenFocusSession(loaded);
+        closeCrossDayOrphanRound(loaded);
 	        return loaded;
       } catch {
         return fallback;
       }
+    }
+
+    // A focus round left open by an app close/crash and relaunched on a LATER day:
+    // repairStaleOpenFocusSession bails (its lastAssessmentDay===today guard), and the
+    // boot rollover would clear the id without an ended event — dropping the round from
+    // event-based 本周/本月. This els-free, data-only close (mirrors repair's shape)
+    // runs in loadState BEFORE the boot rollover, so the ended event is archived into
+    // the prior day's row. endedAt = startedAt + elapsedSeconds (NOT now) so the hours
+    // the app was closed don't inflate the span — the boot analog of allowLongGap:false.
+    // The runtime (app-open) analog is closeRoundBeforeRollover. (T3 boot)
+    function closeCrossDayOrphanRound(dayState) {
+      if (!dayState || !dayState.activeFocusSessionId) return dayState;
+      if (!dayState.currentDay || dayState.currentDay === todayKey()) return dayState;
+      const elapsed = Math.max(0, Math.round(Number(dayState.elapsedSeconds || 0)));
+      const startedAt = dayState.activeFocusStartedAt || "";
+      const startMs = Date.parse(startedAt);
+      const endedAt = Number.isFinite(startMs)
+        ? new Date(startMs + elapsed * 1000).toISOString()
+        : new Date().toISOString();
+      dayState.events = Array.isArray(dayState.events) ? dayState.events : [];
+      dayState.events.push({
+        type: "focus_session",
+        phase: "ended",
+        sessionId: dayState.activeFocusSessionId,
+        startedAt,
+        endedAt,
+        durationSeconds: elapsed,
+        sourceMode: dayState.sessionSource || "manual",
+        endedBy: "rollover",
+        interruptedByBreak: false
+      });
+      dayState.activeFocusSessionId = "";
+      dayState.activeFocusStartedAt = "";
+      dayState.activeFocusStartedLoad = 0;
+      return dayState;
     }
 
     function repairStaleOpenFocusSession(dayState) {
@@ -10595,7 +10631,26 @@
       lastActiveSecondsBeforeIdle = 0;
     }
 
+    // A focus round open across midnight must emit its ended event BEFORE a rollover
+    // archives + clears the day, or the whole round (all of it yesterday's work) is
+    // dropped from event-based 本周/本月 stats — only the daily elapsedSeconds fallback
+    // keeps it, so the day row and the week row disagreed. Kept OUT of
+    // rolloverDayIfNeeded because that also runs at cold-boot before els exist and
+    // closeFocusSession reads els; every RUNTIME rollover path (app open across
+    // midnight) calls this first. Self-guards → a no-op when the day hasn't changed.
+    // allowLongGap:false so a sleep/inactive gap right before the rollover does NOT
+    // catch elapsed up over the gap (that would record the sleep as focus — the
+    // min(span,duration) metric can't save it since the forced sync inflates BOTH).
+    // The app-CLOSED-across-midnight analog is closeCrossDayOrphanRound (in loadState). (T3)
+    function closeRoundBeforeRollover() {
+      if (!state.activeFocusSessionId) return;
+      if (!state.currentDay || state.currentDay === todayKey()) return;
+      if (isRunning) syncRunningSessionClock({ allowLongGap: false });
+      closeFocusSession("rollover");
+    }
+
     function ensureCurrentDay(options = {}) {
+      closeRoundBeforeRollover();
       const rolledOver = rolloverDayIfNeeded(state);
       if (!rolledOver) return false;
       resetSessionClock();
@@ -11930,6 +11985,7 @@
     // rolloverDayIfNeeded is a plain function (no callback), so no recursion; a no-op when
     // the day is already today. Mirrors ensureCurrentDay's own rollover-branch reset set.
     function archiveIfDayCrossed() {
+      closeRoundBeforeRollover();
       if (state.currentDay && state.currentDay !== todayKey() && rolloverDayIfNeeded(state)) {
         resetSessionClock();
         autoElapsedSeconds = 0;

@@ -124,6 +124,22 @@ function main() {
     /onForceBreakDone\(\(payload\) => finishForceBreak\(payload\)\)/.test(indexHtml),
     "dashboard consumes onForceBreakDone → finishForceBreak"
   );
+  // A focus round open across midnight must emit its ended event before the
+  // rollover archives+clears, or it drops out of event-based week/month stats.
+  // Runtime path (app open): closeRoundBeforeRollover, called by both rollover
+  // entry points. Boot path (app closed across midnight): closeCrossDayOrphanRound
+  // in loadState. Both must exist. (T3)
+  assert(indexHtml.includes("function closeRoundBeforeRollover"), "runtime cross-midnight round-close helper exists (T3)");
+  assert(indexHtml.includes("function closeCrossDayOrphanRound"), "boot cross-day orphan round-close helper exists (T3)");
+  assert(
+    /closeRoundBeforeRollover\(\);\s*\n\s*const rolledOver = rolloverDayIfNeeded/.test(indexHtml),
+    "ensureCurrentDay closes the open round before rolling over"
+  );
+  assert(
+    /closeRoundBeforeRollover\(\);\s*\n\s*if \(state\.currentDay/.test(indexHtml),
+    "archiveIfDayCrossed closes the open round before rolling over"
+  );
+
   // Force break must close an open focus round, or the next round merges into
   // the orphaned id and inflates a later segment (S1).
   const startForceBreakBody = functionBody(indexHtml, "startForceBreak");
