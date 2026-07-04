@@ -11358,6 +11358,16 @@
       if (forceBreakActive) return;
       forceBreakActive = true;
       forceBreakPreview = Boolean(options.preview);
+      // Close any open focus round before stopping the clock, or its
+      // activeFocusSessionId is orphaned and the next startSession merges into it
+      // (openFocusSession early-returns on a live id). Key off the persisted id so a
+      // round left open by a reload is still closed; sync elapsed first (only
+      // meaningful while isRunning) so durationSeconds is accurate. A preview closes
+      // it neutrally — the work was real, but it isn't an accepted-rest boundary.
+      if (state.activeFocusSessionId) {
+        if (isRunning) syncRunningSessionClock();
+        closeFocusSession(forceBreakPreview ? "preview" : "force");
+      }
       isRunning = false;
       window.clearInterval(ticker);
       ticker = null;

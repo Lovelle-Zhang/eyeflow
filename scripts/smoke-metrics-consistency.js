@@ -124,6 +124,14 @@ function main() {
     /onForceBreakDone\(\(payload\) => finishForceBreak\(payload\)\)/.test(indexHtml),
     "dashboard consumes onForceBreakDone → finishForceBreak"
   );
+  // Force break must close an open focus round, or the next round merges into
+  // the orphaned id and inflates a later segment (S1).
+  const startForceBreakBody = functionBody(indexHtml, "startForceBreak");
+  assert(
+    startForceBreakBody.includes("closeFocusSession("),
+    "startForceBreak closes an open focus round before stopping the clock (no orphaned session)"
+  );
+
   const finishForceBreakBody = functionBody(indexHtml, "finishForceBreak");
   assert(
     finishForceBreakBody.includes("completeRecovery("),
