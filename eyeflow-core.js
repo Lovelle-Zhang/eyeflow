@@ -249,7 +249,7 @@ window.EyeFlowCore = (() => {
     const shown = Number(reminderStats.shown || 0);
     const ignored = Number(reminderStats.ignored || 0);
     if (shown >= 2 && ignored >= shown / 2) {
-      return "今天的提醒你多半留到了稍后。不催你——累的时候早一点停，眼睛会更轻。";
+      return "今天的提醒多半被留到了稍后。不催你，累了早点停会更轻。";
     }
     return "今天在稳稳地用眼。到断点时停一下，让节奏松一点。";
   }

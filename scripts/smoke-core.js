@@ -385,7 +385,7 @@ function main() {
   assertMatches(indexHtml, /function\s+drawShareBrandMark\([\s\S]*iconSize = size \* 0\.84;[\s\S]*iconGradient\.addColorStop\(0,\s*"#EAFFF6"\);[\s\S]*iconGradient\.addColorStop\(0\.58,\s*"#BDEAFF"\);[\s\S]*iconGradient\.addColorStop\(1,\s*"#F3EEC7"\);[\s\S]*"#6FE7C3"/, "profile share image draws the real app icon mark");
   assertMatches(indexHtml, /function\s+drawDailyShareCardCanvas\([\s\S]*canvas\.width = 1200;[\s\S]*canvas\.height = 720;[\s\S]*#f5f3ee[\s\S]*eyeflow\.app/, "profile share image draws a textured card artifact");
   assertMatches(indexHtml, /window\.eyeflowDesktop\?\.copyShareImage[\s\S]*generateDailyShareImageDataUrl\(\)/, "profile share action copies the generated image card first");
-  assertMatches(indexHtml, /function\s+shareCardPayload\([\s\S]*今日专注[\s\S]*护眼恢复[\s\S]*节奏[\s\S]*function\s+buildDailyShareText\(\)[\s\S]*card\.metrics\.map[\s\S]*Mira 小句/, "today share payload keeps focus/recovery/rhythm; text fallback composes the period metrics plus a Mira line");
+  assertMatches(indexHtml, /function\s+shareCardPayload\([\s\S]*eyebrow:[\s\S]*insight:[\s\S]*今日专注[\s\S]*护眼恢复[\s\S]*节奏[\s\S]*function\s+buildDailyShareText\(\)[\s\S]*card\.insight[\s\S]*card\.metrics\.forEach[\s\S]*Mira 小句/, "today payload is insight-led (eyebrow+insight+metrics); share text leads with the insight, keeps metrics + a Mira line for week/month");
   assertIncludes(indexHtml, "function recordedDurationLabel", "profile duration fields distinguish missing timing from zero minutes");
   assertIncludes(metricsJs, "function recordedSecondsForDay", "profile duration uses the strongest available local timing signal");
   assertIncludes(indexHtml, "autoElapsedSeconds", "profile preserves accumulated automatic local timing across the day");
@@ -556,7 +556,7 @@ function main() {
   );
   assertEqual(
     insight({ focusSeconds: 1200, breaks: 0, zone: "medium", focusTargetMinutes: 50, reminderStats: { shown: 4, ignored: 3 } }),
-    "今天的提醒你多半留到了稍后。不催你——累的时候早一点停，眼睛会更轻。",
+    "今天的提醒多半被留到了稍后。不催你，累了早点停会更轻。",
     "insight: high ignore rate"
   );
   assertEqual(
@@ -564,6 +564,15 @@ function main() {
     "今天在稳稳地用眼。到断点时停一下，让节奏松一点。",
     "insight: default steady-use fallback"
   );
+  // Every insight must fit the canvas 2-line budget (~33px over ~536px ≈ 15 chars/line),
+  // or drawDailyShareCardCanvas silently truncates line 3. Pin a char cap across the
+  // whole rule space so a future rule edit that overflows is caught here, not on export.
+  [
+    {}, { focusSeconds: 3600, zone: "high" }, { focusSeconds: 3600, breaks: 0, focusTargetMinutes: 50 },
+    { symptoms: { strain: 8 } }, { symptoms: { dryness: 8 } }, { symptoms: { blur: 8 } }, { symptoms: { light: 8 } },
+    { focusSeconds: 1200, breaks: 2, zone: "comfort" }, { focusSeconds: 1200, reminderStats: { shown: 4, ignored: 3 } },
+    { focusSeconds: 1200, zone: "medium" }
+  ].forEach((o) => assertEqual(insight(o).length <= 32, true, `insight fits the 2-line canvas budget: "${insight(o)}" (${insight(o).length})`));
 
   assertEqual(core.intensityLabel("quiet"), "L1 安静", "quiet intensity label");
   assertEqual(core.intensityLabel("force"), "L4 强制爱", "force intensity label");
