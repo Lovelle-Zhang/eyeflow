@@ -6144,7 +6144,7 @@
       padding: var(--ef-space-12);
       border: 1px solid var(--group-line);
       border-radius: var(--ef-radius-xl);
-      background: var(--group-bg-strong);
+      background: var(--share-card-bg);
       box-shadow: var(--group-shadow);
       display: grid;
       gap: var(--ef-space-9);
@@ -6360,7 +6360,7 @@
       padding: var(--ef-space-12);
       border: 1px solid var(--group-line);
       border-radius: var(--ef-radius-xl);
-      background: var(--group-bg-strong);
+      background: var(--share-card-bg);
       box-shadow: var(--group-shadow);
       display: grid;
       gap: var(--ef-space-9);
@@ -15253,7 +15253,7 @@
       const themeColor = (name, fallback) => themeCss.getPropertyValue(name).trim() || fallback;
       const cardColors = {
         frame: themeColor("--share-frame-bg", "#f5f3ee"),
-        surface: themeColor("--group-bg-strong", "rgba(250, 248, 244, 0.78)"),
+        surface: themeColor("--share-card-bg", "#FFFFFF"),
         line: themeColor("--group-line", "rgba(24, 32, 31, 0.08)"),
         ink: themeColor("--ink", "rgba(31, 33, 31, 0.94)"),
         muted: themeColor("--muted", "rgba(73, 72, 68, 0.62)"),

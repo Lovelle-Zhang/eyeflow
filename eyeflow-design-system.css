@@ -436,6 +436,12 @@
   --surface-tint: #F7F8F0;
   --group-bg: #F7F8F0;
   --group-bg-strong: #FAFAF4;
+  /* Share-card surface. In light mode the old #FAFAF4 sat one hair off the #F7F8F0
+     paper panel — near-but-not-equal, which reads as an "almost-matching" mistake on
+     a card this large. Lift it to a clean white so it reads as a real takeaway artifact
+     (and lets the brand-green accents pop, as they already do in dark). Dark keeps the
+     elevated #26282b, where the lightness step already carries the layering. */
+  --share-card-bg: #FFFFFF;
   --group-line: rgba(46, 54, 40, 0.08);
   --group-line-soft: rgba(46, 54, 40, 0.05);
   --group-shadow: 0 0 0 0.5px rgba(46, 50, 38, 0.05), 0 1px 2px rgba(46, 50, 38, 0.045), 0 4px 14px rgba(46, 50, 38, 0.04);
@@ -525,6 +531,7 @@
   --surface-tint: #212325;
   --group-bg: #212325;
   --group-bg-strong: #26282b;
+  --share-card-bg: #26282b;
   --group-line: rgba(255, 255, 255, 0.09);
   --group-line-soft: rgba(255, 255, 255, 0.06);
   --group-shadow: 0 0 0 0.5px rgba(0, 0, 0, 0.45), 0 1px 2px rgba(0, 0, 0, 0.4);
