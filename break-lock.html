@@ -1034,6 +1034,7 @@
       document.body.removeAttribute("data-complete");
       els.previewBadge.hidden = !previewSession;
       els.doneBtn.hidden = true;
+      els.doneBtn.disabled = false; // re-arm for this break (robust if a window is ever reused via breakLock:update)
       els.escapeBtn.hidden = false;
       resetEscapeButton();
       if (!ticker) ticker = window.setInterval(tick, 250);
@@ -1084,6 +1085,12 @@
     }
 
     els.doneBtn.addEventListener("click", () => {
+      // Guard the source of a double completeRecovery: a fast double-click (the
+      // kiosk must exit fullscreen before the window closes — hundreds of ms —
+      // so both clicks land) would send breakLock:done twice. Disable after the
+      // first; the renderer's finishForceBreak has its own idempotence guard too. (S4)
+      if (els.doneBtn.disabled) return;
+      els.doneBtn.disabled = true;
       stopVoiceGuide();
       window.eyeflowDesktop?.finishForceBreak?.({
         preview: previewSession,

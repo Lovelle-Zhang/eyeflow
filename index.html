@@ -11523,6 +11523,12 @@
     }
 
     function finishForceBreak(payload = {}) {
+      // Idempotence: every legitimate entry (done / escape / preview) happens while a
+      // break is active, and this function clears forceBreakActive below. A second
+      // delivery of breakLock:finished (double-click racing the kiosk fullscreen-exit)
+      // then no-ops here instead of running completeRecovery twice (breaks+=2, dup
+      // recovery_event). The break-lock button is also disabled on first click. (S4)
+      if (!forceBreakActive) return;
       stopBreakRestTimer();
       window.clearInterval(forceBreakTimer);
       forceBreakTimer = null;
