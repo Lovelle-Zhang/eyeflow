@@ -6410,6 +6410,40 @@
       font-weight: 600;
     }
 
+    /* Insight-led layout (TODAY card, .has-insight). Eyebrow + insight are the hero;
+       the daily 金句 keeps its serif identity but drops to a small ambiance tail at
+       the bottom (via order). Week/month cards omit .has-insight → eyebrow/insight
+       stay hidden and the quote is the hero in its natural spot (legacy layout). */
+    .share-preview-overlay .share-art-eyebrow {
+      color: var(--mira);
+      font-size: var(--ef-text-body-sm);
+      font-weight: 600;
+      letter-spacing: 0.04em;
+    }
+
+    .share-preview-overlay .share-art-insight {
+      color: var(--ink);
+      font-size: var(--ef-text-display-sm);
+      line-height: 1.34;
+      font-weight: 600;
+    }
+
+    .share-preview-overlay .share-art-card.has-insight .share-art-eyebrow {
+      margin-bottom: calc(-1 * var(--ef-space-6));
+    }
+
+    .share-preview-overlay .share-art-card.has-insight .share-art-quote {
+      order: 5;
+      color: var(--muted);
+      font-size: var(--ef-text-body);
+      line-height: var(--ef-line-body);
+      font-weight: 400;
+    }
+
+    .share-preview-overlay .share-art-card.has-insight .share-art-footer {
+      order: 6;
+    }
+
     .share-preview-overlay .share-art-metrics {
       display: flex;
       align-items: flex-start;
@@ -9473,8 +9507,10 @@
         <button class="share-period-tab" data-period="month" type="button" role="tab" aria-selected="false">本月</button>
       </div>
       <div class="share-preview-stage">
-        <article class="share-art-card" aria-label="完整分享卡">
+        <article class="share-art-card" id="shareArtCard" aria-label="完整分享卡">
           <span class="share-art-date" id="shareDateLabel">2026年6月29日 · 周一</span>
+          <span class="share-art-eyebrow" id="shareEyebrow" hidden="">Mira 今天看到的</span>
+          <strong class="share-art-insight" id="shareInsight" hidden="">今天在稳稳地用眼。</strong>
           <strong class="share-art-quote" id="shareQuote">停二十秒，不是退后，是给下一步蓄力。</strong>
           <div class="share-art-metrics" aria-label="节奏摘要">
             <div class="share-art-metric"><span id="shareCardLabel0">今日专注</span><strong id="shareCardFocusTime">还没开始</strong></div>
@@ -9758,7 +9794,8 @@
       computeEyeLoadScore,
       classifyLoad,
       initialRhythmForLoad,
-      intensityLabel
+      intensityLabel,
+      todayActionInsight
     } = window.EyeFlowCore;
     const {
       recoveryModeMeta,
@@ -9968,7 +10005,10 @@
       profileRhythmRest: document.querySelector("#profileRhythmRest"),
       profileRhythmWhy: document.querySelector("#profileRhythmWhy"),
       profileRecommendationSource: document.querySelector("#profileRecommendationSource"),
+      shareArtCard: document.querySelector("#shareArtCard"),
       shareDateLabel: document.querySelector("#shareDateLabel"),
+      shareEyebrow: document.querySelector("#shareEyebrow"),
+      shareInsight: document.querySelector("#shareInsight"),
       shareQuote: document.querySelector("#shareQuote"),
       shareCardLabel0: document.querySelector("#shareCardLabel0"),
       shareCardLabel1: document.querySelector("#shareCardLabel1"),
@@ -15221,6 +15261,8 @@
       return {
         period: "today",
         date: shareDateLabel(),
+        eyebrow: "Mira 今天看到的",
+        insight: currentTodayInsight(focusSeconds),
         quote: dailyShareQuote(),
         metrics: [
           { label: "今日专注", value: shareFocusLabel(focusSeconds) },
@@ -15228,6 +15270,21 @@
           { label: "节奏", value: currentShareRhythmLabel() }
         ]
       };
+    }
+
+    // Gather TODAY's observable state and hand it to the pure todayActionInsight rule.
+    // Week/month deliberately get no insight yet (needs the closed-loop engine); their
+    // payload stays quote-led and the renderers fall back to the legacy layout.
+    function currentTodayInsight(focusSeconds = currentDayFocusSeconds()) {
+      const analysis = computeEyeAnalysis();
+      return todayActionInsight({
+        focusSeconds,
+        breaks: Number(state.breaks || 0),
+        focusTargetMinutes: Number(els.focusTarget.value || state.focusTarget || 50),
+        zone: analysis.zone,
+        symptoms: analysis.symptoms,
+        reminderStats: state.reminderStats || {}
+      });
     }
 
     function buildDailyShareText() {
@@ -15246,6 +15303,16 @@
 
     function renderDailyShareCard() {
       const card = shareCardPayload(sharePeriod);
+      const hasInsight = Boolean(card.insight);
+      if (els.shareArtCard) els.shareArtCard.classList.toggle("has-insight", hasInsight);
+      if (els.shareEyebrow) {
+        els.shareEyebrow.textContent = card.eyebrow || "";
+        els.shareEyebrow.hidden = !hasInsight;
+      }
+      if (els.shareInsight) {
+        els.shareInsight.textContent = card.insight || "";
+        els.shareInsight.hidden = !hasInsight;
+      }
       if (els.shareDateLabel) els.shareDateLabel.textContent = card.date;
       if (els.shareQuote) els.shareQuote.textContent = card.quote;
       const labelEls = [els.shareCardLabel0, els.shareCardLabel1, els.shareCardLabel2];
