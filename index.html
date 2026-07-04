@@ -11523,12 +11523,15 @@
     }
 
     function finishForceBreak(payload = {}) {
-      // Idempotence: every legitimate entry (done / escape / preview) happens while a
-      // break is active, and this function clears forceBreakActive below. A second
-      // delivery of breakLock:finished (double-click racing the kiosk fullscreen-exit)
-      // then no-ops here instead of running completeRecovery twice (breaks+=2, dup
-      // recovery_event). The break-lock button is also disabled on first click. (S4)
-      if (!forceBreakActive) return;
+      // Capture whether a real force break was active before we clear the flag. Only
+      // the normal-completion path (completeRecovery, below) is guarded by it — a
+      // second breakLock:finished delivery (done double-click racing the kiosk
+      // fullscreen-exit) then no-ops instead of double-counting breaks + recovery.
+      // NOT a top-level guard: the debug-capture preview path drives the break via the
+      // desktop bridge (eyeflowDesktop.startForceBreak → main), which never sets the
+      // renderer's forceBreakActive, yet still needs the preview branch to run. The
+      // break-lock done button is also disabled on first click (source dedup). (S4)
+      const wasForceBreakActive = forceBreakActive;
       stopBreakRestTimer();
       window.clearInterval(forceBreakTimer);
       forceBreakTimer = null;
@@ -11586,6 +11589,10 @@
         persist();
         return;
       }
+      // Normal completion — the only double-count-prone path (completeRecovery). A
+      // duplicate breakLock:finished after the first finish (forceBreakActive already
+      // cleared) no-ops here. The debug/preview path returns above and never reaches this. (S4)
+      if (!wasForceBreakActive) return;
       els.breakOverlay.classList.remove("show");
       els.breakOverlay.classList.remove("rest-ready");
       exitLocalFullscreen();
