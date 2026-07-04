@@ -109,6 +109,31 @@ function main() {
     "completeRecovery appends the recovery_event in the same flow"
   );
 
+  // --- 5. break-lock rests reach the stats (the two-hop IPC loop) --------
+  // The full-screen forced rest runs in its own window; its completion only
+  // reaches the event stream via: main broadcasts breakLock:finished →
+  // preload onForceBreakDone → dashboard finishForceBreak → completeRecovery.
+  // Two analysis passes independently mis-read this wiring as missing — pin
+  // every hop so a refactor can't silently orphan forced rests from stats.
+  const preloadJs = read("preload.js");
+  assert(preloadJs.includes('ipcRenderer.on("breakLock:finished"'), "preload listens for breakLock:finished");
+  assert(/onForceBreakDone:/.test(preloadJs), "preload exposes onForceBreakDone");
+  const mainJs = read("main.js");
+  assert(mainJs.includes('.send("breakLock:finished"'), "main broadcasts breakLock:finished to the dashboard");
+  assert(
+    /onForceBreakDone\(\(payload\) => finishForceBreak\(payload\)\)/.test(indexHtml),
+    "dashboard consumes onForceBreakDone → finishForceBreak"
+  );
+  const finishForceBreakBody = functionBody(indexHtml, "finishForceBreak");
+  assert(
+    finishForceBreakBody.includes("completeRecovery("),
+    "finishForceBreak completion path records the rest via completeRecovery"
+  );
+  assert(
+    finishForceBreakBody.includes('appendDataEvent("recovery_event"'),
+    "finishForceBreak interrupted path also records (completed: false)"
+  );
+
   console.log("[smoke:metrics-consistency] PASSED. Event stream and reminder counters stay reconcilable.");
 }
 
