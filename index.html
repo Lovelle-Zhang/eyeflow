@@ -10747,6 +10747,14 @@
     }
 
     function completeSessionForSystemRest(reason) {
+      // A break is already in progress (force kiosk or rest overlay). The break flow
+      // (completeRecovery when it finishes) is the ONE authority that records this
+      // rest — recording a system rest here too double-counts breaks + recovery
+      // events for a single episode (lock/suspend during a break is expected: Mira
+      // just told them to leave the screen). The caller already paused the visible
+      // break timer; we only skip the duplicate record. Same break-active predicate
+      // deriveTodayPhase uses. (S2)
+      if (forceBreakActive || els.breakOverlay.classList.contains("show")) return;
       const now = Date.now();
       if (now - lastSystemRestAt < 30000) return;
       syncRunningSessionClock({ now, allowLongGap: false });
@@ -11527,6 +11535,12 @@
         els.breakOverlay.classList.remove("show");
         els.breakOverlay.classList.remove("rest-ready");
         exitLocalFullscreen();
+        // The pre-break focus round was already closed by startForceBreak; clear its
+        // leftover clock so a stale elapsedSeconds can't seed the next auto round via
+        // its max(). Normal completion resets via completeRecovery; the system-rest
+        // path that used to clean this incidentally is now skipped during a break (S2),
+        // so the interrupted/escape path must reset the clock itself.
+        resetSessionClock();
         if (wasPreview) {
           switchView("rhythmView");
           forceConfirmPending = state.settings.intensity !== "force";
