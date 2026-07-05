@@ -11,11 +11,17 @@
 // HONESTY CONTRACT (why this module is deliberately small):
 // The prettier recap insights the product wants — "120 秒以上的恢复更稳定"
 // (recovery-duration effectiveness) and "高强度日之间恢复不均" (per-day load /
-// recovery distribution) — are NOT computable yet. break-lock full-screen rests
-// record no duration into events (roadmap Phase 1.3), and there is no per-day
-// recovery aggregate. Rather than fabricate those, rhythmInsights() DECLARES
-// them in `degraded[]` with the blocking reason. They light up for free once the
-// upstream data lands; until then the engine only claims what the data backs.
+// recovery distribution) — are NOT produced by this slice. This is a SCOPE line,
+// not (as an earlier roadmap note claimed) a missing-data line: the inputs already
+// exist in rhythmMemory — recovery_feedback events carry durationSeconds +
+// postRestFeedback, and every round_ended carries currentLoad tagged by day. Two
+// real caveats remain before those insights can be claimed honestly, so they are
+// DECLARED in `degraded[]` rather than faked:
+//   1. recovery durationSeconds is currently the PLANNED breakTarget, not the
+//      measured rest length (completeRecovery records els.breakTarget), so a clean
+//      "120s+ is more stable" claim needs the measured-duration口径 first;
+//   2. per-day load distribution just isn't aggregated here yet.
+// They are next-slice work, not blocked on upstream data.
 //
 // Pure & deterministic: no Date.now(), no live state — window bounds are derived
 // from the events themselves so unit tests are reproducible.
@@ -218,10 +224,11 @@ window.EyeFlowRhythm = (() => {
       ignore,
       adherence,
       suggestion,
-      // Honest negative space — declared, not faked. Lights up when upstream lands.
+      // Honest negative space — declared, not faked. NOT blocked on missing data
+      // (the inputs are already in rhythmMemory); these are next-slice scope.
       degraded: [
-        { key: "recovery-effectiveness", reason: "缺恢复时长：break-lock 全屏休息未记入事件（Phase 1.3 入账后点亮）" },
-        { key: "load-distribution", reason: "缺每日负荷/恢复分布聚合（需按日聚合后点亮）" }
+        { key: "recovery-effectiveness", reason: "数据已在 rhythmMemory(recovery_feedback.durationSeconds+postRestFeedback)；本 slice 未做，且 durationSeconds 现为计划 breakTarget 非实测时长——'120s+更稳'需先补实测口径" },
+        { key: "load-distribution", reason: "数据已在 round_ended.currentLoad(按 day 标记)；本 slice 未做按日聚合" }
       ]
     };
   }
