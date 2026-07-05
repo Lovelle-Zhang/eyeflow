@@ -2386,21 +2386,24 @@ function applyInterventionBehavior(state) {
     : level >= 3
       ? 6 * 60 * 1000
       : 8 * 60 * 1000;
+  const companionHiddenByPreference = desktopPreferenceDefaults().showCompanionOnLaunch === false;
   if (levelChanged || now - lastAutoPanelAt > panelCooldown) {
-    lastAutoPanelAt = now;
-    showCompanionPanel();
-    if (autoPanelTimer) {
-      clearTimeout(autoPanelTimer);
-      autoPanelTimer = null;
-    }
-    if (level === 2) {
-      autoPanelTimer = setTimeout(() => {
-        if (Number(latestState.interventionLevel || 1) === 2) hideCompanionPanel();
-      }, 9000);
+    if (!companionHiddenByPreference) {
+      lastAutoPanelAt = now;
+      showCompanionPanel();
+      if (autoPanelTimer) {
+        clearTimeout(autoPanelTimer);
+        autoPanelTimer = null;
+      }
+      if (level === 2) {
+        autoPanelTimer = setTimeout(() => {
+          if (Number(latestState.interventionLevel || 1) === 2) hideCompanionPanel();
+        }, 9000);
+      }
     }
   }
 
-  if (level >= 3 && state.allowSystemNotify && now - lastAutoNotifyAt > 12 * 60 * 1000) {
+  if (((companionHiddenByPreference && level >= 2) || (level >= 3 && state.allowSystemNotify)) && now - lastAutoNotifyAt > 12 * 60 * 1000) {
     lastAutoNotifyAt = now;
     notify(state.message || "找一个恢复断点，看远处 20 秒。");
   }

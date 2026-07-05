@@ -410,6 +410,7 @@ function main() {
   assertMatches(mainJs, /function hideCompanionWindow\(\{ persistPreference = true \} = \{\}\)[\s\S]*if \(persistPreference\) writeDesktopPreference\("showCompanionOnLaunch", false\);/, "installed temporary companion hides do not persist the hidden preference");
   assertMatches(mainJs, /ipcMain\.handle\("companion:hide", \(\) => \{[\s\S]*hideCompanionWindow\(\{ persistPreference: false \}\);[\s\S]*\}\);/, "installed renderer lifecycle hide keeps desktop Mira default visible");
   assertMatches(mainJs, /function showCompanionBubble\(message, options = \{\}\)[\s\S]*!desktopPreferenceDefaults\(\)\.showCompanionOnLaunch[\s\S]*return \{ ok: false, reason: "hidden" \};/, "installed hidden desktop Mira preference blocks toast bubbles from resurrecting Mira");
+  assertMatches(mainJs, /function applyInterventionBehavior\(state\)[\s\S]*const companionHiddenByPreference = desktopPreferenceDefaults\(\)\.showCompanionOnLaunch === false;[\s\S]*if \(!companionHiddenByPreference\) \{[\s\S]*showCompanionPanel\(\);[\s\S]*\}[\s\S]*if \(\(\(companionHiddenByPreference && level >= 2\) \|\| \(level >= 3 && state\.allowSystemNotify\)\) && now - lastAutoNotifyAt > 12 \* 60 \* 1000\) \{[\s\S]*notify\(state\.message \|\| "找一个恢复断点，看远处 20 秒。"\);[\s\S]*\}/, "installed hidden desktop Mira preference falls back to system notification for L2+ recovery-point reminders");
   assertMatches(mainJs, /function createDarwinTrayIcon\(\)[\s\S]*nativeImage\.createEmpty\(\)[\s\S]*scaleFactor: 1,[\s\S]*trayTemplate\.png[\s\S]*scaleFactor: 2,[\s\S]*trayTemplate@2x\.png[\s\S]*icon\.setTemplateImage\(true\);/, "installed macOS menu bar tray loads crisp 1x and 2x template assets");
   if (readBuffer("assets/trayTemplate.png").length < 100) {
     throw new Error("installed macOS menu bar tray template asset is missing or empty");
@@ -672,7 +673,7 @@ function main() {
   assertNotMatches(indexHtml, /card\.breaks|今日休息次数|<span>休息<\/span><strong id="shareCardBreaks"/, "installed daily share card does not expose rest as a count");
   assertIncludes(indexHtml, "eyeflow.app", "installed profile share card includes restrained domain branding");
   assertMatches(indexHtml, /#todayView \.share-art-mark,[\s\S]*#profileView \.share-art-mark\s*\{[\s\S]*width:\s*calc\(var\(--ef-control-lg\) \+ var\(--ef-space-1\)\);[\s\S]*background:\s*url\("\.\/assets\/icon\.svg"\) center \/ contain no-repeat;/, "installed daily share card uses the source app icon asset");
-  assertIncludes(indexHtml, '<button class="ghost" id="copyShareBtn" type="button">带走</button>', "installed profile share card uses a compact copy action");
+  assertMatches(indexHtml, /<button class="[^"]*" id="copyShareBtn" type="button">[\s\S]*?带走[\s\S]*?<\/button>/, "installed profile share card uses a compact copy action");
   assertIncludes(indexHtml, 'id="sharePreviewOverlay"', "installed daily share action opens a full-card preview overlay");
   assertIncludes(indexHtml, 'id="copyShareConfirmBtn"', "installed daily share preview has a separate copy confirmation");
   assertIncludes(indexHtml, 'els.copyShareBtn?.addEventListener("click", openDailySharePreview);', "installed daily share compact action does not copy before preview");
@@ -693,7 +694,7 @@ function main() {
   assertMatches(indexHtml, /function\s+drawShareBrandMark\([\s\S]*iconSize = size \* 0\.84;[\s\S]*iconGradient\.addColorStop\(0,\s*"#EAFFF6"\);[\s\S]*iconGradient\.addColorStop\(0\.58,\s*"#BDEAFF"\);[\s\S]*iconGradient\.addColorStop\(1,\s*"#F3EEC7"\);[\s\S]*"#6FE7C3"/, "installed profile share image draws the real app icon mark");
   assertMatches(indexHtml, /function\s+drawDailyShareCardCanvas\([\s\S]*canvas\.width = 1200;[\s\S]*canvas\.height = 720;[\s\S]*#f5f3ee[\s\S]*eyeflow\.app/, "installed profile share image draws a textured card artifact");
   assertMatches(indexHtml, /window\.eyeflowDesktop\?\.copyShareImage[\s\S]*generateDailyShareImageDataUrl\(\)/, "installed profile share action copies the generated image card first");
-  assertMatches(indexHtml, /function\s+shareCardPayload\([\s\S]*今日专注[\s\S]*护眼恢复[\s\S]*节奏[\s\S]*function\s+buildDailyShareText\(\)[\s\S]*card\.metrics\.map[\s\S]*Mira 小句/, "installed today share payload keeps focus/recovery/rhythm; text fallback composes the period metrics plus a Mira line");
+  assertMatches(indexHtml, /function\s+shareCardPayload\([\s\S]*eyebrow:[\s\S]*insight:[\s\S]*今日专注[\s\S]*护眼恢复[\s\S]*节奏[\s\S]*function\s+buildDailyShareText\(\)[\s\S]*card\.insight[\s\S]*card\.metrics\.forEach[\s\S]*Mira 小句/, "installed today share payload keeps focus/recovery/rhythm; text fallback composes the period metrics plus a Mira line");
   assertIncludes(indexHtml, "状态线", "installed profile review keeps today's state line as a lower-weight disclosure");
   assertIncludes(indexHtml, "查看长期档案", "installed profile review moves long-term records behind one archive disclosure");
   assertNotIncludes(indexHtml, "默认收起", "installed profile archive does not expose implementation state copy");
