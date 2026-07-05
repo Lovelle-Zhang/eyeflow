@@ -7,6 +7,7 @@ const root = path.join(__dirname, "..");
 
 const checks = [
   ["Check core scoring logic", "smoke:core"],
+  ["Check rhythm engine signals", "smoke:rhythm"],
   ["Check metric口径 consistency", "smoke:metrics"],
   ["Check event/counter store consistency", "smoke:metrics-consistency"],
   ["Check session UI state", "smoke:session"],

@@ -129,6 +129,7 @@ function main() {
   assertScript("eyeflow-rest-flow.js");
   assertScript("eyeflow-ui-utils.js");
   assertScript("eyeflow-metrics.js");
+  assertScript("eyeflow-rhythm.js");
 
   assertPackageScript(pkg, "build:app", "electron-builder --mac dir --publish never");
   assertPackageScript(pkg, "install:local", "node scripts/install-local-app.js");
@@ -136,6 +137,7 @@ function main() {
   assertPackageScript(pkg, "verify", "node scripts/verify.js");
   assertPackageScript(pkg, "capture:current", "node scripts/current-visual-capture.js");
   assertPackageScript(pkg, "smoke:core", "node scripts/smoke-core.js");
+  assertPackageScript(pkg, "smoke:rhythm", "node scripts/smoke-rhythm.js");
   assertPackageScript(pkg, "smoke:metrics", "node scripts/smoke-metrics.js");
   assertPackageScript(pkg, "smoke:readiness", "electron scripts/smoke-readiness-sync.js");
   assertPackageScript(pkg, "smoke:theme", "electron scripts/smoke-theme-sync.js");
