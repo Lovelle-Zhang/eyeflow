@@ -14647,10 +14647,16 @@
       }
 
       if (load >= 74 && !isManualPaused()) {
+        // "到恢复断点了" only when the timer actually reached the target; if the eye
+        // signal is high but the round just started, say so honestly instead of
+        // claiming a break point that the clock hasn't hit.
+        const reachedTarget = elapsedSeconds >= Number(els.focusTarget.value || 0) * 60;
         els.stateHeadline.textContent = "现在休息";
-        els.stateAction.textContent = sessionStarted
-          ? "到恢复断点了。"
-          : "Mira 建议先休息。";
+        els.stateAction.textContent = !sessionStarted
+          ? "Mira 建议先休息。"
+          : reachedTarget
+            ? "到恢复断点了。"
+            : "状态偏高，先歇一下。";
         els.stateExplain.textContent = "先离开屏幕一小段，回来再继续。";
         renderStateCues([]);
         els.primaryActionBtn.hidden = false;
