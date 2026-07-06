@@ -2386,24 +2386,30 @@ function applyInterventionBehavior(state) {
     : level >= 3
       ? 6 * 60 * 1000
       : 8 * 60 * 1000;
-  const companionHiddenByPreference = desktopPreferenceDefaults().showCompanionOnLaunch === false;
-  if (levelChanged || now - lastAutoPanelAt > panelCooldown) {
-    if (!companionHiddenByPreference) {
-      lastAutoPanelAt = now;
-      showCompanionPanel();
-      if (autoPanelTimer) {
-        clearTimeout(autoPanelTimer);
-        autoPanelTimer = null;
-      }
-      if (level === 2) {
-        autoPanelTimer = setTimeout(() => {
-          if (Number(latestState.interventionLevel || 1) === 2) hideCompanionPanel();
-        }, 9000);
-      }
+  // "Can Mira deliver this in-app?" is a RUNTIME question, not a preference one.
+  // The companion can be off-screen three ways: hidden by preference, exited this
+  // session via double-click (companion:hide keeps the preference visible), or
+  // hidden by a sleep/lock lifecycle event. The first two are the user keeping
+  // Mira away — don't drag her back on screen with showCompanionPanel(); fall back
+  // to the top-of-screen notification so the reminder still lands. The lifecycle
+  // case is transient (Mira is restored on resume), so it must NOT notify.
+  const companionVisible = isCompanionWindowVisible();
+  const companionExited = !companionVisible && !companionHiddenByLifecycle;
+  if (companionVisible && (levelChanged || now - lastAutoPanelAt > panelCooldown)) {
+    lastAutoPanelAt = now;
+    showCompanionPanel();
+    if (autoPanelTimer) {
+      clearTimeout(autoPanelTimer);
+      autoPanelTimer = null;
+    }
+    if (level === 2) {
+      autoPanelTimer = setTimeout(() => {
+        if (Number(latestState.interventionLevel || 1) === 2) hideCompanionPanel();
+      }, 9000);
     }
   }
 
-  if (((companionHiddenByPreference && level >= 2) || (level >= 3 && state.allowSystemNotify)) && now - lastAutoNotifyAt > 12 * 60 * 1000) {
+  if (((companionExited && level >= 2) || (level >= 3 && state.allowSystemNotify)) && now - lastAutoNotifyAt > 12 * 60 * 1000) {
     lastAutoNotifyAt = now;
     notify(state.message || "找一个恢复断点，看远处 20 秒。");
   }
@@ -2575,6 +2581,14 @@ function startSystemLifecycleMonitor() {
   });
   powerMonitor.on("unlock-screen", () => {
     screenLocked = false;
+    // Unlocking ends the lifecycle hide. Clear the latch unconditionally — while
+    // it is set, applyInterventionBehavior treats Mira as "transiently hidden" and
+    // withholds the fallback notification, so a stuck latch (lock/unlock with no
+    // resume) would silently swallow L2+ reminders for preference-hidden users.
+    // Restore Mira through the preference-aware path so a user-hidden companion is
+    // NOT resurrected.
+    companionHiddenByLifecycle = false;
+    ensureCompanionReachable();
   });
   powerMonitor.on("suspend", () => {
     activeWorkStartedAt = null;
@@ -2586,9 +2600,11 @@ function startSystemLifecycleMonitor() {
   powerMonitor.on("resume", () => {
     broadcastSystemLifecycle("resume");
     setTimeout(() => {
-      if (companionHiddenByLifecycle && companionWindow && !companionWindow.isDestroyed()) {
-        revealCompanionWindow();
-      }
+      // Clear the latch unconditionally (so a gone/destroyed window can't leave it
+      // stuck true and swallow later fallback reminders), then restore Mira through
+      // the preference-aware path so a user-hidden companion is NOT resurrected.
+      companionHiddenByLifecycle = false;
+      ensureCompanionReachable();
     }, 1000);
   });
 }

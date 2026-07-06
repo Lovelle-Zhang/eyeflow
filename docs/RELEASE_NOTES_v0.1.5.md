@@ -8,6 +8,7 @@ EyeFlow v0.1.5 is a signed and notarized beta refresh for macOS testers. It is a
 - **Cross-midnight is honest.** A focus round that spans midnight is closed into the day it belonged to, so today starts from `00:00` and the previous day keeps its time in the weekly/monthly view. Manual rounds crossing midnight now roll into the week/month correctly.
 - **Forced rest counts once, cleanly.** Starting a `强制爱` rest closes the open focus round (no orphaned, later-inflated segment), locking the screen during a rest no longer double-counts it, and double-clicking "finish" can't double-count a break.
 - **Today share card leads with an insight.** The card now opens with a short, honest "what Mira saw today" line above the numbers, and the entry point reads as a real take-away (a tonal-green 带走 button with a share glyph) instead of a muted row.
+- **Reminders reach you when Mira is put away.** When the desktop companion is exited or hidden, recovery-point reminders (L2+) now fall back to a top-of-screen system notification instead of silently going nowhere — decided by whether Mira is actually on screen, not just a saved preference, and no longer swallowed after a lock/unlock.
 - **Reduce Motion is honored on the full-screen rest.** The break-lock rest window now respects the system "Reduce Motion" setting.
 - **Steadier storage.** Saves are guarded against storage-quota errors so a full store can't interrupt the running clock.
 
