@@ -7344,8 +7344,12 @@
     /* Each notification channel reads as "name + one-line what-it-does · switch",
        so 轻提示音 and 系统通知 are self-explanatory and clearly parallel. */
     #rhythmView .notify-option {
+      display: flex;
       align-items: center;
+      justify-content: space-between;
       gap: var(--ef-space-6);
+      width: 100%;
+      min-height: var(--ef-hit-target);
     }
 
     #rhythmView .notify-option-text {
@@ -9248,12 +9252,9 @@
                       <span class="notify-option-text"><b>轻提示音</b><em>到恢复断点时轻响一下</em></span>
                       <input type="checkbox" class="ef-switch" id="soundToggle" role="switch">
                     </label>
-                    <label class="notify-option">
-                      <span class="notify-option-text"><b>系统通知（可选）</b><em id="notificationCopy">离开窗口时也能在通知中心看到。</em></span>
-                      <input type="checkbox" class="ef-switch" id="systemNotifyToggle" role="switch">
-                    </label>
-                    <div class="notify-test-row">
-                      <button class="ghost notify-test-btn" id="testNotificationBtn" type="button">测试通知</button>
+                    <div class="notify-option">
+                      <span class="notify-option-text"><b>系统通知</b><em id="notificationCopy">离开电脑也想收到提醒时，点右边授权一次；显示与否由 macOS 通知设置管。</em></span>
+                      <button class="ghost notify-test-btn" id="testNotificationBtn" type="button">开启并测试</button>
                     </div>
                   </div>
                   <span class="tag ef-status-pill" id="notificationTag" data-state="optional">可选</span>
@@ -10011,7 +10012,6 @@
       ],
       deepWorkMiraOnlyToggle: document.querySelector("#deepWorkMiraOnlyToggle"),
       soundToggle: document.querySelector("#soundToggle"),
-      systemNotifyToggle: document.querySelector("#systemNotifyToggle"),
       introWrap: document.querySelector("#introWrap"),
       introToggle: document.querySelector("#introToggle"),
       bandComfort: document.querySelector("#bandComfort"),
@@ -10256,15 +10256,10 @@
     [
       els.deepWorkMiraOnlyToggle,
       els.soundToggle,
-      els.systemNotifyToggle,
       els.forceVoiceGuideToggle
     ].forEach((input) => {
       input.addEventListener("change", () => {
         state.settings[input.id] = input.checked;
-        if (input === els.systemNotifyToggle) {
-          renderNotificationStatus();
-          renderDesktopReadiness();
-        }
         persist();
         renderActivity();
       });
@@ -10403,7 +10398,6 @@
           intensity: "quiet",
           deepWorkMiraOnlyToggle: false,
           soundToggle: false,
-          systemNotifyToggle: false,
           forceVoiceGuideToggle: true,
           recoveryMode: "mixed"
         },
@@ -10676,7 +10670,6 @@
       setRecoveryMode(state.settings.recoveryMode || "mixed", { persistChange: false });
       els.deepWorkMiraOnlyToggle.checked = Boolean(state.settings.deepWorkMiraOnlyToggle);
       els.soundToggle.checked = Boolean(state.settings.soundToggle);
-      els.systemNotifyToggle.checked = Boolean(state.settings.systemNotifyToggle);
       els.forceVoiceGuideToggle.checked = state.settings.forceVoiceGuideToggle !== false;
     }
 
@@ -12646,36 +12639,29 @@
       const platform = status?.platform || (isDesktopShell ? "darwin" : "browser");
       const supportedKnown = status?.notificationSupported !== undefined;
       const supported = Boolean(status?.notificationSupported);
-      const enabled = Boolean(state.settings.systemNotifyToggle);
+      // There is no in-app toggle: whether the banner appears is governed by macOS.
+      // We only surface support state + the one-click "authorize + test" affordance.
       if (platform === "browser" || !isDesktopShell) {
         setSystemStatus(els.notificationTag, "preview", "桌面版可用");
-        els.notificationCopy.textContent = "浏览器预览不会发送系统通知；桌面版也只在你开启后使用。";
-        els.systemNotifyToggle.disabled = true;
+        els.notificationCopy.textContent = "浏览器预览不会发送系统通知；桌面版随 macOS 设置使用。";
         els.testNotificationBtn.disabled = true;
         return;
       }
       if (!supportedKnown) {
         setSystemStatus(els.notificationTag, "checking", "检查中");
-        els.notificationCopy.textContent = "正在读取系统通知支持状态；默认仍只用 Mira 状态。";
-        els.systemNotifyToggle.disabled = true;
+        els.notificationCopy.textContent = "正在读取系统通知支持状态。";
         els.testNotificationBtn.disabled = true;
         return;
       }
       if (!supported) {
         setSystemStatus(els.notificationTag, "unavailable", "不可用");
-        els.notificationCopy.textContent = "当前环境不支持系统通知；Mira 状态和轻提示仍可用。";
-        els.systemNotifyToggle.checked = false;
-        els.systemNotifyToggle.disabled = true;
+        els.notificationCopy.textContent = "当前环境不支持系统通知；Mira 状态和岛仍可用。";
         els.testNotificationBtn.disabled = true;
-        state.settings.systemNotifyToggle = false;
         return;
       }
-      els.systemNotifyToggle.disabled = false;
+      setSystemStatus(els.notificationTag, "optional", "随 macOS");
+      els.notificationCopy.textContent = "离开电脑也想收到提醒时，点右边授权一次；显示与否由 macOS 通知设置管。";
       els.testNotificationBtn.disabled = false;
-      setSystemStatus(els.notificationTag, enabled ? "enabled" : "optional", enabled ? "已开启" : "可选");
-      els.notificationCopy.textContent = enabled
-        ? "恢复断点出现时可发送系统通知；勿扰规则仍会减少提醒。"
-        : "默认只用 Mira 状态；需要离开窗口也看到提醒时再开启。";
     }
 
     async function testSystemNotification() {
@@ -13060,12 +13046,9 @@
       } else if (!notificationSupported) {
         els.readyNotifyCopy.textContent = "用 Mira 状态。";
         setReadinessState(els.readyNotifyTitle, "unavailable", "不可用");
-      } else if (state.settings.systemNotifyToggle) {
-        els.readyNotifyCopy.textContent = "断点通知。";
-        setReadinessState(els.readyNotifyTitle, "enabled", "已启用");
       } else {
-        els.readyNotifyCopy.textContent = "可选开启。";
-        setReadinessState(els.readyNotifyTitle, "optional", "默认关闭");
+        els.readyNotifyCopy.textContent = "随 macOS 设置。";
+        setReadinessState(els.readyNotifyTitle, "optional", "随 macOS");
       }
     }
 
@@ -13110,7 +13093,7 @@
         `平台：${desktop.platform || permission.platform || (isDesktopShell ? "darwin" : "browser")}`,
         `辅助功能权限：${permissionText}`,
         `开机启动：${launchText}`,
-        `系统通知：${notificationSupported} / ${state.settings.systemNotifyToggle ? "已开启" : "未开启"}`,
+        `系统通知：${notificationSupported}（显示由 macOS 设置管）`,
         `提醒边界：${intensityLabel(state.settings.intensity || "quiet")}`,
         `恢复方式：${mode}`,
         `当前状态信号：${load}`,
@@ -16360,7 +16343,6 @@
         snoozeUntil: Number(state.snoozeUntil || 0),
         reminderOpening,
         naturalBreak,
-        allowSystemNotify: Boolean(state.settings.systemNotifyToggle && state.settings.intensity !== "force"),
         ...currentAppearanceState()
       });
     }

@@ -2387,21 +2387,47 @@ function applyInterventionBehavior(state) {
   const escalated = level > lastInterventionLevel;
   lastInterventionLevel = level;
 
-  if (level <= 1) {
-    if (levelChanged) hideCompanionPanel();
-    return;
-  }
+  // Runtime visibility: the companion is off-screen if hidden by preference, exited
+  // this session via double-click, or hidden by a sleep/lock lifecycle event. The
+  // lifecycle case is transient (restored on resume) and must NOT get a fallback.
+  const companionVisible = isCompanionWindowVisible();
+  const companionExited = !companionVisible && !companionHiddenByLifecycle;
 
   const snoozeUntil = Number(state.snoozeUntil || 0);
   const quietedByUser = Boolean(state.reminderDeferred) || snoozeUntil > now;
   if (quietedByUser) {
-    hideCompanionPanel();
+    if (companionVisible) hideCompanionPanel();
     return;
   }
 
   const hasReminderOpening = Boolean(state.isRunning || state.reminderOpening || state.naturalBreak || state.reminderPending);
   if (!hasReminderOpening) {
-    if (levelChanged) hideCompanionPanel();
+    if (levelChanged && companionVisible) hideCompanionPanel();
+    return;
+  }
+
+  const islandEnabled = desktopPreferenceDefaults().showReminderIsland !== false;
+  const reminderMessage = state.message || "找一个恢复断点，看远处 20 秒。";
+  const presenceMessage = "Mira 在旁边看着节奏。";
+
+  // Channels escalate with the level (matches the 轻提醒规则), so a light level is
+  // never more than one pop-up:
+  //   L1 安静  — Mira's state carries it when she's on screen; the island is her
+  //             ambient stand-in (presence line, not a nudge) when she's exited.
+  //   L2 轻    — one channel: bubble if visible, island if exited.
+  //   L3 明确  — two: bubble + island when visible; island + system notification away.
+  //   L4       — full-screen, handled outside this coordinator.
+  const showBubble = companionVisible && level >= 2;
+  const showIsland = islandEnabled && (companionExited || level >= 3);
+  // System notification is the away/lock-screen backup, governed by macOS itself (no
+  // in-app toggle): fire it only when Mira is off-screen AND either it's an escalation
+  // (L3) or the island is off too — so a put-away reminder always has a channel, but
+  // a light L2 with the island on stays a single on-screen pop-up.
+  const showNotify = companionExited && level >= 2 && (level >= 3 || !islandEnabled);
+
+  if (!showBubble && !showIsland && !showNotify) {
+    // Nothing to surface (e.g. L1 with Mira on screen) — leave the panel down.
+    if (levelChanged && companionVisible) hideCompanionPanel();
     return;
   }
 
@@ -2411,27 +2437,13 @@ function applyInterventionBehavior(state) {
     : level >= 3
       ? 6 * 60 * 1000
       : 8 * 60 * 1000;
-  // "Can Mira deliver this in-app?" is a RUNTIME question, not a preference one.
-  // The companion can be off-screen three ways: hidden by preference, exited this
-  // session via double-click (companion:hide keeps the preference visible), or
-  // hidden by a sleep/lock lifecycle event. The first two are the user keeping Mira
-  // away; the lifecycle case is transient (restored on resume) and must NOT notify.
-  const companionVisible = isCompanionWindowVisible();
-  const companionExited = !companionVisible && !companionHiddenByLifecycle;
-  const reminderMessage = state.message || "找一个恢复断点，看远处 20 秒。";
-  const islandEnabled = desktopPreferenceDefaults().showReminderIsland !== false;
 
-  // ONE coordinated reminder surfacing on a single shared cooldown, so the same
-  // reminder never triple-buzzes across drifting per-channel timers. levelChanged
-  // lets a real escalation (e.g. L2 → L3) re-surface immediately.
+  // ONE coordinated surfacing on a single shared cooldown, so a reminder never
+  // multi-buzzes across drifting per-channel timers. An upward escalation
+  // (e.g. L2 → L3) re-surfaces immediately.
   if (escalated || now - lastReminderAt > reminderCooldown) {
     lastReminderAt = now;
-
-    // On-screen layer — what you see while at the screen. Mira's bubble when she is
-    // visible; the island when its toggle is on. These can coexist (not either/or).
-    // Don't drag an exited Mira back with showCompanionPanel() — only show her bubble
-    // when she is already on screen.
-    if (companionVisible) {
+    if (showBubble) {
       showCompanionPanel();
       if (autoPanelTimer) {
         clearTimeout(autoPanelTimer);
@@ -2443,16 +2455,8 @@ function applyInterventionBehavior(state) {
         }, 9000);
       }
     }
-    if (islandEnabled) showNotchIsland(reminderMessage);
-
-    // Away/backup layer — the system notification reaches the lock screen /
-    // Notification Center when you are NOT at the screen. Only when Mira isn't
-    // visible (present → the on-screen layer is enough, no stacked banner), AND
-    // either the user opted into system notifications OR the island is off too
-    // (so a put-away Mira never leaves the reminder with no channel at all).
-    if (companionExited && (state.allowSystemNotify || !islandEnabled)) {
-      notify(reminderMessage);
-    }
+    if (showIsland) showNotchIsland(level >= 2 ? reminderMessage : presenceMessage);
+    if (showNotify) notify(reminderMessage);
   }
 }
 

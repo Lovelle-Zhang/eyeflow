@@ -45,7 +45,7 @@ const scenarios = [
       companion: { state: "enabled", title: "默认显示" },
       launch: { state: "enabled", title: "已开启" },
       version: { state: "enabled", title: "EyeFlow 0.1.4" },
-      notify: { state: "enabled", title: "已启用" },
+      notify: { state: "optional", title: "随 macOS" },
       hideDock: { checked: true, title: "只留菜单栏和 Mira", copyIncludes: "从菜单栏可再打开" },
       launchToggle: { checked: true }
     }
@@ -60,7 +60,7 @@ const scenarios = [
       companion: { state: "optional", title: "已隐藏" },
       launch: { state: "optional", title: "手动" },
       version: { state: "enabled", title: "EyeFlow 0.1.1" },
-      notify: { state: "optional", title: "默认关闭" },
+      notify: { state: "optional", title: "随 macOS" },
       hideDock: { checked: false, title: "保留 Dock 图标", copyExcludes: "从菜单栏可再打开" },
       launchToggle: { checked: false }
     }

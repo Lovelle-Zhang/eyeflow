@@ -152,11 +152,11 @@ function main() {
     /const behaviorLevel = Number\(intervention\.level \|\| 1\);[\s\S]*interventionLevel: behaviorLevel,[\s\S]*interventionDisplayLevel: displayLevel,/,
     "companion publishes behavior level separately from display level"
   );
-  assertMatches(
-    indexHtml,
-    /forceMode: state\.settings\.intensity === "force",[\s\S]*allowSystemNotify: Boolean\(state\.settings\.systemNotifyToggle && state\.settings\.intensity !== "force"\)/,
-    "force mode suppresses ordinary companion notifications"
-  );
+  // System notifications are governed by macOS (no in-app toggle): the state payload
+  // no longer carries an allowSystemNotify flag, and the coordinator decides purely by
+  // level + visibility.
+  assertMatches(indexHtml, /forceMode: state\.settings\.intensity === "force",/, "force mode is still surfaced in the published state");
+  assertNotMatches(indexHtml, /allowSystemNotify/, "no in-app system-notification flag in the state payload (macOS governs it)");
   assertIncludes(indexHtml, "我先不弹普通提醒。到恢复断点后，会直接进入全屏恢复。", "force mode companion stays quiet until break point");
   assertIncludes(indexHtml, "强制爱临时退出", "force emergency exit has a quiet cooldown state");
   assertIncludes(indexHtml, "Mira 先只改变状态和颜色；到恢复断点再短暂提示。", "L2 early phase stays visual-only");

@@ -219,8 +219,12 @@ function main() {
   // (Mira bubble when visible + island when enabled, coexisting) plus the system
   // notification only as the away/lock-screen backup — never stacked while Mira is
   // on screen (kills the L3 triple-buzz).
-  assertMatches(mainJs, /function applyInterventionBehavior\(state\)[\s\S]*const companionVisible = isCompanionWindowVisible\(\);[\s\S]*const companionExited = !companionVisible && !companionHiddenByLifecycle;[\s\S]*if \(escalated \|\| now - lastReminderAt > reminderCooldown\) \{[\s\S]*lastReminderAt = now;[\s\S]*if \(companionVisible\) \{[\s\S]*showCompanionPanel\(\);[\s\S]*if \(islandEnabled\) showNotchIsland\(reminderMessage\);[\s\S]*if \(companionExited && \(state\.allowSystemNotify \|\| !islandEnabled\)\) \{[\s\S]*notify\(reminderMessage\);/, "reminder channels share one cooldown: bubble(+island) on-screen; system notification only when Mira is away");
-  assertNotMatches(mainJs, /level >= 3 && state\.allowSystemNotify/, "no system banner stacks on top of the on-screen channels while Mira is visible");
+  // Channels escalate with the level (matches the 轻提醒规则): L2 is one channel,
+  // L3 adds the second + the away notification, all on one shared cooldown. L1 shows
+  // nothing when Mira is visible and only the island (as her ambient stand-in) when
+  // she is exited.
+  assertMatches(mainJs, /function applyInterventionBehavior\(state\)[\s\S]*const showBubble = companionVisible && level >= 2;[\s\S]*const showIsland = islandEnabled && \(companionExited \|\| level >= 3\);[\s\S]*const showNotify = companionExited && level >= 2[\s\S]*&& \(level >= 3 \|\| !islandEnabled\);[\s\S]*if \(escalated \|\| now - lastReminderAt > reminderCooldown\) \{[\s\S]*if \(showBubble\) \{[\s\S]*showCompanionPanel\(\);[\s\S]*if \(showIsland\) showNotchIsland\(level >= 2 \? reminderMessage : presenceMessage\);[\s\S]*if \(showNotify\) notify\(reminderMessage\);/, "reminder channels escalate by level (L2 one, L3 two + away notification) on one shared cooldown");
+  assertMatches(mainJs, /showNotchIsland\(level >= 2 \? reminderMessage : presenceMessage\)/, "the L1 island shows a gentle presence line, not a rest nudge");
   assertMatches(mainJs, /powerMonitor\.on\("unlock-screen", \(\) => \{[\s\S]*companionHiddenByLifecycle = false;[\s\S]*ensureCompanionReachable\(\);[\s\S]*\}\);/, "unlocking clears the lifecycle-hidden latch so fallback reminders are not swallowed after lock/unlock");
 
   // Top-of-screen reminder island: Mira's stand-in for the bubble when she is put away.
