@@ -7359,6 +7359,47 @@
       margin-bottom: var(--ef-space-1);
     }
 
+    /* Notifications row: the status pill sits in the row's right column like every
+       other row's status; "测试通知" gets its own right-aligned line under the
+       system-notification toggle it belongs to. */
+    #rhythmView .notify-test-row {
+      display: flex;
+      justify-content: flex-end;
+      margin-top: var(--ef-space-1);
+    }
+
+    /* Each notification channel reads as "name + one-line what-it-does · switch",
+       so 轻提示音 and 系统通知 are self-explanatory and clearly parallel. */
+    #rhythmView .notify-option {
+      align-items: center;
+      gap: var(--ef-space-6);
+    }
+
+    #rhythmView .notify-option-text {
+      display: flex;
+      flex-direction: column;
+      gap: var(--ef-space-0);
+      min-width: 0;
+    }
+
+    #rhythmView .notify-option-text b {
+      font-weight: var(--ef-symbol-weight-quiet);
+    }
+
+    #rhythmView .notify-option-text em {
+      font-style: normal;
+      color: var(--muted);
+      font-size: var(--ef-text-meta);
+      line-height: var(--ef-line-body);
+    }
+
+    #rhythmView .notify-test-btn {
+      min-height: var(--ef-control-sm);
+      padding: var(--ef-space-1) var(--ef-space-4);
+      font-size: var(--ef-text-body-sm);
+      flex: 0 0 auto;
+    }
+
     /* Each toggle option reads as a "label … switch" row. Shared by the
        check-lists and standalone switch rows so every toggle matches. */
     #rhythmView .settings-check-list label,
@@ -9227,15 +9268,22 @@
                     <label><span>深度工作时只显示 Mira</span><input type="checkbox" class="ef-switch" id="deepWorkMiraOnlyToggle" role="switch"></label>
                   </div>
                 </div>
-                <div class="settings-row ef-preference-row">
+                <div class="settings-row ef-preference-row notify-row">
                   <strong class="settings-row-label ef-preference-row-label">通知方式</strong>
                   <div class="settings-row-value settings-check-list">
-                    <p id="notificationCopy">系统通知是可选通道。默认只用 Mira 状态和轻提示。</p>
-                    <span class="tag ef-status-pill" id="notificationTag" data-state="optional">可选</span>
-                    <label><span>轻提示音</span><input type="checkbox" class="ef-switch" id="soundToggle" role="switch"></label>
-                    <label><span>系统通知（可选）</span><input type="checkbox" class="ef-switch" id="systemNotifyToggle" role="switch"></label>
+                    <label class="notify-option">
+                      <span class="notify-option-text"><b>轻提示音</b><em>到恢复断点时轻响一下</em></span>
+                      <input type="checkbox" class="ef-switch" id="soundToggle" role="switch">
+                    </label>
+                    <label class="notify-option">
+                      <span class="notify-option-text"><b>系统通知（可选）</b><em id="notificationCopy">离开窗口时也能在通知中心看到。</em></span>
+                      <input type="checkbox" class="ef-switch" id="systemNotifyToggle" role="switch">
+                    </label>
+                    <div class="notify-test-row">
+                      <button class="ghost notify-test-btn" id="testNotificationBtn" type="button">测试通知</button>
+                    </div>
                   </div>
-                  <button class="ghost settings-row-action ef-preference-row-action" id="testNotificationBtn" type="button">测试通知</button>
+                  <span class="tag ef-status-pill" id="notificationTag" data-state="optional">可选</span>
                 </div>
               </div>
             </details>
@@ -12651,7 +12699,7 @@
       }
       els.systemNotifyToggle.disabled = false;
       els.testNotificationBtn.disabled = false;
-      setSystemStatus(els.notificationTag, enabled ? "enabled" : "optional", enabled ? "已启用" : "可选");
+      setSystemStatus(els.notificationTag, enabled ? "enabled" : "optional", enabled ? "已开启" : "可选");
       els.notificationCopy.textContent = enabled
         ? "恢复断点出现时可发送系统通知；勿扰规则仍会减少提醒。"
         : "默认只用 Mira 状态；需要离开窗口也看到提醒时再开启。";
@@ -12725,7 +12773,7 @@
         setSystemStatus(
           els.launchAtLoginTag,
           settings.launchAtLogin ? "enabled" : "optional",
-          settings.launchAtLogin ? "已启用" : "手动启动"
+          settings.launchAtLogin ? "已开启" : "手动启动"
         );
         els.desktopLaunchCopy.textContent = settings.launchAtLogin
           ? "EyeFlow 会随电脑启动；Mira 是否悬浮由上方开关决定。"
