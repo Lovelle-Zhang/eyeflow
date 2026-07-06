@@ -506,7 +506,7 @@ function main() {
   assertMatches(indexHtml, /\.today-flow\s*\{[\s\S]*margin-top:\s*var\(--ef-space-6\);[\s\S]*padding:\s*var\(--ef-space-0\);[\s\S]*background:\s*transparent;[\s\S]*border:\s*0;[\s\S]*font-size:\s*var\(--ef-text-body-sm\);/, "installed today flow is supporting rhythm context inside the judgement column");
   assertMatches(indexHtml, /\.state-action-row\s*\{[\s\S]*justify-self:\s*end;[\s\S]*align-self:\s*end;[\s\S]*justify-content:\s*flex-end;[\s\S]*margin-top:\s*var\(--ef-space-0\);/, "installed today primary action stays in the right-side hero column aligned to the copy exit point");
   assertMatches(indexHtml, /\.state-action-row \.primary\s*\{[\s\S]*color:\s*var\(--btn-primary-fg\);[\s\S]*background:\s*var\(--btn-primary-bg\);/, "installed today primary action is the ① solid primary (tokenized, unified 36px)");
-  assertMatches(indexHtml, /\.state-action-row \.primary\[data-intent="rest"\]\s*\{[\s\S]*background:\s*rgba\(255,\s*241,\s*245,\s*0\.46\);[\s\S]*border-color:\s*rgba\(201,\s*99,\s*127,\s*0\.22\);/, "installed today rest action stays light but distinct");
+  assertNotMatches(indexHtml, /data-intent="rest"/, "installed today state card has no off-palette 立即休息 CTA — rest lives on the rhythm card 休息 button + island");
   assertMatches(indexHtml, /\.state-action-row:not\(:has\(button:not\(\[hidden\]\)\)\)\s*\{[\s\S]*display:\s*none;/, "installed today action column hides when no action is visible");
   assertNotIncludes(indexHtml, 'class="state-meta-row"', "installed today main state no longer renders unclear folded meta row");
   assertNotIncludes(indexHtml, 'aria-label="快速反馈"', "installed today main state no longer renders first-screen quick feedback");

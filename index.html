@@ -790,11 +790,6 @@
       color: #f2b8c8;
       background: rgba(225, 120, 150, 0.14);
     }
-    :root[data-theme="dark"] .state-action-row .primary[data-intent="rest"] {
-      color: #f2b8c8;
-      background: rgba(225, 120, 150, 0.12);
-      border-color: rgba(225, 120, 150, 0.28);
-    }
     /* Settings values are content, not alerts; keep them neutral in dark mode. */
     :root[data-theme="dark"] #rhythmView #applyRhythmBtn.settings-rhythm-action,
     :root[data-theme="dark"] #rhythmView .readiness-item[data-state="enabled"] strong {
@@ -2008,12 +2003,6 @@
 
     .state-action-row .primary:active {
       transform: scale(0.985);
-    }
-
-    .state-action-row .primary[data-intent="rest"] {
-      color: rgba(122, 52, 70, 0.9);
-      background: rgba(255, 241, 245, 0.46);
-      border-color: rgba(201, 99, 127, 0.22);
     }
 
     body.session-active #todayView .note-dashboard,
@@ -14659,9 +14648,10 @@
             : "状态偏高，先歇一下。";
         els.stateExplain.textContent = "先离开屏幕一小段，回来再继续。";
         renderStateCues([]);
-        els.primaryActionBtn.hidden = false;
-        els.primaryActionBtn.dataset.intent = "rest";
-        els.primaryActionBtn.textContent = "立即休息";
+        // The rest action lives on the rhythm card's consistent green 「休息」button
+        // (always present) plus the ambient island/bubble nudge — the state card only
+        // carries the status, no separate off-palette CTA here.
+        els.primaryActionBtn.hidden = true;
         return;
       }
 
