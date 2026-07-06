@@ -49,6 +49,7 @@ let companionExpandBaseBounds = null;
 let companionBoundsTransient = false;
 let lastAutoPanelAt = 0;
 let lastAutoNotifyAt = 0;
+let lastIslandAt = 0;
 let lastInterventionLevel = 1;
 let autoPanelTimer = null;
 let hoverOpenTimer = null;
@@ -1181,7 +1182,10 @@ function desktopPreferenceDefaults(settings = readSettings()) {
     hideDockOnClose: settings.hideDockOnClose === true,
     showCompanionOnLaunch: hasCompanionVisibilityPreference
       ? settings.showCompanionOnLaunch !== false
-      : true
+      : true,
+    // Top-of-screen reminder island — an independent channel that can coexist with
+    // the desktop companion (not either/or). Default on; toggled from the menu/tray.
+    showReminderIsland: settings.showReminderIsland !== false
   };
 }
 
@@ -1286,6 +1290,12 @@ function updateApplicationMenu() {
         { label: "打开 EyeFlow", accelerator: "CommandOrControl+O", click: showDashboard },
         { label: "显示/退出 Mira", accelerator: "CommandOrControl+M", click: toggleCompanionVisibility },
         { label: "找回 Mira", accelerator: "CommandOrControl+Shift+M", click: resetCompanionPosition },
+        {
+          label: "顶端提醒岛",
+          type: "checkbox",
+          checked: desktopPreferenceDefaults().showReminderIsland,
+          click: toggleReminderIsland
+        },
         {
           label: "开机自动启动",
           type: "checkbox",
@@ -1985,6 +1995,12 @@ function buildTrayMenu() {
     { label: "打开 EyeFlow", click: showDashboard },
     { label: "休息一下", click: startTrayRest },
     { label: trayMiraVisibilityLabel(), click: toggleCompanionVisibility },
+    {
+      label: "顶端提醒岛",
+      type: "checkbox",
+      checked: desktopPreferenceDefaults().showReminderIsland,
+      click: toggleReminderIsland
+    },
     { type: "separator" },
     { role: "quit", label: "退出 EyeFlow" }
   ]);
@@ -2078,6 +2094,12 @@ function toggleCompanionVisibility() {
     return;
   }
   showCompanion();
+}
+
+function toggleReminderIsland() {
+  const next = !desktopPreferenceDefaults().showReminderIsland;
+  writeDesktopPreference("showReminderIsland", next); // refreshes app + tray menus
+  if (!next) hideNotchIsland();
 }
 
 function notify(message) {
@@ -2411,14 +2433,19 @@ function applyInterventionBehavior(state) {
     }
   }
 
+  const reminderMessage = state.message || "找一个恢复断点，看远处 20 秒。";
   if (((companionExited && level >= 2) || (level >= 3 && state.allowSystemNotify)) && now - lastAutoNotifyAt > 12 * 60 * 1000) {
     lastAutoNotifyAt = now;
-    const reminderMessage = state.message || "找一个恢复断点，看远处 20 秒。";
     notify(reminderMessage);
-    // Mira has been put away → the top-of-screen island is her on-screen stand-in for
-    // the bubble. The system notification above stays as the away/lock-screen fallback
-    // (both layers, per design). When Mira is on screen her bubble handles this instead.
-    if (companionExited) showNotchIsland(reminderMessage);
+  }
+
+  // Reminder island: an independent ambient channel with its own menu toggle. It can
+  // coexist with the desktop companion (not either/or), so it fires for L2+ reminders
+  // whenever enabled — regardless of whether Mira is on screen — on its own cooldown.
+  if (desktopPreferenceDefaults().showReminderIsland !== false
+    && level >= 2 && now - lastIslandAt > 12 * 60 * 1000) {
+    lastIslandAt = now;
+    showNotchIsland(reminderMessage);
   }
 }
 

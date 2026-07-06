@@ -221,7 +221,10 @@ function main() {
   // Top-of-screen reminder island: Mira's stand-in for the bubble when she is put away.
   const islandHtml = read("island.html");
   assertMatches(mainJs, /function showNotchIsland\(message, options = \{\}\) \{[\s\S]*if \(process\.platform !== "darwin"\) return[\s\S]*breakLockWindow[\s\S]*isVisible\(\)[\s\S]*return \{ ok: false, reason: "break-lock" \};/, "showNotchIsland is macOS-gated and never covers the full-screen rest");
-  assertMatches(mainJs, /const reminderMessage = state\.message[\s\S]*notify\(reminderMessage\);[\s\S]*if \(companionExited\) showNotchIsland\(reminderMessage\);/, "the reminder island fires only when Mira is exited, alongside the system-notification fallback");
+  assertMatches(mainJs, /notify\(reminderMessage\);[\s\S]*if \(desktopPreferenceDefaults\(\)\.showReminderIsland !== false[\s\S]*&& level >= 2 && now - lastIslandAt > 12 \* 60 \* 1000\) \{[\s\S]*showNotchIsland\(reminderMessage\);/, "the reminder island is an independent toggle-gated channel (coexists with Mira), not bound to companionExited");
+  assertIncludes(mainJs, "showReminderIsland: settings.showReminderIsland !== false", "reminder island preference defaults on");
+  assertIncludes(mainJs, "function toggleReminderIsland()", "menu/tray can toggle the reminder island");
+  assertMatches(mainJs, /label: "顶端提醒岛",\s*type: "checkbox",\s*checked: desktopPreferenceDefaults\(\)\.showReminderIsland,\s*click: toggleReminderIsland/, "app + tray menu expose the reminder island as a checkbox choice");
   assertMatches(mainJs, /function broadcastSystemLifecycle\(reason\)[\s\S]*if \(reason !== "resume"\) \{[\s\S]*hideNotchIsland\(\);/, "lock/suspend/shutdown hides the reminder island");
   assertIncludes(preloadJs, 'ipcRenderer.on("island:show", listener)', "preload exposes the island:show channel");
   assertIncludes(packageJson, '"island.html"', "island.html is included in packaged files");
