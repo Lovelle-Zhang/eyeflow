@@ -511,6 +511,7 @@
   --mira-strong: #62d3aa;
   --mira-soft: rgba(79, 201, 156, 0.16);
   --mira-line: rgba(79, 201, 156, 0.30);
+  --ef-mira-mouth-color: rgba(79, 201, 156, 0.58); /* mouth curve flips brighter on the dark face */
 
   --sb-bg: #1b1c1e;
   --sb-border: rgba(255, 255, 255, 0.08);

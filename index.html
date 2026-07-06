@@ -1824,25 +1824,13 @@
     }
 
     .stage-mira[data-mood="rest"] .pet-mouth {
-      width: 14px;
-      height: 13px;
-      top: 42px;
+      top: var(--ef-mira-mouth-top);
+      width: var(--ef-mira-mouth-width);
+      height: var(--ef-mira-mouth-height);
       border: 0;
+      border-bottom: var(--ef-mira-mouth-stroke) solid var(--ef-mira-mouth-color);
       background: transparent;
       transform: translateX(-50%);
-      display: grid;
-      place-items: center;
-    }
-
-    .stage-mira[data-mood="rest"] .pet-mouth::before {
-      content: "Ɛ";
-      font-family: ui-rounded, "SF Pro Rounded", Inter, system-ui, sans-serif;
-      font-size: var(--ef-text-body-sm);
-      font-weight: 500;
-      line-height: 1;
-      color: var(--mira);
-      opacity: 0.72;
-      transform: translateY(-1px) rotate(-4deg) scaleX(0.82);
     }
 
     .state-hero:nth-child(2) {
@@ -4482,28 +4470,13 @@
     }
 
     .companion[data-mood="rest"] .pet-mouth {
-      width: 12px;
-      height: 13px;
-      top: 34px;
+      top: var(--ef-mira-mouth-top);
+      width: var(--ef-mira-mouth-width);
+      height: var(--ef-mira-mouth-height);
       border: 0;
+      border-bottom: var(--ef-mira-mouth-stroke) solid var(--ef-mira-mouth-color);
       background: transparent;
       transform: translateX(-50%);
-      display: grid;
-      place-items: center;
-      opacity: 0.94;
-    }
-
-    .companion[data-mood="rest"] .pet-mouth::before {
-      content: "Ɛ";
-      font-family: ui-rounded, "SF Pro Rounded", Inter, system-ui, sans-serif;
-      font-size: var(--ef-text-body-sm);
-      font-weight: 500;
-      line-height: 1;
-      color: rgba(214, 82, 125, 0.72);
-      text-shadow:
-        0 1px 0 rgba(255, 255, 255, 0.5),
-        0 0 1px rgba(68, 30, 44, 0.16);
-      transform: translateY(-1px) rotate(-4deg) scaleX(0.82);
     }
 
     .companion-body {
