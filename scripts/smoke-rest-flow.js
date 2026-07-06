@@ -34,6 +34,12 @@ function assertMatches(source, pattern, label) {
   }
 }
 
+function assertNotMatches(source, pattern, label) {
+  if (pattern.test(source)) {
+    throw new Error(`${label}: unexpected pattern found: ${pattern}`);
+  }
+}
+
 function parseInlineScripts(relativePath) {
   const html = read(relativePath);
   const scripts = [...html.matchAll(/<script(?:\s[^>]*)?>([\s\S]*?)<\/script>/gi)];
@@ -126,10 +132,12 @@ function main() {
   assertEqual(restFlow.recoveryCompletionPlan({ feedback: "tired", breakTarget: 210 }).nextBreakTarget, 240, "tired feedback extends rest cap");
 
   assertMatches(companionHtml, /currentMood\s*===\s*"rest"[\s\S]*openDashboard\(\{\s*restGuide:\s*true\s*\}\);[\s\S]*return;[\s\S]*if \(isMiraSpeaking\) return;/, "pink Mira opens rest guide even while its prompt is visible");
-  assertIncludes(companionHtml, "function shouldNotifyRest", "companion gates rest notifications");
-  assertIncludes(companionHtml, "restNotifyCooldown = 12 * 60 * 1000", "companion rest notifications have a cooldown");
-  assertMatches(companionHtml, /if \(state\.forceMode \|\| state\.forceBreakActive\) return false;/, "force mode suppresses companion rest notifications");
-  assertMatches(companionHtml, /state\.allowSystemNotify !== true/, "companion respects system notification setting");
+  // Single reminder-notification authority: only main.js's coordinator sends system
+  // notifications. The companion window and the dashboard reminder/natural-break paths
+  // no longer fire their own (that used to stack banners on top of the bubble/island).
+  assertNotMatches(companionHtml, /eyeflowDesktop\.notify\(/, "companion delegates system notifications to the main-process coordinator");
+  assertNotMatches(indexHtml, /现在像是一个恢复断点/, "natural-break nudge no longer fires its own system notification");
+  assertNotMatches(indexHtml, /miraExited\(\) && !state\.settings\.systemNotifyToggle && window\.eyeflowDesktop\?\.notify/, "exited-Mira reminder fallback is delivered by main.js, not the dashboard");
   assertMatches(mainJs, /const quietedByUser = Boolean\(state\.reminderDeferred\) \|\| snoozeUntil > now;[\s\S]*hideCompanionPanel\(\);[\s\S]*return;/, "desktop panel respects snooze and busy-later responses");
   assertMatches(mainJs, /const hasReminderOpening = Boolean\(state\.isRunning \|\| state\.reminderOpening \|\| state\.naturalBreak \|\| state\.reminderPending\);/, "desktop panel requires an interruption opening");
   assertIncludes(breakLockHtml, "再点一次确认退出", "break lock emergency exit requires confirmation");

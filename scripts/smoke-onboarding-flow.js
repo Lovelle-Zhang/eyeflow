@@ -215,13 +215,18 @@ function main() {
   assertMatches(mainJs, /function hideCompanionWindow\(\{ persistPreference = true \} = \{\}\)[\s\S]*if \(persistPreference\) writeDesktopPreference\("showCompanionOnLaunch", false\);/, "temporary companion hides do not persist the hidden preference");
   assertMatches(mainJs, /ipcMain\.handle\("companion:hide", \(\) => \{[\s\S]*hideCompanionWindow\(\{ persistPreference: false \}\);[\s\S]*\}\);/, "renderer lifecycle hide keeps desktop Mira default visible");
   assertMatches(mainJs, /function showCompanionBubble\(message, options = \{\}\)[\s\S]*!desktopPreferenceDefaults\(\)\.showCompanionOnLaunch[\s\S]*return \{ ok: false, reason: "hidden" \};/, "hidden desktop Mira preference blocks toast bubbles from resurrecting Mira");
-  assertMatches(mainJs, /function applyInterventionBehavior\(state\)[\s\S]*const companionVisible = isCompanionWindowVisible\(\);[\s\S]*const companionExited = !companionVisible && !companionHiddenByLifecycle;[\s\S]*if \(companionVisible && [\s\S]*showCompanionPanel\(\);[\s\S]*if \(\(\(companionExited && level >= 2\) \|\| \(level >= 3 && state\.allowSystemNotify\)\) && now - lastAutoNotifyAt > 12 \* 60 \* 1000\) \{[\s\S]*notify\(reminderMessage\);/, "exited/hidden desktop Mira falls back to system notification for L2+ recovery-point reminders (runtime visibility, not preference)");
+  // Reminder channels are coordinated on ONE shared cooldown: the on-screen layer
+  // (Mira bubble when visible + island when enabled, coexisting) plus the system
+  // notification only as the away/lock-screen backup — never stacked while Mira is
+  // on screen (kills the L3 triple-buzz).
+  assertMatches(mainJs, /function applyInterventionBehavior\(state\)[\s\S]*const companionVisible = isCompanionWindowVisible\(\);[\s\S]*const companionExited = !companionVisible && !companionHiddenByLifecycle;[\s\S]*if \(escalated \|\| now - lastReminderAt > reminderCooldown\) \{[\s\S]*lastReminderAt = now;[\s\S]*if \(companionVisible\) \{[\s\S]*showCompanionPanel\(\);[\s\S]*if \(islandEnabled\) showNotchIsland\(reminderMessage\);[\s\S]*if \(companionExited && \(state\.allowSystemNotify \|\| !islandEnabled\)\) \{[\s\S]*notify\(reminderMessage\);/, "reminder channels share one cooldown: bubble(+island) on-screen; system notification only when Mira is away");
+  assertNotMatches(mainJs, /level >= 3 && state\.allowSystemNotify/, "no system banner stacks on top of the on-screen channels while Mira is visible");
   assertMatches(mainJs, /powerMonitor\.on\("unlock-screen", \(\) => \{[\s\S]*companionHiddenByLifecycle = false;[\s\S]*ensureCompanionReachable\(\);[\s\S]*\}\);/, "unlocking clears the lifecycle-hidden latch so fallback reminders are not swallowed after lock/unlock");
 
   // Top-of-screen reminder island: Mira's stand-in for the bubble when she is put away.
   const islandHtml = read("island.html");
   assertMatches(mainJs, /function showNotchIsland\(message, options = \{\}\) \{[\s\S]*if \(process\.platform !== "darwin"\) return[\s\S]*breakLockWindow[\s\S]*isVisible\(\)[\s\S]*return \{ ok: false, reason: "break-lock" \};/, "showNotchIsland is macOS-gated and never covers the full-screen rest");
-  assertMatches(mainJs, /notify\(reminderMessage\);[\s\S]*if \(desktopPreferenceDefaults\(\)\.showReminderIsland !== false[\s\S]*&& level >= 2 && now - lastIslandAt > 12 \* 60 \* 1000\) \{[\s\S]*showNotchIsland\(reminderMessage\);/, "the reminder island is an independent toggle-gated channel (coexists with Mira), not bound to companionExited");
+  assertIncludes(mainJs, "const islandEnabled = desktopPreferenceDefaults().showReminderIsland !== false;", "island is a toggle-gated channel that coexists with Mira");
   assertIncludes(mainJs, "showReminderIsland: settings.showReminderIsland !== false", "reminder island preference defaults on");
   assertIncludes(mainJs, "function toggleReminderIsland()", "menu/tray can toggle the reminder island");
   assertMatches(mainJs, /label: "顶端提醒岛",\s*type: "checkbox",\s*checked: desktopPreferenceDefaults\(\)\.showReminderIsland,\s*click: toggleReminderIsland/, "app + tray menu expose the reminder island as a checkbox choice");

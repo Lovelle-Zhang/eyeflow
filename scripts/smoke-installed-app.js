@@ -410,8 +410,8 @@ function main() {
   assertMatches(mainJs, /function hideCompanionWindow\(\{ persistPreference = true \} = \{\}\)[\s\S]*if \(persistPreference\) writeDesktopPreference\("showCompanionOnLaunch", false\);/, "installed temporary companion hides do not persist the hidden preference");
   assertMatches(mainJs, /ipcMain\.handle\("companion:hide", \(\) => \{[\s\S]*hideCompanionWindow\(\{ persistPreference: false \}\);[\s\S]*\}\);/, "installed renderer lifecycle hide keeps desktop Mira default visible");
   assertMatches(mainJs, /function showCompanionBubble\(message, options = \{\}\)[\s\S]*!desktopPreferenceDefaults\(\)\.showCompanionOnLaunch[\s\S]*return \{ ok: false, reason: "hidden" \};/, "installed hidden desktop Mira preference blocks toast bubbles from resurrecting Mira");
-  assertMatches(mainJs, /function applyInterventionBehavior\(state\)[\s\S]*const companionVisible = isCompanionWindowVisible\(\);[\s\S]*const companionExited = !companionVisible && !companionHiddenByLifecycle;[\s\S]*if \(companionVisible && [\s\S]*showCompanionPanel\(\);[\s\S]*if \(\(\(companionExited && level >= 2\) \|\| \(level >= 3 && state\.allowSystemNotify\)\) && now - lastAutoNotifyAt > 12 \* 60 \* 1000\) \{[\s\S]*notify\(reminderMessage\);/, "installed exited/hidden desktop Mira falls back to system notification for L2+ reminders");
-  assertMatches(mainJs, /if \(desktopPreferenceDefaults\(\)\.showReminderIsland !== false[\s\S]*&& level >= 2 && now - lastIslandAt > 12 \* 60 \* 1000\) \{[\s\S]*showNotchIsland\(reminderMessage\);/, "installed reminder island is a toggle-gated channel that coexists with Mira");
+  assertMatches(mainJs, /function applyInterventionBehavior\(state\)[\s\S]*if \(escalated \|\| now - lastReminderAt > reminderCooldown\) \{[\s\S]*lastReminderAt = now;[\s\S]*if \(companionVisible\) \{[\s\S]*showCompanionPanel\(\);[\s\S]*if \(islandEnabled\) showNotchIsland\(reminderMessage\);[\s\S]*if \(companionExited && \(state\.allowSystemNotify \|\| !islandEnabled\)\) \{[\s\S]*notify\(reminderMessage\);/, "installed reminder channels share one cooldown: bubble(+island) on-screen; system notification only when Mira is away");
+  assertNotMatches(mainJs, /level >= 3 && state\.allowSystemNotify/, "installed: no system banner stacks on top of on-screen channels while Mira is visible");
   assertMatches(mainJs, /label: "顶端提醒岛",\s*type: "checkbox",\s*checked: desktopPreferenceDefaults\(\)\.showReminderIsland,\s*click: toggleReminderIsland/, "installed menu exposes the reminder island choice");
   assertMatches(mainJs, /function createDarwinTrayIcon\(\)[\s\S]*nativeImage\.createEmpty\(\)[\s\S]*scaleFactor: 1,[\s\S]*trayTemplate\.png[\s\S]*scaleFactor: 2,[\s\S]*trayTemplate@2x\.png[\s\S]*icon\.setTemplateImage\(true\);/, "installed macOS menu bar tray loads crisp 1x and 2x template assets");
   if (readBuffer("assets/trayTemplate.png").length < 100) {
@@ -623,10 +623,10 @@ function main() {
   assertIncludes(companionHtml, "state.continuityLine", "installed companion consumes continuity context");
   assertMatches(companionHtml, /const shouldFocusManualStart = !options\.restGuide && !options\.view && !options\.focus;[\s\S]*\{ view: "todayView", focus: "manualStart" \}[\s\S]*window\.eyeflowDesktop\.showDashboard\(dashboardOptions\);/, "installed companion open button returns to Today manual focus by default");
   assertIncludes(indexHtml, 'continuityLine: `${classifyLoad(load)} · ${intensityLabel(state.settings.intensity || "quiet")}`', "installed companion context avoids baseline math");
-  assertIncludes(companionHtml, "function shouldNotifyRest", "installed companion gates rest notifications");
-  assertIncludes(companionHtml, "restNotifyCooldown = 12 * 60 * 1000", "installed companion rest notifications have a cooldown");
-  assertMatches(companionHtml, /if \(state\.forceMode \|\| state\.forceBreakActive\) return false;/, "installed force mode suppresses companion rest notifications");
-  assertMatches(companionHtml, /state\.allowSystemNotify !== true/, "installed companion respects notification setting");
+  // Single reminder-notification authority — only main.js's coordinator sends them.
+  assertNotMatches(companionHtml, /eyeflowDesktop\.notify\(/, "installed companion delegates system notifications to the main-process coordinator");
+  assertNotMatches(indexHtml, /现在像是一个恢复断点/, "installed natural-break nudge no longer fires its own system notification");
+  assertNotMatches(indexHtml, /miraExited\(\) && !state\.settings\.systemNotifyToggle && window\.eyeflowDesktop\?\.notify/, "installed exited-Mira reminder fallback is delivered by main.js");
   assertIncludes(indexHtml, "max-height: calc(100vh - var(--ef-space-12));", "installed break dialog stays inside short desktop windows");
   assertMatches(mainJs, /if \(label === "break-lock-complete"\) \{[\s\S]*window\.clearInterval\(ticker\);[\s\S]*completionShown = false;[\s\S]*showCompletion\(\);/, "installed debug break-lock complete capture stops the timer before forcing the completed state");
   assertIncludes(indexHtml, "overscroll-behavior: contain;", "installed break dialog scroll is contained");

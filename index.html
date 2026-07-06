@@ -9230,9 +9230,8 @@
                 <div class="settings-row ef-preference-row">
                   <strong class="settings-row-label ef-preference-row-label">通知方式</strong>
                   <div class="settings-row-value settings-check-list">
-                    <p id="notificationCopy">系统通知是可选通道。默认只用 Mira 状态变化和轻提示。</p>
+                    <p id="notificationCopy">系统通知是可选通道。默认只用 Mira 状态和轻提示。</p>
                     <span class="tag ef-status-pill" id="notificationTag" data-state="optional">可选</span>
-                    <label><span>Mira 状态变化</span><input type="checkbox" class="ef-switch" id="miraStateToggle" role="switch" checked=""></label>
                     <label><span>轻提示音</span><input type="checkbox" class="ef-switch" id="soundToggle" role="switch"></label>
                     <label><span>系统通知（可选）</span><input type="checkbox" class="ef-switch" id="systemNotifyToggle" role="switch"></label>
                   </div>
@@ -9990,7 +9989,6 @@
         document.querySelector("#interventionBar4")
       ],
       deepWorkMiraOnlyToggle: document.querySelector("#deepWorkMiraOnlyToggle"),
-      miraStateToggle: document.querySelector("#miraStateToggle"),
       soundToggle: document.querySelector("#soundToggle"),
       systemNotifyToggle: document.querySelector("#systemNotifyToggle"),
       introWrap: document.querySelector("#introWrap"),
@@ -10236,7 +10234,6 @@
     els.cancelForceBtn.addEventListener("click", cancelForceMode);
     [
       els.deepWorkMiraOnlyToggle,
-      els.miraStateToggle,
       els.soundToggle,
       els.systemNotifyToggle,
       els.forceVoiceGuideToggle
@@ -10384,7 +10381,6 @@
         settings: {
           intensity: "quiet",
           deepWorkMiraOnlyToggle: false,
-          miraStateToggle: true,
           soundToggle: false,
           systemNotifyToggle: false,
           forceVoiceGuideToggle: true,
@@ -10658,7 +10654,6 @@
       setIntensity(state.settings.intensity || "quiet", { persistChange: false, renderChange: false, userChange: false });
       setRecoveryMode(state.settings.recoveryMode || "mixed", { persistChange: false });
       els.deepWorkMiraOnlyToggle.checked = Boolean(state.settings.deepWorkMiraOnlyToggle);
-      els.miraStateToggle.checked = Boolean(state.settings.miraStateToggle);
       els.soundToggle.checked = Boolean(state.settings.soundToggle);
       els.systemNotifyToggle.checked = Boolean(state.settings.systemNotifyToggle);
       els.forceVoiceGuideToggle.checked = state.settings.forceVoiceGuideToggle !== false;
@@ -11965,16 +11960,10 @@
           : intervention.copy,
         status: "pending"
       };
-      // The primary reminder only renders in the dashboard card. If Mira is exited that
-      // card sits in a hidden window with no bubble channel, so also surface it as a
-      // system notification — otherwise an exited-Mira user never sees an L2/L3 reminder
-      // short of a forced break. Gate on !systemNotifyToggle: when the user has system
-      // notifications ON, the existing L3/rest notify paths (main.js, companion.html)
-      // already fire, so adding one here would double up. This fills only the silent
-      // default-off gap. (Rate-limited already by the reminder cooldown/dedup above.)
-      if (miraExited() && !state.settings.systemNotifyToggle && window.eyeflowDesktop?.notify) {
-        window.eyeflowDesktop.notify(`${state.pendingReminder.title} ${state.pendingReminder.copy}`);
-      }
+      // The exited-Mira system-notification fallback now lives in the single
+      // coordinator (main.js applyInterventionBehavior), which is companionExited-,
+      // island-, and cooldown-aware. This renderer no longer fires its own — that
+      // used to double up with the main-process fallback and ignore the island.
       state.reminderStats.shown += 1;
       appendRhythmMemory("reminder_shown", {
         reminderId: state.pendingReminder.id,
@@ -12646,7 +12635,7 @@
       }
       if (!supportedKnown) {
         setSystemStatus(els.notificationTag, "checking", "检查中");
-        els.notificationCopy.textContent = "正在读取系统通知支持状态；默认仍只用 Mira 状态变化。";
+        els.notificationCopy.textContent = "正在读取系统通知支持状态；默认仍只用 Mira 状态。";
         els.systemNotifyToggle.disabled = true;
         els.testNotificationBtn.disabled = true;
         return;
@@ -12665,7 +12654,7 @@
       setSystemStatus(els.notificationTag, enabled ? "enabled" : "optional", enabled ? "已启用" : "可选");
       els.notificationCopy.textContent = enabled
         ? "恢复断点出现时可发送系统通知；勿扰规则仍会减少提醒。"
-        : "默认只用 Mira 状态变化；需要离开窗口也看到提醒时再开启。";
+        : "默认只用 Mira 状态；需要离开窗口也看到提醒时再开启。";
     }
 
     async function testSystemNotification() {
@@ -13214,16 +13203,6 @@
       return "等待恢复断点";
     }
 
-    // When the desktop Mira is exited (companion window hidden), its speech-bubble
-    // channel is suppressed (main.js showCompanionBubble returns {ok:false,reason:"hidden"}),
-    // and the primary reminder only shows in the hidden dashboard. So a user who exits
-    // Mira gets NO visible reminder unless system notifications happen to be on (default
-    // off). Treat "Mira exited" as intent to still be reminded: fall back to a system
-    // notification so soft nudges aren't silently dropped. (When Mira is visible, the
-    // bubble / dashboard card already carry it — no extra notification.)
-    function miraExited() {
-      return latestDesktopSettings?.showCompanionOnLaunch === false;
-    }
 
     function maybeNudgeAtNaturalBreak(activity) {
       if (!isNaturalBreak(activity)) return;
@@ -13236,9 +13215,10 @@
       if (!miraOnly && state.settings.soundToggle) {
         playSoftBeep();
       }
-      if (!miraOnly && (state.settings.systemNotifyToggle || miraExited()) && window.eyeflowDesktop?.notify) {
-        window.eyeflowDesktop.notify("现在像是一个恢复断点。看远处 20 秒。");
-      }
+      // The natural-break system notification is delivered by the single coordinator
+      // in main.js (a natural break raises the intervention level to L2, which is
+      // broadcast to applyInterventionBehavior). This renderer only plays the soft
+      // beep now — it no longer fires its own banner alongside the coordinator's.
     }
 
     function playSoftBeep() {
@@ -16366,7 +16346,9 @@
 
     function publishCompanionState(nextState) {
       latestCompanionState = nextState;
-      if (!state.settings.miraStateToggle) return;
+      // Always publish: main.js is the single reminder-notification coordinator and
+      // must receive state regardless of the (decorative) "Mira 状态变化" toggle —
+      // otherwise turning that toggle off would silently kill every reminder.
       if (!window.eyeflowDesktop?.publishState) return;
       window.eyeflowDesktop.publishState(nextState);
     }

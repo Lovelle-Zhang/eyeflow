@@ -409,7 +409,7 @@ function main() {
   assertIncludes(installedSmokeJs, "installed onboarding centers the single primary action", "installed smoke checks onboarding action centering CSS");
   assertIncludes(installedSmokeJs, "installed onboarding debug capture keeps the blurred background", "installed smoke checks onboarding debug capture blur CSS");
   assertIncludes(installedSmokeJs, "installed onboarding permission note is muted text", "installed smoke checks lightweight safety boundary");
-  assertIncludes(installedSmokeJs, "installed force mode suppresses companion rest notifications", "installed smoke checks force notification suppression");
+  assertIncludes(installedSmokeJs, "installed companion delegates system notifications to the main-process coordinator", "installed smoke checks the single reminder-notification authority");
   assertIncludes(installedSmokeJs, "installed break lock emergency exit requires confirmation", "installed smoke checks force emergency exit");
   assertIncludes(installedSmokeJs, "installed L2 early phase stays visual-only", "installed smoke checks L2 early boundary");
   assertIncludes(installedSmokeJs, "installed profile review opens with Mira insight", "installed smoke checks profile Mira insight opening");

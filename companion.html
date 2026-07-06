@@ -697,9 +697,6 @@
     const tapMoveThreshold = 8;
     const hoverOpenDelay = 120;
     const hoverCloseDelay = 1600;
-    const restNotifyCooldown = 12 * 60 * 1000;
-    let lastRestNotifyAt = 0;
-    let lastRestNotifyKey = "";
     let bubbleTimer = null;
     let isMiraSpeaking = false;
 
@@ -717,19 +714,6 @@
       applyState({ mood, title: label, message: copy, allowSystemNotify: true });
     }
 
-    function shouldNotifyRest(state, mood) {
-      if (mood !== "rest" || !window.eyeflowDesktop) return false;
-      if (state.forceMode || state.forceBreakActive) return false;
-      if (state.allowSystemNotify !== true) return false;
-      if (Number(state.interventionLevel || 1) < 2) return false;
-      const now = Date.now();
-      const key = `${state.interventionLevel || 1}:${state.title || ""}:${state.message || ""}`;
-      if (key === lastRestNotifyKey && now - lastRestNotifyAt < restNotifyCooldown) return false;
-      if (now - lastRestNotifyAt < restNotifyCooldown) return false;
-      lastRestNotifyAt = now;
-      lastRestNotifyKey = key;
-      return true;
-    }
 
     function normalizeTheme(value) {
       if (value === "day" || value === "light") return "day";
@@ -760,9 +744,9 @@
         ? "看远处 20 秒。点我打开指引。"
         : state.message || "我会在旁边看着节奏，先轻提醒陪伴。";
       contextLine.textContent = state.continuityLine || `${state.loadZone || "舒适区"} · ${state.intensityLabel || "L1 安静"}`;
-      if (shouldNotifyRest(state, mood)) {
-        window.eyeflowDesktop.notify(state.message || "找一个恢复断点，看远处 20 秒。");
-      }
+      // System notifications are delivered by the single coordinator in main.js
+      // (applyInterventionBehavior). The companion window no longer fires its own —
+      // that used to stack a banner on top of the bubble/island.
     }
 
     window.setInterval(() => {
