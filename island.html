@@ -1,0 +1,104 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>EyeFlow Island</title>
+<style>
+  html, body {
+    margin: 0;
+    height: 100%;
+    background: transparent;
+    overflow: hidden;
+    -webkit-user-select: none;
+    user-select: none;
+    font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Segoe UI", sans-serif;
+  }
+  /* The window spans the top-center; the pill slides DOWN into view from behind the
+     top edge (Dynamic-Island style). We never draw ON the physical notch — the pill
+     lives just below it and, on non-notch Macs, reads as a plain top-center pill. */
+  #island {
+    position: absolute;
+    left: 50%;
+    top: 54px; /* just below the menu bar — floating, without drifting too low */
+    transform: translate(-50%, -190%);
+    display: inline-flex;
+    align-items: center;
+    gap: 13px;
+    max-width: 92vw;
+    padding: 13px 26px 13px 16px;
+    border-radius: 999px;
+    background: rgba(26, 107, 82, 0.97); /* --mira-strong #1a6b52 — the app's signature brand green */
+    box-shadow:
+      0 12px 34px rgba(0, 0, 0, 0.26),
+      0 6px 16px rgba(0, 0, 0, 0.4),
+      inset 0 0 0 1px rgba(255, 255, 255, 0.12);
+    color: #f6f7f9;
+    opacity: 0;
+    transition: transform 360ms cubic-bezier(0.22, 1, 0.36, 1), opacity 280ms ease;
+    white-space: nowrap;
+  }
+  #island.show {
+    transform: translate(-50%, 0);
+    opacity: 1;
+  }
+  /* Honor Reduce Motion (eye-comfort DNA): cross-fade only, no slide. */
+  @media (prefers-reduced-motion: reduce) {
+    #island {
+      transition: opacity 280ms ease;
+      transform: translate(-50%, 0);
+    }
+  }
+  .mark {
+    width: 34px;
+    height: 34px;
+    flex: 0 0 auto;
+    border-radius: 10px;
+    display: block;
+  }
+  .msg {
+    font-size: 16.5px;
+    font-weight: 600;
+    line-height: 1.25;
+    letter-spacing: 0.01em;
+  }
+  .msg .accent { color: #6FE7C3; }
+</style>
+</head>
+<body>
+  <div id="island" role="status" aria-live="polite">
+    <svg class="mark" viewBox="0 0 1024 1024" aria-hidden="true">
+      <defs>
+        <linearGradient id="bg" x1="216" y1="156" x2="826" y2="874" gradientUnits="userSpaceOnUse">
+          <stop offset="0" stop-color="#EAFFF6"/><stop offset=".58" stop-color="#BDEAFF"/><stop offset="1" stop-color="#F3EEC7"/>
+        </linearGradient>
+      </defs>
+      <rect width="1024" height="1024" rx="230" fill="url(#bg)"/>
+      <rect x="177" y="335" width="671" height="318" rx="159" fill="#0E1C20"/>
+      <circle cx="380" cy="468" r="46" fill="#F8FFFC"/>
+      <circle cx="644" cy="468" r="46" fill="#F8FFFC"/>
+      <circle cx="803" cy="344" r="82" fill="#6FE7C3"/>
+    </svg>
+    <span class="msg" id="msg">看远一点，休息 20 秒</span>
+  </div>
+
+  <script>
+    const island = document.getElementById("island");
+    const msgEl = document.getElementById("msg");
+    let hideTimer = null;
+
+    function present(data) {
+      const text = (data && data.message) ? String(data.message) : "看远一点，休息 20 秒";
+      msgEl.textContent = text;
+      requestAnimationFrame(() => island.classList.add("show"));
+      if (hideTimer) clearTimeout(hideTimer);
+      const ms = Math.max(1600, Math.min(Number(data && data.durationMs) || 6000, 12000));
+      hideTimer = setTimeout(() => island.classList.remove("show"), ms);
+    }
+
+    if (window.eyeflowDesktop && window.eyeflowDesktop.onIslandShow) {
+      window.eyeflowDesktop.onIslandShow(present);
+    }
+  </script>
+</body>
+</html>

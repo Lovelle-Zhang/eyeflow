@@ -6,6 +6,8 @@ const { execFile, spawnSync } = require("node:child_process");
 let dashboardWindow;
 let companionWindow;
 let breakLockWindow;
+let notchWindow;
+let notchHideTimer = null;
 let tray;
 let breakLockCanClose = false;
 const currentVisualCaptureTargets = parseCurrentVisualCaptureTargets(process.env.EYEFLOW_CURRENT_CAPTURE || process.env.EYEFLOW_DEBUG_CURRENT_CAPTURE || "");
@@ -2411,7 +2413,12 @@ function applyInterventionBehavior(state) {
 
   if (((companionExited && level >= 2) || (level >= 3 && state.allowSystemNotify)) && now - lastAutoNotifyAt > 12 * 60 * 1000) {
     lastAutoNotifyAt = now;
-    notify(state.message || "找一个恢复断点，看远处 20 秒。");
+    const reminderMessage = state.message || "找一个恢复断点，看远处 20 秒。";
+    notify(reminderMessage);
+    // Mira has been put away → the top-of-screen island is her on-screen stand-in for
+    // the bubble. The system notification above stays as the away/lock-screen fallback
+    // (both layers, per design). When Mira is on screen her bubble handles this instead.
+    if (companionExited) showNotchIsland(reminderMessage);
   }
 }
 
@@ -2428,6 +2435,7 @@ function broadcastSystemLifecycle(reason) {
   if (reason !== "resume") {
     hideCompanionPanel();
     hideWindowIfAlive(companionWindow);
+    hideNotchIsland();
     companionHiddenByLifecycle = true;
   }
   if (dashboardWindow && !dashboardWindow.isDestroyed()) {
@@ -2609,6 +2617,102 @@ function startSystemLifecycleMonitor() {
   });
 }
 
+// --- Top-of-screen ambient reminder island (notch-adaptive) ---
+// A transparent, click-through, screen-saver-level window pinned to the top-center of
+// the active display. Content slides down just under the top edge (we never draw on the
+// physical notch); on non-notch Macs it simply reads as a top-center pill. It mirrors the
+// break-lock window's level so it sits over the menu bar and survives full-screen apps.
+// This is Mira's on-screen stand-in for her bubble when the desktop companion is put away.
+function notchIslandBounds() {
+  const cursor = screen.getCursorScreenPoint();
+  const display = screen.getDisplayNearestPoint(cursor) || screen.getPrimaryDisplay();
+  const area = display.bounds; // full bounds (incl. menu bar), not workArea
+  const width = 560;
+  const height = 180;
+  return {
+    width,
+    height,
+    x: Math.round(area.x + (area.width - width) / 2),
+    y: Math.round(area.y) // top edge; the pill inside slides down from behind it
+  };
+}
+
+function createNotchWindow() {
+  notchWindow = new BrowserWindow({
+    ...notchIslandBounds(),
+    frame: false,
+    resizable: false,
+    movable: false,
+    transparent: true,
+    hasShadow: false,
+    alwaysOnTop: true,
+    skipTaskbar: true,
+    focusable: false,
+    show: false,
+    title: "EyeFlow",
+    webPreferences: {
+      preload: path.join(appRoot, "preload.js"),
+      contextIsolation: true,
+      nodeIntegration: false
+    }
+  });
+  attachWebDiagnostics(notchWindow, "island");
+  notchWindow.setAlwaysOnTop(true, "screen-saver");
+  notchWindow.setVisibleOnAllWorkspaces(true, { visibleOnFullScreen: true });
+  notchWindow.setIgnoreMouseEvents(true); // click-through; ambient, not interactive
+  notchWindow.on("closed", () => { notchWindow = null; });
+  notchWindow.loadFile(path.join(appRoot, "island.html"));
+}
+
+function hideNotchIsland() {
+  if (notchHideTimer) {
+    clearTimeout(notchHideTimer);
+    notchHideTimer = null;
+  }
+  if (notchWindow && !notchWindow.isDestroyed()) notchWindow.hide();
+}
+
+function showNotchIsland(message, options = {}) {
+  // Notch-adaptive top island is macOS-only; never let it throw into the caller
+  // (it runs inside reminder delivery). Also don't cover the full-screen rest.
+  if (process.platform !== "darwin") return { ok: false, reason: "unsupported" };
+  try {
+    if (breakLockWindow && !breakLockWindow.isDestroyed() && breakLockWindow.isVisible()) {
+      return { ok: false, reason: "break-lock" };
+    }
+    if (!notchWindow || notchWindow.isDestroyed()) createNotchWindow();
+    if (!notchWindow || notchWindow.isDestroyed()) return { ok: false, reason: "missing" };
+    notchWindow.setBounds(notchIslandBounds());
+    notchWindow.setAlwaysOnTop(true, "screen-saver");
+    notchWindow.showInactive();
+    notchWindow.moveTop();
+    const durationMs = Math.max(1600, Math.min(Number(options.durationMs) || 6000, 12000));
+    const text = String(message || "").slice(0, 80);
+    const present = () => {
+      if (!notchWindow || notchWindow.isDestroyed()) return;
+      notchWindow.webContents.send("island:show", { message: text, durationMs });
+      // Start the auto-hide only once the message is actually delivered, so a slow
+      // first load can't hide the pill before it ever appears.
+      if (notchHideTimer) clearTimeout(notchHideTimer);
+      notchHideTimer = setTimeout(() => {
+        notchHideTimer = null;
+        if (notchWindow && !notchWindow.isDestroyed()) notchWindow.hide();
+      }, durationMs + 600);
+    };
+    if (notchWindow.webContents.isLoading()) {
+      notchWindow.webContents.once("did-finish-load", present);
+    } else {
+      present();
+    }
+    return { ok: true };
+  } catch (error) {
+    console.warn("[EyeFlow] island show failed", error && error.message);
+    return { ok: false, reason: "error" };
+  }
+}
+
+ipcMain.handle("island:show", (_event, message) => showNotchIsland(message));
+
 app.whenReady().then(() => {
   updateApplicationMenu();
 
@@ -2628,6 +2732,10 @@ app.whenReady().then(() => {
   startActivityMonitor();
   startSystemLifecycleMonitor();
   startCompanionVisibilityMonitor();
+  // Dev-only: preview the reminder island without driving a real L2+ reminder.
+  if (process.env.EYEFLOW_ISLAND_SPIKE === "1") {
+    setTimeout(() => showNotchIsland("看远一点，休息 20 秒 · Mira", { durationMs: 9000 }), 1500);
+  }
   screen.on("display-added", ensureCompanionReachable);
   screen.on("display-removed", ensureCompanionReachable);
   screen.on("display-metrics-changed", ensureCompanionReachable);

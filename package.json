@@ -57,6 +57,7 @@
       "eyeflow-metrics.js",
       "companion.html",
       "break-lock.html",
+      "island.html",
       "main.js",
       "preload.js",
       "package.json",

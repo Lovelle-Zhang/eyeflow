@@ -49,6 +49,11 @@ contextBridge.exposeInMainWorld("eyeflowDesktop", {
     ipcRenderer.on("companion:bubble", listener);
     return () => ipcRenderer.removeListener("companion:bubble", listener);
   },
+  onIslandShow: (callback) => {
+    const listener = (_event, payload) => callback(payload);
+    ipcRenderer.on("island:show", listener);
+    return () => ipcRenderer.removeListener("island:show", listener);
+  },
   onForceBreakDone: (callback) => {
     const listener = (_event, payload) => callback(payload);
     ipcRenderer.on("breakLock:finished", listener);
