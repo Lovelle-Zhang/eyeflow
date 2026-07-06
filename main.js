@@ -53,6 +53,7 @@ let autoPanelTimer = null;
 let hoverOpenTimer = null;
 let hoverCloseTimer = null;
 let companionVisibilityTimer = null;
+let dockRecentPruneTimer = null;
 let startupPanelShown = false;
 let companionHiddenByLifecycle = false;
 let voiceProcess = null;
@@ -1138,15 +1139,90 @@ function runDebugRestClickScript() {
   });
 }
 
-function showDockIcon() {
-  if (process.platform === "darwin" && app.dock) {
+// The one place that flips the Dock icon. Redundant show calls are skipped, but hide
+// is always re-asserted: macOS can report the Dock as hidden while the UI still keeps
+// a stale app icon around. Activation policy is set alongside the Dock call so
+// menu-bar mode behaves like a real accessory app, not just a regular app with a
+// hidden running indicator.
+function setDockVisible(visible) {
+  if (process.platform !== "darwin" || !app.dock) return;
+  const next = Boolean(visible);
+  if (typeof app.setActivationPolicy === "function") {
+    app.setActivationPolicy(next ? "regular" : "accessory");
+  }
+  if (next && app.dock.isVisible() === true) return;
+  if (next) {
     app.dock.show();
+  } else {
+    app.dock.hide();
   }
 }
 
+function showDockIcon() {
+  setDockVisible(true);
+}
+
 function hideDockIcon() {
-  if (process.platform === "darwin" && app.dock) {
-    app.dock.hide();
+  setDockVisible(false);
+}
+
+function pruneEyeFlowDockRecentEntry() {
+  if (process.platform !== "darwin") return false;
+  const dockPreferencesPath = path.join(app.getPath("home"), "Library", "Preferences", "com.apple.dock.plist");
+  if (!fs.existsSync(dockPreferencesPath)) return false;
+
+  const countResult = spawnSync("/usr/bin/plutil", [
+    "-extract",
+    "recent-apps",
+    "raw",
+    "-o",
+    "-",
+    dockPreferencesPath
+  ], { encoding: "utf8" });
+  const count = Number.parseInt(String(countResult.stdout || "").trim(), 10);
+  if (!Number.isFinite(count) || count <= 0) return false;
+
+  let removed = false;
+  for (let index = count - 1; index >= 0; index -= 1) {
+    const bundleResult = spawnSync("/usr/libexec/PlistBuddy", [
+      "-c",
+      `Print :recent-apps:${index}:tile-data:bundle-identifier`,
+      dockPreferencesPath
+    ], { encoding: "utf8" });
+    if (bundleResult.status !== 0 || String(bundleResult.stdout || "").trim() !== "com.eyeflow.app") continue;
+
+    const deleteResult = spawnSync("/usr/libexec/PlistBuddy", [
+      "-c",
+      `Delete :recent-apps:${index}`,
+      dockPreferencesPath
+    ], { encoding: "utf8" });
+    removed = removed || deleteResult.status === 0;
+  }
+
+  if (removed) {
+    spawnSync("/usr/bin/killall", ["Dock"], { encoding: "utf8" });
+  }
+  return removed;
+}
+
+function scheduleEyeFlowDockRecentPrune() {
+  if (process.platform !== "darwin") return;
+  if (dockRecentPruneTimer) clearTimeout(dockRecentPruneTimer);
+  dockRecentPruneTimer = setTimeout(() => {
+    dockRecentPruneTimer = null;
+    pruneEyeFlowDockRecentEntry();
+  }, 1200);
+}
+
+// Single authority for the Dock icon. Menu-bar mode means the Dock icon stays hidden
+// even when the dashboard is open; the menu bar item is the app's entry point.
+function syncDock() {
+  if (process.platform !== "darwin" || !app.dock) return;
+  const shouldHide = desktopPreferenceDefaults().hideDockOnClose;
+  setDockVisible(!shouldHide);
+  if (shouldHide) {
+    pruneEyeFlowDockRecentEntry();
+    scheduleEyeFlowDockRecentPrune();
   }
 }
 
@@ -1524,6 +1600,7 @@ function revealCompanionWindow({ reset = false, focus = false } = {}) {
   if (!wasVisible || reset || focus) bringCompanionToFront(companionWindow);
   if (focus) companionWindow.focus();
   if (!repaired && !wasVisible) saveCompanionBounds();
+  syncDock();
 }
 
 function ensureCompanionReachable() {
@@ -1573,6 +1650,7 @@ function showCompanionPanel() {
   companionWindow.showInactive();
   bringCompanionToFront(companionWindow);
   sendCompanionExpanded();
+  syncDock();
 }
 
 function hideCompanionPanel() {
@@ -1641,6 +1719,7 @@ function showCompanionBubble(message, options = {}) {
   companionBoundsTransient = false;
   companionWindow.showInactive();
   bringCompanionToFront(companionWindow);
+  syncDock();
   sendCompanionBubble({ visible: true, message: text });
   if (companionBubbleTimer) clearTimeout(companionBubbleTimer);
   const durationMs = Number.isFinite(options.durationMs) ? options.durationMs : 8000;
@@ -1715,6 +1794,10 @@ function launchBehavior() {
 }
 
 function applyLaunchDockBehavior(behavior) {
+  if (desktopPreferenceDefaults().hideDockOnClose) {
+    hideDockIcon();
+    return;
+  }
   if (behavior.showDock) {
     showDockIcon();
   } else {
@@ -1771,11 +1854,15 @@ function createDashboardWindow(options = {}) {
     if (showOnReady) dashboardWindow.show();
   });
 
+  // Whenever the dashboard becomes visible, re-assert the Dock: a companion/island
+  // show during launch may have hidden it before the window appeared.
+  dashboardWindow.on("show", () => syncDock());
+
   dashboardWindow.on("close", (event) => {
     if (!app.isQuitting) {
       event.preventDefault();
       dashboardWindow.hide();
-      if (desktopPreferenceDefaults().hideDockOnClose) hideDockIcon();
+      syncDock();
     }
   });
 
@@ -2057,7 +2144,7 @@ function sendDashboardFocus(payload = {}) {
 }
 
 function showDashboard(options = {}) {
-  showDockIcon();
+  syncDock();
   if (!dashboardWindow) createDashboardWindow({ showOnReady: true, revealOnboarding: false });
   keepDashboardVisible();
   revealDashboardOnCurrentSpace();
@@ -2195,6 +2282,7 @@ function startBreakLock(payload = {}) {
     });
     breakLockWindow.show();
     enterBreakLockFullscreen();
+    syncDock();
     breakLockWindow.focus();
     return;
   }
@@ -2247,6 +2335,7 @@ function startBreakLock(payload = {}) {
   breakLockWindow.once("ready-to-show", () => {
     breakLockWindow.show();
     enterBreakLockFullscreen();
+    syncDock();
     breakLockWindow.focus();
   });
   breakLockWindow.on("closed", () => {
@@ -2678,6 +2767,10 @@ function notchIslandBounds() {
 function createNotchWindow() {
   notchWindow = new BrowserWindow({
     ...notchIslandBounds(),
+    // NSPanel (non-activating): an ambient overlay must not flip the app's
+    // activation policy back to "regular" — otherwise showing it resurrects the
+    // Dock icon in menu-bar-only mode. A panel floats without owning the app.
+    type: "panel",
     frame: false,
     resizable: false,
     movable: false,
@@ -2724,6 +2817,7 @@ function showNotchIsland(message, options = {}) {
     notchWindow.setAlwaysOnTop(true, "screen-saver");
     notchWindow.showInactive();
     notchWindow.moveTop();
+    syncDock(); // showing this window can resurrect the Dock icon — re-assert it away
     const durationMs = Math.max(1600, Math.min(Number(options.durationMs) || 6000, 12000));
     const text = String(message || "").slice(0, 80);
     const present = () => {
@@ -2751,6 +2845,36 @@ function showNotchIsland(message, options = {}) {
 
 ipcMain.handle("island:show", (_event, message) => showNotchIsland(message));
 
+// Exactly one EyeFlow. Several bundles share the id com.eyeflow.app (the installed
+// copy, the dist build output, a mounted release DMG) and the app is also a login
+// item — without this lock a second launch from a different path runs a duplicate
+// with its own tray + Dock presence that quits independently of the first. The
+// second instance hands off to the running one and exits.
+const gotSingleInstanceLock = app.requestSingleInstanceLock();
+
+if (process.platform === "darwin") {
+  app.on("will-finish-launching", () => {
+    if (desktopPreferenceDefaults().hideDockOnClose) {
+      hideDockIcon();
+      pruneEyeFlowDockRecentEntry();
+      scheduleEyeFlowDockRecentPrune();
+    }
+  });
+}
+
+app.on("second-instance", () => {
+  // A duplicate launch was redirected here — surface the running instance instead.
+  // Defer through whenReady: the event can arrive before this (winning) instance
+  // has finished booting, and creating windows before ready is unsafe.
+  app.whenReady().then(() => {
+    ensureCompanionReachable();
+    showDashboard();
+  });
+});
+
+if (!gotSingleInstanceLock) {
+  app.quit();
+} else {
 app.whenReady().then(() => {
   updateApplicationMenu();
 
@@ -2778,6 +2902,7 @@ app.whenReady().then(() => {
   screen.on("display-removed", ensureCompanionReachable);
   screen.on("display-metrics-changed", ensureCompanionReachable);
 });
+}
 
 function handleActivate() {
   if (suppressNextActivate && dashboardWindow && !dashboardWindow.isVisible()) {
@@ -2950,6 +3075,10 @@ ipcMain.handle("desktopSettings:setCompanionVisible", (_event, enabled) => {
 
 ipcMain.handle("desktopSettings:setHideDockOnClose", (_event, enabled) => {
   const preferences = writeDesktopPreference("hideDockOnClose", enabled);
+  if (preferences.hideDockOnClose) {
+    pruneEyeFlowDockRecentEntry();
+    scheduleEyeFlowDockRecentPrune();
+  }
   return {
     ...getDesktopSettings(),
     ...preferences

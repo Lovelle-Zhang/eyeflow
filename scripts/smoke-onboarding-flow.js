@@ -177,20 +177,34 @@ function main() {
   assertIncludes(mainJs, "next.companionVisibilityPreferenceVersion = COMPANION_VISIBILITY_PREFERENCE_VERSION", "main marks explicit desktop Mira visibility choices");
   assertIncludes(preloadJs, "setHideDockOnClose", "preload exposes menu-bar mode IPC");
   assertMatches(mainJs, /ipcMain\.handle\("desktopSettings:setHideDockOnClose"[\s\S]*writeDesktopPreference\("hideDockOnClose", enabled\)/, "main persists the user-selected menu-bar mode");
-  assertMatches(mainJs, /function hideDockIcon\(\)[\s\S]*app\.dock\.hide\(\);[\s\S]*\}/, "main can hide the Dock icon for quiet menu-bar launches");
+  assertMatches(mainJs, /ipcMain\.handle\("desktopSettings:setHideDockOnClose"[\s\S]*if \(preferences\.hideDockOnClose\) \{[\s\S]*pruneEyeFlowDockRecentEntry\(\);[\s\S]*\}/, "turning on menu-bar mode immediately removes EyeFlow from Dock recents");
+  assertNotMatches(mainJs, /function setDockVisible\(visible\)[\s\S]*app\.dock\.isVisible\(\) === next[\s\S]*return;[\s\S]*app\.dock\.hide\(\);/, "setDockVisible must re-assert hide even when macOS reports the Dock is already hidden");
+  assertMatches(mainJs, /function setDockVisible\(visible\)[\s\S]*app\.setActivationPolicy\(next \? "regular" : "accessory"\)/, "setDockVisible updates the macOS activation policy, not only the Dock icon");
+  assertMatches(mainJs, /function setDockVisible\(visible\)[\s\S]*if \(next && app\.dock\.isVisible\(\) === true\) return;[\s\S]*app\.dock\.hide\(\);/, "setDockVisible only skips redundant show calls, never redundant hide calls");
+  assertMatches(mainJs, /function hideDockIcon\(\)[\s\S]*setDockVisible\(false\);[\s\S]*\}/, "main can hide the Dock icon for quiet menu-bar launches");
+  assertMatches(mainJs, /function pruneEyeFlowDockRecentEntry\(\)[\s\S]*PlistBuddy[\s\S]*Delete :recent-apps:\$\{index\}[\s\S]*killall[\s\S]*Dock/, "main can remove only EyeFlow from macOS Dock recent-apps");
+  assertMatches(mainJs, /function scheduleEyeFlowDockRecentPrune\(\)[\s\S]*setTimeout\(\(\) => \{[\s\S]*pruneEyeFlowDockRecentEntry\(\);[\s\S]*\}, 1200\)/, "main schedules a delayed Dock recent prune after macOS can asynchronously re-add EyeFlow");
+  assertMatches(mainJs, /app\.on\("will-finish-launching", \(\) => \{[\s\S]*desktopPreferenceDefaults\(\)\.hideDockOnClose[\s\S]*hideDockIcon\(\);[\s\S]*pruneEyeFlowDockRecentEntry\(\);[\s\S]*\}\);/, "main hides the Dock and prunes EyeFlow recents during early macOS launch when menu-bar mode is already enabled");
   assertMatches(mainJs, /function wasOpenedAtLogin\(\)[\s\S]*app\.getLoginItemSettings\(\)\.wasOpenedAtLogin/, "main can distinguish macOS login-item launches from user launches");
   assertMatches(mainJs, /function wantsDashboardOnLaunch\(\)[\s\S]*return Boolean\(debugCapture \|\| debugOnboarding \|\| process\.env\.EYEFLOW_SHOW_DASHBOARD_ON_LAUNCH === "1"\);/, "main keeps explicit dashboard launch separate from ordinary app opens");
   assertMatches(mainJs, /function launchBehavior\(\)[\s\S]*openedAtLogin = wasOpenedAtLogin\(\);[\s\S]*showDashboard = wantsDashboardOnLaunch\(\) \|\| !openedAtLogin;[\s\S]*showDock: showDashboard,[\s\S]*showDashboard,[\s\S]*suppressInitialActivate: !showDashboard,[\s\S]*revealOnboarding: true/, "main opens the dashboard for user launches while keeping login-item launches quiet");
   assertMatches(mainJs, /function applyLaunchDockBehavior\(behavior\)[\s\S]*if \(behavior\.showDock\) \{[\s\S]*showDockIcon\(\);[\s\S]*\} else \{[\s\S]*hideDockIcon\(\);[\s\S]*\}/, "main applies Dock visibility from the launch behavior object");
+  assertMatches(mainJs, /const gotSingleInstanceLock = app\.requestSingleInstanceLock\(\);[\s\S]*app\.on\("second-instance", \(\) => \{[\s\S]*showDashboard\(\);[\s\S]*\}\);[\s\S]*if \(!gotSingleInstanceLock\) \{[\s\S]*app\.quit\(\);[\s\S]*\} else \{[\s\S]*app\.whenReady\(\)/, "main holds a single-instance lock so duplicate launches hand off instead of running a second tray/Dock copy");
   assertMatches(mainJs, /const launch = launchBehavior\(\);[\s\S]*applyLaunchDockBehavior\(launch\);[\s\S]*suppressNextActivate = launch\.suppressInitialActivate;[\s\S]*createDashboardWindow\(\{ showOnReady: launch\.showDashboard, revealOnboarding: launch\.revealOnboarding \}\);/, "main consumes one launch behavior object instead of scattered launch flags");
   assertMatches(mainJs, /dashboardWindow\.once\("ready-to-show", \(\) => \{[\s\S]*if \(showOnReady\) dashboardWindow\.show\(\);[\s\S]*\}\);/, "dashboard ready-to-show no longer forces the main page open on every launch");
   assertIncludes(mainJs, `dashboardWindow.on("close", (event) => {
     if (!app.isQuitting) {
       event.preventDefault();
       dashboardWindow.hide();
-      if (desktopPreferenceDefaults().hideDockOnClose) hideDockIcon();
+      syncDock();
     }
-  });`, "closing the dashboard hides the Dock icon only after the user enables menu-bar mode");
+  });`, "closing the dashboard syncs the Dock icon (hidden in menu-bar mode)");
+  assertMatches(mainJs, /function syncDock\(\)[\s\S]*const shouldHide = desktopPreferenceDefaults\(\)\.hideDockOnClose;[\s\S]*setDockVisible\(!shouldHide\)/, "syncDock keeps the Dock hidden whenever menu-bar mode is enabled, even while the dashboard is open");
+  assertMatches(mainJs, /function syncDock\(\)[\s\S]*if \(shouldHide\) \{[\s\S]*pruneEyeFlowDockRecentEntry\(\);[\s\S]*\}/, "syncDock prunes EyeFlow from Dock recents after visible windows can re-add it");
+  assertMatches(mainJs, /function syncDock\(\)[\s\S]*if \(shouldHide\) \{[\s\S]*scheduleEyeFlowDockRecentPrune\(\);[\s\S]*\}/, "syncDock schedules a second recent prune for Dock's async recent-apps write");
+  assertNotMatches(mainJs, /function showDashboard\(options = \{\}\) \{[\s\S]*?showDockIcon\(\);[\s\S]*?if \(!dashboardWindow\)/, "showDashboard must not resurrect the Dock in menu-bar mode");
+  assertMatches(mainJs, /function showDashboard\(options = \{\}\) \{[\s\S]*syncDock\(\);[\s\S]*if \(!dashboardWindow\)/, "showDashboard re-syncs the Dock instead of forcing it visible");
+  assertMatches(mainJs, /notchWindow\.showInactive\(\);[\s\S]*notchWindow\.moveTop\(\);[\s\S]*syncDock\(\);/, "the island re-asserts the Dock state after showing (it can resurrect the Dock icon)");
   assertMatches(mainJs, /function maybeRevealDashboardForOnboarding\(\{ showOnReady, revealOnboarding \} = \{\}\)[\s\S]*onboardingOverlayIsVisibleScript\(\)[\s\S]*showDashboard\(\{ view: "todayView", focus: "onboarding" \}\)/, "hidden launch still reveals the dashboard for unfinished onboarding");
   assertMatches(mainJs, /function handleActivate\(\)[\s\S]*suppressNextActivate[\s\S]*return;[\s\S]*showDashboard\(\);[\s\S]*app\.on\("activate", handleActivate\);/, "main suppresses only the startup activate event and keeps explicit app activation wired");
   assertMatches(mainJs, /app\.on\("window-all-closed", \(\) => \{[\s\S]*if \(process\.platform !== "darwin"\) app\.quit\(\);[\s\S]*\}\);/, "macOS quiet menu-bar mode keeps the app alive without a visible dashboard");
