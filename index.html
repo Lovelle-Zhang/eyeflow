@@ -9671,6 +9671,7 @@
   <script src="eyeflow-rest-flow.js"></script>
   <script src="eyeflow-ui-utils.js"></script>
   <script src="eyeflow-metrics.js"></script>
+  <script src="eyeflow-rhythm.js"></script>
   <script>
     const STORAGE_KEY = "eyeflow-v1";
     const HISTORY_ARCHIVE_LIMIT = 365;
@@ -9831,7 +9832,8 @@
       classifyLoad,
       initialRhythmForLoad,
       intensityLabel,
-      todayActionInsight
+      todayActionInsight,
+      monthTrendInsight
     } = window.EyeFlowCore;
     const {
       recoveryModeMeta,
@@ -10175,7 +10177,9 @@
           b.classList.toggle("active-setting", active);
           b.setAttribute("aria-pressed", String(active));
         });
-        renderProfileWindow();
+        // Full render so #profileObservation (owned by renderProfile) picks up the
+        // window-specific month insight, not just the overview cards.
+        render();
       });
     });
     window.eyeflowDesktop?.onRestGuide?.((payload = {}) => {
@@ -15286,9 +15290,14 @@
       if (period === "week" || period === "month") {
         const days = period === "week" ? 7 : 30;
         const stats = profileWindowStats(days);
+        // Slice A: the 本月 card leads with an observed trend when the month is
+        // confidently readable; the metrics below become its evidence and the 金句
+        // drops to the ambiance tail (via .has-insight). Week stays quote-led (Slice B).
+        const monthInsight = period === "month" ? currentMonthInsight() : null;
         return {
           period,
           date: shareRangeLabel(days),
+          ...(monthInsight ? { eyebrow: "Mira 这个月看到的", insight: monthInsight } : {}),
           quote: periodShareQuote(period),
           metrics: [
             { label: period === "week" ? "本周护眼" : "本月护眼", value: formatDurationCompact(stats.restSeconds) },
@@ -15326,6 +15335,44 @@
         symptoms: analysis.symptoms,
         reminderStats: state.reminderStats || {}
       });
+    }
+
+    // Day-level records for the month trend — the SAME window/records shape as
+    // profileWindowStats (one 口径), with accept/skip derived from each day's own
+    // reminder_event stream so the current day and the archive count identically.
+    function monthTrendDayRecords() {
+      const today = todayKey();
+      const seen = new Set();
+      const records = [
+        { day: today, events: state.events || [] },
+        ...(state.summaryHistory || [])
+      ].filter((r) => {
+        // Skip malformed/future-dated rows (dayGap clamps those to 0) and dedupe — the
+        // live current-day record wins over any same-day archive row.
+        if (!r || !r.day || r.day > today || dayGap(r.day, today) >= 30 || seen.has(r.day)) return false;
+        seen.add(r.day);
+        return true;
+      });
+      return records.map((r) => {
+        const events = Array.isArray(r.events) ? r.events : [];
+        let completed = 0;
+        let snoozed = 0;
+        let ignored = 0;
+        for (const e of events) {
+          if (!e || e.type !== "reminder_event") continue;
+          if (e.userResponse === "completed") completed += 1;
+          else if (e.userResponse === "snoozed") snoozed += 1;
+          else if (e.userResponse === "ignored") ignored += 1;
+        }
+        return { day: r.day, completed, snoozed, ignored, recoverySeconds: recoverySecondsForDay(r) };
+      });
+    }
+
+    // The "月 = 趋势" observed-trend line, or null when the month isn't confidently
+    // readable (callers then fall back to the quote-led card / legacy observation).
+    function currentMonthInsight() {
+      const trend = window.EyeFlowRhythm.monthlyTrend({ days: monthTrendDayRecords() });
+      return monthTrendInsight(trend);
     }
 
     function buildDailyShareText() {
@@ -15868,7 +15915,11 @@
       renderDailyShareCard();
       els.profileLoad.textContent = hasProfileEvidence ? load : "记录中";
       if (els.profileObservation) {
-        els.profileObservation.textContent = profileObservationText({
+        // When viewing 本月, lead with the observed month trend if it's confidently
+        // readable (the overview cards below are its evidence); otherwise keep the
+        // period-agnostic observation. Week (Slice B) stays on the legacy observation.
+        const monthInsight = profileWindowDays >= 30 ? currentMonthInsight() : null;
+        els.profileObservation.textContent = monthInsight || profileObservationText({
           hasEvidence: hasProfileEvidence,
           accepted: rhythmSummary.acceptedBreaks,
           skipped: rhythmSummary.skippedBreaks,

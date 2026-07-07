@@ -431,6 +431,8 @@ function main() {
   assertMatches(mainJs, /function intensityMenuItems\(\)[\s\S]*L1 安静 — 只改状态，不弹提醒[\s\S]*type: "radio"[\s\S]*L4 强制爱… — 到点全屏，应用内开启[\s\S]*requestIntensityFromMenu\("force"\)/, "installed menu exposes the four reminder levels as a radio group");
   assertMatches(mainJs, /function requestIntensityFromMenu\(level\)[\s\S]*if \(level === "force"[\s\S]*showDashboard\(\);[\s\S]*"intensity:request", level/, "installed menu routes the level to the renderer; L4 opens the app for its confirm");
   assertIncludes(indexHtml, 'intensity: state.settings.intensity || "standard"', "installed renderer publishes the raw intensity for the menu radio");
+  assertIncludes(indexHtml, '<script src="eyeflow-rhythm.js"></script>', "installed renderer loads the closed-loop rhythm engine (was packaged but unwired)");
+  assertMatches(indexHtml, /const monthInsight = period === "month" \? currentMonthInsight\(\) : null;[\s\S]*monthInsight \? \{ eyebrow: "Mira 这个月看到的", insight: monthInsight \}/, "installed 本月 share card leads with the month insight when readable");
   assertMatches(mainJs, /function createDarwinTrayIcon\(\)[\s\S]*nativeImage\.createEmpty\(\)[\s\S]*scaleFactor: 1,[\s\S]*trayTemplate\.png[\s\S]*scaleFactor: 2,[\s\S]*trayTemplate@2x\.png[\s\S]*icon\.setTemplateImage\(true\);/, "installed macOS menu bar tray loads crisp 1x and 2x template assets");
   if (readBuffer("assets/trayTemplate.png").length < 100) {
     throw new Error("installed macOS menu bar tray template asset is missing or empty");

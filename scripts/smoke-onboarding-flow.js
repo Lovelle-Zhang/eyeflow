@@ -280,6 +280,15 @@ function main() {
   assertIncludes(indexHtml, "window.eyeflowDesktop?.setReminderIntensity?.(level);", "renderer notifies main the moment the level changes (no render-cycle lag)");
   assertMatches(mainJs, /ipcMain\.handle\("intensity:changed", \(_event, level\) => \{[\s\S]*applyMenuIntensity\(level\)/, "main updates the menu radio directly from the intensity:changed notify");
   assertMatches(mainJs, /function showDashboard\(options = \{\}\)[\s\S]*if \(!dashboardWindow \|\| dashboardWindow\.isDestroyed\(\)\) createDashboardWindow/, "showDashboard recovers a destroyed window, not just a missing one");
+
+  // Recap "月 = 趋势" (Slice A): the previously-unwired closed-loop engine is now loaded,
+  // and the 本月 share card + recap observation lead with an observed trend (or fall back
+  // to quote-led when the month isn't confidently readable).
+  assertIncludes(indexHtml, '<script src="eyeflow-rhythm.js"></script>', "the closed-loop rhythm engine is actually loaded by the renderer (was packaged but unwired)");
+  assertMatches(indexHtml, /function currentMonthInsight\(\)[\s\S]*EyeFlowRhythm\.monthlyTrend\(\{ days: monthTrendDayRecords\(\) \}\)[\s\S]*monthTrendInsight\(trend\)/, "month insight runs the day archive through monthlyTrend → monthTrendInsight");
+  assertMatches(indexHtml, /function monthTrendDayRecords\(\)[\s\S]*e\.type !== "reminder_event"[\s\S]*recoverySeconds: recoverySecondsForDay\(r\)/, "month day records reuse the profileWindow shape and derive accept/skip from each day's events");
+  assertMatches(indexHtml, /const monthInsight = period === "month" \? currentMonthInsight\(\) : null;[\s\S]*monthInsight \? \{ eyebrow: "Mira 这个月看到的", insight: monthInsight \}/, "本月 share card leads with the month insight when readable");
+  assertIncludes(indexHtml, "const monthInsight = profileWindowDays >= 30 ? currentMonthInsight() : null;", "recap observation leads with the month insight when viewing 本月");
   assertMatches(mainJs, /function createDarwinTrayIcon\(\)[\s\S]*nativeImage\.createEmpty\(\)[\s\S]*scaleFactor: 1,[\s\S]*trayTemplate\.png[\s\S]*scaleFactor: 2,[\s\S]*trayTemplate@2x\.png[\s\S]*icon\.setTemplateImage\(true\);/, "macOS menu bar tray loads crisp 1x and 2x template assets");
   assertIncludes(packageJson, '"assets/trayTemplate.png"', "macOS menu bar tray template asset is included in packaged files");
   assertIncludes(packageJson, '"assets/trayTemplate@2x.png"', "macOS menu bar tray Retina template asset is included in packaged files");

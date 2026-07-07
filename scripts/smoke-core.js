@@ -608,6 +608,32 @@ function main() {
   assertMatches(indexHtml, /els\.suggestFocusTarget\.textContent = [\s\S]{0,80}?suggestFocusDelta[\s\S]*?\$\{suggestFocusDelta/, "恢复节奏 card shows the delta vs current focus");
   assertMatches(indexHtml, /Mira 建议下一轮 \$\{suggestion\.focus\} 分（\$\{rhythmFocusRelation\(suggestion\)\}/, "今天计划文案 states the relation + source");
 
+  // monthTrendInsight (Slice A) — one observed-trend line or null; same honesty rule as
+  // todayActionInsight: it never fabricates a claim when the signal isn't confident.
+  const monthLine = (t) => core.monthTrendInsight(t);
+  assertEqual(monthLine(null), null, "month insight: missing trend → null");
+  assertEqual(monthLine({ ready: false }), null, "month insight: unready trend → null (falls back to quote-led)");
+  assertEqual(
+    monthLine({ ready: true, rest: { ready: true, direction: "rising-accept" } }),
+    "这个月，你越来越接得住休息了。",
+    "month insight: rising-accept → 越来越接得住休息"
+  );
+  assertEqual(
+    monthLine({ ready: true, rest: { ready: true, direction: "falling-accept" } }),
+    "这个月的提醒，慢慢被留到“稍后”的多了。",
+    "month insight: falling-accept → 留到稍后的多了"
+  );
+  assertEqual(
+    monthLine({ ready: true, rest: { ready: true, direction: "steady" }, recovery: { ready: true, steady: true } }),
+    "这一个月，护眼的节奏一直很稳。",
+    "month insight: steady rest + steady recovery → 节奏一直很稳"
+  );
+  assertEqual(
+    monthLine({ ready: true, rest: { ready: false, direction: "unknown" }, recovery: { ready: true, steady: false } }),
+    null,
+    "month insight: no confident signal → null (never fabricates)"
+  );
+
   console.log("[smoke:core] PASSED. EyeFlow core scoring and first-round rhythm are stable.");
 }
 

@@ -233,12 +233,123 @@ window.EyeFlowRhythm = (() => {
     };
   }
 
+  // --- Monthly trend (recap page "月 = 趋势", Slice A) ----------------------
+  // The ignore/adherence read above lives in the 7-day rhythm memory, so it can't
+  // see a month. The monthly trend instead consumes the DAY-LEVEL archive the recap
+  // page already keeps (summaryHistory), one normalized record per day, so it can
+  // honestly span ~4 weeks. Same discipline: pure, deterministic, gated — it only
+  // claims a direction when both halves of the window carry enough real rest
+  // decisions, and it never touches an uncomputable claim (declared in degraded).
+  const MIN_MONTH_DAYS = 8;             // days of archive before a month is readable
+  const MIN_MONTH_HALF_DECISIONS = 3;   // rest decisions per half to claim a rest trend
+  // Those decisions must ALSO spread across ≥ this many distinct days per half, so one
+  // busy day can't masquerade as a month-long trend (mirrors computeIgnoreTrend's guard).
+  const MIN_MONTH_DECISION_DAYS_PER_HALF = 2;
+  const MONTH_TREND_DELTA = 0.15;       // meaningful accept-rate change between halves
+  const STEADY_RECOVERY_DAY_RATE = 0.5; // "节奏稳" needs rest on ≥ half the days, both halves
+
+  function normalizeMonthDays(days = []) {
+    return (Array.isArray(days) ? days : [])
+      .filter((d) => d && d.day)
+      .map((d) => ({
+        day: String(d.day),
+        completed: Math.max(0, num(d.completed)),
+        snoozed: Math.max(0, num(d.snoozed)),
+        ignored: Math.max(0, num(d.ignored)),
+        recoverySeconds: Math.max(0, num(d.recoverySeconds))
+      }))
+      .sort((a, b) => (a.day < b.day ? -1 : a.day > b.day ? 1 : 0));
+  }
+
+  function restStatsOfDays(days) {
+    let accepted = 0;
+    let skipped = 0;
+    let recoveryDays = 0;
+    let decisionDays = 0;
+    for (const d of days) {
+      accepted += d.completed;
+      skipped += d.snoozed + d.ignored;
+      if (d.recoverySeconds > 0) recoveryDays += 1;
+      if (d.completed + d.snoozed + d.ignored > 0) decisionDays += 1;
+    }
+    const decisions = accepted + skipped;
+    return {
+      dayCount: days.length,
+      accepted,
+      skipped,
+      decisions,
+      decisionDays,
+      acceptRate: decisions ? accepted / decisions : 0,
+      recoveryDays,
+      recoveryDayRate: days.length ? recoveryDays / days.length : 0
+    };
+  }
+
+  function monthDegraded() {
+    return [
+      { key: "recovery-effectiveness", reason: "'长恢复更稳'需实测休息时长(现为计划 breakTarget)，本 slice 不做" },
+      { key: "time-of-day-pattern", reason: "周=模式(按小时/星期几的跳过与达标)属 Slice B，本 slice 只做月趋势方向" }
+    ];
+  }
+
+  function monthlyTrend(input = {}) {
+    const days = normalizeMonthDays(input.days);
+    if (days.length < MIN_MONTH_DAYS) {
+      return { ready: false, reason: "not-enough-days", dayCount: days.length, degraded: monthDegraded() };
+    }
+    // Split into prior / recent halves by day (chronological), so a single busy day
+    // can't masquerade as a month-long trend.
+    const mid = Math.ceil(days.length / 2);
+    const priorStats = restStatsOfDays(days.slice(0, mid));
+    const recentStats = restStatsOfDays(days.slice(mid));
+
+    // Rest trend — accept-rate direction, only when both halves have enough decisions.
+    let restDirection = "unknown";
+    const restReady = priorStats.decisions >= MIN_MONTH_HALF_DECISIONS
+      && recentStats.decisions >= MIN_MONTH_HALF_DECISIONS
+      && priorStats.decisionDays >= MIN_MONTH_DECISION_DAYS_PER_HALF
+      && recentStats.decisionDays >= MIN_MONTH_DECISION_DAYS_PER_HALF;
+    if (restReady) {
+      const delta = recentStats.acceptRate - priorStats.acceptRate;
+      if (delta >= MONTH_TREND_DELTA) restDirection = "rising-accept";
+      else if (delta <= -MONTH_TREND_DELTA) restDirection = "falling-accept";
+      else restDirection = "steady";
+    }
+
+    // Recovery steadiness — rests on at least half the days across BOTH halves.
+    const totalRecoveryDays = priorStats.recoveryDays + recentStats.recoveryDays;
+    const recoverySteady = priorStats.recoveryDayRate >= STEADY_RECOVERY_DAY_RATE
+      && recentStats.recoveryDayRate >= STEADY_RECOVERY_DAY_RATE;
+
+    return {
+      ready: true,
+      dayCount: days.length,
+      rest: {
+        ready: restReady,
+        direction: restDirection,
+        recentAccepted: recentStats.accepted,
+        recentDecisions: recentStats.decisions,
+        recentSkipped: recentStats.skipped,
+        priorAccepted: priorStats.accepted,
+        priorDecisions: priorStats.decisions,
+        priorSkipped: priorStats.skipped
+      },
+      recovery: {
+        ready: totalRecoveryDays > 0,
+        steady: recoverySteady,
+        typicalDaysPerWeek: Math.round(totalRecoveryDays / days.length * 7)
+      },
+      degraded: monthDegraded()
+    };
+  }
+
   return {
     RHYTHM_MODEL_VERSION,
     normalizeRoundEvents,
     computeIgnoreTrend,
     computeFocusAdherence,
     rhythmSuggestion,
-    rhythmInsights
+    rhythmInsights,
+    monthlyTrend
   };
 })();

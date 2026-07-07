@@ -254,6 +254,28 @@ window.EyeFlowCore = (() => {
     return "今天在稳稳地用眼。到断点时停一下，让节奏松一点。";
   }
 
+  // Recap-page "月 = 趋势" (Slice A): ONE observed-trend sentence from the
+  // EyeFlowRhythm.monthlyTrend signals, or null when the month isn't confidently
+  // readable (the caller then falls back to the quote-led card). Same honesty rule as
+  // todayActionInsight — it describes what happened (accepted rest more / deferred more /
+  // stayed steady), never a causal promise, and never an uncomputable claim (those live
+  // in the engine's degraded[]).
+  function monthTrendInsight(trend = {}) {
+    if (!trend || !trend.ready) return null;
+    const rest = trend.rest || {};
+    if (rest.ready && rest.direction === "rising-accept") {
+      return "这个月，你越来越接得住休息了。";
+    }
+    if (rest.ready && rest.direction === "falling-accept") {
+      return "这个月的提醒，慢慢被留到“稍后”的多了。";
+    }
+    const recovery = trend.recovery || {};
+    if (recovery.ready && recovery.steady) {
+      return "这一个月，护眼的节奏一直很稳。";
+    }
+    return null;
+  }
+
   return {
     clampLoad,
     symptomLoadScore,
@@ -264,6 +286,7 @@ window.EyeFlowCore = (() => {
     initialRhythmForLoad,
     intensityLabel,
     modeActionCopy,
-    todayActionInsight
+    todayActionInsight,
+    monthTrendInsight
   };
 })();
