@@ -15369,10 +15369,22 @@
     }
 
     // The "月 = 趋势" observed-trend line, or null when the month isn't confidently
-    // readable (callers then fall back to the quote-led card / legacy observation).
+    // readable (the share card then falls back to its quote-led layout).
     function currentMonthInsight() {
       const trend = window.EyeFlowRhythm.monthlyTrend({ days: monthTrendDayRecords() });
       return monthTrendInsight(trend);
+    }
+
+    // The recap "本月" observation ALWAYS speaks to the month: the confident insight when
+    // there is one, else an honest cold-start ("还没攒够") / no-clear-trend line — never the
+    // today-flavored observation under a 本月 header, and never a fabricated trend. So a new
+    // user's 本月 reads as "我在攒，快了" from day one instead of empty or off-topic.
+    function monthObservationLine() {
+      const trend = window.EyeFlowRhythm.monthlyTrend({ days: monthTrendDayRecords() });
+      const insight = monthTrendInsight(trend);
+      if (insight) return insight;
+      if (!trend || !trend.ready) return "这个月才刚开始记。再过几天，我就能看出你这个月的节奏。";
+      return "这个月的节奏还没看出明显走向。先按现在的来，有变化我会告诉你。";
     }
 
     function buildDailyShareText() {
@@ -15915,11 +15927,11 @@
       renderDailyShareCard();
       els.profileLoad.textContent = hasProfileEvidence ? load : "记录中";
       if (els.profileObservation) {
-        // When viewing 本月, lead with the observed month trend if it's confidently
-        // readable (the overview cards below are its evidence); otherwise keep the
-        // period-agnostic observation. Week (Slice B) stays on the legacy observation.
-        const monthInsight = profileWindowDays >= 30 ? currentMonthInsight() : null;
-        els.profileObservation.textContent = monthInsight || profileObservationText({
+        // When viewing 本月, the observation ALWAYS speaks to the month — the confident
+        // trend when there is one, else an honest cold-start / no-trend line (the overview
+        // cards are its evidence). Week (Slice B) stays on the legacy observation.
+        const monthLine = profileWindowDays >= 30 ? monthObservationLine() : null;
+        els.profileObservation.textContent = monthLine || profileObservationText({
           hasEvidence: hasProfileEvidence,
           accepted: rhythmSummary.acceptedBreaks,
           skipped: rhythmSummary.skippedBreaks,

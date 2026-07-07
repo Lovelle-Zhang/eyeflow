@@ -288,7 +288,8 @@ function main() {
   assertMatches(indexHtml, /function currentMonthInsight\(\)[\s\S]*EyeFlowRhythm\.monthlyTrend\(\{ days: monthTrendDayRecords\(\) \}\)[\s\S]*monthTrendInsight\(trend\)/, "month insight runs the day archive through monthlyTrend → monthTrendInsight");
   assertMatches(indexHtml, /function monthTrendDayRecords\(\)[\s\S]*e\.type !== "reminder_event"[\s\S]*recoverySeconds: recoverySecondsForDay\(r\)/, "month day records reuse the profileWindow shape and derive accept/skip from each day's events");
   assertMatches(indexHtml, /const monthInsight = period === "month" \? currentMonthInsight\(\) : null;[\s\S]*monthInsight \? \{ eyebrow: "Mira 这个月看到的", insight: monthInsight \}/, "本月 share card leads with the month insight when readable");
-  assertIncludes(indexHtml, "const monthInsight = profileWindowDays >= 30 ? currentMonthInsight() : null;", "recap observation leads with the month insight when viewing 本月");
+  assertIncludes(indexHtml, "const monthLine = profileWindowDays >= 30 ? monthObservationLine() : null;", "recap 本月 observation always speaks to the month (insight or honest cold-start)");
+  assertMatches(indexHtml, /function monthObservationLine\(\)[\s\S]*if \(insight\) return insight;[\s\S]*这个月才刚开始记[\s\S]*这个月的节奏还没看出明显走向/, "本月 cold-start is honest: 刚开始记 when thin, 还没看出走向 when data exists but no trend — never a fabricated trend");
   assertMatches(mainJs, /function createDarwinTrayIcon\(\)[\s\S]*nativeImage\.createEmpty\(\)[\s\S]*scaleFactor: 1,[\s\S]*trayTemplate\.png[\s\S]*scaleFactor: 2,[\s\S]*trayTemplate@2x\.png[\s\S]*icon\.setTemplateImage\(true\);/, "macOS menu bar tray loads crisp 1x and 2x template assets");
   assertIncludes(packageJson, '"assets/trayTemplate.png"', "macOS menu bar tray template asset is included in packaged files");
   assertIncludes(packageJson, '"assets/trayTemplate@2x.png"', "macOS menu bar tray Retina template asset is included in packaged files");
