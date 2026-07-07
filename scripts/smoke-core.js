@@ -217,7 +217,7 @@ function main() {
   assertIncludes(indexHtml, "调整提醒边界", "settings advanced reminder boundaries are folded behind a quiet disclosure");
   assertNotMatches(indexHtml, /<span class="settings-row-label[^"]*">当前模式<\/span>[\s\S]*id="currentIntensityValue"/, "settings current mode does not repeat the same label and value row");
   assertNotMatches(indexHtml, /L1 安静：只变 Mira 状态。/, "settings current mode copy avoids repeating the selected mode name");
-  assertIncludes(indexHtml, 'id="currentIntensityValue">L1 安静 <span>最低提醒等级</span></strong>', "settings first screen explains the current mode level");
+  assertIncludes(indexHtml, 'id="currentIntensityValue">L2 轻提示 <span>当前提醒等级</span></strong>', "settings first screen explains the current mode level");
   assertIncludes(indexHtml, "function settingsModePillHtml", "settings mode pill keeps the level explanation when mode changes");
   assertIncludes(indexHtml, "L1 安静</button>", "settings boundary segmented labels stay compact");
   assertIncludes(indexHtml, "L4 强制爱</button>", "settings force segmented label stays compact");

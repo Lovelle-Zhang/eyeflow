@@ -9046,14 +9046,14 @@
                 <h3 class="settings-section-title ef-preference-section-title">当前模式</h3>
                 <p class="settings-section-note" id="intensityCopy">只改变 Mira 状态，不主动打断。</p>
               </div>
-              <strong class="settings-mode-pill ef-status-pill" id="currentIntensityValue">L1 安静 <span>最低提醒等级</span></strong>
+              <strong class="settings-mode-pill ef-status-pill" id="currentIntensityValue">L2 轻提示 <span>当前提醒等级</span></strong>
             </div>
             <details class="settings-boundary-disclosure settings-disclosure-row ef-disclosure-row">
               <summary><span>调整提醒边界</span></summary>
               <div class="advanced-body">
                 <div class="settings-segmented-control ef-segmented-control">
-                  <button class="active-setting" type="button" data-intensity="quiet">L1 安静</button>
-                  <button type="button" data-intensity="standard">L2 轻提示</button>
+                  <button type="button" data-intensity="quiet">L1 安静</button>
+                  <button class="active-setting" type="button" data-intensity="standard">L2 轻提示</button>
                   <button type="button" data-intensity="clear">L3 明确</button>
                   <button type="button" data-intensity="force">L4 强制爱</button>
                 </div>
@@ -10405,7 +10405,7 @@
         autoElapsedSeconds: 0,
         lastAnalysis: null,
         settings: {
-          intensity: "quiet",
+          intensity: "standard",
           deepWorkMiraOnlyToggle: false,
           soundToggle: false,
           forceVoiceGuideToggle: true,
@@ -11009,7 +11009,7 @@
       state.pendingReminder = null;
       state.deferReminderUntilBreak = false;
       state.deferReminderNeedsWork = false;
-      state.settings.intensity = "quiet";
+      state.settings.intensity = "standard";
       state.rhythmSource = "default";
       els.focusTarget.value = initialRhythm.focus;
       els.breakTarget.value = initialRhythm.rest;

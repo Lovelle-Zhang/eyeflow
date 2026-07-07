@@ -165,7 +165,7 @@ function main() {
   assertIncludes(indexHtml, "#rhythmView .settings-boundary-disclosure summary {\n      min-height: var(--ef-control-md);", "installed settings current mode disclosure uses compact row height");
   assertIncludes(indexHtml, "class=\"settings-mode-summary\"", "installed settings current mode renders as a quiet summary");
   assertIncludes(indexHtml, "class=\"settings-mode-pill ef-status-pill\"", "installed settings current mode value uses a compact status pill");
-  assertIncludes(indexHtml, 'id="currentIntensityValue">L1 安静 <span>最低提醒等级</span></strong>', "installed settings first screen explains the current mode level");
+  assertIncludes(indexHtml, 'id="currentIntensityValue">L2 轻提示 <span>当前提醒等级</span></strong>', "installed settings first screen explains the current mode level");
   assertIncludes(indexHtml, "function settingsModePillHtml", "installed settings mode pill keeps the level explanation when mode changes");
   assertNotMatches(indexHtml, /<span class="settings-row-label[^"]*">当前模式<\/span>[\s\S]*id="currentIntensityValue"/, "installed settings current mode does not repeat the same label and value row");
   assertNotIncludes(indexHtml, "L1 安静：只变 Mira 状态。", "installed settings current mode copy avoids repeating the selected mode name");
@@ -579,14 +579,14 @@ function main() {
   assertIncludes(indexHtml, '<strong id="stateHeadline">我在旁边</strong>', "installed today opens directly on the unified standby surface");
   assertIncludes(indexHtml, '<button class="primary" id="primaryActionBtn" type="button" data-intent="start" hidden="">开始这一轮 →</button>', "installed today keeps the duplicate hero start hidden by default");
   assertIncludes(indexHtml, "调整提醒边界", "installed settings folds advanced reminder boundaries behind a quiet disclosure");
-  assertIncludes(indexHtml, 'id="currentIntensityValue">L1 安静 <span>最低提醒等级</span></strong>', "installed settings first screen shows current mode with context");
+  assertIncludes(indexHtml, 'id="currentIntensityValue">L2 轻提示 <span>当前提醒等级</span></strong>', "installed settings first screen shows current mode with context");
   assertIncludes(indexHtml, "不开启也不影响基础提醒。", "installed enhanced sensing explains optional permission");
   assertIncludes(indexHtml, "开启后，Mira 会识别当前 App 和空闲时间，用来判断是否在专注工作，并在合适的时候提醒你休息。不会读取屏幕内容或具体操作。", "installed enhanced sensing explains before macOS permission");
   assertIncludes(indexHtml, "状态跟随 macOS“辅助功能”里的 EyeFlow 开关。", "installed enhanced sensing follows the macOS permission switch");
   assertMatches(indexHtml, /\.nav button\s*\{[\s\S]*min-height:\s*var\(--ef-control-lg\);[\s\S]*gap:\s*var\(--ef-space-4\);/, "installed navigation uses tokenized control rhythm");
   assertMatches(indexHtml, /\.nav svg,[\s\S]*\.small-icon\s*\{[\s\S]*width:\s*var\(--ef-icon-md\);[\s\S]*height:\s*var\(--ef-icon-md\);/, "installed app icons use tokenized size");
   assertNotIncludes(indexHtml, 'stroke-width="2"', "installed app avoids heavy inline icon strokes");
-  assertMatches(indexHtml, /function\s+completeInitialAssessment\(options = \{\}\)[\s\S]*state\.settings\.intensity\s*=\s*"quiet";/, "installed assessment completion defaults to L1 quiet");
+  assertMatches(indexHtml, /function\s+completeInitialAssessment\(options = \{\}\)[\s\S]*state\.settings\.intensity\s*=\s*"standard";/, "installed assessment completion defaults to L2 standard (轻提示)");
   assertIncludes(indexHtml, "onboarding_event", "installed onboarding event stream");
   assertIncludes(indexHtml, "点“休息”，Mira 带你。", "installed rest guide hint");
   assertMatches(indexHtml, /\.onboarding-overlay\s*\{[\s\S]*position:\s*fixed;[\s\S]*inset:\s*0;[\s\S]*place-items:\s*center;/, "installed onboarding overlay centers the first-run dialog in the dashboard window");

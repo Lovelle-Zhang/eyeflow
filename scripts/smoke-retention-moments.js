@@ -59,7 +59,7 @@ function main() {
   assertIncludes(indexHtml, "我在旁边了。你继续专注，休息点到了我再轻轻提醒。", "first-day aha makes Mira feel present");
   assertNotMatches(indexHtml, /眼睛现在怎么样|选一个感觉，Mira 先安排第一轮。|开始第一轮|权限稍后|id="onboardingPermissionBtn"/, "first-day removes forced onboarding and first-screen permission");
   assertIncludes(coreJs, "首轮按 50 分钟专注开始", "first-day comfort rhythm");
-  assertMatches(indexHtml, /function\s+completeInitialAssessment\(options = \{\}\)[\s\S]*ONBOARDING_PRESETS\.fine[\s\S]*state\.settings\.intensity\s*=\s*"quiet"/, "first-day plan starts with low-load quiet rhythm");
+  assertMatches(indexHtml, /function\s+completeInitialAssessment\(options = \{\}\)[\s\S]*ONBOARDING_PRESETS\.fine[\s\S]*state\.settings\.intensity\s*=\s*"standard"/, "first-day plan starts with the low-load rhythm at the L2 standard reminder default");
   assertIncludes(indexHtml, "function miraDialogue", "local Mira dialogue layer");
   assertIncludes(indexHtml, "Mira 只记这个模式，不记你做了什么。", "mode memory avoids content memory");
 

@@ -312,7 +312,7 @@ function main() {
   // Cross-day-while-open / resume rollover follows the same rule as cold launch:
   // prepare the same Today page unless explicit onboarding was requested.
   assertMatches(indexHtml, /function ensureCurrentDay\(options = \{\}\)[\s\S]*?options\.showOnboarding !== false && !canAutoPrepareToday\(\)[\s\S]*?showOnboarding\(\);[\s\S]*?ensureTodayReadyForActivityStart\(\);/, "cross-day rollover prepares standby Today unless explicit onboarding is active");
-  assertMatches(indexHtml, /function\s+completeInitialAssessment\(options = \{\}\)[\s\S]*state\.settings\.intensity\s*=\s*"quiet";[\s\S]*setIntensity\(state\.settings\.intensity,\s*\{\s*persistChange:\s*false,\s*renderChange:\s*false,\s*userChange:\s*false\s*\}\);/, "assessment completion defaults to L1 quiet");
+  assertMatches(indexHtml, /function\s+completeInitialAssessment\(options = \{\}\)[\s\S]*state\.settings\.intensity\s*=\s*"standard";[\s\S]*setIntensity\(state\.settings\.intensity,\s*\{\s*persistChange:\s*false,\s*renderChange:\s*false,\s*userChange:\s*false\s*\}\);/, "assessment completion defaults to L2 standard (轻提示)");
   assertNotMatches(indexHtml, /completeInitialAssessment[\s\S]*showFirstRoundLanding\(\);/, "onboarding no longer passes through a first-round landing page");
   assertMatches(indexHtml, /options\.focusTarget\s*===\s*"panel"[\s\S]*\?\s*els\.sessionPanel/, "focus helper can target session panel");
   assertMatches(indexHtml, /function\s+focusSessionPanel\(options = \{\}\)[\s\S]*clearFirstRoundLanding\(\);[\s\S]*els\.restGuideHint\.hidden\s*=\s*false;/, "rest guide clears first-round hint");
