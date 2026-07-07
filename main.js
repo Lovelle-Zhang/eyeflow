@@ -51,6 +51,7 @@ let companionExpandBaseBounds = null;
 let companionBoundsTransient = false;
 let lastReminderAt = 0;
 let lastInterventionLevel = 1;
+let lastMenuIntensity = null;
 let autoPanelTimer = null;
 let hoverOpenTimer = null;
 let hoverCloseTimer = null;
@@ -1364,6 +1365,10 @@ function updateApplicationMenu() {
         { label: "关于 EyeFlow", click: showAboutPanel },
         { type: "separator" },
         { label: "打开 EyeFlow", accelerator: "CommandOrControl+O", click: showDashboard },
+        { type: "separator" },
+        { label: "提醒强度", enabled: false },
+        ...intensityMenuItems(),
+        { type: "separator" },
         { label: "显示/退出 Mira", accelerator: "CommandOrControl+M", click: toggleCompanionVisibility },
         { label: "找回 Mira", accelerator: "CommandOrControl+Shift+M", click: resetCompanionPosition },
         {
@@ -2075,12 +2080,69 @@ function startTrayRest() {
   showDashboard({ restGuide: true });
 }
 
+// Intensity (the reminder boundary) lives in the renderer — the single source of truth.
+// The menu reads the current level from the last published state for its radio check.
+function currentIntensity() {
+  const v = latestState && latestState.intensity;
+  return (v === "quiet" || v === "standard" || v === "clear" || v === "force") ? v : "standard";
+}
+
+// The four reminder-boundary levels as one radio group, each with an inline one-line note.
+// Reused by both the tray and the app (⌘) menu so they stay identical.
+function intensityMenuItems() {
+  const cur = currentIntensity();
+  return [
+    { label: "L1 安静 — 只改状态，不弹提醒", type: "radio", checked: cur === "quiet", click: () => requestIntensityFromMenu("quiet") },
+    { label: "L2 轻提示 — 到断点轻提一次", type: "radio", checked: cur === "standard", click: () => requestIntensityFromMenu("standard") },
+    { label: "L3 明确 — 更明确，离开加通知", type: "radio", checked: cur === "clear", click: () => requestIntensityFromMenu("clear") },
+    { label: "L4 强制爱… — 到点全屏，应用内开启", type: "radio", checked: cur === "force", click: () => requestIntensityFromMenu("force") }
+  ];
+}
+
+// Route the menu choice through the renderer's requestIntensity (the SAME path as the
+// in-app buttons), so L4 gets its in-app confirm instead of one-click arming full-screen
+// from the menu bar. L1/L2/L3 apply silently in the background window.
+function requestIntensityFromMenu(level) {
+  if (level === "force" || !dashboardWindow || dashboardWindow.isDestroyed()) showDashboard();
+  const send = () => {
+    if (dashboardWindow && !dashboardWindow.isDestroyed()) {
+      dashboardWindow.webContents.send("intensity:request", level);
+    }
+  };
+  if (dashboardWindow && !dashboardWindow.isDestroyed() && dashboardWindow.webContents.isLoading()) {
+    dashboardWindow.webContents.once("did-finish-load", send);
+  } else {
+    send();
+  }
+}
+
+// The renderer notifies main the instant the level changes, so the menu radio never lags
+// the render/publish cycle — render() can early-return (force break) before it publishes
+// the companion state, which would otherwise leave latestState.intensity stale.
+function applyMenuIntensity(level) {
+  if (level !== "quiet" && level !== "standard" && level !== "clear" && level !== "force") return;
+  latestState = { ...latestState, intensity: level };
+  updateTrayMenu();
+  if (level !== lastMenuIntensity) {
+    lastMenuIntensity = level;
+    updateApplicationMenu();
+  }
+}
+ipcMain.handle("intensity:changed", (_event, level) => {
+  applyMenuIntensity(level);
+  return { ok: true };
+});
+
 function buildTrayMenu() {
   return Menu.buildFromTemplate([
     { label: trayStatusLine(), enabled: false },
     { type: "separator" },
     { label: "打开 EyeFlow", click: showDashboard },
     { label: "休息一下", click: startTrayRest },
+    { type: "separator" },
+    { label: "提醒强度", enabled: false },
+    ...intensityMenuItems(),
+    { type: "separator" },
     { label: trayMiraVisibilityLabel(), click: toggleCompanionVisibility },
     {
       label: "顶端提醒岛",
@@ -2147,7 +2209,7 @@ function sendDashboardFocus(payload = {}) {
 
 function showDashboard(options = {}) {
   syncDock();
-  if (!dashboardWindow) createDashboardWindow({ showOnReady: true, revealOnboarding: false });
+  if (!dashboardWindow || dashboardWindow.isDestroyed()) createDashboardWindow({ showOnReady: true, revealOnboarding: false });
   keepDashboardVisible();
   revealDashboardOnCurrentSpace();
   if (options?.restGuide) {
@@ -2464,6 +2526,12 @@ function broadcastState(state) {
   }
   latestState = { ...latestState, ...state };
   updateTrayMenu();
+  // The app (⌘) menu isn't rebuilt on every publish; refresh it only when the reminder
+  // level actually changes so its radio group stays in sync with the tray + settings.
+  if (currentIntensity() !== lastMenuIntensity) {
+    lastMenuIntensity = currentIntensity();
+    updateApplicationMenu();
+  }
   for (const win of [dashboardWindow, companionWindow]) {
     if (win && !win.isDestroyed()) {
       win.webContents.send("state:update", latestState);

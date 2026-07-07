@@ -203,7 +203,7 @@ function main() {
   assertMatches(mainJs, /function syncDock\(\)[\s\S]*if \(shouldHide\) \{[\s\S]*pruneEyeFlowDockRecentEntry\(\);[\s\S]*\}/, "syncDock prunes EyeFlow from Dock recents after visible windows can re-add it");
   assertMatches(mainJs, /function syncDock\(\)[\s\S]*if \(shouldHide\) \{[\s\S]*scheduleEyeFlowDockRecentPrune\(\);[\s\S]*\}/, "syncDock schedules a second recent prune for Dock's async recent-apps write");
   assertNotMatches(mainJs, /function showDashboard\(options = \{\}\) \{[\s\S]*?showDockIcon\(\);[\s\S]*?if \(!dashboardWindow\)/, "showDashboard must not resurrect the Dock in menu-bar mode");
-  assertMatches(mainJs, /function showDashboard\(options = \{\}\) \{[\s\S]*syncDock\(\);[\s\S]*if \(!dashboardWindow\)/, "showDashboard re-syncs the Dock instead of forcing it visible");
+  assertMatches(mainJs, /function showDashboard\(options = \{\}\) \{[\s\S]*syncDock\(\);[\s\S]*if \(!dashboardWindow \|\| dashboardWindow\.isDestroyed\(\)\)/, "showDashboard re-syncs the Dock instead of forcing it visible");
   assertMatches(mainJs, /notchWindow\.showInactive\(\);[\s\S]*notchWindow\.moveTop\(\);[\s\S]*syncDock\(\);/, "the island re-asserts the Dock state after showing (it can resurrect the Dock icon)");
   assertMatches(mainJs, /function maybeRevealDashboardForOnboarding\(\{ showOnReady, revealOnboarding \} = \{\}\)[\s\S]*onboardingOverlayIsVisibleScript\(\)[\s\S]*showDashboard\(\{ view: "todayView", focus: "onboarding" \}\)/, "hidden launch still reveals the dashboard for unfinished onboarding");
   assertMatches(mainJs, /function handleActivate\(\)[\s\S]*suppressNextActivate[\s\S]*return;[\s\S]*showDashboard\(\);[\s\S]*app\.on\("activate", handleActivate\);/, "main suppresses only the startup activate event and keeps explicit app activation wired");
@@ -262,6 +262,24 @@ function main() {
   assertIncludes(islandHtml, '"好，眼睛松过了"', "island completion closes the loop in Mira's voice");
   assertNotIncludes(islandHtml, "BAR_HEIGHT", "island has no ambient level bar (collapsed to the one micro-rest surface)");
   assertIncludes(islandHtml, "prefers-reduced-motion", "island honors Reduce Motion");
+
+  // Menu-bar reminder-strength switch: the four levels as one radio group (with inline
+  // one-line notes) in both the tray and the app menu, routed through the renderer's
+  // requestIntensity so L4 gets its in-app confirm instead of one-click full-screen.
+  assertMatches(mainJs, /function intensityMenuItems\(\)[\s\S]*L1 安静 — 只改状态，不弹提醒[\s\S]*type: "radio"[\s\S]*requestIntensityFromMenu\("quiet"\)[\s\S]*L4 强制爱… — 到点全屏，应用内开启[\s\S]*requestIntensityFromMenu\("force"\)/, "menu exposes all four reminder levels as a radio group with inline notes");
+  assertMatches(mainJs, /function requestIntensityFromMenu\(level\)[\s\S]*if \(level === "force"[\s\S]*showDashboard\(\);[\s\S]*"intensity:request", level/, "menu routes the level to the renderer; L4 opens the app for its confirm");
+  assertMatches(mainJs, /function buildTrayMenu\(\)[\s\S]*\{ label: "提醒强度", enabled: false \},\s*\.\.\.intensityMenuItems\(\)/, "tray menu groups the reminder-strength radios under a 提醒强度 header");
+  assertMatches(mainJs, /submenu: \[[\s\S]*\{ label: "提醒强度", enabled: false \},\s*\.\.\.intensityMenuItems\(\)/, "app (⌘) menu mirrors the same reminder-strength group");
+  assertIncludes(mainJs, "if (currentIntensity() !== lastMenuIntensity) {", "app menu refreshes its radios only when the level actually changes");
+  assertIncludes(preloadJs, 'ipcRenderer.on("intensity:request", listener)', "preload exposes the intensity:request channel for the menu switch");
+  assertIncludes(indexHtml, 'intensity: state.settings.intensity || "standard"', "renderer publishes the raw intensity so the menu can check the right radio");
+  assertMatches(indexHtml, /onIntensityRequest\(\(level\) => \{[\s\S]*requestIntensity\(level\)/, "menu intensity choice runs the same requestIntensity path as the in-app buttons");
+  // The menu radio is decoupled from the render/publish cycle: the renderer notifies main
+  // the instant the level changes, so a force-break early-return in render() can't leave
+  // the menu showing a stale level.
+  assertIncludes(indexHtml, "window.eyeflowDesktop?.setReminderIntensity?.(level);", "renderer notifies main the moment the level changes (no render-cycle lag)");
+  assertMatches(mainJs, /ipcMain\.handle\("intensity:changed", \(_event, level\) => \{[\s\S]*applyMenuIntensity\(level\)/, "main updates the menu radio directly from the intensity:changed notify");
+  assertMatches(mainJs, /function showDashboard\(options = \{\}\)[\s\S]*if \(!dashboardWindow \|\| dashboardWindow\.isDestroyed\(\)\) createDashboardWindow/, "showDashboard recovers a destroyed window, not just a missing one");
   assertMatches(mainJs, /function createDarwinTrayIcon\(\)[\s\S]*nativeImage\.createEmpty\(\)[\s\S]*scaleFactor: 1,[\s\S]*trayTemplate\.png[\s\S]*scaleFactor: 2,[\s\S]*trayTemplate@2x\.png[\s\S]*icon\.setTemplateImage\(true\);/, "macOS menu bar tray loads crisp 1x and 2x template assets");
   assertIncludes(packageJson, '"assets/trayTemplate.png"', "macOS menu bar tray template asset is included in packaged files");
   assertIncludes(packageJson, '"assets/trayTemplate@2x.png"', "macOS menu bar tray Retina template asset is included in packaged files");

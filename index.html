@@ -10323,6 +10323,16 @@
     if (window.eyeflowDesktop?.onForceBreakDone) {
       window.eyeflowDesktop.onForceBreakDone((payload) => finishForceBreak(payload));
     }
+    if (window.eyeflowDesktop?.onIntensityRequest) {
+      // The menu bar routes an intensity choice through the SAME path as the in-app
+      // buttons (requestIntensity), so L4 gets the in-app confirm instead of one-click
+      // arming full-screen mode from the tray.
+      window.eyeflowDesktop.onIntensityRequest((level) => {
+        if (level === "quiet" || level === "standard" || level === "clear" || level === "force") {
+          requestIntensity(level);
+        }
+      });
+    }
     if (window.eyeflowDesktop?.onReminderResolve) {
       // The island's away micro-rest closed the loop in the main process (it sensed
       // whether you stepped away). Resolve the single pending-reminder ledger here so the
@@ -12323,6 +12333,10 @@
           ? "这一轮到恢复断点后接管。"
           : "选择一个提醒边界。";
       state.settings.intensity = level;
+      // Tell main the moment the level changes so the menu-bar radio never lags the
+      // render/publish cycle (render() can early-return during a force break before it
+      // republishes the companion state).
+      window.eyeflowDesktop?.setReminderIntensity?.(level);
       if (options.userChange !== false && previousLevel !== level) {
         const memory = ensureRhythmMemory();
         memory.manualHoldRounds = Math.max(Number(memory.manualHoldRounds || 0), 3);
@@ -16346,6 +16360,7 @@
         baselineContext,
         rhythmSource: state.rhythmSource || "default",
         recoveryMode: state.settings.recoveryMode || "mixed",
+        intensity: state.settings.intensity || "standard",
         intensityLabel: intensityLabel(state.settings.intensity || "quiet"),
         continuityLine: `${classifyLoad(load)} · ${intensityLabel(state.settings.intensity || "quiet")}`,
         isRunning,

@@ -398,7 +398,7 @@ function main() {
   assertMatches(mainJs, /function syncDock\(\)[\s\S]*if \(shouldHide\) \{[\s\S]*pruneEyeFlowDockRecentEntry\(\);[\s\S]*\}/, "installed syncDock prunes EyeFlow from Dock recents after visible windows can re-add it");
   assertMatches(mainJs, /function syncDock\(\)[\s\S]*if \(shouldHide\) \{[\s\S]*scheduleEyeFlowDockRecentPrune\(\);[\s\S]*\}/, "installed syncDock schedules a second recent prune for Dock's async recent-apps write");
   assertNotMatches(mainJs, /function showDashboard\(options = \{\}\) \{[\s\S]*?showDockIcon\(\);[\s\S]*?if \(!dashboardWindow\)/, "installed showDashboard must not resurrect the Dock in menu-bar mode");
-  assertMatches(mainJs, /function showDashboard\(options = \{\}\) \{[\s\S]*syncDock\(\);[\s\S]*if \(!dashboardWindow\)/, "installed showDashboard re-syncs the Dock instead of forcing it visible");
+  assertMatches(mainJs, /function showDashboard\(options = \{\}\) \{[\s\S]*syncDock\(\);[\s\S]*if \(!dashboardWindow \|\| dashboardWindow\.isDestroyed\(\)\)/, "installed showDashboard re-syncs the Dock instead of forcing it visible");
   assertMatches(mainJs, /notchWindow\.showInactive\(\);[\s\S]*syncDock\(\);/, "installed island re-asserts the Dock state after showing");
   assertMatches(mainJs, /function maybeRevealDashboardForOnboarding\(\{ showOnReady, revealOnboarding \} = \{\}\)[\s\S]*onboardingOverlayIsVisibleScript\(\)[\s\S]*showDashboard\(\{ view: "todayView", focus: "onboarding" \}\)/, "installed hidden launch still reveals the dashboard for unfinished onboarding");
   assertMatches(mainJs, /function handleActivate\(\)[\s\S]*suppressNextActivate[\s\S]*return;[\s\S]*showDashboard\(\);[\s\S]*app\.on\("activate", handleActivate\);/, "installed main suppresses only the startup activate event and keeps explicit app activation wired");
@@ -428,6 +428,9 @@ function main() {
   assertNotIncludes(mainJs, 'mode: "bar"', "installed island has no ambient level bar (collapsed to the one micro-rest surface)");
   assertMatches(mainJs, /function startIslandMicroRest\(message, reminderId\)[\s\S]*"reminder:resolve"[\s\S]*status: restedAway \? "completed" : "ignored"[\s\S]*reminderId: reminderId \|\| null[\s\S]*showNotchIsland\(\{ mode: "restResult", ok: restedAway \}\)/, "installed away micro-rest resolves the exact reminder by sensing the look-away");
   assertMatches(mainJs, /label: "顶端提醒岛",\s*type: "checkbox",\s*checked: desktopPreferenceDefaults\(\)\.showReminderIsland,\s*click: toggleReminderIsland/, "installed menu exposes the reminder island choice");
+  assertMatches(mainJs, /function intensityMenuItems\(\)[\s\S]*L1 安静 — 只改状态，不弹提醒[\s\S]*type: "radio"[\s\S]*L4 强制爱… — 到点全屏，应用内开启[\s\S]*requestIntensityFromMenu\("force"\)/, "installed menu exposes the four reminder levels as a radio group");
+  assertMatches(mainJs, /function requestIntensityFromMenu\(level\)[\s\S]*if \(level === "force"[\s\S]*showDashboard\(\);[\s\S]*"intensity:request", level/, "installed menu routes the level to the renderer; L4 opens the app for its confirm");
+  assertIncludes(indexHtml, 'intensity: state.settings.intensity || "standard"', "installed renderer publishes the raw intensity for the menu radio");
   assertMatches(mainJs, /function createDarwinTrayIcon\(\)[\s\S]*nativeImage\.createEmpty\(\)[\s\S]*scaleFactor: 1,[\s\S]*trayTemplate\.png[\s\S]*scaleFactor: 2,[\s\S]*trayTemplate@2x\.png[\s\S]*icon\.setTemplateImage\(true\);/, "installed macOS menu bar tray loads crisp 1x and 2x template assets");
   if (readBuffer("assets/trayTemplate.png").length < 100) {
     throw new Error("installed macOS menu bar tray template asset is missing or empty");

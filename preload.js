@@ -9,6 +9,7 @@ contextBridge.exposeInMainWorld("eyeflowDesktop", {
   notify: (message) => ipcRenderer.invoke("companion:notify", message),
   showMiraBubble: (message) => ipcRenderer.invoke("companion:bubble", message),
   publishState: (state) => ipcRenderer.invoke("state:publish", state),
+  setReminderIntensity: (level) => ipcRenderer.invoke("intensity:changed", level),
   startForceBreak: (payload) => ipcRenderer.invoke("breakLock:start", payload),
   finishForceBreak: (payload) => ipcRenderer.invoke("breakLock:done", payload),
   speak: (payload) => ipcRenderer.invoke("voice:speak", payload),
@@ -58,6 +59,11 @@ contextBridge.exposeInMainWorld("eyeflowDesktop", {
     const listener = (_event, payload) => callback(payload);
     ipcRenderer.on("reminder:resolve", listener);
     return () => ipcRenderer.removeListener("reminder:resolve", listener);
+  },
+  onIntensityRequest: (callback) => {
+    const listener = (_event, level) => callback(level);
+    ipcRenderer.on("intensity:request", listener);
+    return () => ipcRenderer.removeListener("intensity:request", listener);
   },
   onForceBreakDone: (callback) => {
     const listener = (_event, payload) => callback(payload);
