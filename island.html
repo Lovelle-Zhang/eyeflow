@@ -14,59 +14,89 @@
     user-select: none;
     font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Segoe UI", sans-serif;
   }
-  /* The window spans the top-center; the pill slides DOWN into view from behind the
-     top edge (Dynamic-Island style). We never draw ON the physical notch — the pill
-     lives just below it and, on non-notch Macs, reads as a plain top-center pill. */
-  #island {
+  /* The capsule slides DOWN from behind the top edge (Dynamic-Island style) and lives just
+     below the notch; on non-notch Macs it reads as a plain top-center pill. Nothing is ever
+     persistent — it shows for a look-away and slides away, never sitting in the line of sight. */
+  .drop {
     position: absolute;
     left: 50%;
-    top: 54px; /* just below the menu bar — floating, without drifting too low */
+    top: 54px;
     transform: translate(-50%, -190%);
-    display: inline-flex;
-    align-items: center;
-    gap: 13px;
-    max-width: 92vw;
-    padding: 13px 26px 13px 16px;
-    border-radius: 999px;
-    background: rgba(26, 107, 82, 0.97); /* --mira-strong #1a6b52 — the app's signature brand green */
-    box-shadow:
-      0 12px 34px rgba(0, 0, 0, 0.26),
-      0 6px 16px rgba(0, 0, 0, 0.4),
-      inset 0 0 0 1px rgba(255, 255, 255, 0.12);
-    color: #f6f7f9;
     opacity: 0;
     transition: transform 360ms cubic-bezier(0.22, 1, 0.36, 1), opacity 280ms ease;
-    white-space: nowrap;
   }
-  #island.show {
+  .drop.show {
     transform: translate(-50%, 0);
     opacity: 1;
   }
   /* Honor Reduce Motion (eye-comfort DNA): cross-fade only, no slide. */
   @media (prefers-reduced-motion: reduce) {
-    #island {
+    .drop {
       transition: opacity 280ms ease;
       transform: translate(-50%, 0);
     }
   }
+
+  /* The away micro-rest: Mira's stand-in when she's put away — a look-away prompt in her
+     own voice that counts itself down and closes the loop, so a reminder is never a dead-end. */
+  #pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 13px;
+    max-width: 92vw;
+    padding: 12px 22px 12px 14px;
+    border-radius: 18px;
+    background: rgba(26, 107, 82, 0.97);
+    box-shadow:
+      0 12px 34px rgba(0, 0, 0, 0.26),
+      0 6px 16px rgba(0, 0, 0, 0.4),
+      inset 0 0 0 1px rgba(255, 255, 255, 0.12);
+    color: #f6f7f9;
+    white-space: nowrap;
+  }
   .mark {
-    width: 34px;
-    height: 34px;
+    width: 32px;
+    height: 32px;
     flex: 0 0 auto;
     border-radius: 10px;
     display: block;
   }
+  .pbody {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    min-width: 168px;
+  }
   .msg {
-    font-size: 16.5px;
+    font-size: 16px;
     font-weight: 600;
-    line-height: 1.25;
+    line-height: 1.2;
     letter-spacing: 0.01em;
   }
-  .msg .accent { color: #6FE7C3; }
+  .track {
+    height: 3px;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.16);
+    overflow: hidden;
+  }
+  .fill {
+    height: 100%;
+    width: 100%;
+    border-radius: 999px;
+    background: #6FE7C3;
+  }
+  .num {
+    font-size: 15px;
+    font-weight: 600;
+    color: #6FE7C3;
+    min-width: 20px;
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+  }
 </style>
 </head>
 <body>
-  <div id="island" role="status" aria-live="polite">
+  <div id="pill" class="drop" role="status" aria-live="polite">
     <svg class="mark" viewBox="0 0 1024 1024" aria-hidden="true">
       <defs>
         <linearGradient id="bg" x1="216" y1="156" x2="826" y2="874" gradientUnits="userSpaceOnUse">
@@ -79,21 +109,90 @@
       <circle cx="644" cy="468" r="46" fill="#F8FFFC"/>
       <circle cx="803" cy="344" r="82" fill="#6FE7C3"/>
     </svg>
-    <span class="msg" id="msg">看远一点，休息 20 秒</span>
+    <div class="pbody">
+      <span class="msg" id="msg">陪你看会儿远处</span>
+      <div class="track" id="track"><div class="fill" id="fill"></div></div>
+    </div>
+    <span class="num" id="num"></span>
   </div>
 
   <script>
-    const island = document.getElementById("island");
+    const pill = document.getElementById("pill");
     const msgEl = document.getElementById("msg");
+    const numEl = document.getElementById("num");
+    const fillEl = document.getElementById("fill");
+    const trackEl = document.getElementById("track");
     let hideTimer = null;
+    let countdownTimer = null;
+
+    function clearTimers() {
+      if (hideTimer) { clearTimeout(hideTimer); hideTimer = null; }
+      if (countdownTimer) { clearInterval(countdownTimer); countdownTimer = null; }
+    }
+    function scheduleHide(ms) {
+      if (hideTimer) clearTimeout(hideTimer);
+      hideTimer = setTimeout(() => pill.classList.remove("show"), Math.max(1200, ms));
+    }
+
+    // Away micro-rest: run the look-away countdown. It does NOT self-claim completion —
+    // main.js senses whether you actually stepped away and sends the result back.
+    function showRest(message, breakSeconds) {
+      clearTimers();
+      trackEl.style.display = "block";
+      msgEl.textContent = message || "陪你看会儿远处";
+      let left = Math.max(5, Math.round(breakSeconds) || 20);
+      const total = left;
+      numEl.textContent = left;
+      fillEl.style.transition = "none";
+      fillEl.style.width = "100%";
+      fillEl.style.background = "#6FE7C3";
+      void fillEl.offsetWidth; // reflow so the drain animates from full
+      fillEl.style.transition = "width 1s linear";
+      requestAnimationFrame(() => pill.classList.add("show"));
+      countdownTimer = setInterval(() => {
+        left -= 1;
+        numEl.textContent = Math.max(0, left);
+        fillEl.style.width = Math.max(0, (left / total) * 100) + "%";
+        if (left <= 0) { clearInterval(countdownTimer); countdownTimer = null; }
+      }, 1000);
+      // Failsafe: slide away even if the result signal never arrives.
+      scheduleHide(total * 1000 + 4000);
+    }
+
+    // Close the loop in Mira's voice: a warm ✓ when you actually rested; a no-pressure
+    // line when you kept working.
+    function showRestResult(ok) {
+      if (countdownTimer) { clearInterval(countdownTimer); countdownTimer = null; }
+      trackEl.style.display = "block";
+      if (ok) {
+        msgEl.textContent = "好，眼睛松过了";
+        numEl.textContent = "✓";
+        fillEl.style.transition = "width 240ms ease";
+        fillEl.style.width = "100%";
+      } else {
+        msgEl.textContent = "那先忙，回头我再看节奏";
+        numEl.textContent = "";
+        fillEl.style.width = "0%";
+      }
+      if (!pill.classList.contains("show")) requestAnimationFrame(() => pill.classList.add("show"));
+      scheduleHide(ok ? 1600 : 1200);
+    }
+
+    // Legacy plain text pill (dev preview / manual island:show) — no countdown.
+    function showText(message, durationMs) {
+      clearTimers();
+      trackEl.style.display = "none";
+      msgEl.textContent = message || "看远一点，休息 20 秒";
+      numEl.textContent = "";
+      requestAnimationFrame(() => pill.classList.add("show"));
+      scheduleHide(Math.max(1600, Math.min(durationMs || 6000, 12000)));
+    }
 
     function present(data) {
-      const text = (data && data.message) ? String(data.message) : "看远一点，休息 20 秒";
-      msgEl.textContent = text;
-      requestAnimationFrame(() => island.classList.add("show"));
-      if (hideTimer) clearTimeout(hideTimer);
-      const ms = Math.max(1600, Math.min(Number(data && data.durationMs) || 6000, 12000));
-      hideTimer = setTimeout(() => island.classList.remove("show"), ms);
+      const mode = (data && data.mode) || "text";
+      if (mode === "rest") return showRest(data.message, Number(data.breakSeconds || 20));
+      if (mode === "restResult") return showRestResult(Boolean(data.ok));
+      return showText(data && data.message, Number(data && data.durationMs));
     }
 
     if (window.eyeflowDesktop && window.eyeflowDesktop.onIslandShow) {

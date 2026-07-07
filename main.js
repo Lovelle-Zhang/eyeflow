@@ -8,6 +8,8 @@ let companionWindow;
 let breakLockWindow;
 let notchWindow;
 let notchHideTimer = null;
+let islandRestActive = false;
+let islandRestTimer = null;
 let tray;
 let breakLockCanClose = false;
 const currentVisualCaptureTargets = parseCurrentVisualCaptureTargets(process.env.EYEFLOW_CURRENT_CAPTURE || process.env.EYEFLOW_DEBUG_CURRENT_CAPTURE || "");
@@ -2262,6 +2264,9 @@ function startBreakLock(payload = {}) {
   const tasks = sanitizeBreakTasks(payload.tasks);
   const voiceGuide = payload.voiceGuide !== false;
   breakLockCanClose = false;
+  // A full-screen rest supersedes any ambient island look-away — abort it so its timer
+  // can't resolve the pending reminder before this longer break actually completes.
+  hideNotchIsland();
 
   if (breakLockWindow && !breakLockWindow.isDestroyed()) {
     breakLockWindow.__eyeflowPreviewWindow = previewWindow;
@@ -2497,25 +2502,24 @@ function applyInterventionBehavior(state) {
 
   const islandEnabled = desktopPreferenceDefaults().showReminderIsland !== false;
   const reminderMessage = state.message || "找一个恢复断点，看远处 20 秒。";
-  const presenceMessage = "Mira 在旁边看着节奏。";
 
-  // Channels escalate with the level (matches the 轻提醒规则), so a light level is
-  // never more than one pop-up:
-  //   L1 安静  — Mira's state carries it when she's on screen; the island is her
-  //             ambient stand-in (presence line, not a nudge) when she's exited.
-  //   L2 轻    — one channel: bubble if visible, island if exited.
-  //   L3 明确  — two: bubble + island when visible; island + system notification away.
-  //   L4       — full-screen, handled outside this coordinator.
+  // Two independent questions, kept separate so the same level always behaves the same:
+  //   (1) how strong is the reminder — the level; (2) where can Mira deliver it — her
+  //   runtime visibility. Mira on screen → her bubble carries L2+. Mira exited → the
+  //   island IS the reminder: a self-closing look-away micro-rest. There is no ambient
+  //   bar and no per-level visual form — the level only changes Mira's words (and whether
+  //   the away system banner joins). L4 is full-screen, handled outside this coordinator.
   const showBubble = companionVisible && level >= 2;
-  const showIsland = islandEnabled && (companionExited || level >= 3);
+  const showRest = islandEnabled && companionExited && level >= 2;
   // System notification is the away/lock-screen backup, governed by macOS itself (no
   // in-app toggle): fire it only when Mira is off-screen AND either it's an escalation
-  // (L3) or the island is off too — so a put-away reminder always has a channel, but
-  // a light L2 with the island on stays a single on-screen pop-up.
+  // (L3) or the island is off too — so a put-away reminder always has a channel, but a
+  // light L2 with the island on stays a single on-screen surface.
   const showNotify = companionExited && level >= 2 && (level >= 3 || !islandEnabled);
 
-  if (!showBubble && !showIsland && !showNotify) {
-    // Nothing to surface (e.g. L1 with Mira on screen) — leave the panel down.
+  if (!showBubble && !showRest && !showNotify) {
+    // Nothing to surface (L1, or L3 while Mira is on screen and her bubble carries it) —
+    // leave the panel down.
     if (levelChanged && companionVisible) hideCompanionPanel();
     return;
   }
@@ -2544,9 +2548,67 @@ function applyInterventionBehavior(state) {
         }, 9000);
       }
     }
-    if (showIsland) showNotchIsland(level >= 2 ? reminderMessage : presenceMessage);
+    // Mira exited → the island IS the reminder: run the look-away micro-rest and close
+    // the loop itself, no dead-end waiting for a button you can't reach.
+    if (showRest) startIslandMicroRest(islandRestMessage(level), state.reminderId || null);
     if (showNotify) notify(reminderMessage);
   }
+}
+
+// The away micro-rest: the island doesn't just announce a put-away reminder — it runs a
+// short look-away countdown and closes the loop itself. main.js is the sensor, so it
+// judges whether you actually stepped away (input stayed idle through the look-away) and
+// tells the renderer to resolve its single pending-reminder ledger. This kills the
+// "island fired, then nothing — the rest sits in the background forever" dead-end.
+// Mira's words on the away look-away capsule — the same gentle first-person voice as the
+// rest of the app. L3 is more certain, not louder (matches her "我建议现在休息一下").
+function islandRestMessage(level) {
+  return level >= 3 ? "眼睛该松一下了，看远处" : "陪你看会儿远处";
+}
+
+const ISLAND_LOOKAWAY_SECONDS = 20;
+function startIslandMicroRest(message, reminderId) {
+  if (islandRestActive) return; // one look-away at a time; the cooldown handles the rest
+  const shown = showNotchIsland({ mode: "rest", message, breakSeconds: ISLAND_LOOKAWAY_SECONDS });
+  if (!shown || !shown.ok) return; // island unavailable (non-darwin / break-lock) — leave the ledger to its own timeout
+  islandRestActive = true;
+  if (islandRestTimer) clearTimeout(islandRestTimer);
+  islandRestTimer = setTimeout(() => {
+    islandRestTimer = null;
+    islandRestActive = false;
+    let restedAway = false;
+    try {
+      // getSystemIdleTime = seconds since the last keyboard/mouse input. If it covers most
+      // of the look-away, the user stopped interacting = they took the micro-break. This is
+      // the same present/idle proxy the app already uses; input-idle is not proof they
+      // looked away, but it's the honest signal we have, and the copy says "look away".
+      restedAway = powerMonitor.getSystemIdleTime() >= Math.max(8, ISLAND_LOOKAWAY_SECONDS - 6);
+    } catch (_) {
+      restedAway = false;
+    }
+    if (dashboardWindow && !dashboardWindow.isDestroyed()) {
+      // Carry the reminder id so the renderer only closes the exact reminder this
+      // look-away was for — never a newer/stale one the user may have swapped in during
+      // the 20s (id mismatch → the renderer leaves it to its own 12-min timeout).
+      dashboardWindow.webContents.send("reminder:resolve", {
+        status: restedAway ? "completed" : "ignored",
+        reminderId: reminderId || null,
+        source: "island-micro-rest"
+      });
+    }
+    showNotchIsland({ mode: "restResult", ok: restedAway });
+  }, ISLAND_LOOKAWAY_SECONDS * 1000);
+}
+
+// Cancel an in-flight look-away so its timer can't fire after the island was hidden
+// (toggle-off, lock/suspend/quit, or a full-screen break superseding it) and resolve
+// a reminder or re-show the pill behind the user's back.
+function cancelIslandMicroRest() {
+  if (islandRestTimer) {
+    clearTimeout(islandRestTimer);
+    islandRestTimer = null;
+  }
+  islandRestActive = false;
 }
 
 function broadcastActivity(activity) {
@@ -2796,6 +2858,7 @@ function createNotchWindow() {
 }
 
 function hideNotchIsland() {
+  cancelIslandMicroRest(); // hiding the island also aborts any look-away it was running
   if (notchHideTimer) {
     clearTimeout(notchHideTimer);
     notchHideTimer = null;
@@ -2803,10 +2866,17 @@ function hideNotchIsland() {
   if (notchWindow && !notchWindow.isDestroyed()) notchWindow.hide();
 }
 
-function showNotchIsland(message, options = {}) {
+function showNotchIsland(input, legacyOptions = {}) {
   // Notch-adaptive top island is macOS-only; never let it throw into the caller
   // (it runs inside reminder delivery). Also don't cover the full-screen rest.
   if (process.platform !== "darwin") return { ok: false, reason: "unsupported" };
+  // Accept a plain string (legacy text pill) or a structured payload:
+  //   { mode: "rest", message, breakSeconds } — away look-away micro-rest countdown
+  //   { mode: "restResult", ok }              — close the loop (✓ / soft line)
+  const payload = typeof input === "string"
+    ? { mode: "text", message: input, ...legacyOptions }
+    : { ...input };
+  const mode = payload.mode || "text";
   try {
     if (breakLockWindow && !breakLockWindow.isDestroyed() && breakLockWindow.isVisible()) {
       return { ok: false, reason: "break-lock" };
@@ -2818,11 +2888,19 @@ function showNotchIsland(message, options = {}) {
     notchWindow.showInactive();
     notchWindow.moveTop();
     syncDock(); // showing this window can resurrect the Dock icon — re-assert it away
-    const durationMs = Math.max(1600, Math.min(Number(options.durationMs) || 6000, 12000));
-    const text = String(message || "").slice(0, 80);
+    const breakSeconds = Math.max(5, Math.min(Number(payload.breakSeconds) || 20, 120));
+    // Per-mode window lifetime: the rest pill must outlive its countdown (the restResult
+    // signal overrides the hide when it lands); the result surface is brief.
+    const durationMs = mode === "rest"
+      ? breakSeconds * 1000 + 3000
+      : mode === "restResult"
+        ? 1600
+        : Math.max(1600, Math.min(Number(payload.durationMs) || 6000, 12000));
+    const text = String(payload.message || "").slice(0, 80);
+    const data = { mode, message: text, breakSeconds, ok: Boolean(payload.ok), durationMs };
     const present = () => {
       if (!notchWindow || notchWindow.isDestroyed()) return;
-      notchWindow.webContents.send("island:show", { message: text, durationMs });
+      notchWindow.webContents.send("island:show", data);
       // Start the auto-hide only once the message is actually delivered, so a slow
       // first load can't hide the pill before it ever appears.
       if (notchHideTimer) clearTimeout(notchHideTimer);
@@ -2894,9 +2972,18 @@ app.whenReady().then(() => {
   startActivityMonitor();
   startSystemLifecycleMonitor();
   startCompanionVisibilityMonitor();
-  // Dev-only: preview the reminder island without driving a real L2+ reminder.
+  // Dev-only: cycle the reminder island through its real states — the L2 look-away
+  // capsule closing as completed, then the L3 look-away capsule closing as skipped — so
+  // the copy + loop can be eyeballed without waiting for a real L2+ reminder. Visual demo
+  // only: it drives showNotchIsland directly and never touches the pending-reminder ledger.
   if (process.env.EYEFLOW_ISLAND_SPIKE === "1") {
-    setTimeout(() => showNotchIsland("看远一点，休息 20 秒 · Mira", { durationMs: 9000 }), 1500);
+    const demoSteps = [
+      [1500, () => showNotchIsland({ mode: "rest", message: islandRestMessage(2), breakSeconds: 6 })],
+      [8000, () => showNotchIsland({ mode: "restResult", ok: true })],
+      [11000, () => showNotchIsland({ mode: "rest", message: islandRestMessage(3), breakSeconds: 6 })],
+      [17500, () => showNotchIsland({ mode: "restResult", ok: false })]
+    ];
+    for (const [delay, fn] of demoSteps) setTimeout(fn, delay);
   }
   screen.on("display-added", ensureCompanionReachable);
   screen.on("display-removed", ensureCompanionReachable);

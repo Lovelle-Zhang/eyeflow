@@ -9178,9 +9178,9 @@
             <details class="settings-disclosure-row ef-disclosure-row panel settings-rules-row">
               <summary>查看轻提醒规则</summary>
               <ul class="step-list settings-rule-list">
-                <li class="rule-row"><strong class="rule-level">L1</strong>只变状态球、表情和文字，不自动展开气泡。</li>
-                <li class="rule-row"><strong class="rule-level">L2</strong>到恢复断点时短暂展开气泡；中段只先变状态，不立刻打断。</li>
-                <li class="rule-row"><strong class="rule-level">L3</strong>状态信号偏高或明显超时时才增强提示；如果开启系统通知，会按冷却时间提醒。</li>
+                <li class="rule-row"><strong class="rule-level">L1</strong>只改变状态球、表情和文字，不弹气泡，也不打断你。</li>
+                <li class="rule-row"><strong class="rule-level">L2</strong>到恢复断点时轻提一次——Mira 在屏就展开气泡；她退出时，顶部岛带你看远处 20 秒，看完自动收起。</li>
+                <li class="rule-row"><strong class="rule-level">L3</strong>状态信号偏高或明显超时时更明确——Mira 在屏时气泡说得更笃定；你离开电脑时，顶部岛的 20 秒休息加系统通知补位。</li>
                 <li class="rule-row"><strong class="rule-level">L4</strong>强制爱：只在你主动选择后启用；到恢复断点进入全屏恢复，倒计时结束前不显示返回按钮；开启语音引导后可以不看屏幕，Mira 会用声音带你完成。</li>
                 <li class="rule-legend-row"><strong>颜色</strong><span class="rule-legend"><i class="rule-dot" style="--c:#3aa888"></i>在线</span><span class="rule-legend"><i class="rule-dot" style="--c:#5fa8d6"></i>专注</span><span class="rule-legend"><i class="rule-dot" style="--c:#d6a73a"></i>眨眼</span><span class="rule-legend"><i class="rule-dot" style="--c:#d97aa0"></i>休息</span></li>
               </ul>
@@ -10322,6 +10322,27 @@
     }
     if (window.eyeflowDesktop?.onForceBreakDone) {
       window.eyeflowDesktop.onForceBreakDone((payload) => finishForceBreak(payload));
+    }
+    if (window.eyeflowDesktop?.onReminderResolve) {
+      // The island's away micro-rest closed the loop in the main process (it sensed
+      // whether you stepped away). Resolve the single pending-reminder ledger here so the
+      // rest never sits "pending" in the background waiting for an unreachable button.
+      window.eyeflowDesktop.onReminderResolve((payload) => {
+        const status = payload && payload.status;
+        if (status !== "completed" && status !== "ignored") return;
+        // Only close the exact reminder this look-away was showing for — if the pending
+        // reminder changed during the 20s (handled elsewhere, or a fresh one supersedes
+        // it), leave it to its own 12-min timeout rather than resolve the wrong one.
+        const currentId = state.pendingReminder?.status === "pending" ? state.pendingReminder.id : null;
+        if (!payload.reminderId || payload.reminderId !== currentId) return;
+        const had = closePendingReminder(status);
+        if (!had) return;
+        if (status === "completed") {
+          addSystemLog("在顶部岛完成了一次微休息", "你看远处休息了一下，EyeFlow 已记录这次恢复。");
+        }
+        render();
+        persist();
+      });
     }
     refreshPermissionStatus();
     refreshDesktopSettings();
@@ -16335,6 +16356,7 @@
         forceMode: state.settings.intensity === "force",
         forceBreakActive: Boolean(forceBreakActive),
         reminderPending: state.pendingReminder?.status === "pending",
+        reminderId: state.pendingReminder?.status === "pending" ? state.pendingReminder.id : null,
         reminderDeferred: Boolean(state.deferReminderUntilBreak),
         snoozeUntil: Number(state.snoozeUntil || 0),
         reminderOpening,

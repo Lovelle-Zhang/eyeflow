@@ -233,25 +233,34 @@ function main() {
   // (Mira bubble when visible + island when enabled, coexisting) plus the system
   // notification only as the away/lock-screen backup — never stacked while Mira is
   // on screen (kills the L3 triple-buzz).
-  // Channels escalate with the level (matches the 轻提醒规则): L2 is one channel,
-  // L3 adds the second + the away notification, all on one shared cooldown. L1 shows
-  // nothing when Mira is visible and only the island (as her ambient stand-in) when
-  // she is exited.
-  assertMatches(mainJs, /function applyInterventionBehavior\(state\)[\s\S]*const showBubble = companionVisible && level >= 2;[\s\S]*const showIsland = islandEnabled && \(companionExited \|\| level >= 3\);[\s\S]*const showNotify = companionExited && level >= 2[\s\S]*&& \(level >= 3 \|\| !islandEnabled\);[\s\S]*if \(escalated \|\| now - lastReminderAt > reminderCooldown\) \{[\s\S]*if \(showBubble\) \{[\s\S]*showCompanionPanel\(\);[\s\S]*if \(showIsland\) showNotchIsland\(level >= 2 \? reminderMessage : presenceMessage\);[\s\S]*if \(showNotify\) notify\(reminderMessage\);/, "reminder channels escalate by level (L2 one, L3 two + away notification) on one shared cooldown");
-  assertMatches(mainJs, /showNotchIsland\(level >= 2 \? reminderMessage : presenceMessage\)/, "the L1 island shows a gentle presence line, not a rest nudge");
+  // One line, not a matrix: how strong (level) and where Mira can deliver (visibility) are
+  // separate. Mira on-screen → her bubble carries L2+. Mira exited → the island IS the
+  // reminder: a self-closing look-away micro-rest. No ambient bar, no per-level visual
+  // form — level only changes Mira's words and whether the away system banner joins.
+  assertMatches(mainJs, /function applyInterventionBehavior\(state\)[\s\S]*const showBubble = companionVisible && level >= 2;[\s\S]*const showRest = islandEnabled && companionExited && level >= 2;[\s\S]*const showNotify = companionExited && level >= 2[\s\S]*&& \(level >= 3 \|\| !islandEnabled\);[\s\S]*if \(escalated \|\| now - lastReminderAt > reminderCooldown\) \{[\s\S]*if \(showBubble\) \{[\s\S]*showCompanionPanel\(\);[\s\S]*if \(showRest\) startIslandMicroRest\(islandRestMessage\(level\), state\.reminderId \|\| null\);[\s\S]*if \(showNotify\) notify\(reminderMessage\);/, "collapsed island logic: Mira on-screen → bubble; exited → self-closing look-away micro-rest");
+  assertMatches(mainJs, /function islandRestMessage\(level\)[\s\S]*level >= 3 \? "眼睛该松一下了，看远处" : "陪你看会儿远处"/, "island rest copy is Mira's voice; L3 is more certain, not louder");
+  assertNotIncludes(mainJs, 'mode: "bar"', "the ambient level bar is gone — the island is one thing: the away micro-rest");
+  assertMatches(mainJs, /function startIslandMicroRest\(message, reminderId\)[\s\S]*showNotchIsland\(\{ mode: "rest", message, breakSeconds: ISLAND_LOOKAWAY_SECONDS \}\)[\s\S]*powerMonitor\.getSystemIdleTime\(\)[\s\S]*"reminder:resolve"[\s\S]*status: restedAway \? "completed" : "ignored"[\s\S]*reminderId: reminderId \|\| null[\s\S]*showNotchIsland\(\{ mode: "restResult", ok: restedAway \}\)/, "the away micro-rest senses the look-away and resolves the exact reminder (id-guarded, no dead-end)");
+  assertMatches(mainJs, /function hideNotchIsland\(\) \{\s*cancelIslandMicroRest\(\);/, "hiding the island aborts any in-flight look-away timer (no stale resolve / re-show)");
+  assertMatches(indexHtml, /onReminderResolve\(\(payload\) => \{[\s\S]*if \(!payload\.reminderId \|\| payload\.reminderId !== currentId\) return;/, "renderer only closes the exact reminder the look-away was for");
   assertMatches(mainJs, /powerMonitor\.on\("unlock-screen", \(\) => \{[\s\S]*companionHiddenByLifecycle = false;[\s\S]*ensureCompanionReachable\(\);[\s\S]*\}\);/, "unlocking clears the lifecycle-hidden latch so fallback reminders are not swallowed after lock/unlock");
 
   // Top-of-screen reminder island: Mira's stand-in for the bubble when she is put away.
   const islandHtml = read("island.html");
-  assertMatches(mainJs, /function showNotchIsland\(message, options = \{\}\) \{[\s\S]*if \(process\.platform !== "darwin"\) return[\s\S]*breakLockWindow[\s\S]*isVisible\(\)[\s\S]*return \{ ok: false, reason: "break-lock" \};/, "showNotchIsland is macOS-gated and never covers the full-screen rest");
+  assertMatches(mainJs, /function showNotchIsland\(input, legacyOptions = \{\}\) \{[\s\S]*if \(process\.platform !== "darwin"\) return[\s\S]*breakLockWindow[\s\S]*isVisible\(\)[\s\S]*return \{ ok: false, reason: "break-lock" \};/, "showNotchIsland is macOS-gated and never covers the full-screen rest");
   assertIncludes(mainJs, "const islandEnabled = desktopPreferenceDefaults().showReminderIsland !== false;", "island is a toggle-gated channel that coexists with Mira");
   assertIncludes(mainJs, "showReminderIsland: settings.showReminderIsland !== false", "reminder island preference defaults on");
   assertIncludes(mainJs, "function toggleReminderIsland()", "menu/tray can toggle the reminder island");
   assertMatches(mainJs, /label: "顶端提醒岛",\s*type: "checkbox",\s*checked: desktopPreferenceDefaults\(\)\.showReminderIsland,\s*click: toggleReminderIsland/, "app + tray menu expose the reminder island as a checkbox choice");
   assertMatches(mainJs, /function broadcastSystemLifecycle\(reason\)[\s\S]*if \(reason !== "resume"\) \{[\s\S]*hideNotchIsland\(\);/, "lock/suspend/shutdown hides the reminder island");
   assertIncludes(preloadJs, 'ipcRenderer.on("island:show", listener)', "preload exposes the island:show channel");
+  assertIncludes(preloadJs, 'ipcRenderer.on("reminder:resolve", listener)', "preload exposes the reminder:resolve channel for the micro-rest loop");
+  assertMatches(indexHtml, /onReminderResolve\(\(payload\) => \{[\s\S]*closePendingReminder\(status\)/, "renderer resolves the pending reminder when the island micro-rest closes the loop");
   assertIncludes(packageJson, '"island.html"', "island.html is included in packaged files");
-  assertIncludes(islandHtml, "msgEl.textContent = text", "island renders the message as text (XSS-safe), not HTML");
+  assertIncludes(islandHtml, "msgEl.textContent = message", "island renders the message as text (XSS-safe), not HTML");
+  assertIncludes(islandHtml, "function showRest", "island runs the look-away micro-rest countdown");
+  assertIncludes(islandHtml, '"好，眼睛松过了"', "island completion closes the loop in Mira's voice");
+  assertNotIncludes(islandHtml, "BAR_HEIGHT", "island has no ambient level bar (collapsed to the one micro-rest surface)");
   assertIncludes(islandHtml, "prefers-reduced-motion", "island honors Reduce Motion");
   assertMatches(mainJs, /function createDarwinTrayIcon\(\)[\s\S]*nativeImage\.createEmpty\(\)[\s\S]*scaleFactor: 1,[\s\S]*trayTemplate\.png[\s\S]*scaleFactor: 2,[\s\S]*trayTemplate@2x\.png[\s\S]*icon\.setTemplateImage\(true\);/, "macOS menu bar tray loads crisp 1x and 2x template assets");
   assertIncludes(packageJson, '"assets/trayTemplate.png"', "macOS menu bar tray template asset is included in packaged files");
