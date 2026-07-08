@@ -40,6 +40,24 @@ function assertNotMatches(source, pattern, label) {
   }
 }
 
+function functionBody(source, name) {
+  const start = source.indexOf(`function ${name}`);
+  if (start === -1) throw new Error(`${name}: function not found`);
+  const signatureEnd = source.indexOf(") {", start);
+  if (signatureEnd === -1) throw new Error(`${name}: function signature not found`);
+  const braceStart = source.indexOf("{", signatureEnd);
+  let depth = 0;
+  for (let index = braceStart; index < source.length; index += 1) {
+    const char = source[index];
+    if (char === "{") depth += 1;
+    if (char === "}") {
+      depth -= 1;
+      if (depth === 0) return source.slice(braceStart + 1, index);
+    }
+  }
+  throw new Error(`${name}: function body not closed`);
+}
+
 function parseInlineScripts(relativePath) {
   const html = read(relativePath);
   const scripts = [...html.matchAll(/<script(?:\s[^>]*)?>([\s\S]*?)<\/script>/gi)];
@@ -142,6 +160,22 @@ function main() {
   assertMatches(mainJs, /const hasReminderOpening = Boolean\(state\.isRunning \|\| state\.reminderOpening \|\| state\.naturalBreak \|\| state\.reminderPending\);/, "desktop panel requires an interruption opening");
   assertIncludes(breakLockHtml, "再点一次确认退出", "break lock emergency exit requires confirmation");
   assertIncludes(breakLockHtml, "interrupted: true", "break lock reports interrupted force exits");
+  const finishBreakLockBody = functionBody(mainJs, "finishBreakLock");
+  assertNotMatches(
+    finishBreakLockBody,
+    /breakLockWindow\s*=\s*null;/,
+    "break lock finish keeps the window reference until closed"
+  );
+  assertMatches(
+    finishBreakLockBody,
+    /forceCloseBreakLockWindow\(/,
+    "break lock finish has a forced-close fallback for stuck fullscreen windows"
+  );
+  assertMatches(
+    breakLockHtml,
+    /document\.addEventListener\("keydown"[\s\S]*event\.key === "Escape"[\s\S]*requestEmergencyExit\(\);/,
+    "break lock supports Escape as an emergency exit fallback"
+  );
   assertMatches(mainJs, /if \(label === "break-lock-complete"\) \{[\s\S]*window\.clearInterval\(ticker\);[\s\S]*completionShown = false;[\s\S]*showCompletion\(\);/, "debug break-lock complete capture stops the timer before forcing the completed state");
   assertMatches(mainJs, /dashboardWindow\.webContents\.send\("dashboard:restGuide"/, "desktop forwards rest guide");
   assertMatches(indexHtml, /onRestGuide\?\.\(\(payload = \{\}\) => \{[\s\S]*focusSessionPanel\(\{\s*target:\s*"rest",\s*guideLevel:\s*level\s*\}\);/, "dashboard rest guide focuses rest button");

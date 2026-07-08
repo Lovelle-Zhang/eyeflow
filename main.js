@@ -2376,6 +2376,29 @@ function enterBreakLockFullscreen() {
   breakLockWindow.moveTop();
 }
 
+function forceCloseBreakLockWindow(winToClose) {
+  if (!winToClose || winToClose.isDestroyed()) return;
+  breakLockCanClose = true;
+  try {
+    winToClose.setKiosk(false);
+    winToClose.setFullScreen(false);
+    winToClose.setAlwaysOnTop(false);
+    winToClose.setVisibleOnAllWorkspaces(false);
+    winToClose.hide();
+    winToClose.close();
+  } catch (error) {
+    console.warn("[EyeFlow] break-lock close failed", error.message);
+  }
+  setTimeout(() => {
+    if (!winToClose || winToClose.isDestroyed()) return;
+    try {
+      winToClose.destroy();
+    } catch (error) {
+      console.warn("[EyeFlow] break-lock destroy failed", error.message);
+    }
+  }, 1200);
+}
+
 function startBreakLock(payload = {}) {
   const previewWindow = Boolean(payload.preview);
   const minSeconds = debugCapture && payload.preview ? 4 : 15;
@@ -2464,8 +2487,9 @@ function startBreakLock(payload = {}) {
     syncDock();
     breakLockWindow.focus();
   });
+  const currentBreakLockWindow = breakLockWindow;
   breakLockWindow.on("closed", () => {
-    breakLockWindow = null;
+    if (breakLockWindow === currentBreakLockWindow) breakLockWindow = null;
   });
   breakLockWindow.on("close", (event) => {
     if (!breakLockCanClose && !app.isQuitting) {
@@ -2479,13 +2503,7 @@ function finishBreakLock(payload = {}) {
   breakLockCanClose = true;
   if (breakLockWindow && !breakLockWindow.isDestroyed()) {
     const winToClose = breakLockWindow;
-    const closeBreakLockWindow = () => {
-      if (winToClose.isDestroyed()) return;
-      winToClose.setKiosk(false);
-      winToClose.setFullScreen(false);
-      winToClose.setAlwaysOnTop(false);
-      winToClose.close();
-    };
+    const closeBreakLockWindow = () => forceCloseBreakLockWindow(winToClose);
     if (debugCapture && payload.preview) {
       Promise.resolve(captureDebugPageNow(winToClose, "break-lock-complete", {
         requestedView: "break-lock",
@@ -2498,7 +2516,6 @@ function finishBreakLock(payload = {}) {
       closeBreakLockWindow();
     }
   }
-  breakLockWindow = null;
   if (dashboardWindow && !dashboardWindow.isDestroyed()) {
     dashboardWindow.show();
     dashboardWindow.focus();
