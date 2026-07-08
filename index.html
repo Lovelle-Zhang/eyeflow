@@ -11543,7 +11543,14 @@
       if (forceBreakActive) return;
       forceBreakActive = true;
       forceBreakPreview = Boolean(options.preview);
-      state.pendingReminder = null;
+      // Don't just null the pending L2/L3 card — that orphans its `shown` rhythm
+      // memory and reminderStats (the closed-loop engine reads both). Close it
+      // honestly as "ignored": the user didn't respond to the nudge and the system
+      // escalated to a takeover instead; the forced rest is tracked separately as a
+      // recovery_event with trigger "force". The card hides the same way (renders
+      // gate on status === "pending"). A settings PREVIEW leaves a real pending
+      // reminder untouched — it should still be there when the preview ends.
+      if (!options.preview) closePendingReminder("ignored");
       // Close any open focus round before stopping the clock, or its
       // activeFocusSessionId is orphaned and the next startSession merges into it
       // (openFocusSession early-returns on a live id). Key off the persisted id so a

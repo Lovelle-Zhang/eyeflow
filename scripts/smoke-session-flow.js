@@ -160,8 +160,13 @@ function main() {
   assertIncludes(indexHtml, "我先不弹普通提醒。到恢复断点后，会直接进入全屏恢复。", "force mode companion stays quiet until break point");
   assertMatches(
     indexHtml,
-    /function\s+startForceBreak\(intervention, options = \{\}\)[\s\S]*state\.pendingReminder = null;[\s\S]*currentBreakReason = "force";/,
-    "force break clears ordinary pending reminder before taking over the UI"
+    /function\s+startForceBreak\(intervention, options = \{\}\)[\s\S]*if \(!options\.preview\) closePendingReminder\("ignored"\);[\s\S]*currentBreakReason = "force";/,
+    "force break closes the pending reminder honestly (ignored) instead of orphaning its accounting; previews leave it pending"
+  );
+  assertNotMatches(
+    indexHtml,
+    /function\s+startForceBreak\(intervention, options = \{\}\)[\s\S]{0,600}state\.pendingReminder = null;/,
+    "force break must not null the pending reminder directly (orphans shown rhythm memory + reminderStats)"
   );
   assertMatches(
     indexHtml,
