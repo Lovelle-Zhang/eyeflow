@@ -1528,6 +1528,19 @@ function keepDashboardVisible() {
   dashboardWindow.setBounds(defaultDashboardBounds(), false);
 }
 
+function restoreDashboardAfterBreakLock(payload = {}) {
+  if (!dashboardWindow || dashboardWindow.isDestroyed()) return;
+  if (dashboardWindow.isMinimized()) dashboardWindow.restore();
+  if (dashboardWindow.isFullScreen()) dashboardWindow.setFullScreen(false);
+  if (dashboardWindow.isMaximized()) dashboardWindow.unmaximize();
+  if (process.platform === "darwin") dashboardWindow.setVisibleOnAllWorkspaces(false);
+  dashboardWindow.setAlwaysOnTop(false);
+  keepDashboardVisible();
+  dashboardWindow.show();
+  if (payload.preview) dashboardWindow.focus();
+  dashboardWindow.webContents.send("breakLock:finished", payload);
+}
+
 let dashboardRevealTimer = null;
 
 // Bring the dashboard onto the CURRENT Space/desktop. Without this, a window created
@@ -2517,9 +2530,7 @@ function finishBreakLock(payload = {}) {
     }
   }
   if (dashboardWindow && !dashboardWindow.isDestroyed()) {
-    dashboardWindow.show();
-    dashboardWindow.focus();
-    dashboardWindow.webContents.send("breakLock:finished", payload);
+    restoreDashboardAfterBreakLock(payload);
     if (debugCapture && payload.preview) {
       setTimeout(() => {
         dashboardWindow.webContents.executeJavaScript(`(() => new Promise((resolve) => {

@@ -171,6 +171,21 @@ function main() {
     /forceCloseBreakLockWindow\(/,
     "break lock finish has a forced-close fallback for stuck fullscreen windows"
   );
+  assertNotMatches(
+    finishBreakLockBody,
+    /dashboardWindow\.show\(\);\s*dashboardWindow\.focus\(\);/,
+    "break lock finish does not directly reveal a possibly fullscreen dashboard"
+  );
+  assertMatches(
+    finishBreakLockBody,
+    /restoreDashboardAfterBreakLock\(payload\);/,
+    "break lock finish restores the dashboard window before reveal"
+  );
+  assertMatches(
+    mainJs,
+    /function\s+restoreDashboardAfterBreakLock\(payload = \{\}\)[\s\S]*dashboardWindow\.setFullScreen\(false\);[\s\S]*dashboardWindow\.unmaximize\(\);[\s\S]*dashboardWindow\.setVisibleOnAllWorkspaces\(false\);[\s\S]*keepDashboardVisible\(\);[\s\S]*dashboardWindow\.show\(\);/,
+    "dashboard is forced back to a normal centered window after break lock"
+  );
   assertMatches(
     breakLockHtml,
     /document\.addEventListener\("keydown"[\s\S]*event\.key === "Escape"[\s\S]*requestEmergencyExit\(\);/,
