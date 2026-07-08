@@ -682,6 +682,24 @@
       });
     })();
 
+    (function () { // 手机访客:DMG 下载没有意义 — CTA 变成「复制链接,回 Mac 下载」。
+      // 必须跑在中/EN 切换的快照之前,这样换上的文案也能双语切换。
+      const ua = navigator.userAgent;
+      const isMobile = /Android|iPhone|iPod/.test(ua) || (/iPad|Macintosh/.test(ua) && navigator.maxTouchPoints > 1);
+      if (!isMobile) return;
+      document.querySelectorAll('a[href$=".dmg"]').forEach((a) => {
+        const inNav = a.classList.contains("dl");
+        a.textContent = inNav ? "复制链接" : "复制链接 · 回 Mac 下载";
+        a.dataset.en = inNav ? "Copy link" : "Copy link — download on your Mac";
+        a.addEventListener("click", (e) => {
+          e.preventDefault();
+          const done = () => { a.textContent = document.documentElement.lang === "en" ? "Copied ✓ — open on your Mac" : "已复制 ✓ 回 Mac 浏览器打开"; };
+          if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText("https://eyeflow.app").then(done).catch(done);
+          else done();
+        });
+      });
+    })();
+
     (function () { // 中/EN
       const els = [...document.querySelectorAll("[data-en]")];
       els.forEach((el) => (el.dataset.zh = el.innerHTML));
