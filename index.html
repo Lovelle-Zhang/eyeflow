@@ -11949,7 +11949,7 @@
       if (level < 2) return false;
       if (isBusyForReminder()) return false;
       if (latestActivity && isNaturalBreak(latestActivity)) return true;
-      if (!isRunning) return false;
+      if (!(isRunning || isAutoTracking())) return false;
       const targetSeconds = Number(els.focusTarget.value) * 60;
       if (load >= 74) {
         return elapsedSeconds >= Math.min(targetSeconds, 8 * 60);
@@ -14249,7 +14249,7 @@
             copy: `这次强制恢复已中断，Mira 会安静 ${remainingMinutes} 分钟。下一轮到恢复断点后会恢复 L4 规则。`
           };
         }
-        if (!isRunning) {
+        if (!(isRunning || isAutoTracking())) {
           return {
             level: 1,
             displayLevel: 4,
@@ -16439,7 +16439,7 @@
       const naturalBreak = Boolean(latestActivity && isNaturalBreak(latestActivity));
       // "真正到断点" = 手动计时到达目标，或自动模式的自然停顿。main 用它区分：断点前的
       // 提醒边界热身只跳"不带计时的绿胶囊"，真到断点才跳"带计时的" look-away 胶囊，且绕过冷却。
-      const breakDue = Boolean((isRunning && Number(elapsedSeconds) >= Number(els.focusTarget.value) * 60) || naturalBreak);
+      const breakDue = Boolean(((isRunning || isAutoTracking()) && Number(elapsedSeconds) >= Number(els.focusTarget.value) * 60) || naturalBreak);
       publishCompanionState({
         mood,
         title,
