@@ -49,6 +49,9 @@ function main() {
     "today-session-settings",
     "today-auto-tracking",
     "rhythmView",
+    "settings-l1",
+    "settings-l2",
+    "settings-l3",
     "settings-ordinary",
     "profileView",
     "profile-share-card",
@@ -90,8 +93,20 @@ function main() {
   assertIncludes(captureJs, "EYEFLOW_CURRENT_CAPTURE", "capture CLI launches explicit current target");
   assertIncludes(mainJs, "EYEFLOW_DEBUG_ACCESSIBILITY_TRUSTED", "main can fixture ordinary settings capture without changing system permissions");
   assertIncludes(captureJs, "EYEFLOW_DEBUG_ACCESSIBILITY_TRUSTED", "capture CLI can request ordinary settings state");
+  assertIncludes(mainJs, "settings-l1", "main can fixture L1 settings capture");
+  assertIncludes(mainJs, "settings-l2", "main can fixture L2 settings capture");
+  assertIncludes(mainJs, "settings-l3", "main can fixture L3 settings capture");
+  assertIncludes(mainJs, 'wantsCurrentVisualCapture("settings-l1") ? "settings-l1" : ""', "main schedules L1 settings capture");
+  assertIncludes(mainJs, 'wantsCurrentVisualCapture("settings-l2") ? "settings-l2" : ""', "main schedules L2 settings capture");
+  assertIncludes(mainJs, 'wantsCurrentVisualCapture("settings-l3") ? "settings-l3" : ""', "main schedules L3 settings capture");
+  assertIncludes(captureJs, "eyeflow-settings-l1.png", "capture CLI saves L1 settings screenshot");
+  assertIncludes(captureJs, "eyeflow-settings-l2.png", "capture CLI saves L2 settings screenshot");
+  assertIncludes(captureJs, "eyeflow-settings-l3.png", "capture CLI saves L3 settings screenshot");
   assertIncludes(captureJs, "EYEFLOW_DEBUG_CAPTURE_DIR", "capture CLI controls capture directory");
   assertIncludes(captureJs, "EYEFLOW_USER_DATA_DIR", "capture CLI isolates local app data");
+  assertIncludes(captureJs, "child.unref", "capture CLI releases Electron child handles after capture");
+  assertIncludes(captureJs, "child.stdout.destroy", "capture CLI closes child stdout after capture");
+  assertIncludes(captureJs, "child.stderr.destroy", "capture CLI closes child stderr after capture");
   assertIncludes(mainJs, "app.setPath(\"userData\", debugUserDataDir)", "main routes debug capture storage away from production user data");
   assertIncludes(mainJs, "const previewSeconds = debugCapture ? 10 : 15;", "debug force preview leaves enough time for break-lock captures");
   assertIncludes(captureJs, "validateMetadata", "capture CLI refuses mismatched screenshots");

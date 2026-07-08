@@ -23,6 +23,9 @@ if (debugUserDataDir) {
 }
 const debugDashboardView = [
   String(process.env.EYEFLOW_DEBUG_VIEW || ""),
+  wantsCurrentVisualCapture("settings-l1") ? "settings-l1" : "",
+  wantsCurrentVisualCapture("settings-l2") ? "settings-l2" : "",
+  wantsCurrentVisualCapture("settings-l3") ? "settings-l3" : "",
   wantsCurrentVisualCapture("settings-ordinary") ? "settings-ordinary" : "",
   wantsCurrentVisualCapture("rhythmView") ? "rhythmView" : "",
   wantsCurrentVisualCapture("profileView") ? "profileView" : "",
@@ -235,6 +238,15 @@ function parseCurrentVisualCaptureTargets(input) {
     session: "today-session",
     sessionSettings: "today-session-settings",
     settings: "rhythmView",
+    "settings-l1": "settings-l1",
+    settingsL1: "settings-l1",
+    "l1-settings": "settings-l1",
+    "settings-l2": "settings-l2",
+    settingsL2: "settings-l2",
+    "l2-settings": "settings-l2",
+    "settings-l3": "settings-l3",
+    settingsL3: "settings-l3",
+    "l3-settings": "settings-l3",
     "settings-ordinary": "settings-ordinary",
     settingsOrdinary: "settings-ordinary",
     rhythm: "rhythmView",
@@ -267,6 +279,9 @@ function parseCurrentVisualCaptureTargets(input) {
         "today-session-settings",
         "today-auto-tracking",
         "rhythmView",
+        "settings-l1",
+        "settings-l2",
+        "settings-l3",
         "settings-ordinary",
         "profileView",
         "today-share-preview",
@@ -294,6 +309,9 @@ function debugCaptureFilename(label) {
     "dashboard-auto-tracking": "eyeflow-dashboard-auto-tracking.png",
     "dashboard-onboarding": "eyeflow-onboarding-active.png",
     "dashboard-rhythmView": "eyeflow-settings-clean.png",
+    "dashboard-settings-l1": "eyeflow-settings-l1.png",
+    "dashboard-settings-l2": "eyeflow-settings-l2.png",
+    "dashboard-settings-l3": "eyeflow-settings-l3.png",
     "dashboard-settings-ordinary": "eyeflow-settings-ordinary.png",
     "dashboard-profileView": "eyeflow-profile-clean.png",
     "dashboard-today-share-preview": "eyeflow-today-share-preview.png",
@@ -539,6 +557,13 @@ function debugPrepareCaptureScript(options = {}) {
       if (startBtnText) startBtnText.textContent = "暂停";
       document.querySelector("#sessionPanel")?.scrollIntoView({ behavior: "auto", block: "center", inline: "nearest" });
     }
+    const captureIntensity = ${JSON.stringify(options.intensity || "")};
+    if (captureIntensity && typeof setIntensity === "function") {
+      setIntensity(captureIntensity, { persistChange: false, renderChange: false, userChange: false });
+      const disclosure = document.querySelector(".settings-boundary-disclosure");
+      if (disclosure) disclosure.open = true;
+      if (typeof render === "function") render();
+    }
     if (${options.sessionSettingsOpen === true ? "true" : "false"}) {
       const settings = document.querySelector(".session-settings");
       if (settings) {
@@ -670,22 +695,33 @@ async function performDebugCapture(win, label, options = {}) {
 
 function captureDebugDashboardView(viewName, extraDelayMs = 0) {
   if (!debugCapture || !viewName || !dashboardWindow || dashboardWindow.isDestroyed()) return;
-  if (!/^[a-z-]+$/i.test(viewName)) return;
-  const targetViewName = viewName === "settings-ordinary"
+  if (!/^[a-z0-9-]+$/i.test(viewName)) return;
+  const settingsIntensity = ({
+    "settings-l1": "quiet",
+    "settings-l2": "standard",
+    "settings-l3": "clear"
+  })[viewName] || "";
+  const targetViewName = settingsIntensity
+    ? "rhythmView"
+    : viewName === "settings-ordinary"
     ? "rhythmView"
     : viewName === "today-share-preview"
       ? "todayView"
     : viewName === "profile-share-card"
       ? "profileView"
       : viewName;
-  const captureState = viewName === "settings-ordinary"
+  const captureState = settingsIntensity
+    ? `${settingsIntensity === "quiet" ? "L1" : settingsIntensity === "clear" ? "L3" : "L2"} settings`
+    : viewName === "settings-ordinary"
     ? "ordinary mode"
     : viewName === "today-share-preview"
       ? "share preview"
     : viewName === "profile-share-card"
       ? "share card"
       : "default";
-  const captureReason = viewName === "settings-ordinary"
+  const captureReason = settingsIntensity
+    ? `${captureState} debug view`
+    : viewName === "settings-ordinary"
     ? "ordinary settings debug view"
     : viewName === "today-share-preview"
       ? "today share preview debug view"
@@ -697,6 +733,12 @@ function captureDebugDashboardView(viewName, extraDelayMs = 0) {
     ? ["带走这张卡", "复制卡片", "eyeflow.app"]
     : viewName === "profile-share-card"
     ? ["今天就到这里了", "今日分享卡", "eyeflow.app"]
+    : settingsIntensity === "quiet"
+    ? ["L1 安静", "只改变 Mira 状态，不主动打断。", "最低提醒等级"]
+    : settingsIntensity === "standard"
+    ? ["L2 轻提示", "到休息点再轻提醒。", "当前提醒等级"]
+    : settingsIntensity === "clear"
+    ? ["L3 明确", "偏载明显时提醒更清楚。", "当前提醒等级"]
     : [];
   setTimeout(() => {
     if (!dashboardWindow || dashboardWindow.isDestroyed()) return;
@@ -741,6 +783,14 @@ function captureDebugDashboardView(viewName, extraDelayMs = 0) {
         if (typeof elapsedSeconds !== "undefined") elapsedSeconds = Math.max(Number(elapsedSeconds || 0), 8 * 60);
         if (typeof render === "function") render();
         if (typeof openDailySharePreview === "function") openDailySharePreview();
+      }
+      const captureIntensity = ${JSON.stringify(settingsIntensity)};
+      if (captureIntensity && typeof setIntensity === "function") {
+        setIntensity(captureIntensity, { persistChange: false, renderChange: false, userChange: false });
+        const disclosure = document.querySelector(".settings-boundary-disclosure");
+        if (disclosure) disclosure.open = true;
+        if (typeof render === "function") render();
+        enforceView();
       }
       let feedbackProbe = null;
       if (${debugCopyFeedback ? "true" : "false"} && typeof buildFeedbackTemplate === "function") {
@@ -861,7 +911,8 @@ function captureDebugDashboardView(viewName, extraDelayMs = 0) {
           focusSelector,
           requiredText,
           captureState,
-          captureReason
+          captureReason,
+          intensity: settingsIntensity
         });
       });
     }).catch((error) => {

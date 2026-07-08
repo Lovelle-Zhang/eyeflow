@@ -53,6 +53,27 @@ const targets = {
     visibleView: "rhythmView",
     captureState: "default"
   },
+  "settings-l1": {
+    aliases: ["settings-l1", "settingsL1", "l1-settings"],
+    filename: "eyeflow-settings-l1.png",
+    requestedView: "rhythmView",
+    visibleView: "rhythmView",
+    captureState: "L1 settings"
+  },
+  "settings-l2": {
+    aliases: ["settings-l2", "settingsL2", "l2-settings"],
+    filename: "eyeflow-settings-l2.png",
+    requestedView: "rhythmView",
+    visibleView: "rhythmView",
+    captureState: "L2 settings"
+  },
+  "settings-l3": {
+    aliases: ["settings-l3", "settingsL3", "l3-settings"],
+    filename: "eyeflow-settings-l3.png",
+    requestedView: "rhythmView",
+    visibleView: "rhythmView",
+    captureState: "L3 settings"
+  },
   "settings-ordinary": {
     aliases: ["settings-ordinary", "settingsOrdinary", "ordinary-settings"],
     filename: "eyeflow-settings-ordinary.png",
@@ -177,6 +198,16 @@ function basisText(metadata) {
   ].join("\n");
 }
 
+function releaseChild(child) {
+  if (!child) return;
+  if (child.exitCode === null && child.signalCode === null) {
+    child.kill("SIGKILL");
+  }
+  child.stdout.destroy();
+  child.stderr.destroy();
+  child.unref();
+}
+
 async function main() {
   const requested = normalizeTarget(process.argv[2] || "todayView");
   if (!requested) {
@@ -198,6 +229,9 @@ async function main() {
   if (requested === "settings-ordinary") {
     env.EYEFLOW_CURRENT_CAPTURE = "settings-ordinary,rhythmView";
     env.EYEFLOW_DEBUG_ACCESSIBILITY_TRUSTED = "0";
+  }
+  if (["settings-l1", "settings-l2", "settings-l3"].includes(requested)) {
+    env.EYEFLOW_CURRENT_CAPTURE = `${requested},rhythmView`;
   }
 
   const child = spawn(electronBinary(), ["."], {
@@ -225,6 +259,7 @@ async function main() {
   child.kill("SIGTERM");
   await sleep(500);
   if (child.exitCode === null && child.signalCode === null) child.kill("SIGKILL");
+  releaseChild(child);
 
   if (!metadata) {
     throw new Error(`Timed out waiting for ${target.filename}\n${output.split(/\r?\n/).slice(-24).join("\n")}`);
