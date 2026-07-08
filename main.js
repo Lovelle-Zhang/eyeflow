@@ -2633,7 +2633,7 @@ function applyInterventionBehavior(state) {
       if (breakDue) {
         startIslandMicroRest(islandRestMessage(level), state.reminderId || null);
       } else {
-        showNotchIsland({ mode: "text", message: islandNoticeMessage(level) });
+        showNotchIsland({ mode: "text", message: islandNoticeMessage(state, level) });
       }
     }
     if (showNotify) notify(reminderMessage);
@@ -2651,9 +2651,11 @@ function islandRestMessage(level) {
   return level >= 3 ? "眼睛该松一下了，看远处" : "陪你看会儿远处";
 }
 
-// The pre-target heads-up on the away island — a green pill WITHOUT a countdown (just a
-// gentle "快到了"), distinct from the real break point's带计时 look-away capsule.
-function islandNoticeMessage(level) {
+// The pre-target heads-up on the away island — a green pill WITHOUT a countdown, distinct
+// from the real break point's带计时 look-away capsule. In force mode it's a warning that
+// the full-screen takeover is coming (so it's never abrupt), not a look-away line.
+function islandNoticeMessage(state, level) {
+  if (state && state.forceMode) return "快到断点了，到点会进入全屏恢复——先收个尾";
   return level >= 3 ? "眼睛该歇会儿了，待会儿看看远处" : "快到断点了，待会儿看看远处";
 }
 

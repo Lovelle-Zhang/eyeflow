@@ -14251,6 +14251,15 @@
             copy: "这一轮已经到恢复断点。EyeFlow 会进入全屏恢复，倒计时结束前不恢复工作界面。"
           };
         }
+        // L4 预告：全屏接管前先打个招呼，别太突兀。这是提醒（level 2，无计时），不是休息。
+        if (elapsedMinutes >= focusTargetMinutes * 0.72) {
+          return {
+            level: 2,
+            displayLevel: 4,
+            title: "快到恢复断点",
+            copy: "这一轮快到点了——到点会进入全屏恢复。先把手里的收个尾。"
+          };
+        }
         return {
           level: 1,
           displayLevel: 4,
