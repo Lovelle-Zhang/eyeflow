@@ -1528,6 +1528,18 @@ function keepDashboardVisible() {
   dashboardWindow.setBounds(defaultDashboardBounds(), false);
 }
 
+function hideEyeFlowAfterRealBreakLock() {
+  if (dashboardWindow && !dashboardWindow.isDestroyed()) dashboardWindow.hide();
+  syncDock();
+  if (process.platform !== "darwin") return;
+  suppressNextActivate = true;
+  setTimeout(() => {
+    if (dashboardWindow && !dashboardWindow.isDestroyed()) dashboardWindow.hide();
+    app.hide();
+    syncDock();
+  }, 80);
+}
+
 function restoreDashboardAfterBreakLock(payload = {}) {
   if (!dashboardWindow || dashboardWindow.isDestroyed()) return;
   if (dashboardWindow.isMinimized()) dashboardWindow.restore();
@@ -1542,8 +1554,7 @@ function restoreDashboardAfterBreakLock(payload = {}) {
     dashboardWindow.focus();
     return;
   }
-  dashboardWindow.hide();
-  syncDock();
+  hideEyeFlowAfterRealBreakLock();
 }
 
 let dashboardRevealTimer = null;
