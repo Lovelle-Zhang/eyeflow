@@ -2417,6 +2417,13 @@ function forceCloseBreakLockWindow(winToClose) {
   }, 1200);
 }
 
+function hideDashboardBehindBreakLock(previewWindow) {
+  if (previewWindow) return;
+  if (!dashboardWindow || dashboardWindow.isDestroyed()) return;
+  dashboardWindow.hide();
+  syncDock();
+}
+
 function startBreakLock(payload = {}) {
   const previewWindow = Boolean(payload.preview);
   const minSeconds = debugCapture && payload.preview ? 4 : 15;
@@ -2451,6 +2458,7 @@ function startBreakLock(payload = {}) {
     enterBreakLockFullscreen();
     syncDock();
     breakLockWindow.focus();
+    hideDashboardBehindBreakLock(previewWindow);
     return;
   }
 
@@ -2504,6 +2512,7 @@ function startBreakLock(payload = {}) {
     enterBreakLockFullscreen();
     syncDock();
     breakLockWindow.focus();
+    hideDashboardBehindBreakLock(previewWindow);
   });
   const currentBreakLockWindow = breakLockWindow;
   breakLockWindow.on("closed", () => {

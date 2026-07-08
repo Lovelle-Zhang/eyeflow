@@ -652,6 +652,8 @@ function main() {
   assertIncludes(indexHtml, "overscroll-behavior: contain;", "installed break dialog scroll is contained");
   assertIncludes(breakLockHtml, "再点一次确认退出", "installed break lock emergency exit requires confirmation");
   assertIncludes(breakLockHtml, "interrupted: true", "installed break lock reports interrupted force exits");
+  assertMatches(mainJs, /function\s+hideDashboardBehindBreakLock\(previewWindow\)[\s\S]*if \(previewWindow\) return;[\s\S]*dashboardWindow\.hide\(\);[\s\S]*syncDock\(\);/, "installed real break lock hides the dashboard behind fullscreen");
+  assertMatches(mainJs, /function\s+startBreakLock\(payload = \{\}\)[\s\S]*breakLockWindow\.show\(\);[\s\S]*hideDashboardBehindBreakLock\(previewWindow\);[\s\S]*return;[\s\S]*breakLockWindow\.once\("ready-to-show", \(\) => \{[\s\S]*breakLockWindow\.show\(\);[\s\S]*hideDashboardBehindBreakLock\(previewWindow\);/, "installed break lock hides dashboard in reuse and first-window paths");
   assertIncludes(indexHtml, "Mira 先只改变状态和颜色；到恢复断点再短暂提示。", "installed L2 early phase stays visual-only");
   assertIncludes(indexHtml, "强制爱临时退出", "installed force emergency exit has cooldown copy");
   assertIncludes(indexHtml, "Mira Insight", "installed profile review opens with Mira insight");

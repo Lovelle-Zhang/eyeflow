@@ -187,6 +187,16 @@ function main() {
     "real break lock completion hides EyeFlow while preview returns to the dashboard"
   );
   assertMatches(
+    mainJs,
+    /function\s+hideDashboardBehindBreakLock\(previewWindow\)[\s\S]*if \(previewWindow\) return;[\s\S]*dashboardWindow\.hide\(\);[\s\S]*syncDock\(\);/,
+    "real break lock hides the dashboard behind fullscreen so emergency exit returns to the user's work"
+  );
+  assertMatches(
+    mainJs,
+    /function\s+startBreakLock\(payload = \{\}\)[\s\S]*breakLockWindow\.show\(\);[\s\S]*hideDashboardBehindBreakLock\(previewWindow\);[\s\S]*return;[\s\S]*breakLockWindow\.once\("ready-to-show", \(\) => \{[\s\S]*breakLockWindow\.show\(\);[\s\S]*hideDashboardBehindBreakLock\(previewWindow\);/,
+    "break lock start applies the behind-window hide in both reuse and first-window paths"
+  );
+  assertMatches(
     breakLockHtml,
     /document\.addEventListener\("keydown"[\s\S]*event\.key === "Escape"[\s\S]*requestEmergencyExit\(\);/,
     "break lock supports Escape as an emergency exit fallback"
