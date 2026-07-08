@@ -158,6 +158,16 @@ function main() {
   assertMatches(indexHtml, /forceMode: state\.settings\.intensity === "force",/, "force mode is still surfaced in the published state");
   assertNotMatches(indexHtml, /allowSystemNotify/, "no in-app system-notification flag in the state payload (macOS governs it)");
   assertIncludes(indexHtml, "我先不弹普通提醒。到恢复断点后，会直接进入全屏恢复。", "force mode companion stays quiet until break point");
+  assertMatches(
+    indexHtml,
+    /function\s+startForceBreak\(intervention, options = \{\}\)[\s\S]*state\.pendingReminder = null;[\s\S]*currentBreakReason = "force";/,
+    "force break clears ordinary pending reminder before taking over the UI"
+  );
+  assertMatches(
+    indexHtml,
+    /function\s+renderInterventionStrategy\(load\)\s*\{[\s\S]*const intervention = currentIntervention\(load\);[\s\S]*if \(intervention\.level >= 4\) \{[\s\S]*startForceBreak\(intervention\);[\s\S]*return true;[\s\S]*\}[\s\S]*maybeRecordReminder\(intervention, load\);/,
+    "L4 force takeover bypasses ordinary reminder recording"
+  );
   assertIncludes(indexHtml, "强制爱临时退出", "force emergency exit has a quiet cooldown state");
   assertIncludes(indexHtml, "Mira 先只改变状态和颜色；到恢复断点再短暂提示。", "L2 early phase stays visual-only");
   assertIncludes(indexHtml, "const FIRST_AHA_SECONDS = 5 * 60;", "Mira still gives a five-minute alive ping");

@@ -11543,6 +11543,7 @@
       if (forceBreakActive) return;
       forceBreakActive = true;
       forceBreakPreview = Boolean(options.preview);
+      state.pendingReminder = null;
       // Close any open focus round before stopping the clock, or its
       // activeFocusSessionId is orphaned and the next startSession merges into it
       // (openFocusSession early-returns on a live id). Key off the persisted id so a
@@ -14364,11 +14365,11 @@
 
     function renderInterventionStrategy(load) {
       const intervention = currentIntervention(load);
-      maybeRecordReminder(intervention, load);
       if (intervention.level >= 4) {
         startForceBreak(intervention);
         return true;
       }
+      maybeRecordReminder(intervention, load);
       const displayLevel = Number(intervention.displayLevel || intervention.level || 1);
       els.interventionLevel.textContent = `L${displayLevel}`;
       els.interventionTitle.textContent = intervention.title;
