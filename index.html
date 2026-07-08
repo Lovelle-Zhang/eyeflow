@@ -345,8 +345,10 @@
     .pacer .ring .prog { stroke: var(--mira); stroke-width: 3; stroke-linecap: round; stroke-dasharray: var(--circ); stroke-dashoffset: var(--circ); }
     .pacer .dot { width: 96px; height: 96px; border-radius: 50%; background: radial-gradient(circle at 50% 44%, rgba(79,201,156,0.30), rgba(79,201,156,0.05) 70%); box-shadow: inset 0 0 0 1px var(--mira-line), 0 0 30px rgba(79,201,156,0.12); display: grid; place-items: center; color: var(--mira-strong); font-size: 30px; }
     /* The guided breath is MIRA herself — a clearly visible inhale/exhale
-       (scale only) that paces the visitor; the halo holds still behind her. */
-    .rest-act[data-state="resting"] .pacer .pet { --rest: 1.32; --peak: 1.6; --breath: 4s; }
+       (scale only) that paces the visitor; the halo holds still behind her.
+       Tempo inherits her natural --breath (5s): the 10s rest holds exactly
+       two full breaths, ending on an exhale. */
+    .rest-act[data-state="resting"] .pacer .pet { --rest: 1.32; --peak: 1.6; }
     .rest-act[data-state="resting"] .prog { animation: ringFill 10s linear forwards; }
     @keyframes ringFill { to { stroke-dashoffset: 0; } }
 
