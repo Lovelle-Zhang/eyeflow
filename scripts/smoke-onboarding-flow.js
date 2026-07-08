@@ -270,7 +270,9 @@ function main() {
   // one-line notes) in both the tray and the app menu, routed through the renderer's
   // requestIntensity so L4 gets its in-app confirm instead of one-click full-screen.
   assertMatches(mainJs, /function intensityMenuItems\(\)[\s\S]*L1 安静 — 只改状态，不弹提醒[\s\S]*type: "radio"[\s\S]*requestIntensityFromMenu\("quiet"\)[\s\S]*L4 强制爱… — 到点全屏，应用内开启[\s\S]*requestIntensityFromMenu\("force"\)/, "menu exposes all four reminder levels as a radio group with inline notes");
-  assertMatches(mainJs, /function requestIntensityFromMenu\(level\)[\s\S]*if \(level === "force"[\s\S]*showDashboard\(\);[\s\S]*"intensity:request", level/, "menu routes the level to the renderer; L4 opens the app for its confirm");
+  assertMatches(mainJs, /function requestIntensityFromMenu\(level\)[\s\S]*if \(level === "force"\) \{[\s\S]*showDashboard\(\{ view: "rhythmView", focus: "intensity" \}\);[\s\S]*"intensity:request", level/, "menu's L4 lands on the Settings 提醒边界 section (not just the app) for its confirm");
+  assertMatches(indexHtml, /function focusIntensitySetting\(\)[\s\S]*switchView\("rhythmView"\)[\s\S]*\.settings-boundary-disclosure[\s\S]*disclosure\.open = true/, "focusIntensitySetting opens the collapsed 提醒边界 disclosure so the L4 confirm is visible");
+  assertMatches(indexHtml, /if \(payload\.focus === "intensity"\) \{\s*focusIntensitySetting\(\);/, "the dashboard focus channel routes 'intensity' to the settings boundary section");
   assertMatches(mainJs, /function buildTrayMenu\(\)[\s\S]*\{ label: "提醒强度", enabled: false \},\s*\.\.\.intensityMenuItems\(\)/, "tray menu groups the reminder-strength radios under a 提醒强度 header");
   assertMatches(mainJs, /submenu: \[[\s\S]*\{ label: "提醒强度", enabled: false \},\s*\.\.\.intensityMenuItems\(\)/, "app (⌘) menu mirrors the same reminder-strength group");
   assertIncludes(mainJs, "if (currentIntensity() !== lastMenuIntensity) {", "app menu refreshes its radios only when the level actually changes");

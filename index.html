@@ -10195,6 +10195,10 @@
         focusManualStartEntry();
         return;
       }
+      if (payload.focus === "intensity") {
+        focusIntensitySetting();
+        return;
+      }
       if (payload.view) switchView(payload.view);
     });
     els.finishBreakBtn.addEventListener("click", finishBreak);
@@ -13529,6 +13533,17 @@
         sessionSettings.open = true;
         sessionSettings.scrollIntoView({ behavior: "auto", block: "center", inline: "nearest" });
       }
+    }
+
+    // Land on the Settings page with the 提醒边界 section open + in view — the L1–L4
+    // control and the 强制爱 confirm live inside a collapsed disclosure, so switching to
+    // Settings alone isn't enough (the menu's L4 choice would otherwise be "找不到").
+    function focusIntensitySetting() {
+      switchView("rhythmView");
+      const disclosure = document.querySelector("#rhythmView .settings-boundary-disclosure");
+      if (disclosure) disclosure.open = true;
+      const hero = document.querySelector("#rhythmView .settings-hero-section");
+      if (hero) hero.scrollIntoView({ behavior: "auto", block: "start", inline: "nearest" });
     }
 
     function toggleCompanion() {

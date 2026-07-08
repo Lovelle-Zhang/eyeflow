@@ -2104,7 +2104,14 @@ function intensityMenuItems() {
 // in-app buttons), so L4 gets its in-app confirm instead of one-click arming full-screen
 // from the menu bar. L1/L2/L3 apply silently in the background window.
 function requestIntensityFromMenu(level) {
-  if (level === "force" || !dashboardWindow || dashboardWindow.isDestroyed()) showDashboard();
+  // Force needs its in-app confirm, which lives inside a collapsed disclosure on the
+  // Settings page — navigate there and open/scroll to the 提醒边界 section so the choice
+  // isn't lost behind the Today view. A missing/destroyed window (any level) also needs showing.
+  if (level === "force") {
+    showDashboard({ view: "rhythmView", focus: "intensity" });
+  } else if (!dashboardWindow || dashboardWindow.isDestroyed()) {
+    showDashboard();
+  }
   const send = () => {
     if (dashboardWindow && !dashboardWindow.isDestroyed()) {
       dashboardWindow.webContents.send("intensity:request", level);
