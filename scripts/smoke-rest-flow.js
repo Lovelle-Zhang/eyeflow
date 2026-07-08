@@ -179,12 +179,12 @@ function main() {
   assertMatches(
     finishBreakLockBody,
     /restoreDashboardAfterBreakLock\(payload\);/,
-    "break lock finish restores the dashboard window before reveal"
+    "break lock finish routes dashboard handling through one post-break policy"
   );
   assertMatches(
     mainJs,
-    /function\s+restoreDashboardAfterBreakLock\(payload = \{\}\)[\s\S]*dashboardWindow\.setFullScreen\(false\);[\s\S]*dashboardWindow\.unmaximize\(\);[\s\S]*dashboardWindow\.setVisibleOnAllWorkspaces\(false\);[\s\S]*keepDashboardVisible\(\);[\s\S]*dashboardWindow\.show\(\);/,
-    "dashboard is forced back to a normal centered window after break lock"
+    /function\s+restoreDashboardAfterBreakLock\(payload = \{\}\)[\s\S]*dashboardWindow\.setFullScreen\(false\);[\s\S]*dashboardWindow\.unmaximize\(\);[\s\S]*dashboardWindow\.setVisibleOnAllWorkspaces\(false\);[\s\S]*keepDashboardVisible\(\);[\s\S]*dashboardWindow\.webContents\.send\("breakLock:finished", payload\);[\s\S]*if \(payload\.preview\) \{[\s\S]*dashboardWindow\.show\(\);[\s\S]*dashboardWindow\.focus\(\);[\s\S]*return;[\s\S]*\}[\s\S]*dashboardWindow\.hide\(\);[\s\S]*syncDock\(\);/,
+    "real break lock completion hides EyeFlow while preview returns to the dashboard"
   );
   assertMatches(
     breakLockHtml,

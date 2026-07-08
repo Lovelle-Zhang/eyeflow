@@ -1536,9 +1536,14 @@ function restoreDashboardAfterBreakLock(payload = {}) {
   if (process.platform === "darwin") dashboardWindow.setVisibleOnAllWorkspaces(false);
   dashboardWindow.setAlwaysOnTop(false);
   keepDashboardVisible();
-  dashboardWindow.show();
-  if (payload.preview) dashboardWindow.focus();
   dashboardWindow.webContents.send("breakLock:finished", payload);
+  if (payload.preview) {
+    dashboardWindow.show();
+    dashboardWindow.focus();
+    return;
+  }
+  dashboardWindow.hide();
+  syncDock();
 }
 
 let dashboardRevealTimer = null;
