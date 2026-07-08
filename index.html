@@ -344,9 +344,10 @@
     .pacer .ring circle { fill: none; stroke: var(--line); stroke-width: 2; }
     .pacer .ring .prog { stroke: var(--mira); stroke-width: 3; stroke-linecap: round; stroke-dasharray: var(--circ); stroke-dashoffset: var(--circ); }
     .pacer .dot { width: 96px; height: 96px; border-radius: 50%; background: radial-gradient(circle at 50% 44%, rgba(79,201,156,0.30), rgba(79,201,156,0.05) 70%); box-shadow: inset 0 0 0 1px var(--mira-line), 0 0 30px rgba(79,201,156,0.12); display: grid; place-items: center; color: var(--mira-strong); font-size: 30px; }
-    .rest-act[data-state="resting"] .dot { animation: breatheRest 4s var(--ease) infinite; }
+    /* The guided breath is MIRA herself — a clearly visible inhale/exhale
+       (scale only) that paces the visitor; the halo holds still behind her. */
+    .rest-act[data-state="resting"] .pacer .pet { --rest: 1.32; --peak: 1.6; --breath: 4s; }
     .rest-act[data-state="resting"] .prog { animation: ringFill 10s linear forwards; }
-    @keyframes breatheRest { 0%, 100% { transform: scale(0.84); } 50% { transform: scale(1.12); } }
     @keyframes ringFill { to { stroke-dashoffset: 0; } }
 
     /* ── Footer ─────────────────────────────────────────────── */
@@ -392,8 +393,8 @@
       html { scroll-behavior: auto; }
       *, *::before, *::after { animation-duration: 0.001ms !important; animation-iteration-count: 1 !important; transition-duration: 0.001ms !important; }
       .reveal { opacity: 1; transform: none; }
-      /* Act 4: no breathing/ring motion — a still invitation you advance yourself. */
-      .rest-act[data-state="resting"] .dot { transform: scale(1); }
+      /* Act 4: no breathing/ring motion — a still invitation you advance yourself.
+         (Mira's guided breath is frozen by the global animation kill above.) */
       .rest-act[data-state="resting"] .ring { display: none; }
       /* Act 3: no slide-in — the nudges are simply present; the live island freezes on
          its rest state (full bar, "看看远方"), no looping countdown. */
