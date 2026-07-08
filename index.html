@@ -326,7 +326,17 @@
     .rest-act[data-state="done"] [data-when="done"] { display: grid; }
     .rest-act h2, .rest-act .sub { margin: 0; }
     .rest-act .sub.soft { color: var(--muted-soft); }
-    .rest-btn { margin-top: var(--s2); }
+    /* The invite is already alive: Mira breathes inside the waiting ring BEFORE
+       you commit (she's the one inviting), and stays on stage while the ring
+       fills — the breathing dot becomes her halo. The button is the page's ONE
+       solid-green action; every other button stays tonal. Static colour, scale-
+       only motion — no luminance flash. */
+    .pacer .mira { position: absolute; inset: 0; margin: auto; width: 132px; height: 132px; }
+    .pacer .pet { --rest: 1.5; --peak: 1.56; }
+    /* NOTE: must beat the later `.pacer { margin }` — same-specificity source-order trap. */
+    .pacer.pacer-invite { margin-bottom: var(--s2); }
+    .rest-btn { margin-top: var(--s2); background: var(--mira); border-color: transparent; color: var(--wash); font-weight: 600; font-size: 16px; min-height: 52px; padding: 0 var(--s8); }
+    .rest-btn:hover { background: var(--mira-strong); border-color: transparent; }
     .rest-skip { margin-top: var(--s2); border: 0; background: none; color: var(--muted-soft); font: inherit; font-size: var(--t-small); letter-spacing: 0.04em; cursor: pointer; transition: color 0.25s var(--ease); }
     .rest-skip:hover { color: var(--muted); }
     .pacer { --circ: 591; position: relative; width: 208px; height: 208px; display: grid; place-items: center; margin: var(--s4) 0; }
@@ -543,6 +553,15 @@
     <div class="rest-stage">
       <div class="rest-panel" data-when="invite">
         <p class="eyebrow" data-en="Rest with Mira">歇一下</p>
+        <div class="pacer pacer-invite" aria-hidden="true">
+          <svg class="ring" viewBox="0 0 200 200"><circle cx="100" cy="100" r="94"></circle></svg>
+          <div class="mira">
+            <div class="pet">
+              <div class="ant"></div><div class="face"></div>
+              <div class="cheek l"></div><div class="cheek r"></div><div class="mouth"></div>
+            </div>
+          </div>
+        </div>
         <h2 data-en="Look away with <b class='kw-mira'>Mira</b>.">跟 <b class="kw-mira">Mira</b> 一起，把视线放远。</h2>
         <p class="sub" data-en="Ten seconds is enough — a window, or the farthest wall in the room."><span class="cl">10 秒就好——</span><span class="cl">看向窗外，</span><span class="cl">或屋里最远的那面墙。</span></p>
         <button class="cta rest-btn" type="button" data-rest="start" data-en="Okay, ten seconds with you">好，跟你歇 10 秒</button>
@@ -552,6 +571,12 @@
         <div class="pacer">
           <svg class="ring" viewBox="0 0 200 200" aria-hidden="true"><circle cx="100" cy="100" r="94"></circle><circle class="prog" cx="100" cy="100" r="94"></circle></svg>
           <div class="dot" aria-hidden="true"></div>
+          <div class="mira" aria-hidden="true">
+            <div class="pet">
+              <div class="ant"></div><div class="face"></div>
+              <div class="cheek l"></div><div class="cheek r"></div><div class="mouth"></div>
+            </div>
+          </div>
         </div>
         <p class="sub soft" data-en="Look far away. I'm right here.">看向远处，我在。</p>
         <button class="rest-skip" type="button" data-rest="skip" data-en="I'm good →">歇好了 →</button>
@@ -662,7 +687,7 @@
       items.forEach((el) => io.observe(el));
     })();
 
-    (function () { // Act 4 — rest WITH Mira: a real 20s look-away, opt-in and skippable
+    (function () { // Act 4 — rest WITH Mira: a real 10s look-away, opt-in and skippable
       const act = document.querySelector(".rest-act");
       if (!act) return;
       const reduce = window.matchMedia("(prefers-reduced-motion: reduce)");
@@ -672,7 +697,7 @@
         if (!btn) return;
         if (btn.dataset.rest === "start") {
           act.dataset.state = "resting";
-          // Non-reduced: the ring/breath pace the 20s and auto-finish. Reduced: the
+          // Non-reduced: the ring/breath pace the 10s and auto-finish. Reduced: the
           // still "resting" view waits for the visitor to tap 歇好了 themselves.
           if (!reduce.matches) timer = window.setTimeout(() => { act.dataset.state = "done"; }, 10000);
         } else if (btn.dataset.rest === "skip") {
