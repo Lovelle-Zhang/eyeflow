@@ -1,0 +1,716 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>EyeFlow - Mira 的桌面陪伴空间</title>
+  <meta name="description" content="EyeFlow 里住着 Mira：盯太久时，她轻轻提醒你抬头看远处。不打断、不监视、不伤眼。macOS 菜单栏应用，免费、本地运行、Apple 公证。">
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1024 1024'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='216' y1='156' x2='826' y2='874' gradientUnits='userSpaceOnUse'%3E%3Cstop offset='0' stop-color='%23EAFFF6'/%3E%3Cstop offset='.58' stop-color='%23BDEAFF'/%3E%3Cstop offset='1' stop-color='%23F3EEC7'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='1024' height='1024' rx='230' fill='url(%23g)'/%3E%3Crect x='177' y='335' width='671' height='318' rx='159' fill='%230E1C20'/%3E%3Ccircle cx='380' cy='468' r='46' fill='%23F8FFFC'/%3E%3Ccircle cx='644' cy='468' r='46' fill='%23F8FFFC'/%3E%3Ccircle cx='803' cy='344' r='82' fill='%236FE7C3'/%3E%3C/svg%3E">
+  <link rel="canonical" href="https://eyeflow.app/">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://eyeflow.app/">
+  <meta property="og:title" content="EyeFlow - Mira 的桌面陪伴空间">
+  <meta property="og:description" content="Mira 住在你的菜单栏：盯太久时，轻轻提醒你抬头看远处。免费、本地运行、Apple 公证。">
+  <meta property="og:image" content="https://eyeflow.app/shots/share-card.png">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:image" content="https://eyeflow.app/shots/share-card.png">
+  <style>
+    /* ============================================================
+       仅用 EyeFlow 现有 dark-mode token，不引入新色/新渐变。
+       结构：单栏 · Hero = 一句主张 + 一句副文案 + Mira 呼吸 + 一个 Download。
+       排版：标题 -0.02em / 正文 1.6（Flighty）。macOS 原生字面。
+       ============================================================ */
+    :root {
+      color-scheme: dark;
+      --font: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Helvetica Neue", "PingFang SC", "Hiragino Sans GB", sans-serif;
+
+      /* EyeFlow dark-mode tokens (verbatim). */
+      --ink: #f3f4f6; --ink-soft: #d3d5d9; --muted: #9a9aa3; --muted-soft: #6f6f78;
+      --line: rgba(255,255,255,0.08); --line-soft: rgba(255,255,255,0.05);
+      --panel: #212325; --wash: #161718; --wash-2: #1d1f20; --panel-strong: #26282b;
+      --mira: #4fc99c; --mira-strong: #62d3aa; --mira-soft: rgba(79,201,156,0.16); --mira-line: rgba(79,201,156,0.30);
+      --shadow-lift: 0 0 0 0.5px rgba(0,0,0,0.45), 0 10px 28px rgba(0,0,0,0.34);
+
+      /* 4/8-based spacing scale. */
+      --s1: 4px; --s2: 8px; --s3: 12px; --s4: 16px; --s6: 24px; --s8: 32px; --s12: 48px; --s16: 64px; --s24: 96px; --s32: 128px;
+      --radius: 12px; --radius-lg: 14px;
+      --ease: cubic-bezier(0.4, 0, 0.2, 1);
+
+      /* ── Strict typographic system ── */
+      /* one type scale */
+      --t-display: clamp(2.6rem, 5.4vw, 4.5rem);
+      --t-title: clamp(1.75rem, 3.4vw, 2.125rem);
+      --t-lede: 1.25rem; --t-sub: 1.1875rem; --t-body: 1.0625rem;
+      --t-small: 0.875rem; --t-eyebrow: 0.8125rem;
+      /* one set of measures (em-based: ≈1 CJK char, ≈2 latin chars) */
+      --measure: 26em; --measure-lede: 22em; --measure-sub: 20em; --measure-head: 16em;
+      /* one vertical rhythm */
+      --section: clamp(104px, 16vh, 168px);
+      --flow-title: var(--s6);   /* title → body */
+      --flow-figure: var(--s16); /* copy → figure */
+
+      /* Mira geometry (58-unit canonical). */
+      --ms: 58px; --vt: 19px; --vl: 10px; --vw: 38px; --vh: 18px;
+      --st: 15px; --sr: 8px; --ss: 9px;
+      --ft: 24px; --fl: 18px; --fw: 22px; --fh: 8px; --eye: 5px;
+      --mt: 38px; --mw: 8px; --mh: 5px; --mstroke: 1.5px;
+      --ct: 35px; --cw: 7px; --ch: 3px; --coff: 12px;
+      --at: 7px; --al: 18px; --aw: 22px; --ah: 12px; --astroke: 2px;
+      --rest: 2.02; --peak: 2.08; --lift: -1px; --breath: 5s; --sway: 6s; --blink: 220ms; --dblink: 560ms;
+    }
+
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0; font-family: var(--font); font-weight: 400; color: var(--ink);
+      font-size: 17px; line-height: 1.6; -webkit-font-smoothing: antialiased; text-rendering: optimizeLegibility;
+      background:
+        radial-gradient(120% 80% at 50% -8%, #1a1c1e 0%, var(--wash) 56%);
+      background-color: var(--wash);
+      min-height: 100vh;
+    }
+    /* Faint material grain — texture hint, not decoration. */
+    body::before {
+      content: ""; position: fixed; inset: 0; z-index: 0; pointer-events: none; opacity: 0.22; mix-blend-mode: soft-light;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+    }
+
+    /* One grid: nav, hero and screenshots share this width; text is centered
+       and constrained by measure within it. */
+    .col { position: relative; z-index: 1; width: 100%; max-width: 1120px; margin-inline: auto; padding-inline: clamp(24px, 4vw, 40px); }
+    .col-wide { max-width: 1120px; }
+
+    /* ── Nav (not sticky) ───────────────────────────────────── */
+    nav { position: relative; z-index: 2; display: flex; align-items: center; justify-content: space-between; padding: 22px 0 0; }
+    nav .brand { display: inline-flex; align-items: center; gap: 9px; font-size: 15px; font-weight: 500; letter-spacing: -0.01em; color: var(--ink); }
+    nav .mark { width: 20px; height: 20px; border-radius: 6px; background: linear-gradient(150deg, #1f3937, #142224); box-shadow: inset 0 0 0 0.5px rgba(127,241,213,0.12); position: relative; }
+    nav .mark::before { content: ""; position: absolute; top: 7px; left: 4px; width: 12px; height: 5px; border-radius: 99px; background: rgba(6,13,15,0.92); }
+    nav .right { display: inline-flex; align-items: center; gap: 16px; }
+    .lang { display: inline-flex; align-items: center; gap: 7px; }
+    .lang button { border: 0; background: none; color: var(--muted-soft); font: inherit; font-size: 13px; cursor: pointer; padding: 2px; line-height: 1; transition: color 0.25s var(--ease); }
+    .lang button[aria-pressed="true"] { color: var(--ink); }
+    .lang .s { width: 1px; height: 10px; background: var(--line); }
+    nav .dl { font-size: 14px; font-weight: 500; color: var(--mira-strong); text-decoration: none; }
+
+    /* ── Type — all sizes/measures/rhythm from tokens, no one-offs ─ */
+    h1 { margin: 0; font-size: var(--t-display); font-weight: 600; letter-spacing: -0.02em; line-height: 1.1; color: var(--ink); }
+    h2 { margin: 0; max-width: var(--measure-head); margin-inline: auto; font-size: var(--t-title); font-weight: 600; letter-spacing: -0.015em; line-height: 1.24; color: var(--ink); }
+    .sub { margin: 0; max-width: var(--measure-sub); margin-inline: auto; font-size: var(--t-sub); line-height: 1.6; color: var(--muted); }
+    .body { margin: 0; max-width: var(--measure); margin-inline: auto; font-size: var(--t-body); line-height: 1.6; color: var(--muted); }
+    .eyebrow { margin: 0 0 var(--s4); font-size: var(--t-eyebrow); font-weight: 500; letter-spacing: 0.16em; text-transform: uppercase; color: var(--muted-soft); }
+    .meta { margin: 0; font-size: var(--t-small); color: var(--muted-soft); }
+
+    /* Mira — the one protagonist with a mark: a green hairline underline
+       wherever she's NAMED (the page's divider language turned into her
+       signature). The eyes get no line — just a one-step lift in muted running
+       text, same as Mira there. Headings keep their ink. Static — no motion,
+       no luminance shift. Product-mock text is excluded (those replicas must
+       match the app pixel-for-pixel). */
+    .kw-mira { font-weight: inherit; text-decoration: underline; text-decoration-thickness: max(1px, 0.04em); text-underline-offset: 0.22em; text-decoration-color: var(--mira); }
+    .kw-eyes { font-weight: inherit; }
+    .body :is(.kw-mira, .kw-eyes), .sub :is(.kw-mira, .kw-eyes) { color: var(--ink-soft); font-weight: 500; }
+
+    /* Line-breaking rigor — balance short text, avoid orphans in body, and apply
+       strict CJK kinsoku so punctuation never orphans at a line edge. */
+    h1, h2, .sub { text-wrap: balance; }
+    .body { text-wrap: pretty; }
+    body { line-break: strict; }
+    /* Keep each CJK clause (comma/period/colon/dash-delimited) whole, so a
+       two-line heading breaks AT the punctuation, never mid-phrase. Enforced
+       only where there's room; very narrow phones may still wrap inside a
+       clause rather than overflow. `.cl` spans live in the zh copy only. */
+    @media (min-width: 600px) { .cl { white-space: nowrap; } }
+
+    /* ── One section rhythm ── */
+    .block { padding-block: var(--section); text-align: center; }
+    /* Narrative beats carry one line — give them a generous, even breath so the
+       story has room to land (calibrated to the feature sections' rhythm), while
+       the hairline/asterism between them still marks beat vs. chapter. */
+    .block.narrow { padding-block: clamp(100px, 14vh, 140px); }
+    /* …but the FIRST beat is the curtain rising: give the download hero a clear,
+       deliberate breath before the story opens, so Act 0 reads as a new section
+       rather than a tail of the CTA. (Higher specificity than .block.narrow.) */
+    .hero + .block.narrow { padding-top: clamp(124px, 18vh, 180px); }
+    /* A quiet chapter break between beats — a short hairline that says "pause, new beat"
+       so the acts read as separate moments, not one continuous wall of text. */
+    .rule { display: grid; place-items: center; padding-block: clamp(20px, 3vh, 36px); }
+    .rule::before { content: ""; width: 40px; height: 1px; background: var(--line); }
+    /* A chapter turn — bigger than a beat's hairline. This is where the story
+       actually pivots: the problem gives way to Mira. An asterism reads as
+       "new scene," not "next line," so the entrance lands as its own chapter. */
+    .turn { display: grid; place-items: center; padding-block: clamp(64px, 10vh, 116px); }
+    .turn::before { content: "· · ·"; color: var(--muted-soft); font-size: 20px; letter-spacing: 0.6em; text-indent: 0.6em; line-height: 1; }
+
+    /* ── Act 0 · the stakes — an editorial triptych, not another centered block.
+       Three named factors (intensity · responsibility · no-undo) carry the
+       thesis; the last is accented because irreversibility is the crux. ── */
+    .stakes-lead { max-width: 19em; font-size: clamp(1.9rem, 3.6vw, 2.75rem); line-height: 1.2; }
+    .stakes { list-style: none; margin: var(--s16) auto 0; padding: 0; max-width: 960px; display: grid; grid-template-columns: repeat(3, 1fr); text-align: left; }
+    .stake { position: relative; padding: var(--s1) clamp(22px, 3vw, 36px); }
+    .stake + .stake { border-left: 1px solid var(--line); }
+    .stake-i { display: block; font-size: var(--t-small); font-variant-numeric: tabular-nums; letter-spacing: 0.14em; color: var(--muted-soft); }
+    .stake-tag { display: block; margin-top: var(--s4); font-size: var(--t-sub); font-weight: 500; letter-spacing: 0.01em; color: var(--ink); }
+    .stake p { margin: var(--s3) 0 0; font-size: var(--t-body); line-height: 1.62; color: var(--muted); text-wrap: pretty; }
+    .stake.accent .stake-i, .stake.accent .stake-tag { color: var(--mira-strong); }
+    .stake.accent p { color: var(--ink-soft); }
+    .stakes-close { margin-top: var(--s12); }
+    @media (max-width: 720px) {
+      .stakes { grid-template-columns: 1fr; max-width: 28em; margin-top: var(--s12); }
+      .stake { padding: var(--s6) 0; }
+      .stake + .stake { border-left: 0; border-top: 1px solid var(--line); }
+    }
+
+    /* Feature spec — the honesty made concrete, in Act 0's restrained voice:
+       small muted terms, hairline separators, one Mira-accented crux. Keeps the
+       two feature rows rhyming with the opening triptych. */
+    .spec { list-style: none; margin: var(--s8) 0 0; padding: 0; display: flex; flex-wrap: wrap; align-items: center; row-gap: var(--s3); font-size: var(--t-small); line-height: 1.2; letter-spacing: 0.01em; color: var(--muted); }
+    .spec li { display: inline-flex; align-items: center; padding-inline: var(--s4); }
+    .spec li:first-child { padding-left: 0; }
+    .spec li + li { border-left: 1px solid var(--line); }
+    .spec .key { color: var(--mira-strong); }
+    .head { text-align: center; }
+    .head > h2 + .body { margin-top: var(--flow-title); }
+    .head > .eyebrow + h2 { margin-top: 0; }
+    .body + .body { margin-top: var(--s6); }
+
+    /* ── Hero ───────────────────────────────────────────────── */
+    .hero { text-align: center; padding-top: clamp(44px, 8vh, 84px); padding-bottom: 0; }
+    .hero h1 + .sub { margin-top: var(--flow-title); }
+    .hero-title { margin: 0; font-size: clamp(3.5rem, 8vw, 7.5rem); line-height: 0.96; letter-spacing: -0.055em; }
+    .hero-tagline { margin: var(--s6) auto 0; max-width: 18em; font-size: clamp(1.9rem, 3.8vw, 3.25rem); line-height: 1.2; font-weight: 500; letter-spacing: 0.02em; color: var(--ink); text-wrap: balance; }
+    .hero-tagline + .sub { margin-top: var(--s6); }
+    .cta + .meta { margin-top: var(--s6); }
+    .hero .stage { position: relative; display: grid; justify-items: center; gap: var(--s6); margin: var(--s8) 0 var(--s6); }
+    .cta { display: inline-flex; align-items: center; justify-content: center; min-height: 48px; padding: 0 var(--s6); border-radius: var(--radius); border: 1px solid var(--mira-line); background: var(--mira-soft); color: var(--mira-strong); font-size: 15px; font-weight: 500; text-decoration: none; transition: background 0.25s var(--ease), border-color 0.25s var(--ease); }
+    .cta:hover { background: rgba(79,201,156,0.24); border-color: rgba(79,201,156,0.44); }
+
+    /* ── Mira (app dark-mode companion; the one signature) ──── */
+    .mira { position: relative; display: grid; place-items: center; width: 176px; height: 176px; animation: float 8s var(--ease) infinite; }
+    .mira::before { content: ""; position: absolute; width: 190px; height: 190px; border-radius: 50%; background: radial-gradient(circle, rgba(255,255,255,0.035), transparent 66%); }
+    .pet {
+      position: relative; width: var(--ms); aspect-ratio: 1; border-radius: 18px 18px 16px 16px;
+      background: linear-gradient(150deg, #1a3230 0%, #21403c 48%, #152523 100%);
+      box-shadow: inset 0 0 0 1px rgba(127,241,213,0.08), inset 0 -10px 20px rgba(3,10,12,0.28), 0 20px 44px -12px rgba(0,0,0,0.6);
+      display: grid; place-items: center; overflow: hidden;
+      transform: scale(var(--rest)); transform-origin: center; animation: breathe var(--breath) var(--ease) infinite;
+    }
+    .pet::before { content: ""; position: absolute; top: var(--vt); left: var(--vl); width: var(--vw); height: var(--vh); border-radius: 999px; background: linear-gradient(90deg, rgba(129,239,216,0.16), rgba(108,176,255,0.10)), rgba(6,13,15,0.92); box-shadow: inset 0 0 0 1px rgba(139,246,222,0.10); }
+    .pet::after { content: ""; position: absolute; top: var(--st); right: var(--sr); width: var(--ss); height: var(--ss); border-radius: 50%; background: #80d7bd; box-shadow: 0 0 10px rgba(128,215,189,0.45); animation: signal var(--breath) var(--ease) infinite; }
+    .face { position: absolute; top: var(--ft); left: var(--fl); width: var(--fw); height: var(--fh); z-index: 1; }
+    .face::before, .face::after { content: ""; position: absolute; top: 0; width: var(--eye); height: var(--eye); border-radius: 50%; background: #cdd6d1; }
+    .face::before { left: 1px; } .face::after { right: 1px; }
+    body[data-blink="single"] .face::before, body[data-blink="single"] .face::after { animation: blink1 var(--blink) var(--ease) 1; }
+    body[data-blink="double"] .face::before, body[data-blink="double"] .face::after { animation: blink2 var(--dblink) var(--ease) 1; }
+    .mouth { position: absolute; top: var(--mt); left: 50%; width: var(--mw); height: var(--mh); transform: translateX(-50%); border-bottom: var(--mstroke) solid rgba(126,244,216,0.5); border-radius: 0 0 999px 999px; z-index: 1; }
+    .cheek { position: absolute; top: var(--ct); width: var(--cw); height: var(--ch); border-radius: 999px; background: rgba(255,139,176,0.2); z-index: 1; }
+    .cheek.l { left: var(--coff); } .cheek.r { right: var(--coff); }
+    .ant { position: absolute; top: var(--at); left: var(--al); width: var(--aw); height: var(--ah); border-top: var(--astroke) solid rgba(180,222,208,0.22); border-radius: 50%; z-index: 0; transform-origin: 50% 100%; animation: sway var(--sway) var(--ease) infinite; }
+
+    @keyframes float { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-5px); } }
+    @keyframes breathe { 0%,100% { transform: scale(var(--rest)) translateY(0); } 40%,52% { transform: scale(var(--peak)) translateY(var(--lift)); } 88% { transform: scale(var(--rest)) translateY(0); } }
+    @keyframes signal { 0%,100% { transform: scale(0.98); } 46% { transform: scale(1.05); } }
+    @keyframes sway { 0%,100% { transform: rotate(-0.3deg); } 50% { transform: rotate(0.3deg); } }
+    @keyframes blink1 { 0%,100% { transform: scaleY(1); } 50% { transform: translateY(1px) scaleY(0.2); } }
+    @keyframes blink2 { 0%,100% { transform: scaleY(1); } 22%,30%,64%,72% { transform: translateY(1px) scaleY(0.2); } 45%,86% { transform: scaleY(1); } }
+
+    /* character portrait Mira — sits between eyebrow and lede */
+    .portrait { margin: var(--s6) 0 var(--flow-title); display: grid; place-items: center; }
+    .portrait .mira { width: 128px; height: 128px; }
+    .portrait .pet { --rest: 1.5; --peak: 1.54; }
+    /* download block spacing under a heading */
+    .actions { margin-top: var(--s8); }
+
+    /* ── Reminder island — Mira's lightest touch, rebuilt from app tokens ─ */
+    /* Pixel-matched to the app's island.html — same padding, radius, green, shadow, type. */
+    .island { display: inline-flex; align-items: center; gap: 13px; max-width: 100%; padding: 13px 26px 13px 16px; border-radius: 999px; background: rgba(26, 107, 82, 0.97); color: #f6f7f9; font-size: 16.5px; font-weight: 600; line-height: 1.25; letter-spacing: 0.01em; box-shadow: 0 12px 34px rgba(0,0,0,0.26), 0 6px 16px rgba(0,0,0,0.4), inset 0 0 0 1px rgba(255,255,255,0.12); }
+    .island .ic { width: 34px; height: 34px; flex: 0 0 auto; display: block; border-radius: 10px; }
+    /* Live island — loops its real self-closing rest: 看远处 → the bar drains → 已记录 ✓.
+       Slow (8s) and gentle (a draining bar + a crossfade, no flash). It's the island
+       actually working, not a still image. reduced-motion freezes it on the rest state. */
+    .island.live { align-items: center; }
+    .island.live .isl-body { display: grid; gap: 7px; min-width: 220px; }
+    .island.live .isl-msg { position: relative; height: 21px; }
+    .island.live .isl-msg span { position: absolute; inset: 0; white-space: nowrap; }
+    .island.live .isl-msg .done { color: #d7f5ea; }
+    .island.live .isl-track { height: 3px; border-radius: 999px; background: rgba(255,255,255,0.18); overflow: hidden; }
+    .island.live .isl-fill { height: 100%; width: 100%; border-radius: 999px; background: #6FE7C3; }
+    .island.live .isl-msg .rest { animation: islMsgRest 8s var(--ease) infinite; }
+    .island.live .isl-msg .done { opacity: 0; animation: islMsgDone 8s var(--ease) infinite; }
+    .island.live .isl-fill { animation: islFillLoop 8s var(--ease) infinite; }
+    @keyframes islFillLoop { 0%,6% { width: 100%; } 60% { width: 0%; } 65%,100% { width: 100%; } }
+    @keyframes islMsgRest { 0%,58% { opacity: 1; } 64%,96% { opacity: 0; } 100% { opacity: 1; } }
+    @keyframes islMsgDone { 0%,58% { opacity: 0; } 64%,96% { opacity: 1; } 100% { opacity: 0; } }
+
+    /* ── Two gentle reminder surfaces, presented as a labeled pair — same
+       tag + hairline language as Act 0's triptych, but deliberately NO accent
+       colour: Mira-green stays reserved for the honesty cruxes, so it keeps
+       its weight. Here the design carries meaning through structure, not a crux. ── */
+    .channels { display: grid; grid-template-columns: 1fr 1fr; max-width: 840px; margin: var(--flow-figure) auto 0; }
+    .channel { display: grid; grid-template-rows: auto 1fr auto; justify-items: center; align-items: center; gap: var(--s6); padding-inline: clamp(20px, 3vw, 44px); text-align: center; }
+    .channel + .channel { border-left: 1px solid var(--line); }
+    .channel-tag { margin: 0; font-size: var(--t-eyebrow); font-weight: 500; letter-spacing: 0.16em; text-transform: uppercase; color: var(--muted-soft); }
+    .channel-note { margin: 0; max-width: 15em; font-size: var(--t-small); line-height: 1.5; color: var(--muted); }
+    .channels + .body { margin-top: var(--flow-figure); }
+    /* Stack the pair on narrow screens. NOTE: this must live AFTER the base
+       .channels rule above — equal specificity, so source order decides. */
+    @media (max-width: 720px) {
+      .channels { grid-template-columns: 1fr; max-width: 30em; }
+      .channel { grid-template-rows: none; padding: var(--s8) 0; }
+      .channel + .channel { border-left: 0; border-top: 1px solid var(--line); }
+    }
+    /* desktop companion — Mira's expanded bubble (from companion.html) */
+    .companion-card { display: inline-flex; align-items: center; gap: 16px; max-width: 100%; padding: 13px 18px 13px 22px; border-radius: 22px; background: var(--panel); border: 1px solid var(--line); box-shadow: var(--shadow-lift); text-align: left; }
+    .companion-card .txt { display: grid; gap: 3px; min-width: 0; }
+    .companion-card .txt strong { font-size: 14.5px; font-weight: 600; line-height: 1.3; color: var(--ink); }
+    .companion-card .txt span { font-size: 13px; line-height: 1.4; color: var(--muted); }
+    .companion-card .mira { width: 54px; height: 54px; flex: 0 0 auto; animation: none; }
+    .companion-card .mira::before { display: none; }
+    .companion-card .pet { --rest: 0.82; --peak: 0.84; }
+    .channels .companion-card { opacity: 0; transform-origin: 86% 62%; transition: none; }
+    /* Mira's bubble unfurling from the corner, like the real desktop companion:
+       the card grows out from where Mira sits (transform-origin on the glyph),
+       held on a slow decelerating ease so you can watch it open — THEN her two
+       lines fade in, once the bubble is fully open, so the text is always crisp
+       and readable, never squished mid-scale. `both` holds the open state. */
+    @keyframes companionUnfurl {
+      0%   { opacity: 0; transform: scale(0.62); }
+      26%  { opacity: 1; }
+      100% { opacity: 1; transform: scale(1); }
+    }
+    @keyframes companionWords {
+      0%, 48% { opacity: 0; transform: translateX(-5px); }
+      100%    { opacity: 1; transform: translateX(0); }
+    }
+    .channels .companion-card.in { animation: companionUnfurl 0.9s cubic-bezier(0.22, 1, 0.36, 1) both; }
+    .channels .companion-card.in .txt { animation: companionWords 0.9s var(--ease) both; }
+
+    /* Act 3 · the island is always present and loops its real self-closing rest;
+       the corner companion pops open once as it scrolls in (above), then holds.
+       Mira keeps breathing + blinking in the bubble throughout. */
+
+    .closing { text-align: center; padding-top: var(--section); padding-bottom: calc(var(--section) + var(--s8)); }
+    .screen-card { border-radius: 18px; border: 1px solid rgba(79,201,156,0.14); background: radial-gradient(120% 100% at 50% 0%, rgba(45,88,67,0.35), rgba(12,24,21,0.84)); box-shadow: var(--shadow-lift); overflow: hidden; }
+    .screen-card img { display: block; width: 100%; height: auto; opacity: 0.94; }
+    .daily-row { display: grid; grid-template-columns: minmax(0, 0.95fr) minmax(0, 1fr); gap: clamp(56px, 8vw, 96px); align-items: center; margin-top: var(--s32); }
+    .daily-row .daily-copy { text-align: left; }
+    .daily-row h2, .daily-row .body, .daily-row .eyebrow { margin-inline: 0; }
+    /* Stack the feature rows at the same breakpoint as .stakes/.channels — and
+       BEFORE the .cl nowrap window (≥600px) can meet a half-width column: in the
+       600–720px band a nowrap clause (~317px) outgrows the ~283px copy column
+       and eats the right margin. Stacked, it always has full width. */
+    @media (max-width: 720px) {
+      .daily-row { grid-template-columns: 1fr; }
+    }
+    /* Bridge · carries the visitor out of the 90vh rest moment into "it actually
+       counts". Fills the dead space with a quiet line (picking up Act 4's "or
+       just keep scrolling") instead of a void, and pulls Act 5 up tight so the
+       line reads as its lead-in, not a stranded caption. */
+    .bridge { text-align: center; padding-block: clamp(28px, 5vh, 60px); }
+    .bridge p { margin: 0 auto; max-width: 21em; font-size: var(--t-lede); line-height: 1.7; color: var(--muted); text-wrap: balance; }
+    .bridge + .block { padding-top: 0; }
+    .bridge + .block .daily-row { margin-top: var(--s12); }
+    .final-panel { max-width: 1120px; min-height: 420px; margin-inline: auto; padding: 44px clamp(24px, 6vw, 80px) 46px; display: grid; justify-items: center; align-content: center; border-radius: 24px; border: 1px solid rgba(255,255,255,0.07); background: rgba(24,26,27,0.9); box-shadow: 0 18px 46px rgba(0,0,0,0.18); }
+    .final-panel .mira { width: 96px; height: 96px; margin-bottom: var(--s8); }
+    .final-panel .pet { --rest: 1.05; --peak: 1.08; }
+
+    /* ── Act 4 · 跟 Mira 歇一下（参与式护眼一刻） ───────────────
+       The one moment the visitor doesn't watch but DOES: a real 10s look-away,
+       paced by a breathing dot + a soft ring. Gentle by design (scale-only breath,
+       no luminance flash); reduced-motion falls back to a manual, still version. */
+    .rest-act { min-height: 78vh; display: grid; place-items: center; text-align: center; padding-block: var(--section); }
+    .rest-stage { position: relative; width: 100%; max-width: 34em; display: grid; justify-items: center; }
+    .rest-panel { display: grid; justify-items: center; gap: var(--s6); }
+    .rest-act [data-when] { display: none; }
+    .rest-act[data-state="invite"] [data-when="invite"],
+    .rest-act[data-state="resting"] [data-when="resting"],
+    .rest-act[data-state="done"] [data-when="done"] { display: grid; }
+    .rest-act h2, .rest-act .sub { margin: 0; }
+    .rest-act .sub.soft { color: var(--muted-soft); }
+    .rest-btn { margin-top: var(--s2); }
+    .rest-skip { margin-top: var(--s2); border: 0; background: none; color: var(--muted-soft); font: inherit; font-size: var(--t-small); letter-spacing: 0.04em; cursor: pointer; transition: color 0.25s var(--ease); }
+    .rest-skip:hover { color: var(--muted); }
+    .pacer { --circ: 591; position: relative; width: 208px; height: 208px; display: grid; place-items: center; margin: var(--s4) 0; }
+    .pacer .ring { position: absolute; inset: 0; width: 100%; height: 100%; transform: rotate(-90deg); }
+    .pacer .ring circle { fill: none; stroke: var(--line); stroke-width: 2; }
+    .pacer .ring .prog { stroke: var(--mira); stroke-width: 3; stroke-linecap: round; stroke-dasharray: var(--circ); stroke-dashoffset: var(--circ); }
+    .pacer .dot { width: 96px; height: 96px; border-radius: 50%; background: radial-gradient(circle at 50% 44%, rgba(79,201,156,0.30), rgba(79,201,156,0.05) 70%); box-shadow: inset 0 0 0 1px var(--mira-line), 0 0 30px rgba(79,201,156,0.12); display: grid; place-items: center; color: var(--mira-strong); font-size: 30px; }
+    .rest-act[data-state="resting"] .dot { animation: breatheRest 4s var(--ease) infinite; }
+    .rest-act[data-state="resting"] .prog { animation: ringFill 10s linear forwards; }
+    @keyframes breatheRest { 0%, 100% { transform: scale(0.84); } 50% { transform: scale(1.12); } }
+    @keyframes ringFill { to { stroke-dashoffset: 0; } }
+
+    /* ── Footer ─────────────────────────────────────────────── */
+    footer { position: relative; z-index: 1; padding: var(--s24) 0 var(--s16); text-align: center; color: var(--muted-soft); font-size: var(--t-small); }
+    footer a { color: var(--muted); text-decoration: none; }
+    footer .row { display: inline-flex; align-items: center; gap: 10px; }
+    footer .dot { width: 3px; height: 3px; border-radius: 50%; background: var(--line-soft); }
+
+    /* ── Reveal — each screen arrives softly (fade + ≤8px, once) ─ */
+    .reveal { opacity: 0; transform: translateY(8px); transition: opacity 0.95s var(--ease), transform 0.95s var(--ease); }
+    .reveal.in { opacity: 1; transform: none; }
+    .closing .sub { margin-top: var(--s4); }
+
+    /* Latin needs a wider measure than CJK — override the tokens once. */
+    html[lang="en"] { --measure: 34em; --measure-lede: 30em; --measure-sub: 26em; --measure-head: 22em; }
+    html[lang="en"] h1 { letter-spacing: -0.03em; line-height: 1.05; }
+
+    /* Chinese typography — treat CJK by its own rules, not Latin's. Lighter weight
+       reads more refined; gentle POSITIVE tracking (字距) gives characters air;
+       roomier leading. (Latin keeps its tight, negative-tracked settings above.) */
+    html[lang="zh-CN"] { font-family: "PingFang SC", "Hiragino Sans GB", -apple-system, BlinkMacSystemFont, sans-serif; }
+    html[lang="zh-CN"] h1 { font-weight: 500; letter-spacing: 0.02em; line-height: 1.32; }
+    html[lang="zh-CN"] h2 { font-weight: 500; letter-spacing: 0.03em; line-height: 1.42; }
+    html[lang="zh-CN"] .sub { letter-spacing: 0.03em; line-height: 1.85; }
+    html[lang="zh-CN"] .body { letter-spacing: 0.03em; line-height: 1.9; }
+    html[lang="zh-CN"] .eyebrow { letter-spacing: 0.32em; }
+    html[lang="zh-CN"] .meta { letter-spacing: 0.06em; }
+    html[lang="zh-CN"] .hero-title,
+    html[lang="en"] .hero-title {
+      line-height: 0.96;
+      letter-spacing: -0.055em;
+      font-weight: 600;
+    }
+
+    @media (max-width: 560px) {
+      .col { padding-inline: 20px; }
+      h1 { font-size: clamp(2rem, 9vw, 2.6rem); }
+      .mira { width: 150px; height: 150px; }
+      .hero { min-height: auto; }
+      .final-panel { min-height: 360px; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      html { scroll-behavior: auto; }
+      *, *::before, *::after { animation-duration: 0.001ms !important; animation-iteration-count: 1 !important; transition-duration: 0.001ms !important; }
+      .reveal { opacity: 1; transform: none; }
+      /* Act 4: no breathing/ring motion — a still invitation you advance yourself. */
+      .rest-act[data-state="resting"] .dot { transform: scale(1); }
+      .rest-act[data-state="resting"] .ring { display: none; }
+      /* Act 3: no slide-in — the nudges are simply present; the live island freezes on
+         its rest state (full bar, "看看远方"), no looping countdown. */
+      .channels .companion-card, .channels .island { opacity: 1 !important; transform: none !important; }
+      .island.live .isl-fill { width: 100% !important; }
+      .island.live .isl-msg .rest { opacity: 1 !important; }
+      .island.live .isl-msg .done { opacity: 0 !important; }
+    }
+  </style>
+</head>
+<body>
+  <div class="col">
+    <nav>
+      <span class="brand"><span class="mark" aria-hidden="true"></span>EyeFlow</span>
+      <span class="right">
+        <span class="lang" role="group" aria-label="Language">
+          <button type="button" data-lang="zh" aria-pressed="true">中</button>
+          <span class="s" aria-hidden="true"></span>
+          <button type="button" data-lang="en" aria-pressed="false">EN</button>
+        </span>
+        <a class="dl" href="https://github.com/Lovelle-Zhang/eyeflow/releases/download/v0.1.5/EyeFlow-0.1.5-x64.dmg">Download</a>
+      </span>
+    </nav>
+  </div>
+
+  <!-- ── Hero ────────────────────────────────────────────────── -->
+  <section class="hero col">
+    <h1 class="hero-title" data-en="EyeFlow">EyeFlow</h1>
+    <p class="hero-tagline" data-en="Time to look up — someone remembers so you don't have to.">该让<b class="kw-eyes">眼睛</b>歇了——有人替你记得。</p>
+    <p class="sub" data-en="Meet <b class='kw-mira'>Mira</b>, who lives inside EyeFlow: stare too long and she nudges you to look away. No interrupting, no watching, no eye strain."><span class="cl">EyeFlow 里住着 <b class="kw-mira">Mira</b>：</span><span class="cl">盯太久时，</span><span class="cl">她轻轻提醒你抬头看远处。</span><span class="cl">不打断、不监视、不伤眼。</span></p>
+
+    <div class="stage">
+      <div class="mira" role="img" aria-label="Mira，安静呼吸着的小生物" data-en-label="Mira, a small creature quietly breathing">
+        <div class="pet" aria-hidden="true">
+          <div class="ant"></div><div class="face"></div>
+          <div class="cheek l"></div><div class="cheek r"></div><div class="mouth"></div>
+        </div>
+      </div>
+    </div>
+
+    <div>
+      <a class="cta" href="https://github.com/Lovelle-Zhang/eyeflow/releases/download/v0.1.5/EyeFlow-0.1.5-x64.dmg">Download for macOS</a>
+      <div class="meta" data-en="macOS 12+ · Free · Local-first · Notarized">macOS 12+ · 免费 · 本地运行 · Apple 公证</div>
+    </div>
+  </section>
+
+  <!-- ── Act 0 · 眼睛这件事（前置：强度 · 责任 · 不可恢复） ────── -->
+  <section class="block narrow col reveal">
+    <div class="head">
+      <p class="eyebrow" data-en="First, about your eyes">先说说眼睛</p>
+      <h2 class="stakes-lead" data-en="Every waking moment, they're the ones seeing the world for you."><span class="cl">醒着的每一刻，</span><span class="cl">它几乎都在替你看这个世界。</span></h2>
+    </div>
+    <ol class="stakes">
+      <li class="stake">
+        <span class="stake-i">01</span>
+        <span class="stake-tag" data-en="Intensity">使用强度</span>
+        <p data-en="Sixteen waking hours a day, they hardly ever stop.">一天醒着的十几个小时，它几乎没停过。</p>
+      </li>
+      <li class="stake">
+        <span class="stake-i">02</span>
+        <span class="stake-tag" data-en="Responsibility">肩负的责任</span>
+        <p data-en="Nearly all of it comes in through them.">你认识世界，大半从这一处进来。</p>
+      </li>
+      <li class="stake accent">
+        <span class="stake-i">03</span>
+        <span class="stake-tag" data-en="Irreversible">不可恢复</span>
+        <p data-en="What wears down won't grow back — it only goes one way.">磨损了不会自己长回来，只进不退。</p>
+      </li>
+    </ol>
+    <p class="body stakes-close" data-en="The part you use most is the hardest to repair. So it deserves to be looked after — a little each day is enough.">用得最多，偏偏最难修复。正因如此，它值得被好好护着——每天，分一点点就够。</p>
+  </section>
+
+  <div class="rule col"></div>
+
+  <!-- ── Act 1 · 凝视 ─────────────────────────────────────────── -->
+  <section class="block narrow col reveal">
+    <div class="head">
+      <p class="eyebrow" data-en="You've been here a while">你已经盯了很久了</p>
+      <h2 data-en="Screens never tell you when to look up.">屏幕不会提醒你，该抬头了。</h2>
+      <p class="body" data-en="Hours slip by. Your <b class='kw-eyes'>eyes</b> go dry, a little sore — and you barely notice, because nothing on the screen ever says stop.">几个小时就这么过去。<b class="kw-eyes">眼睛</b>有点干、有点酸，你没太在意——因为屏幕上没有任何东西会喊停。</p>
+    </div>
+  </section>
+
+  <div class="turn col" aria-hidden="true"></div>
+
+  <!-- ── Act 2 · Mira 注意到你 ───────────────────────────────── -->
+  <section class="block narrow col reveal">
+    <div class="head">
+      <p class="eyebrow" data-en="But someone noticed">但有人注意到了</p>
+      <div class="portrait">
+        <div class="mira" aria-hidden="true">
+          <div class="pet">
+            <div class="ant"></div><div class="face"></div>
+            <div class="cheek l"></div><div class="cheek r"></div><div class="mouth"></div>
+          </div>
+        </div>
+      </div>
+      <h2 data-en="Meet <b class='kw-mira'>Mira</b>. She watches one thing only — how long you've looked."><span class="cl">这是 <b class="kw-mira">Mira</b>。</span><span class="cl">她只看一件事：</span><span class="cl">你盯了多久。</span></h2>
+      <p class="body" data-en="No camera, no reading your screen, nothing uploaded. She doesn't know what you're doing — only that it's been a while. Everything stays on your Mac.">不开摄像头、不读屏幕内容、不上传。她不知道你在做什么，只知道有一阵子了。所有记录只留在你的 Mac 上。</p>
+    </div>
+  </section>
+
+  <div class="rule col"></div>
+
+  <!-- ── Act 3 · 一声轻唤（提醒） ─────────────────────────────── -->
+  <section class="block narrow col reveal">
+    <div class="head">
+      <p class="eyebrow" data-en="A gentle word">一声轻唤</p>
+      <h2 data-en="Not a pop-up — just a quiet word, only when you need it."><span class="cl">不是弹窗，</span><span class="cl">只是一句轻声的话——</span><span class="cl">需要时才出现。</span></h2>
+      <p class="body" data-en="It never grabs the screen — no flash, all dark, nothing that jolts you. Keep working and she just says it a little more clearly, never louder.">她从不抢屏。全程深色、不闪、不惊到你。你要是继续，她才慢慢把话说清楚一点，从不提高音量。</p>
+    </div>
+    <div class="channels">
+      <div class="channel">
+        <p class="channel-tag" data-en="In the corner">桌面一角</p>
+        <div class="companion-card reveal" role="img" aria-label="桌面角落的 Mira 展开气泡：该歇会儿了，我在。跟我看看远方，20 秒就好" data-en-label="Mira's bubble in the desktop corner: Time for a little break — I'm right here. Let's look into the distance. 20 seconds is all it takes.">
+          <div class="txt">
+            <strong data-en="Time for a little break — I'm right here.">该歇会儿了，我在。</strong>
+            <span data-en="Let's look into the distance. 20 seconds is all it takes.">跟我看看远方，20 秒就好。</span>
+          </div>
+          <div class="mira" aria-hidden="true">
+            <div class="pet">
+              <div class="ant"></div><div class="face"></div>
+              <div class="cheek l"></div><div class="cheek r"></div><div class="mouth"></div>
+            </div>
+          </div>
+        </div>
+        <p class="channel-note" data-en="Peeks out when needed, then slips back.">需要时冒个头，说完退回去。</p>
+      </div>
+      <div class="channel">
+        <p class="channel-tag" data-en="At the top">顶部提醒岛</p>
+        <div class="island live" role="img" aria-label="EyeFlow 顶部提醒岛：看看远方休息一下，看完自动记录" data-en-label="EyeFlow's reminder island at the top of the screen: look into the distance to rest, logged automatically when you're done">
+        <svg class="ic" viewBox="0 0 1024 1024" aria-hidden="true">
+          <defs><linearGradient id="isl-bg" x1="216" y1="156" x2="826" y2="874" gradientUnits="userSpaceOnUse"><stop offset="0" stop-color="#EAFFF6"/><stop offset=".58" stop-color="#BDEAFF"/><stop offset="1" stop-color="#F3EEC7"/></linearGradient></defs>
+          <rect width="1024" height="1024" rx="230" fill="url(#isl-bg)"/>
+          <rect x="177" y="335" width="671" height="318" rx="159" fill="#0E1C20"/>
+          <circle cx="380" cy="468" r="46" fill="#F8FFFC"/>
+          <circle cx="644" cy="468" r="46" fill="#F8FFFC"/>
+          <circle cx="803" cy="344" r="82" fill="#6FE7C3"/>
+        </svg>
+        <div class="isl-body">
+          <div class="isl-msg">
+            <span class="rest" data-en="Look into the distance.">看看远方，休息一下。</span>
+            <span class="done" data-en="Rested · logged ✓">休息完成 · 已记录 ✓</span>
+          </div>
+          <div class="isl-track"><div class="isl-fill"></div></div>
+        </div>
+      </div>
+        <p class="channel-note" data-en="Rests at the very top; tucks itself away when you're done.">贴在屏幕顶端，看完自己收起。</p>
+      </div>
+    </div>
+  </section>
+
+  <div class="rule col"></div>
+
+  <!-- ── Act 4 · 跟 Mira 歇一下（参与式护眼一刻） ─────────────── -->
+  <section class="rest-act reveal col" data-state="invite" aria-label="跟 Mira 歇一下" data-en-label="Rest with Mira">
+    <div class="rest-stage">
+      <div class="rest-panel" data-when="invite">
+        <p class="eyebrow" data-en="Rest with Mira">歇一下</p>
+        <h2 data-en="Look away with <b class='kw-mira'>Mira</b>.">跟 <b class="kw-mira">Mira</b> 一起，把视线放远。</h2>
+        <p class="sub" data-en="Ten seconds is enough — a window, or the farthest wall in the room."><span class="cl">10 秒就好——</span><span class="cl">看向窗外，</span><span class="cl">或屋里最远的那面墙。</span></p>
+        <button class="cta rest-btn" type="button" data-rest="start" data-en="Okay, ten seconds with you">好，跟你歇 10 秒</button>
+        <p class="meta" data-en="or just keep scrolling">也可以直接往下滑</p>
+      </div>
+      <div class="rest-panel" data-when="resting">
+        <div class="pacer">
+          <svg class="ring" viewBox="0 0 200 200" aria-hidden="true"><circle cx="100" cy="100" r="94"></circle><circle class="prog" cx="100" cy="100" r="94"></circle></svg>
+          <div class="dot" aria-hidden="true"></div>
+        </div>
+        <p class="sub soft" data-en="Look far away. I'm right here.">看向远处，我在。</p>
+        <button class="rest-skip" type="button" data-rest="skip" data-en="I'm good →">歇好了 →</button>
+      </div>
+      <div class="rest-panel" data-when="done">
+        <div class="pacer"><div class="dot" aria-hidden="true">✓</div></div>
+        <h2 data-en="There — your <b class='kw-eyes'>eyes</b> just rested.">好了 · <b class="kw-eyes">眼睛</b>松过了。</h2>
+        <p class="sub" data-en="This is all EyeFlow does — quietly, every day.">EyeFlow 每天做的就是这一下——安静地，一整天。</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── 过渡 · 从「歇一下」到「她当真」 ───────────────────────── -->
+  <div class="bridge col reveal">
+    <p data-en="That pause just now — maybe you truly rested, maybe you just scrolled past."><span class="cl">刚才那一下，</span><span class="cl">你可能真歇了，</span><span class="cl">也可能只是划了过去。</span></p>
+  </div>
+
+  <!-- ── Act 5 · 被接住（她当真） ─────────────────────────────── -->
+  <section class="block col col-wide">
+    <div class="daily-row">
+      <div class="screen-card reveal">
+        <img src="shots/break-lock.png" alt="EyeFlow 全屏恢复：Mira 陪你看向远处，休息 20 秒" data-en-alt="EyeFlow's full-screen break: Mira looks into the distance with you for a 20-second rest" loading="lazy" width="2560" height="1640">
+      </div>
+      <div class="daily-copy reveal">
+        <p class="eyebrow" data-en="She means it">她当真</p>
+        <h2 data-en="She knows if you really looked away."><span class="cl">她知道，</span><span class="cl">你有没有真的看向远处。</span></h2>
+        <p class="body" data-en="Not a 'Done' button to fool yourself with. Your break counts only when you truly step back — and <b class='kw-mira'>Mira</b> would rather say 'no clear pattern yet' than invent a nicer number.">不是让你点个"完成"糊弄自己。你真的离开屏幕，这一下才算数——<b class="kw-mira">Mira</b> 宁可说"还看不出规律"，也不给你编个好看的数字。</p>
+        <ul class="spec">
+          <li data-en="Real breaks only">真实离开才算数</li>
+          <li data-en="'Done' won't fool it">点「完成」不作数</li>
+          <li class="key" data-en="Blanks over invented numbers">宁可留白，不编数字</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── Act 6 · 每日小卡 ─────────────────────────────────────── -->
+  <section class="block col col-wide">
+    <div class="daily-row">
+      <div class="daily-copy reveal">
+        <p class="eyebrow" data-en="A quiet daily card">每日小卡</p>
+        <h2 data-en="At the end of the day,<br>your <b class='kw-eyes'>eyes</b> get a soft landing too.">每天结束时，<br>把<b class="kw-eyes">眼睛</b>也轻轻放下。</h2>
+        <p class="body" data-en="A small card to hold the day's rhythm of looking. No tracking, no ranking, just a gentle close to the day.">一张小卡，收好今天的用眼节奏。不追踪、不排名，只帮你轻轻结束这一天。</p>
+        <ul class="spec">
+          <li data-en="No tracking">不追踪</li>
+          <li data-en="No ranking">不排名</li>
+          <li class="key" data-en="Yours to keep, on-device">本地带走</li>
+        </ul>
+      </div>
+      <div class="screen-card reveal">
+        <img src="shots/share-card.png" alt="EyeFlow 今日分享卡：Mira 记下你今天的用眼节奏，可本地带走" data-en-alt="EyeFlow's daily share card: Mira keeps the day's rhythm of looking — yours to keep, on-device" loading="lazy" width="2560" height="1584">
+      </div>
+    </div>
+  </section>
+
+  <!-- ── 收尾 ───────────────────────────────────────────────── -->
+  <section class="closing col">
+    <div class="final-panel">
+      <div class="mira" aria-hidden="true">
+        <div class="pet">
+          <div class="ant"></div><div class="face"></div>
+          <div class="cheek l"></div><div class="cheek r"></div><div class="mouth"></div>
+        </div>
+      </div>
+      <p class="eyebrow" data-en="In the end">说到底</p>
+      <h2 data-en="Your <b class='kw-eyes'>eyes</b> watched the world all day.<br>Someone should call time for them."><b class="kw-eyes">眼睛</b>替你看了一整天，<br>总得有人，替它喊一声停。</h2>
+      <p class="sub" data-en="That's the one thing <b class='kw-mira'>Mira</b> does for you, every day. Bring her home to your Mac."><span class="cl">这正是 <b class="kw-mira">Mira</b> 每天替你做的一件事。</span><span class="cl">让她住进你的 Mac。</span></p>
+      <div class="actions">
+        <a class="cta" href="https://github.com/Lovelle-Zhang/eyeflow/releases/download/v0.1.5/EyeFlow-0.1.5-x64.dmg">Download for macOS</a>
+      </div>
+    </div>
+  </section>
+
+  <footer class="col">
+    <div class="row">
+      <span>EyeFlow</span><span class="dot"></span>
+      <a href="https://github.com/Lovelle-Zhang/eyeflow" data-en="Open source">开源</a><span class="dot"></span>
+      <span data-en="Notarized">已 Apple 公证</span><span class="dot"></span>
+      <span>v0.1.5</span>
+    </div>
+  </footer>
+
+  <script>
+    (function () { // Mira idle blink — the one signature, slow and quiet
+      const reduce = window.matchMedia("(prefers-reduced-motion: reduce)");
+      let next = 0, clear = 0; const rand = (a, b) => a + Math.random() * (b - a);
+      function schedule(now) { next = now + rand(3000, 7000); }
+      function trigger(now) {
+        const dbl = Math.random() < 0.16;
+        document.body.style.setProperty("--blink", Math.round(rand(180, 260)) + "ms");
+        document.body.style.setProperty("--dblink", Math.round(rand(480, 640)) + "ms");
+        document.body.dataset.blink = dbl ? "double" : "single";
+        clear = now + (dbl ? 720 : 340); schedule(now);
+      }
+      function tick(now) {
+        if (clear && now >= clear) { document.body.removeAttribute("data-blink"); clear = 0; }
+        if (!next) schedule(now);
+        if (!document.hidden && now >= next) trigger(now);
+        requestAnimationFrame(tick);
+      }
+      if (!reduce.matches) requestAnimationFrame(tick);
+    })();
+
+    (function () { // reveal — fade + tiny shift, once
+      const items = document.querySelectorAll(".reveal");
+      if (!("IntersectionObserver" in window)) { items.forEach((el) => el.classList.add("in")); return; }
+      const io = new IntersectionObserver((es) => es.forEach((e) => { if (e.isIntersecting) { e.target.classList.add("in"); io.unobserve(e.target); } }), { threshold: 0.14, rootMargin: "0px 0px -6% 0px" });
+      items.forEach((el) => io.observe(el));
+    })();
+
+    (function () { // Act 4 — rest WITH Mira: a real 20s look-away, opt-in and skippable
+      const act = document.querySelector(".rest-act");
+      if (!act) return;
+      const reduce = window.matchMedia("(prefers-reduced-motion: reduce)");
+      let timer = 0;
+      act.addEventListener("click", (e) => {
+        const btn = e.target.closest("[data-rest]");
+        if (!btn) return;
+        if (btn.dataset.rest === "start") {
+          act.dataset.state = "resting";
+          // Non-reduced: the ring/breath pace the 20s and auto-finish. Reduced: the
+          // still "resting" view waits for the visitor to tap 歇好了 themselves.
+          if (!reduce.matches) timer = window.setTimeout(() => { act.dataset.state = "done"; }, 10000);
+        } else if (btn.dataset.rest === "skip") {
+          window.clearTimeout(timer);
+          act.dataset.state = "done";
+        }
+      });
+    })();
+
+    (function () { // 中/EN
+      const els = [...document.querySelectorAll("[data-en]")];
+      els.forEach((el) => (el.dataset.zh = el.innerHTML));
+      // a11y strings ride along: aria-labels and img alts swap with the language,
+      // so screen readers never get Chinese text under html[lang="en"].
+      const labeled = [...document.querySelectorAll("[data-en-label]")];
+      labeled.forEach((el) => (el.dataset.zhLabel = el.getAttribute("aria-label")));
+      const alts = [...document.querySelectorAll("img[data-en-alt]")];
+      alts.forEach((el) => (el.dataset.zhAlt = el.getAttribute("alt")));
+      const btns = [...document.querySelectorAll(".lang button")];
+      function apply(lang) {
+        document.documentElement.lang = lang === "en" ? "en" : "zh-CN";
+        els.forEach((el) => (el.innerHTML = lang === "en" ? el.dataset.en : el.dataset.zh));
+        labeled.forEach((el) => el.setAttribute("aria-label", lang === "en" ? el.dataset.enLabel : el.dataset.zhLabel));
+        alts.forEach((el) => el.setAttribute("alt", lang === "en" ? el.dataset.enAlt : el.dataset.zhAlt));
+        btns.forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.lang === lang)));
+        try { localStorage.setItem("ef-lang", lang); } catch (e) {}
+      }
+      let init = "zh";
+      try {
+        const q = new URLSearchParams(window.location.search).get("lang");
+        const s = localStorage.getItem("ef-lang");
+        if (q === "en" || q === "zh") init = q;
+        else if (s) init = s;
+        else if ((navigator.language || "").toLowerCase().startsWith("en")) init = "en";
+      } catch (e) {}
+      btns.forEach((b) => b.addEventListener("click", () => apply(b.dataset.lang)));
+      apply(init);
+    })();
+  </script>
+</body>
+</html>
