@@ -183,8 +183,13 @@ function main() {
   );
   assertMatches(
     mainJs,
-    /function\s+restoreDashboardAfterBreakLock\(payload = \{\}\)[\s\S]*dashboardWindow\.setFullScreen\(false\);[\s\S]*dashboardWindow\.unmaximize\(\);[\s\S]*dashboardWindow\.setVisibleOnAllWorkspaces\(false\);[\s\S]*keepDashboardVisible\(\);[\s\S]*dashboardWindow\.webContents\.send\("breakLock:finished", payload\);[\s\S]*if \(payload\.preview\) \{[\s\S]*dashboardWindow\.show\(\);[\s\S]*dashboardWindow\.focus\(\);[\s\S]*return;[\s\S]*\}[\s\S]*dashboardWindow\.hide\(\);[\s\S]*syncDock\(\);/,
+    /function\s+restoreDashboardAfterBreakLock\(payload = \{\}\)[\s\S]*dashboardWindow\.setFullScreen\(false\);[\s\S]*dashboardWindow\.unmaximize\(\);[\s\S]*dashboardWindow\.setVisibleOnAllWorkspaces\(false\);[\s\S]*keepDashboardVisible\(\);[\s\S]*dashboardWindow\.webContents\.send\("breakLock:finished", payload\);[\s\S]*if \(payload\.preview\) \{[\s\S]*dashboardWindow\.show\(\);[\s\S]*dashboardWindow\.focus\(\);[\s\S]*return;[\s\S]*\}[\s\S]*hideEyeFlowAfterRealBreakLock\(\);/,
     "real break lock completion hides EyeFlow while preview returns to the dashboard"
+  );
+  assertMatches(
+    mainJs,
+    /function\s+hideEyeFlowAfterRealBreakLock\(\)[\s\S]*dashboardWindow\.hide\(\);[\s\S]*syncDock\(\);[\s\S]*suppressNextActivate = true;[\s\S]*app\.hide\(\);/,
+    "real break lock completion hides the whole macOS app and suppresses immediate activate"
   );
   assertMatches(
     mainJs,
@@ -200,6 +205,11 @@ function main() {
     breakLockHtml,
     /document\.addEventListener\("keydown"[\s\S]*event\.key === "Escape"[\s\S]*requestEmergencyExit\(\);/,
     "break lock supports Escape as an emergency exit fallback"
+  );
+  assertMatches(
+    breakLockHtml,
+    /function\s+requestEmergencyExit\(\)\s*\{[\s\S]{0,700}if \(els\.escapeBtn\.disabled\) return;[\s\S]*?els\.escapeBtn\.disabled = true;[\s\S]*?interrupted: true,/,
+    "emergency exit is idempotent: latched after the confirmed send so repeated clicks/Escape cannot emit duplicate interrupted IPCs (S4 family)"
   );
   assertMatches(mainJs, /if \(label === "break-lock-complete"\) \{[\s\S]*window\.clearInterval\(ticker\);[\s\S]*completionShown = false;[\s\S]*showCompletion\(\);/, "debug break-lock complete capture stops the timer before forcing the completed state");
   assertMatches(mainJs, /dashboardWindow\.webContents\.send\("dashboard:restGuide"/, "desktop forwards rest guide");
