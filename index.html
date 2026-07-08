@@ -16413,6 +16413,9 @@
       const displayLevel = Number(intervention.displayLevel || intervention.level || 1);
       const reminderOpening = hasReminderOpening();
       const naturalBreak = Boolean(latestActivity && isNaturalBreak(latestActivity));
+      // "真正到断点" = 手动计时到达目标，或自动模式的自然停顿。main 用它区分：断点前的
+      // 提醒边界热身只跳"不带计时的绿胶囊"，真到断点才跳"带计时的" look-away 胶囊，且绕过冷却。
+      const breakDue = Boolean((isRunning && Number(elapsedSeconds) >= Number(els.focusTarget.value) * 60) || naturalBreak);
       publishCompanionState({
         mood,
         title,
@@ -16439,6 +16442,7 @@
         snoozeUntil: Number(state.snoozeUntil || 0),
         reminderOpening,
         naturalBreak,
+        breakDue,
         ...currentAppearanceState()
       });
     }

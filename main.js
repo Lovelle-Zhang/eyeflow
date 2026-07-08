@@ -52,6 +52,7 @@ let companionBoundsTransient = false;
 let lastReminderAt = 0;
 let lastInterventionLevel = 1;
 let lastMenuIntensity = null;
+let breakRestSurfaced = false;
 let autoPanelTimer = null;
 let hoverOpenTimer = null;
 let hoverCloseTimer = null;
@@ -2585,6 +2586,14 @@ function applyInterventionBehavior(state) {
   // light L2 with the island on stays a single on-screen surface.
   const showNotify = companionExited && level >= 2 && (level >= 3 || !islandEnabled);
 
+  // The REAL break point (manual timer hit its target, or an auto-mode natural pause) is
+  // the moment that most deserves the full look-away. It surfaces the countdown capsule
+  // and BYPASSES the shared cooldown once per round — so an earlier pre-target heads-up
+  // can't eat it. Before the target, the "提醒边界" heads-up is only a no-countdown pill.
+  const breakDue = Boolean(state.breakDue);
+  if (!breakDue) breakRestSurfaced = false; // re-arm the once-per-break-point latch each round
+  const breakBypass = breakDue && !breakRestSurfaced;
+
   if (!showBubble && !showRest && !showNotify) {
     // Nothing to surface (L1, or L3 while Mira is on screen and her bubble carries it) —
     // leave the panel down.
@@ -2602,8 +2611,9 @@ function applyInterventionBehavior(state) {
   // ONE coordinated surfacing on a single shared cooldown, so a reminder never
   // multi-buzzes across drifting per-channel timers. An upward escalation
   // (e.g. L2 → L3) re-surfaces immediately.
-  if (escalated || now - lastReminderAt > reminderCooldown) {
+  if (escalated || breakBypass || now - lastReminderAt > reminderCooldown) {
     lastReminderAt = now;
+    if (breakDue) breakRestSurfaced = true; // the target break point surfaces once per round
     if (showBubble) {
       showCompanionPanel();
       if (autoPanelTimer) {
@@ -2616,9 +2626,16 @@ function applyInterventionBehavior(state) {
         }, 9000);
       }
     }
-    // Mira exited → the island IS the reminder: run the look-away micro-rest and close
-    // the loop itself, no dead-end waiting for a button you can't reach.
-    if (showRest) startIslandMicroRest(islandRestMessage(level), state.reminderId || null);
+    // Mira exited → the island IS the reminder. At the real break point it runs the
+    // look-away micro-rest (带计时, self-closing); before the target it's only a
+    // no-countdown heads-up pill (提醒边界热身) — never a full rest capsule too early.
+    if (showRest) {
+      if (breakDue) {
+        startIslandMicroRest(islandRestMessage(level), state.reminderId || null);
+      } else {
+        showNotchIsland({ mode: "text", message: islandNoticeMessage(level) });
+      }
+    }
     if (showNotify) notify(reminderMessage);
   }
 }
@@ -2632,6 +2649,12 @@ function applyInterventionBehavior(state) {
 // rest of the app. L3 is more certain, not louder (matches her "我建议现在休息一下").
 function islandRestMessage(level) {
   return level >= 3 ? "眼睛该松一下了，看远处" : "陪你看会儿远处";
+}
+
+// The pre-target heads-up on the away island — a green pill WITHOUT a countdown (just a
+// gentle "快到了"), distinct from the real break point's带计时 look-away capsule.
+function islandNoticeMessage(level) {
+  return level >= 3 ? "眼睛该歇会儿了，待会儿看看远处" : "快到断点了，待会儿看看远处";
 }
 
 const ISLAND_LOOKAWAY_SECONDS = 20;
