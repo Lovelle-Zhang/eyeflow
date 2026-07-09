@@ -52,7 +52,13 @@ function isEyeFlowRunning() {
     encoding: "utf8",
     timeout: 3000
   });
-  if (result.status !== 0) return false;
+  if (result.error) {
+    throw result.error;
+  }
+  if (result.status !== 0) {
+    const output = `${result.stdout || ""}${result.stderr || ""}`.trim();
+    throw new Error(`Unable to verify whether EyeFlow is still running${output ? `: ${output}` : ""}`);
+  }
   return result.stdout.split(/\r?\n/).some((line) => {
     const command = line.trim();
     return command.startsWith("/Applications/EyeFlow.app/Contents/MacOS/EyeFlow")

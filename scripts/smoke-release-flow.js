@@ -200,6 +200,7 @@ function main() {
   assertIncludes(restSmokeJs, "recoveryCompletionPlan", "rest smoke guards completion plan");
   assertMatches(installLocalJs, /path\.join\(root,\s*"dist",\s*"mac",\s*"EyeFlow\.app"\)/, "local install source");
   assertMatches(installLocalJs, /spawnSync\("ps",\s*\["-axo",\s*"command"\]/, "installer detects running app without pgrep");
+  assertMatches(installLocalJs, /if \(result\.error\) \{[\s\S]*throw result\.error;[\s\S]*if \(result\.status !== 0\) \{[\s\S]*Unable to verify whether EyeFlow is still running/, "installer must fail closed when process checks are sandbox-blocked");
 
   assertIncludes(installedSmokeJs, "eyeflow-core.js", "installed smoke checks core file");
   assertIncludes(installedSmokeJs, "eyeflow-ui-utils.js", "installed smoke checks UI utility file");
