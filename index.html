@@ -60,7 +60,10 @@
     }
 
     * { box-sizing: border-box; }
-    html { scroll-behavior: smooth; }
+    /* iOS Safari otherwise inflates long text blocks (~1.3x) — headings then
+       overflow their box, the centered lines spill BOTH sides, and the page
+       gains a sideways pan that reads as "everything is off-centre". */
+    html { scroll-behavior: smooth; -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
     body {
       margin: 0; font-family: var(--font); font-weight: 400; color: var(--ink);
       font-size: 17px; line-height: 1.6; -webkit-font-smoothing: antialiased; text-rendering: optimizeLegibility;
@@ -144,7 +147,9 @@
     /* ── Act 0 · the stakes — an editorial triptych, not another centered block.
        Three named factors (intensity · responsibility · no-undo) carry the
        thesis; the last is accented because irreversibility is the crux. ── */
-    .stakes-lead { max-width: 19em; font-size: clamp(1.9rem, 3.6vw, 2.75rem); line-height: 1.2; }
+    /* Viewport-aware floor: the 13-char clause 「它几乎都在替你看这个世界。」
+       must fit a 390px phone (老 floor 1.9rem 会宽出容器,居中行双侧外溢). */
+    .stakes-lead { max-width: 19em; font-size: clamp(1.6rem, 2vw + 18px, 2.75rem); line-height: 1.2; }
     .stakes { list-style: none; margin: var(--s16) auto 0; padding: 0; max-width: 960px; display: grid; grid-template-columns: repeat(3, 1fr); text-align: left; }
     .stake { position: relative; padding: var(--s1) clamp(22px, 3vw, 36px); }
     .stake + .stake { border-left: 1px solid var(--line); }
