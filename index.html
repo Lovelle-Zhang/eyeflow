@@ -289,8 +289,59 @@
        Mira keeps breathing + blinking in the bubble throughout. */
 
     .closing { text-align: center; padding-top: var(--section); padding-bottom: calc(var(--section) + var(--s8)); }
-    .screen-card { border-radius: 18px; border: 1px solid rgba(79,201,156,0.14); background: radial-gradient(120% 100% at 50% 0%, rgba(45,88,67,0.35), rgba(12,24,21,0.84)); box-shadow: var(--shadow-lift); overflow: hidden; }
-    .screen-card img { display: block; width: 100%; height: auto; opacity: 0.94; }
+    .screen-card { border-radius: 18px; border: 1px solid rgba(79,201,156,0.14); background: radial-gradient(120% 100% at 50% 0%, rgba(45,88,67,0.35), rgba(12,24,21,0.84)); box-shadow: var(--shadow-lift); overflow: hidden; container-type: inline-size; }
+
+    /* ── Act 5/6 live mocks — the real surfaces rebuilt from app tokens,
+       like the island/companion: interfaces at work, not screenshots.
+       All internal sizes in cqi so each mock scales like an image. ── */
+
+    /* break-lock (L4 全屏恢复) — colours verbatim from break-lock.html:
+       bg #17231e→#0f1a17, ink #e7f1ec, mint #8bd8c1, line rgba(176,218,203,.18). */
+    .mock-break { position: relative; aspect-ratio: 1.6; display: grid; justify-items: center; align-content: center; gap: 8px; gap: 1.7cqi; padding: 16px; padding: 3.2cqi; text-align: center; color: #e7f1ec;
+      background: linear-gradient(180deg, rgba(139,216,193,0.055), transparent 38%), linear-gradient(180deg, #17231e 0%, #0f1a17 100%); }
+    .mock-break .mira { width: auto; height: auto; animation: none; }
+    .mock-break .mira::before { display: none; }
+    .mock-break .pet { --rest: 0.92; --peak: 0.99; }
+    .mb-title { font-size: 18px; font-size: max(4cqi, 15px); font-weight: 650; letter-spacing: 0.02em; }
+    .mb-copy { margin: -4px 0 0; margin: -0.8cqi 0 0; font-size: 12px; font-size: max(2.5cqi, 11px); color: rgba(231,241,236,0.62); }
+    .mb-steps { display: flex; gap: 1.6cqi; }
+    .mb-steps span { padding: 1cqi 2.4cqi; border-radius: 999px; border: 1px solid rgba(176,218,203,0.18); font-size: 11px; font-size: max(2.3cqi, 10px); color: rgba(231,241,236,0.55); white-space: nowrap; }
+    .mb-steps .on { border-color: rgba(139,216,193,0.6); color: #8bd8c1; background: rgba(139,216,193,0.08); }
+    /* live ring: conic drains through the mock's 12s rest loop (like the island). */
+    .mb-ring { width: 96px; width: max(19cqi, 88px); aspect-ratio: 1; border-radius: 50%; display: grid; place-items: center; margin-top: 0.4cqi;
+      background: conic-gradient(#8bd8c1 var(--mbp), rgba(230,244,238,0.1) 0);
+      box-shadow: inset 0 0 0 1px rgba(231,241,236,0.055); animation: mbDrain 12s linear infinite; }
+    .mb-timer { width: 76%; aspect-ratio: 1; border-radius: 50%; background: rgba(15,26,23,0.94); border: 1px solid rgba(176,218,203,0.18); display: grid; place-content: center; gap: 0.4cqi; text-align: center; }
+    .mb-tlabel { font-size: 9px; font-size: max(1.9cqi, 9px); letter-spacing: 0.12em; color: rgba(231,241,236,0.42); }
+    .mb-tvals { position: relative; display: block; width: 44px; width: max(9cqi, 42px); height: 1.25em; font-size: 15px; font-size: max(3.4cqi, 13px); font-weight: 700; font-variant-numeric: tabular-nums; }
+    .mb-tvals i { position: absolute; inset: 0; font-style: normal; opacity: 0; animation: mbTick 12s linear infinite; }
+    .mb-tvals i:nth-child(2) { animation-delay: 4s; }
+    .mb-tvals i:nth-child(3) { animation-delay: 8s; }
+    .mb-escape { margin-top: 2px; margin-top: 0.5cqi; padding: 5px 14px; padding: 1.1cqi 3cqi; border-radius: 10px; border: 1px solid rgba(117,232,200,0.36); font-size: 11px; font-size: max(2.2cqi, 10px); color: rgba(231,241,236,0.75); }
+    @keyframes mbDrain { 0% { --mbp: 96%; } 100% { --mbp: 3%; } }
+    /* Registered so the conic angle interpolates smoothly; without @property
+       support the keyframe still applies discretely — alive, just steppier. */
+    @property --mbp { syntax: "<percentage>"; inherits: false; initial-value: 62%; }
+    @keyframes mbTick { 0%, 30% { opacity: 1; } 33%, 100% { opacity: 0; } }
+
+    /* daily share card — structure verbatim from the app's share-art-card:
+       date · eyebrow · serif insight · three metrics · hairline · brand footer. */
+    .mock-share { aspect-ratio: 1.62; display: grid; align-content: center; justify-items: start; gap: 10px; gap: 2.1cqi; padding: 22px 28px; padding: 4.6cqi 6cqi; text-align: left; background: var(--panel); }
+    .ms-date { font-size: 12px; font-size: max(2.6cqi, 11px); color: var(--muted); }
+    .ms-eyebrow { font-size: 11px; font-size: max(2.4cqi, 10px); letter-spacing: 0.14em; color: var(--mira-strong); }
+    .ms-insight { max-width: 30ch; font-family: "Songti SC", STSong, "Noto Serif CJK SC", Georgia, serif; font-size: 20px; font-size: max(4.5cqi, 16px); line-height: 1.5; font-weight: 600; color: var(--ink); }
+    .ms-metrics { display: flex; gap: 32px; gap: 7cqi; margin-top: 0.6cqi; }
+    .ms-metrics > div { display: grid; gap: 0.8cqi; }
+    .ms-metrics span { font-size: 11px; font-size: max(2.3cqi, 10px); color: var(--muted); }
+    .ms-metrics b { font-size: 16px; font-size: max(3.4cqi, 13px); font-weight: 500; color: var(--ink); }
+    .ms-divider { width: 100%; height: 1px; background: var(--line); margin-top: 1cqi; }
+    .ms-footer { width: 100%; display: flex; align-items: center; justify-content: space-between; }
+    .ms-brand { display: inline-flex; align-items: center; gap: 1.8cqi; }
+    .ms-mark { width: 16px; height: 16px; width: 3.4cqi; height: 3.4cqi; border-radius: 22%; background: linear-gradient(150deg, #1f3937, #142224); box-shadow: inset 0 0 0 0.5px rgba(127,241,213,0.12); position: relative; }
+    .ms-mark::before { content: ""; position: absolute; top: 34%; left: 20%; width: 60%; height: 26%; border-radius: 99px; background: rgba(6,13,15,0.92); }
+    .ms-brand b { display: block; font-size: 12px; font-size: max(2.5cqi, 11px); font-weight: 600; color: var(--ink); line-height: 1.3; }
+    .ms-brand i { display: block; font-style: normal; font-size: 10px; font-size: max(2.1cqi, 10px); color: var(--muted-soft); }
+    .ms-domain { font-size: 11px; font-size: max(2.3cqi, 10px); color: var(--muted-soft); }
     .daily-row { display: grid; grid-template-columns: minmax(0, 0.95fr) minmax(0, 1fr); gap: clamp(56px, 8vw, 96px); align-items: center; margin-top: var(--s32); }
     .daily-row .daily-copy { text-align: left; }
     .daily-row h2, .daily-row .body, .daily-row .eyebrow { margin-inline: 0; }
@@ -300,6 +351,9 @@
        and eats the right margin. Stacked, it always has full width. */
     @media (max-width: 720px) {
       .daily-row { grid-template-columns: 1fr; }
+      /* Stacked, both feature rows read the same way: words first, proof after.
+         (Desktop alternates sides; the alternation means nothing in one column.) */
+      .daily-row .screen-card { order: 2; }
     }
     /* Bridge · carries the visitor out of the 90vh rest moment into "it actually
        counts". Fills the dead space with a quiet line (picking up Act 4's "or
@@ -390,6 +444,10 @@
       .mira { width: 150px; height: 150px; }
       .hero { min-height: auto; }
       .final-panel { min-height: 360px; }
+      /* spec terms stack: an inline hairline list that wraps leaves a stray
+         leading separator on line two — three short rows read cleaner. */
+      .spec { display: grid; gap: var(--s2); }
+      .spec li, .spec li + li { border-left: 0; padding-inline: 0; }
     }
     @media (prefers-reduced-motion: reduce) {
       html { scroll-behavior: auto; }
@@ -401,6 +459,11 @@
       /* Act 3: no slide-in — the nudges are simply present; the live island freezes on
          its rest state (full bar, "看看远方"), no looping countdown. */
       .channels .companion-card, .channels .island { opacity: 1 !important; transform: none !important; }
+      /* Act 5 mock: freeze the break-lock ring mid-rest with a readable timer —
+         the animation kill would otherwise land both on their end states (empty). */
+      .mb-ring { --mbp: 62% !important; animation: none !important; }
+      .mb-tvals i { opacity: 0 !important; }
+      .mb-tvals i:first-child { opacity: 1 !important; }
       .island.live .isl-fill { width: 100% !important; }
       .island.live .isl-msg .rest { opacity: 1 !important; }
       .island.live .isl-msg .done { opacity: 0 !important; }
@@ -601,7 +664,29 @@
   <section class="block col col-wide">
     <div class="daily-row">
       <div class="screen-card reveal">
-        <img src="shots/break-lock.png" alt="EyeFlow 全屏恢复：Mira 陪你看向远处，休息 20 秒" data-en-alt="EyeFlow's full-screen break: Mira looks into the distance with you for a 20-second rest" loading="lazy" width="2560" height="1640">
+        <div class="mock-break" role="img" aria-label="EyeFlow 全屏恢复：Mira 陪你看向远处，环形倒计时走完自动回来" data-en-label="EyeFlow's full-screen break: Mira looks into the distance with you while the ring counts down">
+          <div class="mira" aria-hidden="true">
+            <div class="pet">
+              <div class="ant"></div><div class="face"></div>
+              <div class="cheek l"></div><div class="cheek r"></div><div class="mouth"></div>
+            </div>
+          </div>
+          <strong class="mb-title" data-en="Look into the distance">看向远处</strong>
+          <p class="mb-copy" data-en="No need to stare at the screen — look far away for 20 seconds, then come back.">不用盯着屏幕，看远处 20 秒再回来。</p>
+          <div class="mb-steps" aria-hidden="true">
+            <span class="on" data-en="Gaze far">远眺</span>
+            <span data-en="Slow blinks">慢眨眼</span>
+            <span data-en="Slow breaths">慢呼吸</span>
+            <span data-en="Eyes closed">闭眼</span>
+          </div>
+          <div class="mb-ring" aria-hidden="true">
+            <div class="mb-timer">
+              <span class="mb-tlabel" data-en="Left">剩余</span>
+              <b class="mb-tvals"><i>00:18</i><i>00:12</i><i>00:06</i></b>
+            </div>
+          </div>
+          <span class="mb-escape" data-en="Emergency exit">紧急退出</span>
+        </div>
       </div>
       <div class="daily-copy reveal">
         <p class="eyebrow" data-en="She means it">她当真</p>
@@ -630,7 +715,21 @@
         </ul>
       </div>
       <div class="screen-card reveal">
-        <img src="shots/share-card.png" alt="EyeFlow 今日分享卡：Mira 记下你今天的用眼节奏，可本地带走" data-en-alt="EyeFlow's daily share card: Mira keeps the day's rhythm of looking — yours to keep, on-device" loading="lazy" width="2560" height="1584">
+        <article class="mock-share" role="img" aria-label="EyeFlow 今日分享卡：Mira 今天看到的一句观察，加上今日专注、护眼恢复与节奏，本地生成可带走" data-en-label="EyeFlow's daily share card: Mira's one-line observation with today's focus, recovery and rhythm — generated locally, yours to keep">
+          <span class="ms-date" data-en="Jul 9, 2026 · Thu">2026年7月9日 · 周四</span>
+          <span class="ms-eyebrow" data-en="What Mira saw today">Mira 今天看到的</span>
+          <strong class="ms-insight" data-en="A steady day for your eyes. Pause at the break points, and let the rhythm loosen a little.">今天在稳稳地用眼。到断点时停一下，让节奏松一点。</strong>
+          <div class="ms-metrics" aria-hidden="true">
+            <div><span data-en="Focus today">今日专注</span><b data-en="6 h 58 m">6 小时 58 分</b></div>
+            <div><span data-en="Recovery">护眼恢复</span><b data-en="14 min">14 分钟</b></div>
+            <div><span data-en="Rhythm">节奏</span><b data-en="Steady">保持平稳</b></div>
+          </div>
+          <div class="ms-divider" aria-hidden="true"></div>
+          <div class="ms-footer">
+            <span class="ms-brand"><span class="ms-mark" aria-hidden="true"></span><span><b>EyeFlow</b><i data-en="Mira's desktop companion space">Mira 的桌面陪伴空间</i></span></span>
+            <span class="ms-domain">eyeflow.app</span>
+          </div>
+        </article>
       </div>
     </div>
   </section>
