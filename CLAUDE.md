@@ -4,7 +4,8 @@
 
 ## 文案定位
 
-所有面向用户的文案以 docs/POSITIONING.md 为准。
+所有面向用户的文案以 docs/POSITIONING.md 为准;
+语气与措辞必须符合 docs/MIRA_LANGUAGE.md(语言宪法),发布前过其自检清单。
 
 ## 代码复审
 
