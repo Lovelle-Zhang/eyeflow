@@ -138,41 +138,6 @@
        so the acts read as separate moments, not one continuous wall of text. */
     .rule { display: grid; place-items: center; padding-block: clamp(20px, 3vh, 36px); }
     .rule::before { content: ""; width: 40px; height: 1px; background: var(--line); }
-    /* A chapter turn — bigger than a beat's hairline. This is where the story
-       actually pivots: the problem gives way to Mira. An asterism reads as
-       "new scene," not "next line," so the entrance lands as its own chapter. */
-    .turn { display: grid; place-items: center; padding-block: clamp(64px, 10vh, 116px); }
-    .turn::before { content: "· · ·"; color: var(--muted-soft); font-size: 20px; letter-spacing: 0.6em; text-indent: 0.6em; line-height: 1; }
-
-    /* ── Act 0 · the stakes — an editorial triptych, not another centered block.
-       Three named factors (intensity · responsibility · no-undo) carry the
-       thesis; the last is accented because irreversibility is the crux. ── */
-    /* Viewport-aware floor: the 13-char clause 「它几乎都在替你看这个世界。」
-       must fit a 390px phone (老 floor 1.9rem 会宽出容器,居中行双侧外溢). */
-    .stakes-lead { max-width: 19em; font-size: clamp(1.6rem, 2vw + 18px, 2.75rem); line-height: 1.2; }
-    .stakes { list-style: none; margin: var(--s16) auto 0; padding: 0; max-width: 960px; display: grid; grid-template-columns: repeat(3, 1fr); text-align: left; }
-    .stake { position: relative; padding: var(--s1) clamp(22px, 3vw, 36px); }
-    .stake + .stake { border-left: 1px solid var(--line); }
-    .stake-i { display: block; font-size: var(--t-small); font-variant-numeric: tabular-nums; letter-spacing: 0.14em; color: var(--muted-soft); }
-    .stake-tag { display: block; margin-top: var(--s4); font-size: var(--t-sub); font-weight: 500; letter-spacing: 0.01em; color: var(--ink); }
-    .stake p { margin: var(--s3) 0 0; font-size: var(--t-body); line-height: 1.62; color: var(--muted); text-wrap: pretty; }
-    .stake.accent .stake-i, .stake.accent .stake-tag { color: var(--mira-strong); }
-    .stake.accent p { color: var(--ink-soft); }
-    .stakes-close { margin-top: var(--s12); }
-    @media (max-width: 720px) {
-      .stakes { grid-template-columns: 1fr; max-width: 28em; margin-top: var(--s12); }
-      .stake { padding: var(--s6) 0; }
-      .stake + .stake { border-left: 0; border-top: 1px solid var(--line); }
-    }
-
-    /* Feature spec — the honesty made concrete, in Act 0's restrained voice:
-       small muted terms, hairline separators, one Mira-accented crux. Keeps the
-       two feature rows rhyming with the opening triptych. */
-    .spec { list-style: none; margin: var(--s8) 0 0; padding: 0; display: flex; flex-wrap: wrap; align-items: center; row-gap: var(--s3); font-size: var(--t-small); line-height: 1.2; letter-spacing: 0.01em; color: var(--muted); }
-    .spec li { display: inline-flex; align-items: center; padding-inline: var(--s4); }
-    .spec li:first-child { padding-left: 0; }
-    .spec li + li { border-left: 1px solid var(--line); }
-    .spec .key { color: var(--mira-strong); }
     .head { text-align: center; }
     .head > h2 + .body { margin-top: var(--flow-title); }
     .head > .eyebrow + h2 { margin-top: 0; }
@@ -181,9 +146,8 @@
     /* ── Hero ───────────────────────────────────────────────── */
     .hero { text-align: center; padding-top: clamp(44px, 8vh, 84px); padding-bottom: 0; }
     .hero h1 + .sub { margin-top: var(--flow-title); }
-    .hero-title { margin: 0; font-size: clamp(3.5rem, 8vw, 7.5rem); line-height: 0.96; letter-spacing: -0.055em; }
-    .hero-tagline { margin: var(--s6) auto 0; max-width: 18em; font-size: clamp(1.9rem, 3.8vw, 3.25rem); line-height: 1.2; font-weight: 500; letter-spacing: 0.02em; color: var(--ink); text-wrap: balance; }
-    .hero-tagline + .sub { margin-top: var(--s6); }
+    /* 主 slogan:体感钩当头。CJK 500 字重(排版课),两行由 <br> 定死断点。 */
+    .hero-slogan { margin: 0 auto; max-width: 15em; font-size: clamp(1.55rem, 3.2vw + 12px, 3.4rem); line-height: 1.42; font-weight: 500; letter-spacing: 0.02em; color: var(--ink); }
     .cta + .meta { margin-top: var(--s6); }
     .hero .stage { position: relative; display: grid; justify-items: center; gap: var(--s6); margin: var(--s8) 0 var(--s6); }
     .cta { display: inline-flex; align-items: center; justify-content: center; min-height: 48px; padding: 0 var(--s6); border-radius: var(--radius); border: 1px solid var(--mira-line); background: var(--mira-soft); color: var(--mira-strong); font-size: 15px; font-weight: 500; text-decoration: none; transition: background 0.25s var(--ease), border-color 0.25s var(--ease); }
@@ -246,29 +210,6 @@
     @keyframes islMsgRest { 0%,58% { opacity: 1; } 64%,96% { opacity: 0; } 100% { opacity: 1; } }
     @keyframes islMsgDone { 0%,58% { opacity: 0; } 64%,96% { opacity: 1; } 100% { opacity: 0; } }
 
-    /* ── Two gentle reminder surfaces, presented as a labeled pair — same
-       tag + hairline language as Act 0's triptych, but deliberately NO accent
-       colour: Mira-green stays reserved for the honesty cruxes, so it keeps
-       its weight. Here the design carries meaning through structure, not a crux. ── */
-    .channels { display: grid; grid-template-columns: 1fr 1fr; max-width: 840px; margin: var(--flow-figure) auto 0; }
-    .channel { display: grid; grid-template-rows: auto 1fr auto; justify-items: center; align-items: center; gap: var(--s6); padding-inline: clamp(20px, 3vw, 44px); text-align: center; }
-    .channel + .channel { border-left: 1px solid var(--line); }
-    .channel-tag { margin: 0; font-size: var(--t-eyebrow); font-weight: 500; letter-spacing: 0.16em; text-transform: uppercase; color: var(--muted-soft); }
-    .channel-note { margin: 0; max-width: 15em; font-size: var(--t-small); line-height: 1.5; color: var(--muted); }
-    /* The pair reads as equals: one shared capsule width, text zones flexing to
-       fill, so neither surface outweighs the other (mobile and desktop alike). */
-    .channel .companion-card, .channel .island { width: min(100%, 400px); }
-    .channel .companion-card { justify-content: space-between; }
-    .channel .companion-card .txt { flex: 1; }
-    .channel .island.live .isl-body { flex: 1; }
-    .channels + .body { margin-top: var(--flow-figure); }
-    /* Stack the pair on narrow screens. NOTE: this must live AFTER the base
-       .channels rule above — equal specificity, so source order decides. */
-    @media (max-width: 720px) {
-      .channels { grid-template-columns: 1fr; max-width: 30em; }
-      .channel { grid-template-rows: none; padding: var(--s8) 0; }
-      .channel + .channel { border-left: 0; border-top: 1px solid var(--line); }
-    }
     /* desktop companion — Mira's expanded bubble (from companion.html) */
     .companion-card { display: inline-flex; align-items: center; gap: 16px; max-width: 100%; padding: 13px 18px 13px 22px; border-radius: 22px; background: var(--panel); border: 1px solid var(--line); box-shadow: var(--shadow-lift); text-align: left; }
     .companion-card .txt { display: grid; gap: 3px; min-width: 0; }
@@ -277,7 +218,7 @@
     .companion-card .mira { width: 54px; height: 54px; flex: 0 0 auto; animation: none; }
     .companion-card .mira::before { display: none; }
     .companion-card .pet { --rest: 0.82; --peak: 0.84; }
-    .channels .companion-card { opacity: 0; transform-origin: 86% 62%; transition: none; }
+    .mock-stack .companion-card { opacity: 0; transform-origin: 86% 62%; transition: none; }
     /* Mira's bubble unfurling from the corner, like the real desktop companion:
        the card grows out from where Mira sits (transform-origin on the glyph),
        held on a slow decelerating ease so you can watch it open — THEN her two
@@ -292,15 +233,16 @@
       0%, 48% { opacity: 0; transform: translateX(-5px); }
       100%    { opacity: 1; transform: translateX(0); }
     }
-    .channels .companion-card.in { animation: companionUnfurl 0.9s cubic-bezier(0.22, 1, 0.36, 1) both; }
-    .channels .companion-card.in .txt { animation: companionWords 0.9s var(--ease) both; }
+    .mock-stack .companion-card.in { animation: companionUnfurl 0.9s cubic-bezier(0.22, 1, 0.36, 1) both; }
+    .mock-stack .companion-card.in .txt { animation: companionWords 0.9s var(--ease) both; }
 
     /* Act 3 · the island is always present and loops its real self-closing rest;
        the corner companion pops open once as it scrolls in (above), then holds.
        Mira keeps breathing + blinking in the bubble throughout. */
 
     .closing { text-align: center; padding-top: var(--section); padding-bottom: calc(var(--section) + var(--s8)); }
-    .screen-card { border-radius: 18px; border: 1px solid rgba(79,201,156,0.14); background: radial-gradient(120% 100% at 50% 0%, rgba(45,88,67,0.35), rgba(12,24,21,0.84)); box-shadow: var(--shadow-lift); overflow: hidden; container-type: inline-size; }
+    .screen-card { border-radius: 16px; border: 1px solid var(--line); overflow: hidden; container-type: inline-size; }
+    .screen-card img { display: block; width: 100%; height: auto; }
 
     /* ── Act 5/6 live mocks — the real surfaces rebuilt from app tokens,
        like the island/companion: interfaces at work, not screenshots.
@@ -353,15 +295,35 @@
     .ms-brand b { display: block; font-size: 12px; font-size: max(2.5cqi, 11px); font-weight: 600; color: var(--ink); line-height: 1.3; }
     .ms-brand i { display: block; font-style: normal; font-size: 10px; font-size: max(2.1cqi, 10px); color: var(--muted-soft); }
     .ms-domain { font-size: 11px; font-size: max(2.3cqi, 10px); color: var(--muted-soft); }
+    .step-eyebrow { font-variant-numeric: tabular-nums; }
+    /* 第二拍的两只提醒面:纵向小叠,复用气泡展开动画(选择器随容器换靶)。 */
+    .mock-stack { display: grid; gap: 20px; justify-items: center; align-content: center; }
+    .mock-stack .companion-card, .mock-stack .island { width: min(100%, 400px); }
+    .mock-stack .companion-card { justify-content: space-between; }
+    .mock-stack .companion-card .txt { flex: 1; }
+    .mock-stack .island.live .isl-body { flex: 1; }
+    /* 哲学四条:发丝线四栏,克制无边框。 */
+    .tenets { list-style: none; margin: var(--s12) auto 0; padding: 0; max-width: 1024px; display: grid; grid-template-columns: repeat(4, 1fr); text-align: left; }
+    .tenets li { padding: var(--s1) clamp(18px, 2.4vw, 30px); }
+    .tenets li + li { border-left: 1px solid var(--line); }
+    .tenets strong { display: block; font-size: var(--t-sub); font-weight: 500; letter-spacing: 0.01em; color: var(--ink); }
+    .tenets p { margin: var(--s3) 0 0; font-size: var(--t-small); line-height: 1.6; color: var(--muted); text-wrap: pretty; }
+    .brand-line { max-width: 22em; }
+    .waitlist { margin-top: var(--s6); }
+    .waitlist a { color: var(--mira-strong); text-decoration: none; border-bottom: 1px solid var(--mira-line); padding-bottom: 1px; margin-left: 6px; }
     .daily-row { display: grid; grid-template-columns: minmax(0, 0.95fr) minmax(0, 1fr); gap: clamp(56px, 8vw, 96px); align-items: center; margin-top: var(--s32); }
     .daily-row .daily-copy { text-align: left; }
     .daily-row h2, .daily-row .body, .daily-row .eyebrow { margin-inline: 0; }
-    /* Stack the feature rows at the same breakpoint as .stakes/.channels — and
+    /* Stack the feature rows on phones — and
        BEFORE the .cl nowrap window (≥600px) can meet a half-width column: in the
        600–720px band a nowrap clause (~317px) outgrows the ~283px copy column
        and eats the right margin. Stacked, it always has full width. */
     @media (max-width: 720px) {
       .daily-row { grid-template-columns: 1fr; }
+      /* Phones: release the mock aspect lock — with legibility floors the content
+         outgrows the ratio box and screen-card overflow:hidden clips it (Safari). */
+      .mock-break, .mock-share { aspect-ratio: auto; }
+      .mock-break { padding-block: 6cqi; }
       /* Stacked, both feature rows read the same way: words first, proof after.
          (Desktop alternates sides; the alternation means nothing in one column.) */
       .daily-row .screen-card { order: 2; }
@@ -369,17 +331,7 @@
          is taller than the ratio box, and inside the screen-card's
          overflow:hidden that clipped Mira at the top (Safari). Content-driven
          height can never clip. */
-      .mock-break, .mock-share { aspect-ratio: auto; }
-      .mock-break { padding-block: 6cqi; }
     }
-    /* Bridge · carries the visitor out of the 90vh rest moment into "it actually
-       counts". Fills the dead space with a quiet line (picking up Act 4's "or
-       just keep scrolling") instead of a void, and pulls Act 5 up tight so the
-       line reads as its lead-in, not a stranded caption. */
-    .bridge { text-align: center; padding-block: clamp(28px, 5vh, 60px); }
-    .bridge p { margin: 0 auto; max-width: 21em; font-size: var(--t-lede); line-height: 1.7; color: var(--muted); text-wrap: balance; }
-    .bridge + .block { padding-top: 0; }
-    .bridge + .block .daily-row { margin-top: var(--s12); }
     .final-panel { max-width: 1120px; min-height: 420px; margin-inline: auto; padding: 44px clamp(24px, 6vw, 80px) 46px; display: grid; justify-items: center; align-content: center; border-radius: 24px; border: 1px solid rgba(255,255,255,0.07); background: rgba(24,26,27,0.9); box-shadow: 0 18px 46px rgba(0,0,0,0.18); }
     .final-panel .mira { width: 96px; height: 96px; margin-bottom: var(--s8); }
     .final-panel .pet { --rest: 1.05; --peak: 1.08; }
@@ -451,12 +403,6 @@
     html[lang="zh-CN"] .body { letter-spacing: 0.03em; line-height: 1.9; }
     html[lang="zh-CN"] .eyebrow { letter-spacing: 0.32em; }
     html[lang="zh-CN"] .meta { letter-spacing: 0.06em; }
-    html[lang="zh-CN"] .hero-title,
-    html[lang="en"] .hero-title {
-      line-height: 0.96;
-      letter-spacing: -0.055em;
-      font-weight: 600;
-    }
 
     @media (max-width: 560px) {
       .col { padding-inline: 20px; }
@@ -464,10 +410,9 @@
       .mira { width: 150px; height: 150px; }
       .hero { min-height: auto; }
       .final-panel { min-height: 360px; }
-      /* spec terms stack: an inline hairline list that wraps leaves a stray
-         leading separator on line two — three short rows read cleaner. */
-      .spec { display: grid; gap: var(--s2); }
-      .spec li, .spec li + li { border-left: 0; padding-inline: 0; }
+      .tenets { grid-template-columns: 1fr; max-width: 28em; margin-inline: auto; }
+      .tenets li { padding: var(--s6) 0; }
+      .tenets li + li { border-left: 0; border-top: 1px solid var(--line); }
     }
     @media (prefers-reduced-motion: reduce) {
       html { scroll-behavior: auto; }
@@ -478,12 +423,13 @@
       .rest-act[data-state="resting"] .ring { display: none; }
       /* Act 3: no slide-in — the nudges are simply present; the live island freezes on
          its rest state (full bar, "看看远方"), no looping countdown. */
-      .channels .companion-card, .channels .island { opacity: 1 !important; transform: none !important; }
+      .mock-stack .companion-card, .mock-stack .island { opacity: 1 !important; transform: none !important; }
       /* Act 5 mock: freeze the break-lock ring mid-rest with a readable timer —
          the animation kill would otherwise land both on their end states (empty). */
       .mb-ring { --mbp: 62% !important; animation: none !important; }
       .mb-tvals i { opacity: 0 !important; }
       .mb-tvals i:first-child { opacity: 1 !important; }
+
       .island.live .isl-fill { width: 100% !important; }
       .island.live .isl-msg .rest { opacity: 1 !important; }
       .island.live .isl-msg .done { opacity: 0 !important; }
@@ -505,11 +451,12 @@
     </nav>
   </div>
 
-  <!-- ── Hero ────────────────────────────────────────────────── -->
+  <!-- ── Hero · 主 slogan(体感钩)────────────────────────────── -->
   <section class="hero col">
-    <h1 class="hero-title" data-en="EyeFlow">EyeFlow</h1>
-    <p class="hero-tagline" data-en="Time to look up — someone remembers so you don't have to.">该让<b class="kw-eyes">眼睛</b>歇了——有人替你记得。</p>
-    <p class="sub" data-en="Meet <b class='kw-mira'>Mira</b>, who lives inside EyeFlow: stare too long and she nudges you to look away. No interrupting, no watching, no eye strain."><span class="cl">EyeFlow 里住着 <b class="kw-mira">Mira</b>：</span><span class="cl">盯太久时，</span><span class="cl">她轻轻提醒你抬头看远处。</span><span class="cl">不打断、不监视、不伤眼。</span></p>
+    <h1 class="hero-slogan">
+      <span class="cl" data-en="Screens blur the world a little.">屏幕看久了，世界会有点糊。</span><br>
+      <span class="cl" data-en="<b class='kw-mira'>Mira</b> helps you bring it back into focus."><b class="kw-mira">Mira</b> 陪你，一点点找回清晰。</span>
+    </h1>
 
     <div class="stage">
       <div class="mira" role="img" aria-label="Mira，安静呼吸着的小生物" data-en-label="Mira, a small creature quietly breathing">
@@ -526,49 +473,10 @@
     </div>
   </section>
 
-  <!-- ── Act 0 · 眼睛这件事（前置：强度 · 责任 · 不可恢复） ────── -->
+  <!-- ── 中段 · 她是谁(功能层:它是什么、怎么工作)──────── -->
   <section class="block narrow col reveal">
     <div class="head">
-      <p class="eyebrow" data-en="First, about your eyes">先说说眼睛</p>
-      <h2 class="stakes-lead" data-en="Every waking moment, they're the ones seeing the world for you."><span class="cl">醒着的每一刻，</span><span class="cl">它几乎都在替你看这个世界。</span></h2>
-    </div>
-    <ol class="stakes">
-      <li class="stake">
-        <span class="stake-i">01</span>
-        <span class="stake-tag" data-en="Intensity">使用强度</span>
-        <p data-en="Sixteen waking hours a day, they hardly ever stop.">一天醒着的十几个小时，它几乎没停过。</p>
-      </li>
-      <li class="stake">
-        <span class="stake-i">02</span>
-        <span class="stake-tag" data-en="Responsibility">肩负的责任</span>
-        <p data-en="Nearly all of it comes in through them.">你认识世界，大半从这一处进来。</p>
-      </li>
-      <li class="stake accent">
-        <span class="stake-i">03</span>
-        <span class="stake-tag" data-en="Irreversible">不可恢复</span>
-        <p data-en="What wears down won't grow back — it only goes one way.">磨损了不会自己长回来，只进不退。</p>
-      </li>
-    </ol>
-    <p class="body stakes-close" data-en="The part you use most is the hardest to repair. So it deserves to be looked after — a little each day is enough.">用得最多，偏偏最难修复。正因如此，它值得被好好护着——每天，分一点点就够。</p>
-  </section>
-
-  <div class="rule col"></div>
-
-  <!-- ── Act 1 · 凝视 ─────────────────────────────────────────── -->
-  <section class="block narrow col reveal">
-    <div class="head">
-      <p class="eyebrow" data-en="You've been here a while">你已经盯了很久了</p>
-      <h2 data-en="Screens never tell you when to look up.">屏幕不会提醒你，该抬头了。</h2>
-      <p class="body" data-en="Hours slip by. Your <b class='kw-eyes'>eyes</b> go dry, a little sore — and you barely notice, because nothing on the screen ever says stop.">几个小时就这么过去。<b class="kw-eyes">眼睛</b>有点干、有点酸，你没太在意——因为屏幕上没有任何东西会喊停。</p>
-    </div>
-  </section>
-
-  <div class="turn col" aria-hidden="true"></div>
-
-  <!-- ── Act 2 · Mira 注意到你 ───────────────────────────────── -->
-  <section class="block narrow col reveal">
-    <div class="head">
-      <p class="eyebrow" data-en="But someone noticed">但有人注意到了</p>
+      <p class="eyebrow" data-en="Meet her">认识一下</p>
       <div class="portrait">
         <div class="mira" aria-hidden="true">
           <div class="pet">
@@ -577,23 +485,34 @@
           </div>
         </div>
       </div>
-      <h2 data-en="Meet <b class='kw-mira'>Mira</b>. She watches one thing only — how long you've looked."><span class="cl">这是 <b class="kw-mira">Mira</b>。</span><span class="cl">她只看一件事：</span><span class="cl">你盯了多久。</span></h2>
-      <p class="body" data-en="No camera, no reading your screen, nothing uploaded. She doesn't know what you're doing — only that it's been a while. Everything stays on your Mac.">不开摄像头、不读屏幕内容、不上传。她不知道你在做什么，只知道有一阵子了。所有记录只留在你的 Mac 上。</p>
+      <h2 data-en="She doesn't say much — but it lands."><span class="cl">她话很少，</span><span class="cl">但都说在点上。</span></h2>
+      <p class="body" data-en="<b class='kw-mira'>Mira</b> lives inside EyeFlow — a quiet companion for screen work. Stare too long and you slowly lose your edge; what she does is small: a gentle stop, before the fatigue piles up."><span class="cl">EyeFlow 里住着 <b class="kw-mira">Mira</b>，</span><span class="cl">一位安静的屏幕工作伙伴。</span>屏幕看久了，人会慢慢没状态——她做的事很小：在疲劳攒起来之前，轻轻停你一下。</p>
+      <p class="body" data-en="She watches one thing only — how long you’ve looked. No camera, no reading your screen, nothing uploaded."><span class="cl">她只看一件事：</span><span class="cl">你盯了多久。</span>不开摄像头、不读屏幕内容、不上传。</p>
     </div>
   </section>
 
-  <div class="rule col"></div>
-
-  <!-- ── Act 3 · 一声轻唤（提醒） ─────────────────────────────── -->
-  <section class="block narrow col reveal">
-    <div class="head">
-      <p class="eyebrow" data-en="A gentle word">一声轻唤</p>
-      <h2 data-en="Not a pop-up — just a quiet word, only when you need it."><span class="cl">不是弹窗，</span><span class="cl">只是一句轻声的话——</span><span class="cl">需要时才出现。</span></h2>
-      <p class="body" data-en="It never grabs the screen — no flash, all dark, nothing that jolts you. Keep working and she just says it a little more clearly, never louder.">她从不抢屏。全程深色、不闪、不惊到你。你要是继续，她才慢慢把话说清楚一点，从不提高音量。</p>
+  <!-- ── 一天的弧线 · 五拍 ─────────────────────────────────── -->
+  <section class="block col col-wide">
+    <div class="daily-row">
+      <div class="daily-copy reveal">
+        <p class="eyebrow step-eyebrow" data-en="01 · Quietly there">01 · 安静待着</p>
+        <h2 data-en="&quot;I'm right here.&quot;">「我在旁边。」</h2>
+        <p class="body" data-en="She never rushes you. Timing starts softly only when the screen is active — until then, she just waits.">她不催你开始。有屏幕活动时，才轻轻开始计时——在那之前，她就安静待着。</p>
+      </div>
+      <div class="screen-card reveal">
+        <img src="shots/today.png" alt="EyeFlow 今天页：Mira 说「我在旁边」，现在先不计时" data-en-alt="EyeFlow's Today view: Mira says 'I'm right here' — not timing yet" loading="lazy" width="2560" height="1584">
+      </div>
     </div>
-    <div class="channels">
-      <div class="channel">
-        <p class="channel-tag" data-en="In the corner">桌面一角</p>
+  </section>
+
+  <section class="block col col-wide">
+    <div class="daily-row">
+      <div class="daily-copy reveal">
+        <p class="eyebrow step-eyebrow" data-en="02 · A quiet word">02 · 盯久了，说一句</p>
+        <h2 data-en="Not a takeover — a word."><span class="cl">不抢屏，</span><span class="cl">只轻轻说一句。</span></h2>
+        <p class="body" data-en="A peek from the desktop corner, or a small island at the top. Keep working and she just says it a little more clearly, never louder.">桌面一角冒个头，或顶部一座小岛。你要是继续，她才慢慢把话说清楚一点，从不提高音量。</p>
+      </div>
+      <div class="mock-stack reveal">
         <div class="companion-card reveal" role="img" aria-label="桌面角落的 Mira 展开气泡：该歇会儿了，我在。跟我看看远方，20 秒就好" data-en-label="Mira's bubble in the desktop corner: Time for a little break — I'm right here. Let's look into the distance. 20 seconds is all it takes.">
           <div class="txt">
             <strong data-en="Time for a little break — I'm right here.">该歇会儿了，我在。</strong>
@@ -606,39 +525,120 @@
             </div>
           </div>
         </div>
-        <p class="channel-note" data-en="Peeks out when needed, then slips back.">需要时冒个头，说完退回去。</p>
-      </div>
-      <div class="channel">
-        <p class="channel-tag" data-en="At the top">顶部提醒岛</p>
         <div class="island live" role="img" aria-label="EyeFlow 顶部提醒岛：看看远方休息一下，看完自动记录" data-en-label="EyeFlow's reminder island at the top of the screen: look into the distance to rest, logged automatically when you're done">
-        <svg class="ic" viewBox="0 0 1024 1024" aria-hidden="true">
-          <defs><linearGradient id="isl-bg" x1="216" y1="156" x2="826" y2="874" gradientUnits="userSpaceOnUse"><stop offset="0" stop-color="#EAFFF6"/><stop offset=".58" stop-color="#BDEAFF"/><stop offset="1" stop-color="#F3EEC7"/></linearGradient></defs>
-          <rect width="1024" height="1024" rx="230" fill="url(#isl-bg)"/>
-          <rect x="177" y="335" width="671" height="318" rx="159" fill="#0E1C20"/>
-          <circle cx="380" cy="468" r="46" fill="#F8FFFC"/>
-          <circle cx="644" cy="468" r="46" fill="#F8FFFC"/>
-          <circle cx="803" cy="344" r="82" fill="#6FE7C3"/>
-        </svg>
-        <div class="isl-body">
-          <div class="isl-msg">
-            <span class="rest" data-en="Look into the distance.">看看远方，休息一下。</span>
-            <span class="done" data-en="Rested · logged ✓">休息完成 · 已记录 ✓</span>
+          <svg class="ic" viewBox="0 0 1024 1024" aria-hidden="true">
+            <defs><linearGradient id="isl-bg" x1="216" y1="156" x2="826" y2="874" gradientUnits="userSpaceOnUse"><stop offset="0" stop-color="#EAFFF6"/><stop offset=".58" stop-color="#BDEAFF"/><stop offset="1" stop-color="#F3EEC7"/></linearGradient></defs>
+            <rect width="1024" height="1024" rx="230" fill="url(#isl-bg)"/>
+            <rect x="177" y="335" width="671" height="318" rx="159" fill="#0E1C20"/>
+            <circle cx="380" cy="468" r="46" fill="#F8FFFC"/>
+            <circle cx="644" cy="468" r="46" fill="#F8FFFC"/>
+            <circle cx="803" cy="344" r="82" fill="#6FE7C3"/>
+          </svg>
+          <div class="isl-body">
+            <div class="isl-msg">
+              <span class="rest" data-en="Look into the distance.">看看远方，休息一下。</span>
+              <span class="done" data-en="Rested · logged ✓">休息完成 · 已记录 ✓</span>
+            </div>
+            <div class="isl-track"><div class="isl-fill"></div></div>
           </div>
-          <div class="isl-track"><div class="isl-fill"></div></div>
         </div>
-      </div>
-        <p class="channel-note" data-en="Rests at the very top; tucks itself away when you're done.">贴在屏幕顶端，看完自己收起。</p>
       </div>
     </div>
   </section>
 
-  <div class="rule col"></div>
+  <section class="block col col-wide">
+    <div class="daily-row">
+      <div class="daily-copy reveal">
+        <p class="eyebrow step-eyebrow" data-en="03 · A look into the distance">03 · 带你看看远处</p>
+        <h2 data-en="She walks you through it."><span class="cl">离开屏幕一下，</span><span class="cl">她带着。</span></h2>
+        <p class="body" data-en="Gaze far, slow blinks, slow breaths — step by step, no need to watch the screen. And when you're back, just one line: welcome back.">远眺、慢眨眼、慢呼吸——一步步带，不用盯着屏幕。回来时，她只说一句：欢迎回来。</p>
+      </div>
+      <div class="screen-card reveal">
+        <div class="mock-break" role="img" aria-label="EyeFlow 全屏恢复：Mira 陪你看向远处，环形倒计时走完自动回来" data-en-label="EyeFlow's full-screen break: Mira looks into the distance with you while the ring counts down">
+          <div class="mira" aria-hidden="true">
+            <div class="pet">
+              <div class="ant"></div><div class="face"></div>
+              <div class="cheek l"></div><div class="cheek r"></div><div class="mouth"></div>
+            </div>
+          </div>
+          <strong class="mb-title" data-en="Look into the distance">看向远处</strong>
+          <p class="mb-copy" data-en="No need to stare at the screen — look far away for 20 seconds, then come back.">不用盯着屏幕，看远处 20 秒再回来。</p>
+          <div class="mb-steps" aria-hidden="true">
+            <span class="on" data-en="Gaze far">远眺</span>
+            <span data-en="Slow blinks">慢眨眼</span>
+            <span data-en="Slow breaths">慢呼吸</span>
+            <span data-en="Eyes closed">闭眼</span>
+          </div>
+          <div class="mb-ring" aria-hidden="true">
+            <div class="mb-timer">
+              <span class="mb-tlabel" data-en="Left">剩余</span>
+              <b class="mb-tvals"><i>00:18</i><i>00:12</i><i>00:06</i></b>
+            </div>
+          </div>
+          <span class="mb-escape" data-en="Emergency exit">紧急退出</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="block col col-wide">
+    <div class="daily-row">
+      <div class="daily-copy reveal">
+        <p class="eyebrow step-eyebrow" data-en="04 · Honest notes">04 · 如实记下</p>
+        <h2 data-en="She writes down what she saw."><span class="cl">看到什么，</span><span class="cl">就记什么。</span></h2>
+        <p class="body" data-en="When the record is thin, she says so — &quot;no rush to judge yet.&quot; Blanks over invented numbers.">记录还少时，她会说「先不急着下判断」。宁可留白，也不编一个好看的数字。</p>
+      </div>
+      <div class="screen-card reveal">
+        <img src="shots/days.png" alt="EyeFlow 这几天页：Mira 的观察——记录还少，先不急着下判断" data-en-alt="EyeFlow's These Days view: Mira's observation — record still thin, no rush to judge" loading="lazy" width="2560" height="1584">
+      </div>
+    </div>
+  </section>
+
+  <section class="block col col-wide">
+    <div class="daily-row">
+      <div class="daily-copy reveal">
+        <p class="eyebrow step-eyebrow" data-en="05 · Yours to keep">05 · 带走</p>
+        <h2 data-en="At day's end, a small card."><span class="cl">每天结束，</span><span class="cl">一张小卡。</span></h2>
+        <p class="body" data-en="Today's focus, the rest you took, and one line she noticed. Generated locally, never uploaded.">今天的专注、歇下来的时间、一句她看到的观察。本地生成，不上传。</p>
+      </div>
+      <div class="screen-card reveal">
+        <article class="mock-share" role="img" aria-label="EyeFlow 今日分享卡：Mira 今天看到的一句观察，加上今日专注、歇眼与节奏，本地生成可带走" data-en-label="EyeFlow's daily share card: Mira's one-line observation with today's focus, recovery and rhythm — generated locally, yours to keep">
+          <span class="ms-date" data-en="Jul 9, 2026 · Thu">2026年7月9日 · 周四</span>
+          <span class="ms-eyebrow" data-en="What Mira saw today">Mira 今天看到的</span>
+          <strong class="ms-insight" data-en="A steady day for your eyes. Pause at the break points, and let the rhythm loosen a little.">今天在稳稳地用眼。到断点时停一下，让节奏松一点。</strong>
+          <div class="ms-metrics" aria-hidden="true">
+            <div><span data-en="Focus today">今日专注</span><b data-en="6 h 58 m">6 小时 58 分</b></div>
+            <div><span data-en="Eyes rested">歇眼</span><b data-en="14 min">14 分钟</b></div>
+            <div><span data-en="Rhythm">节奏</span><b data-en="Steady">保持平稳</b></div>
+          </div>
+          <div class="ms-divider" aria-hidden="true"></div>
+          <div class="ms-footer">
+            <span class="ms-brand"><span class="ms-mark" aria-hidden="true"></span><span><b>EyeFlow</b><i data-en="Mira's desktop companion space">Mira 的桌面陪伴空间</i></span></span>
+            <span class="ms-domain">eyeflow.app</span>
+          </div>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── 她的规矩(哲学四条,信任层)──────────────────────────── -->
+  <section class="block narrow col reveal">
+    <div class="head">
+      <p class="eyebrow" data-en="Her rules">她的规矩</p>
+    </div>
+    <ul class="tenets">
+      <li><strong data-en="No interrupting">不打断</strong><p data-en="She never forces a stop — unless you chose it.">除非你主动选择，不强制停下。</p></li>
+      <li><strong data-en="No watching">不监控</strong><p data-en="No screen reading, no keylogging, no camera.">不读屏幕内容，不记键盘，不开摄像头。</p></li>
+      <li><strong data-en="No pressure">不制造压力</strong><p data-en="No scores, no red alerts.">没有分数，没有红色警告。</p></li>
+      <li><strong data-en="Local by default">数据留在本地</strong><p data-en="Your state and habits stay on this Mac.">状态、感受、习惯，默认只在这台 Mac。</p></li>
+    </ul>
+  </section>
 
   <!-- ── Act 4 · 跟 Mira 歇一下（参与式护眼一刻） ─────────────── -->
   <section class="rest-act reveal col" data-state="invite" aria-label="跟 Mira 歇一下" data-en-label="Rest with Mira">
     <div class="rest-stage">
       <div class="rest-panel" data-when="invite">
-        <p class="eyebrow" data-en="Rest with Mira">歇一下</p>
+        <p class="eyebrow" data-en="Try it right now">现在就试一次</p>
         <div class="pacer pacer-invite" aria-hidden="true">
           <svg class="ring" viewBox="0 0 200 200"><circle cx="100" cy="100" r="94"></circle></svg>
           <div class="mira">
@@ -675,86 +675,7 @@
     </div>
   </section>
 
-  <!-- ── 过渡 · 从「歇一下」到「她当真」 ───────────────────────── -->
-  <div class="bridge col reveal">
-    <p data-en="That pause just now — maybe you truly rested, maybe you just scrolled past."><span class="cl">刚才那一下，</span><span class="cl">你可能真歇了，</span><span class="cl">也可能只是划了过去。</span></p>
-  </div>
-
-  <!-- ── Act 5 · 被接住（她当真） ─────────────────────────────── -->
-  <section class="block col col-wide">
-    <div class="daily-row">
-      <div class="screen-card reveal">
-        <div class="mock-break" role="img" aria-label="EyeFlow 全屏恢复：Mira 陪你看向远处，环形倒计时走完自动回来" data-en-label="EyeFlow's full-screen break: Mira looks into the distance with you while the ring counts down">
-          <div class="mira" aria-hidden="true">
-            <div class="pet">
-              <div class="ant"></div><div class="face"></div>
-              <div class="cheek l"></div><div class="cheek r"></div><div class="mouth"></div>
-            </div>
-          </div>
-          <strong class="mb-title" data-en="Look into the distance">看向远处</strong>
-          <p class="mb-copy" data-en="No need to stare at the screen — look far away for 20 seconds, then come back.">不用盯着屏幕，看远处 20 秒再回来。</p>
-          <div class="mb-steps" aria-hidden="true">
-            <span class="on" data-en="Gaze far">远眺</span>
-            <span data-en="Slow blinks">慢眨眼</span>
-            <span data-en="Slow breaths">慢呼吸</span>
-            <span data-en="Eyes closed">闭眼</span>
-          </div>
-          <div class="mb-ring" aria-hidden="true">
-            <div class="mb-timer">
-              <span class="mb-tlabel" data-en="Left">剩余</span>
-              <b class="mb-tvals"><i>00:18</i><i>00:12</i><i>00:06</i></b>
-            </div>
-          </div>
-          <span class="mb-escape" data-en="Emergency exit">紧急退出</span>
-        </div>
-      </div>
-      <div class="daily-copy reveal">
-        <p class="eyebrow" data-en="She means it">她当真</p>
-        <h2 data-en="She knows if you really looked away."><span class="cl">她知道，</span><span class="cl">你有没有真的看向远处。</span></h2>
-        <p class="body" data-en="Not a 'Done' button to fool yourself with. Your break counts only when you truly step back — and <b class='kw-mira'>Mira</b> would rather say 'no clear pattern yet' than invent a nicer number.">不是让你点个"完成"糊弄自己。你真的离开屏幕，这一下才算数——<b class="kw-mira">Mira</b> 宁可说"还看不出规律"，也不给你编个好看的数字。</p>
-        <ul class="spec">
-          <li data-en="Real breaks only">真实离开才算数</li>
-          <li data-en="'Done' won't fool her">点「完成」不作数</li>
-          <li class="key" data-en="Blanks over invented numbers">宁可留白，不编数字</li>
-        </ul>
-      </div>
-    </div>
-  </section>
-
-  <!-- ── Act 6 · 每日小卡 ─────────────────────────────────────── -->
-  <section class="block col col-wide">
-    <div class="daily-row">
-      <div class="daily-copy reveal">
-        <p class="eyebrow" data-en="A quiet daily card">每日小卡</p>
-        <h2 data-en="At the end of the day,<br>your <b class='kw-eyes'>eyes</b> get a soft landing too.">每天结束时，<br>把<b class="kw-eyes">眼睛</b>也轻轻放下。</h2>
-        <p class="body" data-en="A small card to hold the day's rhythm of looking. No tracking, no ranking, just a gentle close to the day.">一张小卡，收好今天的用眼节奏。不追踪、不排名，只帮你轻轻结束这一天。</p>
-        <ul class="spec">
-          <li data-en="No tracking">不追踪</li>
-          <li data-en="No ranking">不排名</li>
-          <li class="key" data-en="Yours to keep, on-device">本地带走</li>
-        </ul>
-      </div>
-      <div class="screen-card reveal">
-        <article class="mock-share" role="img" aria-label="EyeFlow 今日分享卡：Mira 今天看到的一句观察，加上今日专注、护眼恢复与节奏，本地生成可带走" data-en-label="EyeFlow's daily share card: Mira's one-line observation with today's focus, recovery and rhythm — generated locally, yours to keep">
-          <span class="ms-date" data-en="Jul 9, 2026 · Thu">2026年7月9日 · 周四</span>
-          <span class="ms-eyebrow" data-en="What Mira saw today">Mira 今天看到的</span>
-          <strong class="ms-insight" data-en="A steady day for your eyes. Pause at the break points, and let the rhythm loosen a little.">今天在稳稳地用眼。到断点时停一下，让节奏松一点。</strong>
-          <div class="ms-metrics" aria-hidden="true">
-            <div><span data-en="Focus today">今日专注</span><b data-en="6 h 58 m">6 小时 58 分</b></div>
-            <div><span data-en="Recovery">护眼恢复</span><b data-en="14 min">14 分钟</b></div>
-            <div><span data-en="Rhythm">节奏</span><b data-en="Steady">保持平稳</b></div>
-          </div>
-          <div class="ms-divider" aria-hidden="true"></div>
-          <div class="ms-footer">
-            <span class="ms-brand"><span class="ms-mark" aria-hidden="true"></span><span><b>EyeFlow</b><i data-en="Mira's desktop companion space">Mira 的桌面陪伴空间</i></span></span>
-            <span class="ms-domain">eyeflow.app</span>
-          </div>
-        </article>
-      </div>
-    </div>
-  </section>
-
-  <!-- ── 收尾 ───────────────────────────────────────────────── -->
+  <!-- ── 收尾 · 品牌句(仪式时刻)────────────────────────────── -->
   <section class="closing col">
     <div class="final-panel">
       <div class="mira" aria-hidden="true">
@@ -763,12 +684,11 @@
           <div class="cheek l"></div><div class="cheek r"></div><div class="mouth"></div>
         </div>
       </div>
-      <p class="eyebrow" data-en="In the end">说到底</p>
-      <h2 data-en="Your <b class='kw-eyes'>eyes</b> watched the world all day.<br>Someone should call time for them."><b class="kw-eyes">眼睛</b>替你看了一整天，<br>总得有人，替它喊一声停。</h2>
-      <p class="sub" data-en="That's the one thing <b class='kw-mira'>Mira</b> does for you, every day. Bring her home to your Mac."><span class="cl">这正是 <b class="kw-mira">Mira</b> 每天替你做的一件事。</span><span class="cl">让她住进你的 Mac。</span></p>
+      <h2 class="brand-line" data-en="EyeFlow — guarding the way you see the world.">EyeFlow —— 守护你看清世界的方式。</h2>
       <div class="actions">
         <a class="cta" href="https://github.com/Lovelle-Zhang/eyeflow/releases/download/v0.1.6/EyeFlow-0.1.6-x64.dmg">Download for macOS</a>
       </div>
+      <p class="meta waitlist" data-en="Want a quiet ping when a new version lands? <a href='mailto:zynono@gmail.com?subject=EyeFlow%20Waitlist'>Leave an email</a>"><span class="cl">想在新版本时被轻轻叫一声？</span><a href="mailto:zynono@gmail.com?subject=EyeFlow%20Waitlist">留个邮箱</a></p>
     </div>
   </section>
 
