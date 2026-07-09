@@ -729,7 +729,7 @@
       <strong id="taskTitle">看向远处</strong>
       <p id="taskCopy">不用盯着屏幕，看远处 20 秒再回来。</p>
     </div>
-    <div class="step-flow" id="stepFlow" aria-label="恢复流程"></div>
+    <div class="step-flow" id="stepFlow" aria-label="恢复步骤"></div>
     <div class="ring" id="ring" style="--progress: 0%;">
       <div class="timer-wrap">
         <div class="timer-stack">
@@ -1048,7 +1048,7 @@
       setRelaxMood("close");
       els.taskTitle.textContent = "可以慢慢回来了";
       els.taskCopy.textContent = previewSession
-        ? "恢复流程预览结束，可以回到 EyeFlow。"
+        ? "这轮恢复的预览结束了，可以回到 EyeFlow。"
         : "这轮恢复完成。慢慢把视线收回来，再回到 EyeFlow。";
       renderStepFlow(activeTasks.length);
       els.timer.textContent = "00:00";

@@ -52,7 +52,7 @@ window.EyeFlowCore = (() => {
 
   function topContributorName(contributors) {
     const names = {
-      symptom: "症状自评",
+      symptom: "感受自评",
       behavior: "连续盯屏",
       recovery: "恢复抵消",
       environment: "环境信号",
@@ -201,14 +201,14 @@ window.EyeFlowCore = (() => {
 
   function intensityLabel(level) {
     if (level === "force") return "L4 强制爱";
-    if (level === "clear") return "L3 明确介入";
+    if (level === "clear") return "L3 明确提醒";
     if (level === "standard") return "L2 轻提示";
     return "L1 安静";
   }
 
   function modeActionCopy(level) {
     if (level === "force") return "到恢复断点进入全屏恢复，时间到才回到工作界面";
-    if (level === "clear") return "到恢复断点或状态信号偏高时明确介入，连续超时会升级语气";
+    if (level === "clear") return "到恢复断点或状态信号偏高时明确提醒，连续超出目标会说得更清楚";
     if (level === "standard") return "到恢复断点短暂轻提示，你可以休息或稍后处理";
     return "先轻提醒陪伴，不抢你的控制权";
   }

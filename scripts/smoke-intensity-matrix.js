@@ -46,7 +46,7 @@ function main() {
     "L2 reaches behavior level 2 at the break point, while L3 reaches behavior level 3 immediately"
   );
 
-  assertIncludes(indexHtml, "L3</strong>状态信号偏高或明显超时时更明确", "L3 user-facing rule describes clear escalation");
+  assertIncludes(indexHtml, "L3</strong>状态信号偏高或明显超出目标时更明确", "L3 user-facing rule describes clear escalation");
   assertIncludes(indexHtml, "即使 Mira 在屏", "L3 copy states the real break-point prompt is clear even while Mira is visible");
   assertIncludes(mainJs, "L3 明确 — 到点胶囊+通知", "L3 menu copy matches the real break-point channel");
   assertMatches(
@@ -56,7 +56,7 @@ function main() {
   );
   assertMatches(
     indexHtml,
-    /state\.settings\.intensity === "clear" && elapsedMinutes >= focusTargetMinutes \+ 10[\s\S]*level: 3,[\s\S]*title: "已经明显超时"/,
+    /state\.settings\.intensity === "clear" && elapsedMinutes >= focusTargetMinutes \+ 10[\s\S]*level: 3,[\s\S]*title: "已经比目标久了不少"/,
     "L3 obvious overrun escalates to behavior level 3"
   );
   assertMatches(

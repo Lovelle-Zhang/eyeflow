@@ -295,7 +295,7 @@ function main() {
   assertIncludes(indexHtml, "profileInsightSentence", "profile view renders a short Mira insight from local state");
   assertIncludes(indexHtml, "Mira 记住的节奏", "profile view exposes rhythm memory as user-facing remembered rhythm");
   assertIncludes(indexHtml, "完成恢复", "profile rhythm memory shows completed recovery neutrally");
-  assertIncludes(indexHtml, "稍后/未处理", "profile rhythm memory shows delayed or unhandled reminders neutrally");
+  assertIncludes(indexHtml, "稍后/没顾上", "profile rhythm memory shows delayed or unhandled reminders neutrally");
   assertIncludes(indexHtml, "当前节奏来源", "profile rhythm memory shows whether Mira or the user owns the rhythm");
   assertMatches(indexHtml, /<section class="daily-summary daily-share-card" aria-label="今日分享卡">[\s\S]*id="dailySummaryTitle"[\s\S]*id="dailySummaryCopy"[\s\S]*id="tomorrowPlan"[\s\S]*id="copyShareBtn"/, "daily share card contains summary and action");
   assertNotMatches(indexHtml, /<section class="daily-summary" aria-label="今日总结"/, "today no longer renders a separate daily summary section");
@@ -576,7 +576,7 @@ function main() {
 
   assertEqual(core.intensityLabel("quiet"), "L1 安静", "quiet intensity label");
   assertEqual(core.intensityLabel("force"), "L4 强制爱", "force intensity label");
-  assertIncludes(core.modeActionCopy("clear"), "明确介入", "clear mode action copy");
+  assertIncludes(core.modeActionCopy("clear"), "明确提醒", "clear mode action copy");
 
   assertNoHardcodedNeutralSurfaces(indexHtml, "themed views use theme tokens, not hardcoded neutral surfaces");
 

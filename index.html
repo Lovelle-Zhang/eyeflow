@@ -8866,8 +8866,8 @@
               <span>节奏 <strong>25 分 / 120 秒</strong></span>
             </div>
             <div class="assessment-reminder" id="assessmentReminder" hidden="">
-              <strong>今天还没给眼睛打分</strong>
-              <p>打分后再开首轮。</p>
+              <strong>今天还没记眼睛的感受</strong>
+              <p>记一下感受，再开首轮。</p>
               <button class="ghost" id="assessmentReminderBtn" type="button">记录状态</button>
             </div>
             <div class="pending-reminder" id="pendingReminderCard" hidden="">
@@ -8983,11 +8983,11 @@
         </details>
 
         <div hidden="">
-          <div id="mainInsight"><div>当前状态平稳。开始会话后，系统会结合连续时长和你的记录生成建议。</div></div>
+          <div id="mainInsight"><div>当前状态平稳。开始这一轮后，Mira 会结合连续时长和你的记录给建议。</div></div>
           <div id="recommendations">
         <div class="rec">
           <svg class="small-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="m12 2 3 7h7l-5.5 4.2 2.2 7L12 16l-6.7 4.2 2.2-7L2 9h7Z"></path></svg>
-          <div><strong>保持平稳</strong><p>现在状态不错。继续用短会话推进，别等到眼睛抗议才休息。</p></div>
+          <div><strong>保持平稳</strong><p>现在状态不错。继续用短轮次推进，别等到眼睛抗议才休息。</p></div>
         </div>
       </div>
           <div id="trend"><div class="bar" style="--h:29px"><span>23</span></div><div class="bar" style="--h:18px"><span>11</span></div><div class="bar" style="--h:20px"><span>16</span></div></div>
@@ -9016,7 +9016,7 @@
           </div>
         </div>
         <span id="responseRate" hidden="">暂无</span>
-        <span id="responseRateCopy" hidden="">今天还没有触发 L2/L3 介入。</span>
+        <span id="responseRateCopy" hidden="">今天还没有 L2/L3 提醒。</span>
             <span id="recoveryScore" hidden="">0 分钟</span>
         <span id="recoveryCopy" hidden="">主动或自动识别的休息都会计入。</span>
       </section>
@@ -9180,7 +9180,7 @@
               <ul class="step-list settings-rule-list">
                 <li class="rule-row"><strong class="rule-level">L1</strong>只改变状态球、表情和文字，不弹气泡，也不打断你。</li>
                 <li class="rule-row"><strong class="rule-level">L2</strong>到恢复断点时轻提一次——Mira 在屏就展开气泡；她退出时，顶部岛带你看远处 20 秒，看完自动收起。</li>
-                <li class="rule-row"><strong class="rule-level">L3</strong>状态信号偏高或明显超时时更明确——到真正恢复断点时，即使 Mira 在屏，也会用顶部岛的 20 秒休息和系统通知明确提示。</li>
+                <li class="rule-row"><strong class="rule-level">L3</strong>状态信号偏高或明显超出目标时更明确——到真正恢复断点时，即使 Mira 在屏，也会用顶部岛的 20 秒休息和系统通知明确提示。</li>
                 <li class="rule-row"><strong class="rule-level">L4</strong>强制爱：只在你主动选择后启用；到恢复断点进入全屏恢复，倒计时结束前不显示返回按钮；开启语音引导后可以不看屏幕，Mira 会用声音带你完成。</li>
                 <li class="rule-legend-row"><strong>颜色</strong><span class="rule-legend"><i class="rule-dot" style="--c:#3aa888"></i>在线</span><span class="rule-legend"><i class="rule-dot" style="--c:#5fa8d6"></i>专注</span><span class="rule-legend"><i class="rule-dot" style="--c:#d6a73a"></i>眨眼</span><span class="rule-legend"><i class="rule-dot" style="--c:#d97aa0"></i>休息</span></li>
               </ul>
@@ -9225,7 +9225,7 @@
                   <span class="tag">触发 <b id="reminderShown">0</b></span>
                   <span class="tag" hidden="">完成 <b id="reminderCompleted">0</b></span>
                   <span class="tag" hidden="">稍后 <b id="reminderSnoozed">0</b></span>
-                  <span class="tag" hidden="">未处理 <b id="reminderIgnored">0</b></span>
+                  <span class="tag" hidden="">没顾上 <b id="reminderIgnored">0</b></span>
                   <span class="tag" hidden="">自然离屏 <b id="autoBreaks">0</b></span>
                 </div>
                 <div class="settings-row ef-preference-row">
@@ -9335,7 +9335,7 @@
           <summary class="profile-detail-fold-summary">
             <div class="profile-detail-fold-title">
               <strong>展开看这几天的明细</strong>
-              <span>状态线、症状记录和长期趋势，需要时再看。</span>
+              <span>状态线、感受记录和长期趋势，需要时再看。</span>
             </div>
           </summary>
           <div class="profile-detail-fold-body">
@@ -9353,7 +9353,7 @@
                   <strong id="profileMemoryAccepted">暂无</strong>
                 </div>
                 <div class="profile-memory-item">
-                  <span>稍后/未处理</span>
+                  <span>稍后/没顾上</span>
                   <strong id="profileMemorySkipped">暂无</strong>
                 </div>
                 <div class="profile-memory-item">
@@ -9473,7 +9473,7 @@
                       <span id="profileModelVersion">V2 本地模型</span>
                     </div>
                     <div id="profileContributors">
-                      <div class="profile-analysis-line" data-role="symptom"><span>症状自评</span><div class="profile-analysis-track"><span style="--value:30%;"></span></div><b>0</b></div>
+                      <div class="profile-analysis-line" data-role="symptom"><span>感受自评</span><div class="profile-analysis-track"><span style="--value:30%;"></span></div><b>0</b></div>
                     </div>
                   </div>
                   <div class="profile-analysis-block" aria-label="记录情况">
@@ -9643,7 +9643,7 @@
         <p id="breakMicroReply"></p>
       </div>
       <p class="break-companion-line" id="breakCompanionLine" hidden="">Mira 在这里守时间。</p>
-      <div class="break-flow" id="breakFlow" aria-label="恢复流程" hidden=""></div>
+      <div class="break-flow" id="breakFlow" aria-label="恢复步骤" hidden=""></div>
       <div class="break-mini-timer" id="breakMiniTimer" hidden="">
         <span id="breakMiniTimerLabel">剩余</span>
         <strong id="breakMiniTimerText">00:20</strong>
@@ -11260,7 +11260,7 @@
       const memoryLine = modeMemoryLine("overrun");
       showToast(memoryLine ? `Mira：${memoryLine}` : `Mira：${lightReminderLine(group, "nudge") || "看一眼远处，再回来。"}`);
       if (elapsedSeconds >= targetSeconds + 10 * 60) {
-        showToast("Mira：你已经超时 10 分钟了。我建议现在休息一下。");
+        showToast("Mira：这一轮已经比目标久了 10 分钟。我建议现在休息一下。");
       }
     }
 
@@ -11621,7 +11621,7 @@
           window.clearInterval(forceBreakTimer);
           forceBreakTimer = null;
           els.breakCopy.textContent = payload.preview
-            ? "恢复流程预览结束。现在可以回到 EyeFlow。"
+            ? "这轮恢复的预览结束了。现在可以回到 EyeFlow。"
             : "这轮恢复完成。现在可以回到 EyeFlow。";
           renderForceRecoveryTask(100, 0);
           els.forceReturnBtn.hidden = false;
@@ -11773,7 +11773,7 @@
       if (hadPendingReminder) {
         addSystemLog("延后一次 Mira 提醒", `你选择 ${SNOOZE_MINUTES} 分钟后再处理，EyeFlow 已把本轮提醒往后放一点。`);
       } else {
-        addSystemLog("先继续当前会话", `你暂时回到工作，EyeFlow 已把下一次提醒往后放 ${SNOOZE_MINUTES} 分钟。`);
+        addSystemLog("先继续这一轮", `你暂时回到工作，EyeFlow 已把下一次提醒往后放 ${SNOOZE_MINUTES} 分钟。`);
       }
       showToast(`Mira：好，${SNOOZE_MINUTES} 分钟后我再看一次节奏。`);
       startSession();
@@ -11787,7 +11787,7 @@
       state.deferReminderNeedsWork = true;
       state.lastReminderAt = Date.now();
       if (hadPendingReminder) {
-        addSystemLog("忙完再说", "这次介入被延后到下一个恢复断点。EyeFlow 会先保持状态提示，不继续催。");
+        addSystemLog("忙完再说", "这次提醒延后到下一个恢复断点。EyeFlow 会先保持状态提示，不继续催。");
       }
       showToast("Mira：好，我先不提醒。等你停下来再提醒。");
       render();
@@ -11975,7 +11975,7 @@
       if (pending?.status === "pending" && now - Date.parse(pending.at) > 12 * 60 * 1000) {
         closePendingReminder("ignored");
         recordMiraModeSignal("overrun");
-        addSystemLog("一次提醒未处理", "这次提醒没有被处理。EyeFlow 会用它来判断提醒是否太频繁。");
+        addSystemLog("一次提醒没顾上", "这次提醒你没顾上。EyeFlow 会用它来判断提醒是否太频繁。");
       }
       if (level < 2) return;
       if (!shouldSurfaceReminder(intervention, load)) return;
@@ -12039,7 +12039,7 @@
         responseLatencySeconds: 0,
         ...rhythmEventContext()
       });
-      addSystemLog(`Mira 触发 L${level} 介入`, intervention.copy);
+      addSystemLog(`Mira 把话说得更明确了（L${level}）`, intervention.copy);
     }
 
     function maybeAutoCompleteBreak(activity) {
@@ -12072,7 +12072,7 @@
       sessionSource = "idle";
       lastNudgeAt = 0;
       lastActiveSecondsBeforeIdle = 0;
-      addSystemLog("自动识别一次自然离屏", `检测到你离开键鼠约 ${activity.idleSeconds} 秒，已作为自然离屏信号记录。`);
+      addSystemLog("自动识别一次自然离屏", `注意到你离开键鼠约 ${activity.idleSeconds} 秒，已记为一次自然离屏。`);
       appendRhythmMemory("recovery_feedback", {
         endedAt: new Date().toISOString(),
         durationSeconds: Number(activity.idleSeconds || 0),
@@ -12456,11 +12456,11 @@
       } else if (!latestActivity.enhancedDesktopSensing) {
         els.activityCopy.textContent = "普通模式中：只做本地计时和休息提醒。";
       } else if (!latestActivity.isWorking) {
-        els.activityCopy.textContent = "当前处于空闲状态。恢复操作后，EyeFlow 会重新计算连续活跃时间。";
+        els.activityCopy.textContent = "现在处于空闲。回来动一下，EyeFlow 会重新计算连续活跃时间。";
       } else if (state.settings.deepWorkMiraOnlyToggle && latestActivity.isDeepWorkApp) {
-        els.activityCopy.textContent = `检测到 ${app} 深度工作中。恢复断点只更新 Mira，不弹出提示。`;
+        els.activityCopy.textContent = `看起来你在用 ${app} 深度工作。恢复断点只更新 Mira，不弹出提示。`;
       } else {
-        els.activityCopy.textContent = `检测到你正在使用 ${app}${latestActivity.isDeepWorkApp ? "，看起来像深度工作。" : "。"}`;
+        els.activityCopy.textContent = `看起来你正在使用 ${app}${latestActivity.isDeepWorkApp ? "，看起来像深度工作。" : "。"}`;
       }
     }
 
@@ -12532,7 +12532,7 @@
         enhancedPermissionNeedsRestart = false;
         stopEnhancedPermissionPolling();
         renderDesktopReadiness();
-        showToast("Mira：增强桌面感知已同步为开启。");
+        showToast("Mira：增强桌面感知已开启。");
         return;
       }
       if (latestDesktopSettings?.enhancedDesktopSensingRequested === true && window.eyeflowDesktop?.setEnhancedSensing) {
@@ -12590,8 +12590,8 @@
             stopEnhancedPermissionPolling();
             renderDesktopReadiness();
             showToast(enhancedPermissionPollTarget
-              ? "Mira：增强桌面感知已同步为开启。"
-              : "Mira：已同步为普通模式。");
+              ? "Mira：增强桌面感知已开启。"
+              : "Mira：已切回普通模式。");
             return;
           }
         } catch (error) {
@@ -12823,8 +12823,8 @@
             enhancedPermissionNeedsRestart = false;
             stopEnhancedPermissionPolling();
             showToast(nextEnabled
-              ? "Mira：增强桌面感知已同步为开启。"
-              : "Mira：已同步为普通模式。");
+              ? "Mira：增强桌面感知已开启。"
+              : "Mira：已切回普通模式。");
             return;
           }
           showToast(nextEnabled
@@ -14308,7 +14308,7 @@
           level: 1,
           title: "只让 Mira 轻轻变化",
             copy: deepWorkMiraOnly
-              ? "检测到深度工作，暂时只更新 Mira 状态，不弹出提示。"
+              ? "看起来在深度工作，暂时只更新 Mira 状态，不弹出提示。"
             : `当前是安静模式，默认只用状态球和文字变化。${reminderLine || "看到 Mira 变色时先眨几下，不用停下。"}`
         };
       }
@@ -14319,7 +14319,7 @@
         return {
           level: 3,
           displayLevel: 3,
-          title: "已经明显超时",
+          title: "已经比目标久了不少",
           copy: "这轮已经超过目标时间较久，Mira 会更明确地建议你休息。"
         };
       }
@@ -14329,7 +14329,7 @@
           level: 3,
           displayLevel: 3,
           title: "状态偏高，准备提醒",
-          copy: "眼睛信号偏高。Mira 会先观察节奏，持续一小段时间后再明确介入。"
+          copy: "眼睛信号偏高。Mira 会先观察节奏，持续一小段时间后再明确提醒。"
         };
       }
 
@@ -14366,9 +14366,9 @@
       return {
         level: 1,
         displayLevel: chosenDisplayLevel,
-        title: state.settings.intensity === "clear" ? "明确介入已开启" : "轻提示已开启",
+        title: state.settings.intensity === "clear" ? "明确提醒已开启" : "轻提示已开启",
         copy: state.settings.intensity === "clear"
-          ? "Mira 先保持安静；到恢复断点、状态信号偏高或明显超时时，会更明确地带你恢复。"
+          ? "Mira 先保持安静；到恢复断点、状态信号偏高或明显超出目标时，会更明确地带你恢复。"
           : "Mira 先保持安静；到恢复断点时，会短暂提示你眨眼和远眺。"
       };
     }
@@ -14400,7 +14400,7 @@
       if (stats.shown === 0) {
         els.reminderFeedbackCopy.textContent = "Mira 会记录提醒有没有被接住，用来慢慢让提醒更轻。";
       } else if (stats.ignored > stats.completed + stats.snoozed) {
-        els.reminderFeedbackCopy.textContent = "今天未处理的提醒偏多，后续可以降低介入频率或更依赖恢复断点。";
+        els.reminderFeedbackCopy.textContent = "今天不少提醒你没顾上，后续可以少主动提醒、更依赖恢复断点。";
       } else {
         els.reminderFeedbackCopy.textContent = "今天的提醒已有反馈，EyeFlow 会用这些信号调整节奏。";
       }
@@ -14439,7 +14439,7 @@
       if (stats.shown === 0) {
         els.responseRateCopy.textContent = "暂无 L2/L3。";
       } else if (stats.ignored > handled) {
-        els.responseRateCopy.textContent = `${stats.shown} 次 · 未处理偏多`;
+        els.responseRateCopy.textContent = `${stats.shown} 次 · 多半没顾上`;
       } else {
         els.responseRateCopy.textContent = `${stats.shown} 次 · 处理 ${handled}`;
       }
@@ -14508,7 +14508,7 @@
       const targetSeconds = Number(els.focusTarget.value) * 60;
       if (isRecordingSession() && elapsedSeconds >= targetSeconds) {
         const overMinutes = Math.floor((elapsedSeconds - targetSeconds) / 60);
-        const prefix = overMinutes > 0 ? `超时 ${overMinutes} 分` : "到断点";
+        const prefix = overMinutes > 0 ? `多 ${overMinutes} 分` : "到断点";
         return `${prefix} · 目标 ${focusTargetMinutes} 分钟`;
       }
       if (isAutoTracking()) {
@@ -14875,7 +14875,7 @@
 
     function contributorMeta(key) {
       return {
-        symptom: { label: "症状自评", max: 40 },
+        symptom: { label: "感受自评", max: 40 },
         behavior: { label: "连续计时", max: 35 },
         recovery: { label: "恢复抵消", max: 25 },
         environment: { label: "环境信号", max: 15 },
@@ -14930,7 +14930,7 @@
       return {
         onboarding_event: "激活引导",
         daily_assessment: "状态自评",
-        focus_session: "专注会话",
+        focus_session: "专注轮次",
         recovery_event: "恢复事件",
         reminder_event: "提醒事件",
         hardware_sample: "硬件样本"
@@ -16120,7 +16120,7 @@
       } else if (recoverySeconds === 0 && focusMinutes >= 20) {
         els.weeklyRecoveryCopy.textContent = "已经有连续计时记录，但还没有完成恢复。先让 Mira 带你做一次短恢复。";
       } else if (stats.shown && stats.ignored > handled) {
-        els.weeklyRecoveryCopy.textContent = "档案里未处理提醒偏多。EyeFlow 应该继续降低主动介入，更多依赖状态变化和恢复断点。";
+        els.weeklyRecoveryCopy.textContent = "档案里不少提醒没顾上。EyeFlow 会继续少主动提醒，更多依赖状态变化和恢复断点。";
       } else if (recoverySeconds > 0) {
         els.weeklyRecoveryCopy.textContent = `Mira 已帮你保留 ${shareRecoveryLabel(recoverySeconds)} 的护眼恢复，其中一部分来自被你接住的提醒。继续保持轻提醒节奏，让恢复自然插进工作间隙。`;
       } else {
@@ -16264,7 +16264,7 @@
         intensity = state.settings.intensity === "force" ? "force" : "quiet";
         title = "少一点打扰";
         copy = "提醒常被放到稍后时，Mira 会更多等断点、少主动打断。";
-        reason = `Mira 参考近 7 天：未处理偏多，所以延到 ${focus} 分并保持 ${intensityLabel(intensity)}。`;
+        reason = `Mira 参考近 7 天：提醒多半没顾上，所以延到 ${focus} 分并保持 ${intensityLabel(intensity)}。`;
         source = "rule-skipped";
       } else if (responsiveRhythm) {
         if (learnedFocus) focus = boundedRhythmValue(learnedFocus, focus, 15, 50, 5);
@@ -16500,8 +16500,8 @@
     });
 
     function statusCopy(load, running) {
-      if (!hasAssessedToday()) return "先做今日打分。";
-      if (running) return `会话中 · 已专注 ${Math.floor(elapsedSeconds / 60)} 分钟`;
+      if (!hasAssessedToday()) return "先记一下今天的感受。";
+      if (running) return `这一轮 · 已专注 ${Math.floor(elapsedSeconds / 60)} 分钟`;
       if (isAutoTracking()) {
         const autoMinutes = Math.floor(elapsedSeconds / 60);
         const autoDuration = autoMinutes > 0 ? `${autoMinutes} 分钟` : "不到 1 分钟";
