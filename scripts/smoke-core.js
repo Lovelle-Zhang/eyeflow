@@ -318,7 +318,7 @@ function main() {
   assertNotMatches(indexHtml, /function\s+profileObservationText[\s\S]*?Math\.random\(\)/, "observation does not randomly change on every render");
   assertIncludes(indexHtml, "展开看这几天的明细", "all quantitative views are tucked into one gentle fold");
   assertIncludes(indexHtml, 'class="panel profile-detail-fold"', "the fold is a single disclosure, not scattered cards");
-  assertMatches(indexHtml, /<div class="profile-window-stats">[\s\S]*<span class="profile-window-stat-label">屏幕活跃<\/span>[\s\S]*<span class="profile-window-stat-label">护眼恢复<\/span>[\s\S]*<\/div>/, "profile window top summary keeps only the two user-value metrics");
+  assertMatches(indexHtml, /<div class="profile-window-stats">[\s\S]*<span class="profile-window-stat-label">屏幕活跃<\/span>[\s\S]*<span class="profile-window-stat-label">歇眼<\/span>[\s\S]*<\/div>/, "profile window top summary keeps only the two user-value metrics");
   assertNotMatches(indexHtml, /<span class="profile-window-stat-label">(?:节奏|记录)<\/span>/, "profile window does not expose rhythm or record-count cards as top metrics");
   assertMatches(indexHtml, /#profileView \.profile-detail-fold-body > \.profile-rhythm-memory,[\s\S]*?background:\s*transparent;/, "folded sections render flat, not as cards-in-cards");
   assertNotMatches(indexHtml, /接住率/, "no pass-rate (接住率) grade anywhere in 这几天");
@@ -334,7 +334,7 @@ function main() {
   assertMatches(metricsJs, /function\s+recoverySecondsForShareEvent\([\s\S]*event\.mode === "system-detected"\) return 0;/, "system-detected natural away does not inflate eye-care recovery duration");
   assertIncludes(metricsJs, "function naturalAwaySecondsForDay", "natural away is tracked separately from eye-care recovery");
   assertIncludes(indexHtml, "自然离屏", "auto away is explained as natural away, not eye-care recovery");
-  assertIncludes(indexHtml, "<span>护眼恢复</span>", "daily share card labels recovery as eye care instead of rest counts");
+  assertIncludes(indexHtml, "<span>歇眼</span>", "daily share card labels recovery as eye care instead of rest counts");
   assertNotMatches(indexHtml, /card\.breaks|今日休息次数|<span>休息<\/span><strong id="shareCardBreaks"/, "daily share card does not expose rest as a count");
   assertIncludes(indexHtml, "eyeflow.app", "profile share card includes restrained domain branding");
   assertMatches(indexHtml, /#todayView \.share-art-mark,[\s\S]*#profileView \.share-art-mark\s*\{[\s\S]*width:\s*calc\(var\(--ef-control-lg\) \+ var\(--ef-space-1\)\);[\s\S]*background:\s*url\("\.\/assets\/icon\.svg"\) center \/ contain no-repeat;/, "daily share card uses the source app icon asset");
@@ -385,7 +385,7 @@ function main() {
   assertMatches(indexHtml, /function\s+drawShareBrandMark\([\s\S]*iconSize = size \* 0\.84;[\s\S]*iconGradient\.addColorStop\(0,\s*"#EAFFF6"\);[\s\S]*iconGradient\.addColorStop\(0\.58,\s*"#BDEAFF"\);[\s\S]*iconGradient\.addColorStop\(1,\s*"#F3EEC7"\);[\s\S]*"#6FE7C3"/, "profile share image draws the real app icon mark");
   assertMatches(indexHtml, /function\s+drawDailyShareCardCanvas\([\s\S]*canvas\.width = 1200;[\s\S]*canvas\.height = 720;[\s\S]*#f5f3ee[\s\S]*eyeflow\.app/, "profile share image draws a textured card artifact");
   assertMatches(indexHtml, /window\.eyeflowDesktop\?\.copyShareImage[\s\S]*generateDailyShareImageDataUrl\(\)/, "profile share action copies the generated image card first");
-  assertMatches(indexHtml, /function\s+shareCardPayload\([\s\S]*eyebrow:[\s\S]*insight:[\s\S]*今日专注[\s\S]*护眼恢复[\s\S]*节奏[\s\S]*function\s+buildDailyShareText\(\)[\s\S]*card\.insight[\s\S]*card\.metrics\.forEach[\s\S]*Mira 小句/, "today payload is insight-led (eyebrow+insight+metrics); share text leads with the insight, keeps metrics + a Mira line for week/month");
+  assertMatches(indexHtml, /function\s+shareCardPayload\([\s\S]*eyebrow:[\s\S]*insight:[\s\S]*今日专注[\s\S]*歇眼[\s\S]*节奏[\s\S]*function\s+buildDailyShareText\(\)[\s\S]*card\.insight[\s\S]*card\.metrics\.forEach[\s\S]*Mira 小句/, "today payload is insight-led (eyebrow+insight+metrics); share text leads with the insight, keeps metrics + a Mira line for week/month");
   assertIncludes(indexHtml, "function recordedDurationLabel", "profile duration fields distinguish missing timing from zero minutes");
   assertIncludes(metricsJs, "function recordedSecondsForDay", "profile duration uses the strongest available local timing signal");
   assertIncludes(indexHtml, "autoElapsedSeconds", "profile preserves accumulated automatic local timing across the day");

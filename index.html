@@ -8999,7 +8999,7 @@
           <div class="daily-share-copy">
             <span id="summaryDayLabel">今日分享卡 · 2026-06-03</span>
             <strong id="dailySummaryTitle">节奏平稳</strong>
-            <p id="dailySummaryCopy">今日专注 0 分钟 · 护眼恢复 0 分钟</p>
+            <p id="dailySummaryCopy">今日专注 0 分钟 · 歇眼 0 分钟</p>
             <span id="tomorrowPlan" hidden="">保持平稳</span>
             <span id="tomorrowCopy" hidden="">Mira 继续轻提醒。</span>
           </div>
@@ -9024,14 +9024,14 @@
       <div id="logs" hidden="">
           <article class="log-item">
             <header><span>18:14</span><span>状态信号 11</span></header>
-            <strong>完成一次护眼恢复</strong>
+            <strong>完成一次歇眼</strong>
             <p>干涩 1 / 酸胀 2 / 模糊 0 / 畏光 0</p>
             <p>反馈：差不多。下一轮提醒会提前一点。</p>
           </article>
         
           <article class="log-item">
             <header><span>21:10</span><span>状态信号 23</span></header>
-            <strong>完成一次护眼恢复</strong>
+            <strong>完成一次歇眼</strong>
             <p>干涩 2 / 酸胀 3 / 模糊 1 / 畏光 1</p>
             <p>远眺和眨眼已记录。下一轮会重新计算本轮计时。</p>
           </article>
@@ -9280,7 +9280,7 @@
               <strong class="profile-window-stat-value" id="profileWindowActive">0 分钟</strong>
             </div>
             <div class="profile-window-stat">
-              <span class="profile-window-stat-label">护眼恢复</span>
+              <span class="profile-window-stat-label">歇眼</span>
               <strong class="profile-window-stat-value" id="profileWindowRest">0 分钟</strong>
             </div>
           </div>
@@ -9387,7 +9387,7 @@
             <div class="profile-chart-metrics">
               <div class="profile-mini-stat"><span>当前</span><strong id="profileTrendCurrent">16</strong></div>
               <div class="profile-mini-stat"><span>高峰</span><strong id="profileTrendPeak">16</strong></div>
-              <div class="profile-mini-stat"><span>护眼恢复</span><strong id="profileTrendBreaks">0 分钟</strong></div>
+              <div class="profile-mini-stat"><span>歇眼</span><strong id="profileTrendBreaks">0 分钟</strong></div>
               <div class="profile-mini-stat"><span>起伏</span><strong id="profileTrendRange">0</strong></div>
             </div>
             <div class="profile-symptom-bars" id="profileTags">
@@ -9418,7 +9418,7 @@
                   <b id="weeklyRecoveryDays">0 天</b>
                 </div>
                 <div class="reason">
-                  <span>护眼恢复</span>
+                  <span>歇眼</span>
                   <b id="weeklyRecoveryBreaks">0 分钟</b>
                 </div>
                 <div class="reason">
@@ -9460,7 +9460,7 @@
                 <div class="profile-evidence-grid profile-record-grid">
                   <div class="profile-evidence"><span>高峰</span><strong id="profilePeakLoad">16</strong></div>
                   <div class="profile-evidence"><span>样本</span><strong id="profileSampleCount">0</strong></div>
-                  <div class="profile-evidence"><span>护眼恢复</span><strong id="profileBreaks">0 分钟</strong></div>
+                  <div class="profile-evidence"><span>歇眼</span><strong id="profileBreaks">0 分钟</strong></div>
                   <div class="profile-evidence"><span>计时</span><strong id="profileFocusTime">未记录</strong></div>
                   <div class="profile-evidence"><span>提醒</span><strong id="profileHandledRate">暂无</strong></div>
                   <div class="profile-evidence"><span>判断把握</span><strong id="profileConfidence">低</strong></div>
@@ -9550,7 +9550,7 @@
           <strong class="share-art-quote" id="shareQuote">停二十秒，不是退后，是给下一步蓄力。</strong>
           <div class="share-art-metrics" aria-label="节奏摘要">
             <div class="share-art-metric"><span id="shareCardLabel0">今日专注</span><strong id="shareCardFocusTime">还没开始</strong></div>
-            <div class="share-art-metric"><span id="shareCardLabel1">护眼恢复</span><strong id="shareCardBreaks">0 分钟</strong></div>
+            <div class="share-art-metric"><span id="shareCardLabel1">歇眼</span><strong id="shareCardBreaks">0 分钟</strong></div>
             <div class="share-art-metric"><span id="shareCardLabel2">节奏</span><strong id="shareCardRhythm">保持平稳</strong></div>
           </div>
           <div class="share-art-divider"></div>
@@ -13143,7 +13143,7 @@
         `评分模型：${analysis.modelVersion || "未知"} / 置信度 ${analysis.confidenceLabel || "低"}`,
         `缺失信号：${(analysis.missingSignals || []).map(missingSignalLabel).join("、") || "无"}`,
         `今日专注：${formatFeedbackDuration(elapsedSeconds)}`,
-        `今日护眼恢复：${shareRecoveryLabel(recoverySecondsForDay({ events: state.events || [] }))}`,
+        `今日歇眼：${shareRecoveryLabel(recoverySecondsForDay({ events: state.events || [] }))}`,
         `rhythmMemoryDays：${rhythmSummary.rhythmMemoryDays}`,
         `acceptedBreaks：${rhythmSummary.acceptedBreaks}`,
         `laterOrUnhandled：${rhythmSummary.skippedBreaks}`,
@@ -14414,7 +14414,7 @@
       const focusMinutes = Math.floor(focusSeconds / 60);
       const focusLabel = shareFocusLabel(focusSeconds);
       const recoveryLabel = shareRecoveryLabel(recoverySeconds);
-      const summaryLine = `今日专注 ${focusLabel} · 护眼恢复 ${recoveryLabel}`;
+      const summaryLine = `今日专注 ${focusLabel} · 歇眼 ${recoveryLabel}`;
       const handled = stats.completed + stats.snoozed;
       const responsePercent = stats.shown ? Math.round(handled / stats.shown * 100) : null;
       const totalBreaks = state.breaks;
@@ -15351,7 +15351,7 @@
         quote: dailyShareQuote(),
         metrics: [
           { label: "今日专注", value: shareFocusLabel(focusSeconds) },
-          { label: "护眼恢复", value: shareRecoveryLabel(recoverySeconds) },
+          { label: "歇眼", value: shareRecoveryLabel(recoverySeconds) },
           { label: "节奏", value: currentShareRhythmLabel() }
         ]
       };
@@ -16108,9 +16108,9 @@
       if (!activeDays.length) {
         els.weeklyRecoveryCopy.textContent = "开始一次专注或完成一次恢复后，这里会沉淀成你的长期轻提醒恢复档案。";
       } else if (activeDays.length >= 30 && recoverySeconds > 0) {
-        els.weeklyRecoveryCopy.textContent = `长期档案已记录 ${activeDays.length} 天，Mira 帮你保留了 ${shareRecoveryLabel(recoverySeconds)} 的护眼恢复${naturalAwayCopy}。后续会优先按你的真实节奏让提醒更轻。`;
+        els.weeklyRecoveryCopy.textContent = `长期档案已记录 ${activeDays.length} 天，Mira 帮你保留了 ${shareRecoveryLabel(recoverySeconds)} 的歇眼${naturalAwayCopy}。后续会优先按你的真实节奏让提醒更轻。`;
       } else if (activeDays.length >= 7 && recoverySeconds > 0) {
-        els.weeklyRecoveryCopy.textContent = `档案正在成形：已记录 ${activeDays.length} 天、护眼恢复 ${shareRecoveryLabel(recoverySeconds)}${naturalAwayCopy}。继续积累后，EyeFlow 会更清楚哪些提醒真的适合你。`;
+        els.weeklyRecoveryCopy.textContent = `档案正在成形：已记录 ${activeDays.length} 天、歇眼 ${shareRecoveryLabel(recoverySeconds)}${naturalAwayCopy}。继续积累后，EyeFlow 会更清楚哪些提醒真的适合你。`;
       } else if (activeDays.length >= 3 && stats.shown && stats.ignored > handled) {
         els.weeklyRecoveryCopy.textContent = "第 3 天开始你可能会自然把提醒留到稍后。EyeFlow 会降低主动提示，更多等窗口切换、键鼠停顿这类自然断点再提醒。";
       } else if (activeDays.length >= 3 && recoverySeconds === 0 && focusMinutes >= 20) {
@@ -16122,7 +16122,7 @@
       } else if (stats.shown && stats.ignored > handled) {
         els.weeklyRecoveryCopy.textContent = "档案里不少提醒没顾上。EyeFlow 会继续少主动提醒，更多依赖状态变化和恢复断点。";
       } else if (recoverySeconds > 0) {
-        els.weeklyRecoveryCopy.textContent = `Mira 已帮你保留 ${shareRecoveryLabel(recoverySeconds)} 的护眼恢复，其中一部分来自被你接住的提醒。继续保持轻提醒节奏，让恢复自然插进工作间隙。`;
+        els.weeklyRecoveryCopy.textContent = `Mira 已帮你保留 ${shareRecoveryLabel(recoverySeconds)} 的歇眼，其中一部分来自被你接住的提醒。继续保持轻提醒节奏，让恢复自然插进工作间隙。`;
       } else {
         els.weeklyRecoveryCopy.textContent = "节奏正在建立。完成几次恢复后，Mira 会把这些记录沉淀成更具体的长期趋势。";
       }
@@ -16279,8 +16279,8 @@
         rest = boundedRhythmValue(Math.max(rest, 120), 120, 90, 240, 30);
         intensity = state.settings.intensity === "force" ? "force" : "standard";
         title = "补一段恢复";
-        copy = "今天已经有连续计时，但护眼恢复还少，下一轮建议提前一点。";
-        reason = `Mira 参考今天节奏：还没有护眼恢复记录，所以先到 ${focus} 分提醒一次。`;
+        copy = "今天已经有连续计时，但歇眼还少，下一轮建议提前一点。";
+        reason = `Mira 参考今天节奏：还没有歇眼记录，所以先到 ${focus} 分提醒一次。`;
         source = "rule-first-break";
       }
 
@@ -16396,7 +16396,7 @@
             </div>
             <div class="history-trend history-spark">${trend}</div>
             <div class="history-cell"><span>计时</span><strong>${focusLabel}</strong></div>
-            <div class="history-cell"><span>护眼恢复</span><strong>${recoveryLabel}</strong></div>
+            <div class="history-cell"><span>歇眼</span><strong>${recoveryLabel}</strong></div>
             <div class="history-cell"><span>提醒处理</span><strong>${shown ? (handled >= shown * 0.6 ? "大多接住" : handled > 0 ? "接住一部分" : "暂时不多") : "暂无"}</strong></div>
           </article>
         `;
@@ -16408,7 +16408,7 @@
             <span>状态范围</span>
             <span>日内趋势</span>
             <span>计时</span>
-            <span>护眼恢复</span>
+            <span>歇眼</span>
             <span>提醒处理</span>
           </div>
           ${rows}

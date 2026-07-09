@@ -492,7 +492,7 @@ function main() {
   assertMatches(indexHtml, /function\s+sessionHintText\(\)[\s\S]*remainingLabel[\s\S]*剩余 \$\{remainingMinutes\} 分钟[\s\S]*目标 \$\{focusTargetMinutes\} 分钟/, "installed today timer bar carries remaining and target time");
   assertNotIncludes(indexHtml, "els.focusMinutes.textContent", "installed round target is no longer rendered as a duplicate metric");
   assertNotIncludes(indexHtml, "els.loadBand.textContent", "installed remaining time is no longer rendered as a duplicate metric");
-  assertIncludes(indexHtml, "今日专注 0 分钟 · 护眼恢复 0 分钟", "installed summary shares focus total and recovery duration without rest counts");
+  assertIncludes(indexHtml, "今日专注 0 分钟 · 歇眼 0 分钟", "installed summary shares focus total and recovery duration without rest counts");
   assertMatches(indexHtml, /details\.quick-log-panel summary\s*\{[\s\S]*padding:\s*var\(--ef-space-8\) var\(--ef-space-9\);[\s\S]*grid-template-columns:\s*var\(--ef-control-sm\) minmax\(0,\s*1fr\);/, "installed quick log summary uses tokenized spacing");
   assertMatches(indexHtml, /details\.quick-log-panel summary::before\s*\{[\s\S]*width:\s*var\(--ef-control-sm\);[\s\S]*font-weight:\s*var\(--ef-symbol-weight-base\);[\s\S]*font-size:\s*var\(--ef-text-title-sm\);/, "installed quick log symbol uses tokenized weight");
   assertIncludes(indexHtml, "随时都可以记一下。", "installed quick log prompt invites anytime logging");
@@ -675,7 +675,7 @@ function main() {
   assertIncludes(indexHtml, "下一轮建议", "installed profile review answers the next-round plan directly");
   assertNotMatches(indexHtml, /<span class="profile-trend-tag" id="profileTrendTag">/, "installed profile insight header removes the duplicated overall-state chip");
   assertIncludes(indexHtml, "主要感受", "installed profile review uses a user-facing signal label");
-  assertMatches(indexHtml, /<div class="profile-window-stats">[\s\S]*<span class="profile-window-stat-label">屏幕活跃<\/span>[\s\S]*<span class="profile-window-stat-label">护眼恢复<\/span>[\s\S]*<\/div>/, "installed profile window top summary keeps only the two user-value metrics");
+  assertMatches(indexHtml, /<div class="profile-window-stats">[\s\S]*<span class="profile-window-stat-label">屏幕活跃<\/span>[\s\S]*<span class="profile-window-stat-label">歇眼<\/span>[\s\S]*<\/div>/, "installed profile window top summary keeps only the two user-value metrics");
   assertNotMatches(indexHtml, /<span class="profile-window-stat-label">(?:节奏|记录)<\/span>/, "installed profile window does not expose rhythm or record-count cards as top metrics");
   assertIncludes(indexHtml, "<span>提醒时间</span>", "installed profile review labels the reminder timing directly");
   assertIncludes(indexHtml, "<span>休息时间</span>", "installed profile review labels the rest timing directly");
@@ -697,7 +697,7 @@ function main() {
   assertMatches(metricsJs, /function\s+recoverySecondsForShareEvent\([\s\S]*event\.mode === "system-detected"\) return 0;/, "installed system-detected natural away does not inflate eye-care recovery duration");
   assertIncludes(metricsJs, "function naturalAwaySecondsForDay", "installed natural away is tracked separately from eye-care recovery");
   assertIncludes(indexHtml, "自然离屏", "installed auto away is explained as natural away, not eye-care recovery");
-  assertIncludes(indexHtml, "<span>护眼恢复</span>", "installed daily share card labels recovery as eye care instead of rest counts");
+  assertIncludes(indexHtml, "<span>歇眼</span>", "installed daily share card labels recovery as eye care instead of rest counts");
   assertNotMatches(indexHtml, /card\.breaks|今日休息次数|<span>休息<\/span><strong id="shareCardBreaks"/, "installed daily share card does not expose rest as a count");
   assertIncludes(indexHtml, "eyeflow.app", "installed profile share card includes restrained domain branding");
   assertMatches(indexHtml, /#todayView \.share-art-mark,[\s\S]*#profileView \.share-art-mark\s*\{[\s\S]*width:\s*calc\(var\(--ef-control-lg\) \+ var\(--ef-space-1\)\);[\s\S]*background:\s*url\("\.\/assets\/icon\.svg"\) center \/ contain no-repeat;/, "installed daily share card uses the source app icon asset");
@@ -722,7 +722,7 @@ function main() {
   assertMatches(indexHtml, /function\s+drawShareBrandMark\([\s\S]*iconSize = size \* 0\.84;[\s\S]*iconGradient\.addColorStop\(0,\s*"#EAFFF6"\);[\s\S]*iconGradient\.addColorStop\(0\.58,\s*"#BDEAFF"\);[\s\S]*iconGradient\.addColorStop\(1,\s*"#F3EEC7"\);[\s\S]*"#6FE7C3"/, "installed profile share image draws the real app icon mark");
   assertMatches(indexHtml, /function\s+drawDailyShareCardCanvas\([\s\S]*canvas\.width = 1200;[\s\S]*canvas\.height = 720;[\s\S]*#f5f3ee[\s\S]*eyeflow\.app/, "installed profile share image draws a textured card artifact");
   assertMatches(indexHtml, /window\.eyeflowDesktop\?\.copyShareImage[\s\S]*generateDailyShareImageDataUrl\(\)/, "installed profile share action copies the generated image card first");
-  assertMatches(indexHtml, /function\s+shareCardPayload\([\s\S]*eyebrow:[\s\S]*insight:[\s\S]*今日专注[\s\S]*护眼恢复[\s\S]*节奏[\s\S]*function\s+buildDailyShareText\(\)[\s\S]*card\.insight[\s\S]*card\.metrics\.forEach[\s\S]*Mira 小句/, "installed today share payload keeps focus/recovery/rhythm; text fallback composes the period metrics plus a Mira line");
+  assertMatches(indexHtml, /function\s+shareCardPayload\([\s\S]*eyebrow:[\s\S]*insight:[\s\S]*今日专注[\s\S]*歇眼[\s\S]*节奏[\s\S]*function\s+buildDailyShareText\(\)[\s\S]*card\.insight[\s\S]*card\.metrics\.forEach[\s\S]*Mira 小句/, "installed today share payload keeps focus/recovery/rhythm; text fallback composes the period metrics plus a Mira line");
   assertIncludes(indexHtml, "状态线", "installed profile review keeps today's state line as a lower-weight disclosure");
   assertIncludes(indexHtml, "查看长期档案", "installed profile review moves long-term records behind one archive disclosure");
   assertNotIncludes(indexHtml, "默认收起", "installed profile archive does not expose implementation state copy");
