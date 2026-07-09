@@ -403,6 +403,9 @@
        Tempo inherits her natural --breath (5s): the 10s rest holds exactly
        two full breaths, ending on an exhale. */
     .rest-act[data-state="resting"] .pacer .pet { --rest: 1.32; --peak: 1.6; }
+    /* Behind Mira the halo is pure glow — its 1px inset edge read as a stray
+       inner circle between her and the progress ring. (Done-state ✓ keeps its.) */
+    .rest-act[data-state="resting"] .dot { box-shadow: none; }
     .rest-act[data-state="resting"] .prog { animation: ringFill 10s linear forwards; }
     @keyframes ringFill { to { stroke-dashoffset: 0; } }
 
