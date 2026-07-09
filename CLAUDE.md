@@ -2,6 +2,10 @@
 
 本文件为 Claude Code 在本仓库工作的约定。
 
+## 文案定位
+
+所有面向用户的文案以 docs/POSITIONING.md 为准。
+
 ## 代码复审
 
 当我完成涉及以下任一情况的改动后，自动用 codex 工具以 read-only 方式复审，
