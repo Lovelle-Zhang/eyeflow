@@ -297,7 +297,10 @@
     .ms-domain { font-size: 11px; font-size: max(2.3cqi, 10px); color: var(--muted-soft); }
     .step-eyebrow { font-variant-numeric: tabular-nums; }
     /* 第二拍的两只提醒面:纵向小叠,复用气泡展开动画(选择器随容器换靶)。 */
-    .mock-stack { display: grid; gap: 20px; justify-items: center; align-content: center; }
+    .mock-stack { display: grid; gap: var(--s8); justify-items: center; align-content: center; }
+    .mock-cell { display: grid; gap: var(--s4); justify-items: center; }
+    .mock-tag { margin: 0; font-size: var(--t-eyebrow); font-weight: 500; letter-spacing: 0.16em; text-transform: uppercase; color: var(--muted-soft); }
+    .mock-note { margin: 0; max-width: 16em; font-size: var(--t-small); line-height: 1.5; color: var(--muted); text-align: center; }
     .mock-stack .companion-card, .mock-stack .island { width: min(100%, 400px); }
     .mock-stack .companion-card { justify-content: space-between; }
     .mock-stack .companion-card .txt { flex: 1; }
@@ -513,6 +516,8 @@
         <p class="body" data-en="A peek from the desktop corner, or a small island at the top. Keep working and she just says it a little more clearly, never louder.">桌面一角冒个头，或顶部一座小岛。你要是继续，她才慢慢把话说清楚一点，从不提高音量。</p>
       </div>
       <div class="mock-stack reveal">
+        <div class="mock-cell">
+        <p class="mock-tag" data-en="In the corner">桌面一角</p>
         <div class="companion-card reveal" role="img" aria-label="桌面角落的 Mira 展开气泡：该歇会儿了，我在。跟我看看远方，20 秒就好" data-en-label="Mira's bubble in the desktop corner: Time for a little break — I'm right here. Let's look into the distance. 20 seconds is all it takes.">
           <div class="txt">
             <strong data-en="Time for a little break — I'm right here.">该歇会儿了，我在。</strong>
@@ -525,6 +530,10 @@
             </div>
           </div>
         </div>
+        <p class="mock-note" data-en="Peeks out when needed, then slips back.">需要时冒个头，说完退回去。</p>
+        </div>
+        <div class="mock-cell">
+        <p class="mock-tag" data-en="At the top">顶部提醒岛</p>
         <div class="island live" role="img" aria-label="EyeFlow 顶部提醒岛：看看远方休息一下，看完自动记录" data-en-label="EyeFlow's reminder island at the top of the screen: look into the distance to rest, logged automatically when you're done">
           <svg class="ic" viewBox="0 0 1024 1024" aria-hidden="true">
             <defs><linearGradient id="isl-bg" x1="216" y1="156" x2="826" y2="874" gradientUnits="userSpaceOnUse"><stop offset="0" stop-color="#EAFFF6"/><stop offset=".58" stop-color="#BDEAFF"/><stop offset="1" stop-color="#F3EEC7"/></linearGradient></defs>
@@ -541,6 +550,8 @@
             </div>
             <div class="isl-track"><div class="isl-fill"></div></div>
           </div>
+        </div>
+        <p class="mock-note" data-en="Rests at the very top; tucks itself away when you're done.">贴在屏幕顶端，看完自己收起。</p>
         </div>
       </div>
     </div>
