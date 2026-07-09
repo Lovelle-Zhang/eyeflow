@@ -360,6 +360,12 @@
       /* Stacked, both feature rows read the same way: words first, proof after.
          (Desktop alternates sides; the alternation means nothing in one column.) */
       .daily-row .screen-card { order: 2; }
+      /* Phones: release the aspect lock. With the legibility floors the content
+         is taller than the ratio box, and inside the screen-card's
+         overflow:hidden that clipped Mira at the top (Safari). Content-driven
+         height can never clip. */
+      .mock-break, .mock-share { aspect-ratio: auto; }
+      .mock-break { padding-block: 6cqi; }
     }
     /* Bridge · carries the visitor out of the 90vh rest moment into "it actually
        counts". Fills the dead space with a quiet line (picking up Act 4's "or
@@ -703,7 +709,7 @@
         <p class="body" data-en="Not a 'Done' button to fool yourself with. Your break counts only when you truly step back — and <b class='kw-mira'>Mira</b> would rather say 'no clear pattern yet' than invent a nicer number.">不是让你点个"完成"糊弄自己。你真的离开屏幕，这一下才算数——<b class="kw-mira">Mira</b> 宁可说"还看不出规律"，也不给你编个好看的数字。</p>
         <ul class="spec">
           <li data-en="Real breaks only">真实离开才算数</li>
-          <li data-en="'Done' won't fool it">点「完成」不作数</li>
+          <li data-en="'Done' won't fool her">点「完成」不作数</li>
           <li class="key" data-en="Blanks over invented numbers">宁可留白，不编数字</li>
         </ul>
       </div>
