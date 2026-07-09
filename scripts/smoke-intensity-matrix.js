@@ -24,8 +24,17 @@ function assertMatches(source, pattern, label) {
 function main() {
   const indexHtml = read("index.html");
   const mainJs = read("main.js");
+  const intensityDocs = read("docs/EYEFLOW_INTENSITY_LEVELS.md");
   const packageJson = JSON.parse(read("package.json"));
   const verifyJs = read("scripts/verify.js");
+
+  ["L1: Quiet", "L2: Light Prompt", "L3: Clear Prompt", "L4: Force Rest", "Cross-Process Data Flow", "Install And Runtime Validation"].forEach((heading) => {
+    assertIncludes(intensityDocs, heading, `intensity docs include ${heading}`);
+  });
+  assertIncludes(intensityDocs, "currentIntervention(load)", "intensity docs name the renderer intervention source");
+  assertIncludes(intensityDocs, "applyInterventionBehavior(state)", "intensity docs name the main-process channel coordinator");
+  assertIncludes(intensityDocs, "startIslandMicroRest()", "intensity docs name the green countdown rest entry point");
+  assertIncludes(intensityDocs, "process elapsed time must be newer than the install", "intensity docs cover old-process install drift");
 
   assertIncludes(indexHtml, "L1</strong>只改变状态球、表情和文字，不弹气泡，也不打断你。", "L1 user-facing rule stays quiet-only");
   assertMatches(
