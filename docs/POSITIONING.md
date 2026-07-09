@@ -57,6 +57,20 @@ Screen Fatigue → Digital Fatigue → Mira(状态伙伴)→ Recovery Intelligen
 
 ## 一句话定位
 
+**定位陈述**(内部对齐用):
+
 - **中**:EyeFlow 是一个温和的屏幕工作伙伴,帮你在数字疲劳累积之前停一下,轻轻恢复,然后重新回到状态。
 - **英**:EyeFlow is a gentle companion that helps screen workers notice digital fatigue early, reset softly, and return.
-- **品牌魂**:EyeFlow —— 守护你看清世界的方式。
+
+**Slogan(定稿,对外)**:
+
+- **首页主 slogan**(体感钩,首页 Hero 用):
+
+  > 屏幕看久了,世界会有点糊。
+  > Mira 陪你,一点点找回清晰。
+
+- **品牌句**(立意压阵,用在 Footer / 关于 / 分享卡等仪式时刻,不滥用):
+
+  > EyeFlow —— 守护你看清世界的方式。
+
+- **层级关系**:主 slogan 负责第一眼的体感共鸣,品牌句负责深处的立意;两者均须遵守 `MIRA_LANGUAGE.md` 五问自检(尤其「看世界级别的话,用在配得上它的时刻」)。
