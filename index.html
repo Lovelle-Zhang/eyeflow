@@ -14344,7 +14344,7 @@
 
       if (elapsedMinutes >= focusTargetMinutes) {
         return {
-          level: 2,
+          level: state.settings.intensity === "clear" ? 3 : 2,
           displayLevel: chosenDisplayLevel,
           title: "到恢复断点",
           copy: lightReminderLine("gaze", "due") || "这轮已经到恢复断点。先眨几下，再看远处 20 秒。"

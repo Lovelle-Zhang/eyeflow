@@ -658,6 +658,7 @@ function main() {
   assertMatches(mainJs, /function\s+startBreakLock\(payload = \{\}\)[\s\S]*breakLockWindow\.show\(\);[\s\S]*hideDashboardBehindBreakLock\(previewWindow\);[\s\S]*return;[\s\S]*breakLockWindow\.once\("ready-to-show", \(\) => \{[\s\S]*breakLockWindow\.show\(\);[\s\S]*hideDashboardBehindBreakLock\(previewWindow\);/, "installed break lock hides dashboard in reuse and first-window paths");
   assertMatches(mainJs, /function\s+hideEyeFlowAfterRealBreakLock\(\)[\s\S]*dashboardWindow\.hide\(\);[\s\S]*syncDock\(\);[\s\S]*suppressNextActivate = true;[\s\S]*app\.hide\(\);/, "installed real break lock hides the whole macOS app after exit");
   assertIncludes(indexHtml, "Mira 先只改变状态和颜色；到恢复断点再短暂提示。", "installed L2 early phase stays visual-only");
+  assertMatches(indexHtml, /if \(elapsedMinutes >= focusTargetMinutes\) \{\s*return \{\s*level: state\.settings\.intensity === "clear" \? 3 : 2,\s*displayLevel: chosenDisplayLevel,\s*title: "到恢复断点"/, "installed L3 reaches behavior level 3 immediately at the normal break point");
   assertIncludes(indexHtml, "强制爱临时退出", "installed force emergency exit has cooldown copy");
   assertIncludes(indexHtml, "Mira Insight", "installed profile review opens with Mira insight");
   assertIncludes(indexHtml, "先完成几轮，Mira 再给建议。", "installed first-day profile uses a direct empty state");
