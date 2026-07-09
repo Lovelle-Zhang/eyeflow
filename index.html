@@ -11955,10 +11955,13 @@
     function shouldSurfaceReminder(intervention, load) {
       const level = Number(intervention.level || 1);
       if (level < 2) return false;
-      if (isBusyForReminder()) return false;
-      if (latestActivity && isNaturalBreak(latestActivity)) return true;
       if (!(isRunning || isAutoTracking())) return false;
       const targetSeconds = Number(els.focusTarget.value) * 60;
+      const clearBreakDue = level >= 3
+        && elapsedSeconds >= targetSeconds;
+      if (clearBreakDue) return true;
+      if (isBusyForReminder()) return false;
+      if (latestActivity && isNaturalBreak(latestActivity)) return true;
       if (load >= 74) {
         return elapsedSeconds >= Math.min(targetSeconds, 8 * 60);
       }

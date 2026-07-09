@@ -2683,31 +2683,27 @@ function applyInterventionBehavior(state) {
   const islandEnabled = desktopPreferenceDefaults().showReminderIsland !== false;
   const reminderMessage = state.message || "找一个恢复断点，看远处 20 秒。";
 
-  // Two independent questions, kept separate so the same level always behaves the same:
-  //   (1) how strong is the reminder — the level; (2) where can Mira deliver it — her
-  //   runtime visibility. Mira on screen → her bubble carries L2+. Mira exited → the
-  //   island IS the reminder: a self-closing look-away micro-rest. There is no ambient
-  //   bar and no per-level visual form — the level only changes Mira's words (and whether
-  //   the away system banner joins). L4 is full-screen, handled outside this coordinator.
-  const showBubble = companionVisible && level >= 2;
-  const showRest = islandEnabled && companionExited && level >= 2;
-  // System notification is the away/lock-screen backup, governed by macOS itself (no
-  // in-app toggle): fire it only when Mira is off-screen AND either it's an escalation
-  // (L3) or the island is off too — so a put-away reminder always has a channel, but a
-  // light L2 with the island on stays a single on-screen surface.
-  const showNotify = companionExited && level >= 2 && (level >= 3 || !islandEnabled);
-
   // The REAL break point (manual timer hit its target, or an auto-mode natural pause) is
   // the moment that most deserves the full look-away. It surfaces the countdown capsule
   // and BYPASSES the shared cooldown once per round — so an earlier pre-target heads-up
   // can't eat it. Before the target, the "提醒边界" heads-up is only a no-countdown pill.
   const breakDue = Boolean(state.breakDue);
+  const l3BreakPoint = level >= 3 && breakDue;
+  // Two independent questions, kept separate so the same level always behaves the same:
+  //   (1) how strong is the reminder; (2) where can Mira deliver it. Mira on screen
+  //   carries L2 in her bubble. L3 at the real break point gets the clear top capsule
+  //   and system banner even when Mira is visible.
+  const showBubble = companionVisible && level >= 2 && !l3BreakPoint;
+  const showRest = islandEnabled && level >= 2 && (companionExited || l3BreakPoint);
+  // System notification is the away/lock-screen backup, governed by macOS itself (no
+  // in-app toggle). L3 at the real break point is also explicit enough to join it.
+  const showNotify = level >= 2 && (companionExited || l3BreakPoint) && (level >= 3 || !islandEnabled);
+
   if (!breakDue) breakRestSurfaced = false; // re-arm the once-per-break-point latch each round
   const breakBypass = breakDue && !breakRestSurfaced;
 
   if (!showBubble && !showRest && !showNotify) {
-    // Nothing to surface (L1, or L3 while Mira is on screen and her bubble carries it) —
-    // leave the panel down.
+    // Nothing to surface (L1, or a non-break reminder while Mira is on screen and quiet).
     if (levelChanged && companionVisible) hideCompanionPanel();
     return;
   }

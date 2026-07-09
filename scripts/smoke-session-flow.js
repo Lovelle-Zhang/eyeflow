@@ -188,6 +188,11 @@ function main() {
   );
   assertMatches(
     indexHtml,
+    /function\s+shouldSurfaceReminder\(intervention, load\)[\s\S]*const clearBreakDue = level >= 3[\s\S]*elapsedSeconds >= targetSeconds;[\s\S]*if \(clearBreakDue\) return true;[\s\S]*if \(isBusyForReminder\(\)\) return false;/,
+    "L3 at the real break point must surface even while the user is still working"
+  );
+  assertMatches(
+    indexHtml,
     /reminderPending: state\.pendingReminder\?\.status === "pending",[\s\S]*snoozeUntil: Number\(state\.snoozeUntil \|\| 0\),[\s\S]*reminderOpening,/,
     "companion publishes reminder context for desktop interruption gating"
   );
