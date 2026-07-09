@@ -2175,7 +2175,7 @@ function intensityMenuItems() {
   return [
     { label: "L1 安静 — 只改状态，不弹提醒", type: "radio", checked: cur === "quiet", click: () => requestIntensityFromMenu("quiet") },
     { label: "L2 轻提示 — 到断点轻提一次", type: "radio", checked: cur === "standard", click: () => requestIntensityFromMenu("standard") },
-    { label: "L3 明确 — 更明确，离开加通知", type: "radio", checked: cur === "clear", click: () => requestIntensityFromMenu("clear") },
+    { label: "L3 明确 — 到点胶囊+通知", type: "radio", checked: cur === "clear", click: () => requestIntensityFromMenu("clear") },
     { label: "L4 强制爱… — 到点全屏，应用内开启", type: "radio", checked: cur === "force", click: () => requestIntensityFromMenu("force") }
   ];
 }

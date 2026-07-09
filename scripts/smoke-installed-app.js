@@ -172,6 +172,7 @@ function main() {
   assertIncludes(indexHtml, "#rhythmView .settings-segmented-control {\n      width: min(100%, calc(var(--ef-space-14) * 12));", "installed settings boundary segmented control stays compact on desktop");
   assertIncludes(indexHtml, "L1 安静</button>", "installed settings boundary segmented labels stay compact");
   assertIncludes(indexHtml, "L4 强制爱</button>", "installed settings force segmented label stays compact");
+  assertIncludes(indexHtml, "即使 Mira 在屏，也会用顶部岛的 20 秒休息和系统通知明确提示", "installed L3 settings rule matches the clear break-point channel");
   assertIncludes(indexHtml, "class=\"settings-segmented-control ef-segmented-control\"", "installed settings boundary renders as a design-system segmented control");
   assertIncludes(designSystemCss, ".ef-segmented-control {\n  min-height: var(--ef-control-md);", "installed settings boundary segmented control uses design-system control tokens");
   assertMatches(indexHtml, /#rhythmView \.force-confirm \{[\s\S]*?border-top:\s*1px solid var\(--group-line\);/, "installed force confirmation is a low-weight, theme-aware prompt row");
@@ -429,6 +430,7 @@ function main() {
   assertMatches(mainJs, /function startIslandMicroRest\(message, reminderId\)[\s\S]*"reminder:resolve"[\s\S]*status: restedAway \? "completed" : "ignored"[\s\S]*reminderId: reminderId \|\| null[\s\S]*showNotchIsland\(\{ mode: "restResult", ok: restedAway \}\)/, "installed away micro-rest resolves the exact reminder by sensing the look-away");
   assertMatches(mainJs, /label: "顶端提醒岛",\s*type: "checkbox",\s*checked: desktopPreferenceDefaults\(\)\.showReminderIsland,\s*click: toggleReminderIsland/, "installed menu exposes the reminder island choice");
   assertMatches(mainJs, /function intensityMenuItems\(\)[\s\S]*L1 安静 — 只改状态，不弹提醒[\s\S]*type: "radio"[\s\S]*L4 强制爱… — 到点全屏，应用内开启[\s\S]*requestIntensityFromMenu\("force"\)/, "installed menu exposes the four reminder levels as a radio group");
+  assertIncludes(mainJs, "L3 明确 — 到点胶囊+通知", "installed L3 menu copy matches the real break-point channel");
   assertMatches(mainJs, /function requestIntensityFromMenu\(level\)[\s\S]*if \(level === "force"\) \{[\s\S]*showDashboard\(\{ view: "rhythmView", focus: "intensity" \}\);[\s\S]*"intensity:request", level/, "installed menu's L4 lands on the Settings 提醒边界 section for its confirm");
   assertIncludes(indexHtml, 'intensity: state.settings.intensity || "standard"', "installed renderer publishes the raw intensity for the menu radio");
   assertIncludes(indexHtml, '<script src="eyeflow-rhythm.js"></script>', "installed renderer loads the closed-loop rhythm engine (was packaged but unwired)");

@@ -1,0 +1,109 @@
+#!/usr/bin/env node
+
+const fs = require("node:fs");
+const path = require("node:path");
+
+const root = path.join(__dirname, "..");
+
+function read(relativePath) {
+  return fs.readFileSync(path.join(root, relativePath), "utf8");
+}
+
+function assertIncludes(source, expected, label) {
+  if (!source.includes(expected)) {
+    throw new Error(`${label}: missing "${expected}"`);
+  }
+}
+
+function assertMatches(source, pattern, label) {
+  if (!pattern.test(source)) {
+    throw new Error(`${label}: pattern not found: ${pattern}`);
+  }
+}
+
+function main() {
+  const indexHtml = read("index.html");
+  const mainJs = read("main.js");
+  const packageJson = JSON.parse(read("package.json"));
+  const verifyJs = read("scripts/verify.js");
+
+  assertIncludes(indexHtml, "L1</strong>只改变状态球、表情和文字，不弹气泡，也不打断你。", "L1 user-facing rule stays quiet-only");
+  assertMatches(
+    indexHtml,
+    /state\.settings\.intensity === "quiet" \|\| deepWorkMiraOnly[\s\S]*return \{[\s\S]*level: 1,[\s\S]*title: "只让 Mira 轻轻变化"/,
+    "L1 behavior level is always non-interrupting"
+  );
+
+  assertIncludes(indexHtml, "L2</strong>到恢复断点时轻提一次", "L2 user-facing rule describes a break-point prompt");
+  assertMatches(
+    indexHtml,
+    /const standardEarly = state\.settings\.intensity === "standard";[\s\S]*level: standardEarly \? 1 : 2,[\s\S]*title: standardEarly \? "提前观察中" : "提前观察眨眼或远眺"/,
+    "L2 pre-break phase stays visual-only"
+  );
+  assertMatches(
+    indexHtml,
+    /if \(elapsedMinutes >= focusTargetMinutes\) \{[\s\S]*level: 2,[\s\S]*title: "到恢复断点"/,
+    "L2 reaches behavior level 2 at the break point"
+  );
+
+  assertIncludes(indexHtml, "L3</strong>状态信号偏高或明显超时时更明确", "L3 user-facing rule describes clear escalation");
+  assertIncludes(indexHtml, "即使 Mira 在屏", "L3 copy states the real break-point prompt is clear even while Mira is visible");
+  assertIncludes(mainJs, "L3 明确 — 到点胶囊+通知", "L3 menu copy matches the real break-point channel");
+  assertMatches(
+    indexHtml,
+    /state\.settings\.intensity === "clear" && elapsedMinutes >= focusTargetMinutes \+ 10[\s\S]*level: 3,[\s\S]*title: "已经明显超时"/,
+    "L3 obvious overrun escalates to behavior level 3"
+  );
+  assertMatches(
+    indexHtml,
+    /function\s+shouldSurfaceReminder\(intervention, load\)[\s\S]*const clearBreakDue = level >= 3[\s\S]*elapsedSeconds >= targetSeconds;[\s\S]*if \(clearBreakDue\) return true;[\s\S]*if \(isBusyForReminder\(\)\) return false;/,
+    "L3 break-point reminder cannot be swallowed by busy activity"
+  );
+  assertMatches(
+    mainJs,
+    /const l3BreakPoint = level >= 3 && breakDue;[\s\S]*const showBubble = companionVisible && level >= 2 && !l3BreakPoint;[\s\S]*const showRest = islandEnabled && level >= 2 && \(companionExited \|\| l3BreakPoint\);[\s\S]*const showNotify = level >= 2 && \(companionExited \|\| l3BreakPoint\) && \(level >= 3 \|\| !islandEnabled\);/,
+    "L3 real break point routes to green capsule plus system notification even if Mira is visible"
+  );
+
+  assertIncludes(indexHtml, "L4</strong>强制爱：只在你主动选择后启用", "L4 user-facing rule requires explicit opt-in");
+  assertMatches(
+    indexHtml,
+    /state\.settings\.intensity === "force"[\s\S]*if \(elapsedMinutes >= focusTargetMinutes\) \{[\s\S]*level: 4,[\s\S]*title: "强制爱：全屏休息"/,
+    "L4 reaches behavior level 4 only at the break point"
+  );
+  assertMatches(
+    indexHtml,
+    /function\s+renderInterventionStrategy\(load\)\s*\{[\s\S]*if \(intervention\.level >= 4\) \{[\s\S]*startForceBreak\(intervention\);[\s\S]*return true;[\s\S]*\}[\s\S]*maybeRecordReminder\(intervention, load\);/,
+    "L4 bypasses ordinary reminders and enters force break"
+  );
+  assertMatches(
+    indexHtml,
+    /function\s+startForceBreak\(intervention, options = \{\}\)[\s\S]*if \(!options\.preview\) closePendingReminder\("ignored"\);[\s\S]*window\.eyeflowDesktop\.startForceBreak\(payload\);/,
+    "L4 force break clears ordinary pending reminder state and enters the desktop bridge"
+  );
+
+  assertMatches(
+    indexHtml,
+    /const behaviorLevel = Number\(intervention\.level \|\| 1\);[\s\S]*const displayLevel = Number\(intervention\.displayLevel \|\| intervention\.level \|\| 1\);[\s\S]*interventionLevel: behaviorLevel,[\s\S]*interventionDisplayLevel: displayLevel,[\s\S]*breakDue,/,
+    "renderer publishes behavior level, display level, and breakDue as separate cross-process facts"
+  );
+  assertMatches(
+    mainJs,
+    /function applyInterventionBehavior\(state\)[\s\S]*const level = Number\(state\.interventionLevel \|\| 1\);[\s\S]*const breakDue = Boolean\(state\.breakDue\);/,
+    "main process drives channels from behavior level plus breakDue, not display labels"
+  );
+
+  if (packageJson.scripts?.["smoke:intensity"] !== "node scripts/smoke-intensity-matrix.js") {
+    throw new Error("package script smoke:intensity is missing or changed");
+  }
+  assertIncludes(verifyJs, '["Check reminder intensity matrix", "smoke:intensity"]', "verify includes the L1-L4 matrix smoke");
+
+  console.log("[smoke:intensity] PASSED. L1-L4 reminder behavior, copy, and channels are matrix-guarded.");
+}
+
+try {
+  main();
+} catch (error) {
+  console.error("[smoke:intensity] FAILED.", error.message);
+  process.exitCode = 1;
+}

@@ -10,6 +10,7 @@ const checks = [
   ["Check rhythm engine signals", "smoke:rhythm"],
   ["Check metric口径 consistency", "smoke:metrics"],
   ["Check event/counter store consistency", "smoke:metrics-consistency"],
+  ["Check reminder intensity matrix", "smoke:intensity"],
   ["Check session UI state", "smoke:session"],
   ["Check current visual capture gate", "smoke:current-capture"],
   ["Check rest recovery flow", "smoke:rest"],
