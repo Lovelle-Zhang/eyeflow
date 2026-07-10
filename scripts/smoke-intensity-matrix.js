@@ -105,7 +105,7 @@ function main() {
   );
   assertMatches(
     mainJs,
-    /restDelivered = startIslandMicroRest\(islandRestMessage\(level\), state\.reminderId \|\| null\);[\s\S]*?const primaryOk = !primaryRestWanted \|\| restDelivered;[\s\S]*?if \(delivered\) lastReminderAt = now;/,
+    /restDelivered = startIslandMicroRest\(islandRestMessage\(level\), state\.reminderId \|\| null\);[\s\S]*?const primaryOk = !primaryRestWanted \|\| restDelivered;[\s\S]*?if \(delivered\) \{\s*lastReminderAt = now;[\s\S]*?lastStableInterventionLevel = level;\s*pendingEscalationLevel = 0;\s*\}/,
     "reminder delivery is transactional: latch/cooldown consumed only after the channel confirmed (2026-07-10)"
   );
   assertMatches(

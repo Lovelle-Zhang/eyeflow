@@ -2832,7 +2832,18 @@ function applyInterventionBehavior(state) {
     // capsule missing" would still bury the round's look-away.
     const primaryRestWanted = showRest && breakDue;
     const primaryOk = !primaryRestWanted || restDelivered;
-    if (delivered) lastReminderAt = now;
+    if (delivered) {
+      lastReminderAt = now;
+      // Ledger sync (2026-07-10 热身双跳): a level that was successfully DELIVERED to
+      // the user is the confirmed stable level, no matter which gate path opened
+      // (cooldown / breakBypass / escalated). Without this, a cooldown-path fire at a
+      // level whose dwell was still pending left the escalation ledger behind — the
+      // dwell completed seconds later, `escalated` re-opened the gate, and the same
+      // heads-up pill fired twice within seconds. Delivery ledger and escalation
+      // ledger must never disagree about what the user has already seen.
+      lastStableInterventionLevel = level;
+      pendingEscalationLevel = 0;
+    }
     if (delivered && primaryOk) {
       reminderDeliveryRetries = 0;
       if (breakDue) breakRestSurfaced = true; // the target break point surfaces once per round
