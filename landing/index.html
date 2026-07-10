@@ -118,6 +118,7 @@
        strict CJK kinsoku so punctuation never orphans at a line edge. */
     h2, .sub { text-wrap: balance; }
     .body { text-wrap: pretty; }
+    .body .copy-line { display: block; }
     body { line-break: strict; }
     /* Keep each CJK clause (comma/period/colon/dash-delimited) whole, so a
        two-line heading breaks AT the punctuation, never mid-phrase. Enforced
@@ -258,8 +259,8 @@
        the corner companion pops open once as it scrolls in (above), then holds.
        Mira keeps breathing + blinking in the bubble throughout. */
 
-    .closing { text-align: center; padding-top: var(--section); padding-bottom: calc(var(--section) + var(--s8)); }
-    .screen-card { border-radius: 16px; border: 1px solid var(--line); overflow: hidden; container-type: inline-size; box-shadow: 0 2px 24px rgba(29,31,26,0.05); }
+    .closing { text-align: center; padding-top: clamp(88px, 12vh, 132px); padding-bottom: calc(var(--section) + var(--s8)); }
+    .screen-card { min-width: 0; border-radius: 16px; border: 1px solid var(--line); overflow: hidden; container-type: inline-size; box-shadow: 0 2px 24px rgba(29,31,26,0.05); }
     .screen-card img { display: block; width: 100%; height: auto; }
 
     /* ── Act 5/6 live mocks — the real surfaces rebuilt from app tokens,
@@ -315,8 +316,8 @@
     .ms-domain { font-size: 11px; font-size: max(2.3cqi, 10px); color: var(--muted-soft); }
     .step-eyebrow { font-variant-numeric: tabular-nums; }
     /* 第二拍的两只提醒面:纵向小叠,复用气泡展开动画(选择器随容器换靶)。 */
-    .mock-stack { display: grid; gap: var(--s8); justify-items: center; align-content: center; }
-    .mock-cell { display: grid; gap: var(--s4); justify-items: center; width: 100%; }
+    .mock-stack { min-width: 0; display: grid; gap: var(--s8); justify-items: center; align-content: center; }
+    .mock-cell { min-width: 0; display: grid; gap: var(--s4); justify-items: center; width: 100%; }
     /* 两种形态之间一条呼吸的界线 */
     .mock-cell + .mock-cell { border-top: 1px solid var(--line); padding-top: var(--s8); }
     .mock-tag { margin: 0; font-size: var(--t-eyebrow); font-weight: 500; letter-spacing: 0.16em; text-transform: uppercase; color: var(--muted-soft); }
@@ -333,20 +334,33 @@
     .brand-line .cl + .cl { margin-left: 0.18em; }
     .waitlist { margin-top: var(--s6); }
     .waitlist a { color: var(--mira-strong); text-decoration: none; border-bottom: 1px solid var(--mira-line); padding-bottom: 1px; margin-left: 6px; }
-    .daily-row { display: grid; grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.08fr); gap: clamp(56px, 7vw, 88px); align-items: center; margin-top: 0; }
-    .daily-row .daily-copy { text-align: left; display: grid; align-content: center; max-width: 22em; }
+    .feature-block { padding-block: clamp(88px, 13vh, 140px); }
+    .daily-row { display: grid; grid-template-columns: minmax(0, 0.86fr) minmax(0, 1.08fr); gap: clamp(44px, 6vw, 76px); align-items: center; margin-top: 0; }
+    .daily-row .daily-copy { text-align: left; display: grid; align-content: center; justify-self: end; max-width: 21em; }
+    .daily-row.is-reverse { grid-template-columns: minmax(0, 1.08fr) minmax(0, 0.86fr); }
+    .daily-row.is-reverse .daily-copy { order: 2; justify-self: start; }
+    .daily-row.is-reverse .screen-card, .daily-row.is-reverse .mock-stack { order: 1; }
     .daily-row h2, .daily-row .body, .daily-row .eyebrow { margin-inline: 0; }
     .daily-row .eyebrow { margin-bottom: var(--s4); }
     .daily-row h2 + .body { margin-top: var(--s4); }
     .daily-row .body { line-height: 1.78; }
     .daily-row .screen-card, .daily-row .mock-stack { justify-self: stretch; }
+    @media (max-width: 900px) and (min-width: 561px) {
+      .tenets { grid-template-columns: repeat(2, 1fr); max-width: 34em; }
+      .tenets li { padding-block: var(--s6); }
+      .tenets li:nth-child(odd) { padding-left: 0; }
+      .tenets li:nth-child(even) { padding-right: 0; border-left: 1px solid var(--line); }
+      .tenets li:nth-child(n + 3) { border-top: 1px solid var(--line); }
+      .tenets li:nth-child(3) { border-left: 0; }
+    }
     /* Stack the feature rows on phones — and
        BEFORE the .cl nowrap window (≥600px) can meet a half-width column: in the
        600–720px band a nowrap clause (~317px) outgrows the ~283px copy column
        and eats the right margin. Stacked, it always has full width. */
     @media (max-width: 720px) {
       .daily-row { grid-template-columns: 1fr; }
-      .daily-row .daily-copy { max-width: 19em; }
+      .daily-row, .daily-row.is-reverse { grid-template-columns: 1fr; }
+      .daily-row .daily-copy, .daily-row.is-reverse .daily-copy { order: 1; justify-self: start; max-width: 19em; }
       .daily-row h2 + .body { margin-top: var(--s3); }
       .stakes { grid-template-columns: 1fr; max-width: 28em; margin-top: var(--s12); }
       .stake { padding: var(--s6) 0; }
@@ -357,13 +371,13 @@
       .mock-break { padding-block: 6cqi; }
       /* Stacked, both feature rows read the same way: words first, proof after.
          (Desktop alternates sides; the alternation means nothing in one column.) */
-      .daily-row .screen-card { order: 2; }
+      .daily-row .screen-card, .daily-row .mock-stack { order: 2; }
       /* Phones: release the aspect lock. With the legibility floors the content
          is taller than the ratio box, and inside the screen-card's
          overflow:hidden that clipped Mira at the top (Safari). Content-driven
          height can never clip. */
     }
-    .final-panel { max-width: 1120px; min-height: 420px; margin-inline: auto; padding: 44px clamp(24px, 6vw, 80px) 46px; display: grid; justify-items: center; align-content: center; border-radius: 24px; border: 1px solid rgba(255,255,255,0.07); background: rgba(24,26,27,0.9); box-shadow: 0 18px 46px rgba(0,0,0,0.18); }
+    .final-panel { max-width: 920px; min-height: 360px; margin-inline: auto; padding: 40px clamp(24px, 6vw, 72px) 42px; display: grid; justify-items: center; align-content: center; border-radius: 18px; border: 1px solid rgba(255,255,255,0.07); background: rgba(24,26,27,0.9); box-shadow: 0 18px 46px rgba(0,0,0,0.18); }
     /* 纸页里「变暗的一刻」——局部切回 app 暗色 token,文字/CTA/Mira 保持亮色读感 */
     .final-panel { --ink: #f3f4f6; --ink-soft: #d3d5d9; --muted: #9a9aa3; --muted-soft: #6f6f78; --line: rgba(255,255,255,0.08); --mira: #4fc99c; --mira-strong: #62d3aa; --mira-soft: rgba(79,201,156,0.16); --mira-line: rgba(79,201,156,0.30); }
     .final-panel .pet, .mock-break .pet { background: linear-gradient(150deg, #1a3230 0%, #21403c 48%, #152523 100%); box-shadow: inset 0 0 0 1px rgba(127,241,213,0.08), inset 0 -10px 20px rgba(3,10,12,0.28), 0 20px 44px -12px rgba(0,0,0,0.5); }
@@ -376,8 +390,8 @@
        The one moment the visitor doesn't watch but DOES: a real 10s look-away,
        paced by a breathing dot + a soft ring. Gentle by design (scale-only breath,
        no luminance flash); reduced-motion falls back to a manual, still version. */
-    .rest-act { min-height: 78vh; display: grid; place-items: center; text-align: center; padding-block: var(--section); }
-    .rest-stage { position: relative; width: 100%; max-width: 34em; display: grid; justify-items: center; }
+    .rest-act { min-height: 72vh; display: grid; place-items: center; text-align: center; padding-block: clamp(92px, 13vh, 148px); }
+    .rest-stage { position: relative; width: 100%; max-width: 31em; display: grid; justify-items: center; }
     .rest-panel { display: grid; justify-items: center; gap: var(--s6); }
     .rest-act [data-when] { display: none; }
     .rest-act[data-state="invite"] [data-when="invite"],
@@ -453,7 +467,7 @@
       .hero .stage { margin: 30px 0 26px; }
       h2 .cl, .sub .cl { display: block; white-space: nowrap; }
       .brand-line .cl + .cl { margin-left: 0; }
-      .body .copy-line { display: block; white-space: nowrap; }
+      .body .copy-line { display: block; white-space: normal; }
       .body { max-width: 19em; font-size: 1rem; line-height: 1.82; }
       .sub { max-width: 19em; font-size: 1rem; line-height: 1.78; }
       .mira { width: 150px; height: 150px; }
@@ -569,7 +583,7 @@
   </section>
 
   <!-- ── 一天的弧线 · 五拍 ─────────────────────────────────── -->
-  <section class="block col col-wide">
+  <section class="block feature-block col col-wide">
     <div class="daily-row">
       <div class="daily-copy reveal">
         <p class="eyebrow step-eyebrow" data-en="01 · Quietly there">01 · 安静待着</p>
@@ -582,8 +596,8 @@
     </div>
   </section>
 
-  <section class="block col col-wide">
-    <div class="daily-row">
+  <section class="block feature-block col col-wide">
+    <div class="daily-row is-reverse">
       <div class="daily-copy reveal">
         <p class="eyebrow step-eyebrow" data-en="02 · A quiet word">02 · 盯久了，说一句</p>
         <h2 data-en="Not a takeover — a word."><span class="cl">不抢屏，</span><span class="cl">只轻轻说一句。</span></h2>
@@ -631,7 +645,7 @@
     </div>
   </section>
 
-  <section class="block col col-wide">
+  <section class="block feature-block col col-wide">
     <div class="daily-row">
       <div class="daily-copy reveal">
         <p class="eyebrow step-eyebrow" data-en="03 · A look into the distance">03 · 带你看看远处</p>
@@ -666,8 +680,8 @@
     </div>
   </section>
 
-  <section class="block col col-wide">
-    <div class="daily-row">
+  <section class="block feature-block col col-wide">
+    <div class="daily-row is-reverse">
       <div class="daily-copy reveal">
         <p class="eyebrow step-eyebrow" data-en="04 · Honest notes">04 · 如实记下</p>
         <h2 data-en="She writes down what she saw."><span class="cl">看到什么，</span><span class="cl">就记什么。</span></h2>
@@ -679,7 +693,7 @@
     </div>
   </section>
 
-  <section class="block col col-wide">
+  <section class="block feature-block col col-wide">
     <div class="daily-row">
       <div class="daily-copy reveal">
         <p class="eyebrow step-eyebrow" data-en="05 · Yours to keep">05 · 带走</p>
