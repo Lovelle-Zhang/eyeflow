@@ -104,7 +104,7 @@
 | C6 | **待命态误触发（矛盾病例，疑似又一处账本失同步）** | 真机实锤：19:36:53 岛 completed→closeBreakRound（elapsed 归 0）；**5 秒后**新 pending 被记录。链路：main 的 `activeSeconds` 不随轮次复位 + 用户恰在 look-away 后的 idle 8–45s 窗口 → `isNaturalBreak` 命中 → 5s 重录；用户随后转入待命（"我在旁边/先不计时/00:00"），灰卡挂到 12min 超时又记一次 ignored | 压力刚被结算（清零/降压）后，同一信号不得立刻再生成断点意图；待命态（无压力累积）不存在断点意图；pending 卡必须随意图消失 |
 | C7 | 歇眼一天仅 1 分钟 | ①部分完成发生在无记账的旧构建；②6 次 look-away 5 次被 `getSystemIdleTime` 判 ignored（看远处但手碰键鼠）→ 不记账且喂静默闸 | 判定语义：不确定不记负面账；ignored 只在显式跳过时记（增补 3） |
 | C8 | 通知说错星期（信任） | `modeMemoryLine` 引用历史 `signal.lastAt` 的周几；lastAt 由 12min 自动 ignore 写入（可被 C7 污染）；横幅脱离上下文被读成"今天是周三" | 事实纪律（MIRA_LANGUAGE.md）：可验证事实实时算或不说；引擎产出的文案上下文只含实时字段 |
-| C9 | 双跳复发（07-10 晚报告，条件待补） | 账本同步修复（969a292）后仍报"热身几秒内两跳"；当晚 build 序列 19:09/19:53 交替，未取到案发时刻日志。候选：跨 build 旧进程、两个不同 surface（pill+横幅）被感知为两跳、>60s 的真实两次意图 | 同 C3 的硬断言兜底：任何 60s 窗口内 ≤1 次打扰面（跨 surface 计数）；案发时刻可从 leveldb reminder_event 时间戳复盘 |
+| C9 | 结算后整晚机枪（07-10 晚，已从 leveldb 复盘定案） | **实录**：20:26–22:42 两小时 10 轮胶囊（pending 创建/销账对：20:38✓→20:42 新→20:51✓→20:55 新→20:56✓→21:15→21:26✓→21:30→21:33✓→21:57✗→22:01→22:09✓→22:15→22:22✓→22:26→22:34✓→22:38→22:42✓；最短间隔 4min）。机制 = C6 病根放大：closeBreakRound 结算后 main `activeSeconds` 棘轮不复位（人持续在屏）→ 每次停手 8–45s 再命中 isNaturalBreak → 记录冷却(4–8min)一到就重录重发。19:53 的冷却止血仅把复发间隔从 26–45s 拉到 4min，未断根 | **结算后压力必须真实回落**：settle 之后、压力重新累积满阈值之前，不得产生任何新的 breakDue 意图（≥15min 静默窗由降压量自然保证，非人为冷却） |
 
 ---
 
@@ -156,11 +156,58 @@
 
 ### 阶段闸（每关给用户看）
 
-- **P0** 本规格确认 ←（当前）
-- **P1** 场景表 v1 确认（用例行 = 病例 + 基线，含期望意图序列）
+- **P0** 本规格确认 ✅（2026-07-10 批准，照此执行不改）
+- **P1** 场景表 v1 确认（用例行 = 病例 + 基线，含期望意图序列）←（当前）
 - **P2** 引擎模块 + smoke 全绿（不接线，旧引擎照跑）
 - **P3** 接线：渲染端翻译层 + main 简化 + 旧闸清退，全 smoke + codex 复审
 - **P4** 装机 dogfood 验证，病例逐条对照销案
+
+## 0c. P1 场景表 v1（2026-07-10 · 待逐行确认）
+
+### 参数（引擎命名常量；⚠️ 标注 = 本表新提出、需拍板）
+
+| 常量 | 值 | 来源 |
+|---|---|---|
+| `T_L1` | 40min 连续用眼 → 压力级 1 | §1（可配置） |
+| `T_L2` | 60min → 压力级 2 | §1 |
+| `T_L3` | 90min → 压力级 3（且 `skipCount ≥ 2`） | §1 |
+| `PRESENT_IDLE` | idle < 300s = 在场，照常累积（被动盯屏算用眼，D3） | e215fd6 |
+| `AWAY_FULL` | ⚠️ 连续 idle ≥ 300s = 真离开 → **full 结算**（清零 + 记自然离屏账）。把 D3 的"暂停"与"重置"合并为一条规则：既然 ≥5min 缺席已按现有语义记为休息（今日账本实录 300–376s 自然离屏事件），暂停态没有存在必要 | 提案 |
+| `MICRO_RELIEF` | ⚠️ micro 完成 = 累积用眼时间 −15min（不清零、不清 skipCount） | 提案 |
+| `FULL_RESET` | full 完成 = 累积归零 + `skipCount` 归零 | §1 |
+| `SKIP` | 仅**显式跳过** micro 记 `skipCount += 1`；传感不确定（`micro_uncertain`）不记任何账 | 增补 3 / C7 |
+| 封顶表 | quiet→cap L1(glow) · standard→cap L2(island-micro) · clear→cap L3(soft-full) · force→cap L3(hard-full) | D1 |
+| 地板 | 投递层统一 60s min-interval（跨 surface 计数），breakDue 首枪走闩锁豁免 | 已落地 |
+
+### 输入 DSL
+
+`present(Nm)` 连续在场 N 分钟（含 idle<300s 的停顿）· `idle(Ns)` 短停 ·
+`away(Nm)` 连续离开 ≥300s · `micro✓(20s)` micro 完成结算 · `micro✗` 显式跳过 ·
+`micro?` 传感不确定 · `full✓` 完整休息结算 · `@查询` 该时刻调 `intentFor` 断言输出。
+期望 intent 写作 `L{level}/{surface}/due={bool}`（level 为封顶后的行为级）。
+
+### 用例行（B=基线 · C=病例；每行 = 给定输入序列 → 期望输出）
+
+| # | 来源 | 设置 | 给定输入序列 | 期望 intent / 结算输出 |
+|---|---|---|---|---|
+| B1 | 该提醒必提醒 | clear | present(40m) @查询；present(→60m) @查询；micro✗ ×2；present(→90m) @查询 | @40m `L1/glow/due=false`；@60m `L2/island-micro/due=true`；@90m（skipCount=2）`L3/soft-full/due=true` |
+| B2 | micro 降压不清零 | standard | present(60m) @查询；micro✓(20s)；@查询；present(+15m) @查询 | @60m `L2/island-micro/due=true`；micro 后累积 60−15=45min → `L1/glow/due=false`；+15m（累积 60m）→ 再次 `L2/island-micro/due=true` |
+| B3 | full 清零 | clear | present(70m)；full✓；@查询；present(+39m) @查询；present(+1m) @查询 | full 后累积=0、skipCount=0 → `L0/none/due=false`；+39m 仍 `L0/none`；+40m → `L1/glow/due=false` |
+| B4 | 封顶语义 | 全四档 | 同一序列 present(95m) + micro✗×2，分别在 quiet/standard/clear/force 下 @95m 查询 | quiet→`L1/glow`（永不高于）；standard→`L2/island-micro`（90m+skip2 也不升）；clear→`L3/soft-full`；force→`L3/hard-full` |
+| B5 | 离开即清 | 任意 | present(50m)；away(5m)；@查询；present(+10m) @查询 | away 触发 full 结算（+自然离屏账 300s）→ `L0/none`；+10m 仍 `L0/none`（10<40） |
+| B6 | 被动盯屏算用眼 | standard | 40 分钟由「敲键 30s + idle(240s)」循环组成（idle 全部 <300s）@40m 查询 | 累积 = 40min（idle<300s 全计入）→ `L1/glow/due=false` |
+| C1 | 静默闸缺席 | clear | 与 B1 完全相同的序列；期间"前台=深度工作 app / 当日 ignored 统计 / 三天高负荷"以任何形式存在 | 与 B1 期望**逐点相同**——结构断言：`pressureStep/intentFor` 的输入 schema 不含前台 app、load、当日统计字段，共情只能改 surface 风格、永不改 due |
+| C2 | 切 app 狂跳 | clear | present(61m)，期间前台 app 每 10s 切换（噪声不构成 obs 字段）@40m @60m @61m 查询 | 三点分别 `L1/glow` `L2/island-micro` `L2/island-micro`——intent 只在阈值处变化一次；投递层断言：61 分钟内打扰面投递 ≤2 次（40m 与 60m 各一） |
+| C3 | 热身双跳 | clear | present(60m) @T 查询并投递；T+2s 再查询 | 两次查询返回**同一意图**（水平信号无边沿）；投递层断言：同意图不重复投递，60s 地板兜底 |
+| C4 | 岛记零 | standard | present(60m)；micro✓(20s) | settle 输出 = `{recoverySeconds:+20(实际), pressure:−15min, skipCount:不变}`；歇眼账 +20s |
+| C5 | 灰卡挂死 | standard | present(60m)；micro✓(20s)；@查询 | settle 后 intent = `L1/glow/due=false` → 断点卡/tray"休息"等派生 UI 必须随 due=false 消失（接线层断言） |
+| C6 | 待命态误触发 | standard | present(60m)；micro✓(20s)；idle(30s)（look-away 余波，<300s 属在场）@查询 | 累积 = 45min + 30s → `L1/glow/due=false`——不存在任何用陈旧 activeSeconds 再生成 due 的路径 |
+| C7 | 判定语义 | standard | present(60m)；micro?（传感不确定）@查询；随后 micro✗；再 micro✗；present(→90m+) @查询（clear 档重跑） | micro? → **零记账**（不降压、不记 skip、不记 ignored）→ intent 仍 `L2/due=true`；两次显式 ✗ 后 skipCount=2；clear 档 @90m → `L3/soft-full` |
+| C8 | 事实纪律 | 任意 | 任意序列 @查询 | 结构断言：`intentFor` 输出的文案上下文只含 `{level, surface, bucket(now), minutes(实时累积)}`——无历史日期/星期字段 |
+| C9 | 结算后机枪 | standard | present(60m)；micro✓(20s)；此后持续 present，每 4min 查询 ×4 | 四次查询 = 累积 45→49→53→57min，全部 `L1/glow/due=false`；直到累积回满 60m 才再次 `L2/due=true`——结算后 15 分钟静默由降压量自然保证，无人为冷却 |
+
+> 通过标准：P2 的 `smoke-reminder-engine.js` 以本表为唯一事实源逐行执行；
+> 行有增删改必须回到本表先改再改测试。
 
 ## 1. 渐进式提醒系统（本次核心）
 
