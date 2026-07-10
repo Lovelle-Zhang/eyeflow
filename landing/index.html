@@ -131,7 +131,7 @@
     /* Narrative beats carry one line — give them a generous, even breath so the
        story has room to land (calibrated to the feature sections' rhythm), while
        the hairline/asterism between them still marks beat vs. chapter. */
-    .block.narrow { padding-block: clamp(100px, 14vh, 140px); }
+    .block.narrow { padding-block: clamp(92px, 13vh, 132px); }
     /* …but the FIRST beat is the curtain rising: give the download hero a clear,
        deliberate breath before the story opens, so Act 0 reads as a new section
        rather than a tail of the CTA. (Higher specificity than .block.narrow.) */
@@ -259,7 +259,7 @@
        the corner companion pops open once as it scrolls in (above), then holds.
        Mira keeps breathing + blinking in the bubble throughout. */
 
-    .closing { text-align: center; padding-top: clamp(88px, 12vh, 132px); padding-bottom: calc(var(--section) + var(--s8)); }
+    .closing { text-align: center; padding-top: clamp(76px, 10vh, 116px); padding-bottom: calc(var(--section) + var(--s8)); }
     .screen-card { min-width: 0; border-radius: 16px; border: 1px solid var(--line); overflow: hidden; container-type: inline-size; box-shadow: 0 2px 24px rgba(29,31,26,0.05); }
     .screen-card img { display: block; width: 100%; height: auto; }
 
@@ -325,7 +325,7 @@
     /* 两张卡各自贴合内容、居中——沿用旧版并排时的比例，不再拉伸成等宽长条 */
     .mock-stack .companion-card, .mock-stack .island { max-width: 100%; }
     /* 哲学四条:发丝线四栏,克制无边框。 */
-    .trust-block { padding-block: clamp(84px, 12vh, 132px); }
+    .trust-block { padding-block: clamp(76px, 10vh, 116px); }
     .tenets { list-style: none; margin: var(--s12) auto 0; padding: 0; max-width: 920px; display: grid; grid-template-columns: repeat(4, 1fr); text-align: left; }
     .tenets li { padding: var(--s1) clamp(16px, 2vw, 26px); }
     .tenets li + li { border-left: 1px solid var(--line); }
@@ -336,7 +336,7 @@
     .final-panel .actions { margin-top: var(--s6); }
     .waitlist { margin-top: var(--s6); }
     .waitlist a { color: var(--mira-strong); text-decoration: none; border-bottom: 1px solid var(--mira-line); padding-bottom: 1px; margin-left: 6px; }
-    .feature-block { padding-block: clamp(88px, 13vh, 140px); }
+    .feature-block { padding-block: clamp(76px, 11vh, 124px); }
     .daily-row { display: grid; grid-template-columns: minmax(0, 0.86fr) minmax(0, 1.08fr); gap: clamp(44px, 6vw, 76px); align-items: center; margin-top: 0; }
     .daily-row .daily-copy { text-align: left; display: grid; align-content: center; justify-self: end; max-width: 21em; }
     .daily-row.is-reverse { grid-template-columns: minmax(0, 1.08fr) minmax(0, 0.86fr); }
@@ -396,7 +396,7 @@
        The one moment the visitor doesn't watch but DOES: a real 10s look-away,
        paced by a breathing dot + a soft ring. Gentle by design (scale-only breath,
        no luminance flash); reduced-motion falls back to a manual, still version. */
-    .rest-act { display: grid; justify-items: center; text-align: center; padding-block: clamp(88px, 12vh, 132px); }
+    .rest-act { display: grid; justify-items: center; text-align: center; padding-block: clamp(76px, 10vh, 116px); }
     .rest-stage { position: relative; width: 100%; max-width: 29em; display: grid; justify-items: center; }
     .rest-panel { display: grid; justify-items: center; gap: var(--s6); }
     .rest-act [data-when] { display: none; }
@@ -480,7 +480,9 @@
       .hero { min-height: auto; }
       .cta { min-height: 44px; padding-inline: 22px; }
       .cta + .meta { margin-top: 20px; }
-      .final-panel { min-height: 360px; }
+      .feature-block, .trust-block, .rest-act { padding-block: 72px; }
+      .closing { padding-top: 72px; }
+      .final-panel { min-height: 320px; }
       footer { padding-top: var(--s16); }
       footer .row { max-width: 18em; }
       .tenets { grid-template-columns: 1fr; max-width: 28em; margin-inline: auto; }
