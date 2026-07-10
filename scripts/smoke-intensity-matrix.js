@@ -80,6 +80,11 @@ function main() {
   );
   assertMatches(
     indexHtml,
+    /title: "到恢复断点"[\s\S]*title: "在恢复断点轻提示"/,
+    "the real break-point escalation is evaluated before the natural-break light prompt (2026-07-10)"
+  );
+  assertMatches(
+    indexHtml,
     /if \(state\.settings\.deepWorkMiraOnlyToggle && latestActivity\?\.isDeepWorkApp && elapsedSeconds >= targetSeconds \* 0\.55\) return true;/,
     "deep-work silence requires the explicit user toggle"
   );

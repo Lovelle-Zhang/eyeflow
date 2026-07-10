@@ -14341,21 +14341,24 @@
         };
       }
 
-      if (latestActivity && isNaturalBreak(latestActivity)) {
-        return {
-          level: 2,
-          displayLevel: chosenDisplayLevel,
-          title: "在恢复断点轻提示",
-          copy: `你刚停下来一下，Mira 会借这个空隙提醒你：${lightReminderLine("gaze", "opening") || "看一眼远处，再回来。"}`
-        };
-      }
-
+      // 顺序即语义（2026-07-10 审计止血）：真正到点的升级判定必须先于 naturalBreak 的
+      // 轻提示——此前 naturalBreak 排在前面，auto 模式下已过目标又恰好停手 8–45 秒时
+      // 会返回 L2，遮蔽 clear 档的 L3，胶囊在 Mira 在屏时整段缺席（老 bug 换入口复活）。
       if (elapsedMinutes >= focusTargetMinutes) {
         return {
           level: state.settings.intensity === "clear" ? 3 : 2,
           displayLevel: chosenDisplayLevel,
           title: "到恢复断点",
           copy: lightReminderLine("gaze", "due") || "这轮已经到恢复断点。先眨几下，再看远处 20 秒。"
+        };
+      }
+
+      if (latestActivity && isNaturalBreak(latestActivity)) {
+        return {
+          level: 2,
+          displayLevel: chosenDisplayLevel,
+          title: "在恢复断点轻提示",
+          copy: `你刚停下来一下，Mira 会借这个空隙提醒你：${lightReminderLine("gaze", "opening") || "看一眼远处，再回来。"}`
         };
       }
 
