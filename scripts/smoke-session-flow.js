@@ -215,6 +215,13 @@ function main() {
     false,
     "paused session is not rest due"
   );
+  // 2026-07-10 岛完成闭环:closeBreakRound 把 elapsed 归零后,rest-due 断点卡
+  // (及其派生的菜单栏"休息"态)必须随之回落——这是岛完成→状态回落的行为锚点。
+  assertEqual(
+    sessionFlow.computeRestDue({ autoTracking: true, elapsedSeconds: 0, focusMinutes: 20 }),
+    false,
+    "island completion (closeBreakRound → elapsed 0) clears the rest-due card"
+  );
   assertEqual(
     sessionFlow.sessionState({ autoTracking: true }),
     "running",

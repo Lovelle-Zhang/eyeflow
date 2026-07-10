@@ -120,8 +120,26 @@ function main() {
   );
   assertMatches(
     indexHtml,
-    /if \(status === "completed"\) \{[\s\S]*?appendDataEvent\("recovery_event", \{[\s\S]*?durationSeconds: Math\.max\(0, Number\(payload\.restSeconds\) \|\| 20\),\s*mode: "island-micro",[\s\S]*?trigger: "island-micro",/,
+    /closeBreakRound\(\{ reminderStatus: "completed" \}\);[\s\S]*?appendDataEvent\("recovery_event", \{[\s\S]*?durationSeconds: Math\.max\(0, Number\(payload\.restSeconds\) \|\| 20\),\s*mode: "island-micro",[\s\S]*?trigger: "island-micro",/,
     "a completed island micro-rest books a real recovery_event so 歇眼 statistics are honest (2026-07-10 X)"
+  );
+  // 岛完成必须与完整休息走同一条销账路径(closeBreakRound):关本轮 → rest-due 卡、
+  // 菜单栏"休息"态、breakDue/闩锁自然回落。禁止在 resolve handler 里手抄轮次关闭。
+  assertMatches(
+    indexHtml,
+    /function closeBreakRound\(\{ reminderStatus = "completed" \} = \{\}\) \{\s*state\.breaks \+= 1;\s*elapsedSeconds = 0;\s*startedAt = null;\s*sessionSource = "idle";\s*lastNudgeAt = 0;\s*const hadPending = closePendingReminder\(reminderStatus\);/,
+    "closeBreakRound is the single round-closure path (2026-07-10 island/main-flow desync fix)"
+  );
+  {
+    const closureCopies = (indexHtml.match(/state\.breaks \+= 1;\s*elapsedSeconds = 0;\s*startedAt = null;\s*sessionSource = "idle";/g) || []).length;
+    if (closureCopies !== 1) {
+      throw new Error(`round-closure core must exist exactly once (inside closeBreakRound); found ${closureCopies} copies`);
+    }
+  }
+  assertMatches(
+    indexHtml,
+    /restStartedBeforeAssessment = false;\s*closeBreakRound\(\{ reminderStatus: "completed" \}\);/,
+    "completeRecovery walks the same closeBreakRound path as the island completion"
   );
   assertMatches(
     mainJs,

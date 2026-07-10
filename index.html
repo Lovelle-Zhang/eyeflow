@@ -10353,30 +10353,41 @@
         // it), leave it to its own 12-min timeout rather than resolve the wrong one.
         const currentId = state.pendingReminder?.status === "pending" ? state.pendingReminder.id : null;
         if (!payload.reminderId || payload.reminderId !== currentId) return;
-        const had = closePendingReminder(status);
-        if (!had) return;
-        if (status === "completed") {
-          // 岛的 20 秒 look-away 是真实发生的恢复——补进 recovery_event 账本，
-          // 让「歇眼」统计和下面这句"已记录"都为真（2026-07-10 X 号对齐：此前
-          // 岛只销 reminder 账，歇眼记 0 秒）。mode 取"island-micro"：metrics 的
-          // 口径过滤只排除 system-detected / system-lifecycle，用户跟着做的
-          // micro-rest 属于 user recovery。时长来自传感器侧的单一常量
-          // （payload.restSeconds = ISLAND_LOOKAWAY_SECONDS），不在这里复制 20。
-          appendDataEvent("recovery_event", {
-            startedAt: "",
-            endedAt: new Date().toISOString(),
-            durationSeconds: Math.max(0, Number(payload.restSeconds) || 20),
-            mode: "island-micro",
-            completed: true,
-            feedback: "auto",
-            postRestFeedback: "auto",
-            acceptedRest: true,
-            trigger: "island-micro",
-            loadAfter: computeEyeLoad(),
-            ...rhythmEventContext()
-          });
-          addSystemLog("在顶部岛完成了一次微休息", "你看远处休息了一下，EyeFlow 已记录这次恢复。");
+        if (status === "ignored") {
+          if (!closePendingReminder("ignored")) return;
+          render();
+          persist();
+          return;
         }
+        // completed → 与完整休息完成走同一条销账路径（2026-07-10）：关本轮、销
+        // pending、清延后。断点卡（rest-due）、菜单栏"休息"态、breakDue/闩锁都
+        // 派生自 elapsed ≥ target，轮次一关就自然回落——不在各处手动补状态，
+        // 不新增第三本账。micro/full 的"降压不清零"精细分层留给治本 Y。
+        const wasRunning = isRunning;
+        closeBreakRound({ reminderStatus: "completed" });
+        // 岛的 20 秒 look-away 是真实发生的恢复——补进 recovery_event 账本，
+        // 让「歇眼」统计和下面这句"已记录"都为真（2026-07-10 X 号对齐：此前
+        // 岛只销 reminder 账，歇眼记 0 秒）。mode 取"island-micro"：metrics 的
+        // 口径过滤只排除 system-detected / system-lifecycle，用户跟着做的
+        // micro-rest 属于 user recovery。时长来自传感器侧的单一常量
+        // （payload.restSeconds = ISLAND_LOOKAWAY_SECONDS），不在这里复制 20。
+        appendDataEvent("recovery_event", {
+          startedAt: "",
+          endedAt: new Date().toISOString(),
+          durationSeconds: Math.max(0, Number(payload.restSeconds) || 20),
+          mode: "island-micro",
+          completed: true,
+          feedback: "auto",
+          postRestFeedback: "auto",
+          acceptedRest: true,
+          trigger: "island-micro",
+          loadAfter: computeEyeLoad(),
+          ...rhythmEventContext()
+        });
+        addSystemLog("在顶部岛完成了一次微休息", "你看远处休息了一下，EyeFlow 已记录这次恢复。");
+        // 手动计时轮在 micro-rest 后重新开一轮（对齐完整休息的 restartSession
+        // 语义）；自动模式不用管——activity 一来自然从 0 续上。
+        if (wasRunning) startSession();
         render();
         persist();
       });
@@ -11813,6 +11824,23 @@
       persist();
     }
 
+    // 「断点已响应」的唯一销账路径：关本轮（elapsed 归零 → rest-due 卡、菜单栏
+    // "休息"态、breakDue/闩锁全部由派生自然回落）+ 销 pending + 清延后。
+    // completeRecovery（完整休息）与岛 micro-rest 完成共用这一条——别再各处手抄
+    // 这几行（2026-07-10：岛完成只销了 reminder 账没关轮次，断点卡和菜单栏状态
+    // 挂死，就是"多本账不同步"的又一次显形）。
+    function closeBreakRound({ reminderStatus = "completed" } = {}) {
+      state.breaks += 1;
+      elapsedSeconds = 0;
+      startedAt = null;
+      sessionSource = "idle";
+      lastNudgeAt = 0;
+      const hadPending = closePendingReminder(reminderStatus);
+      state.deferReminderUntilBreak = false;
+      state.deferReminderNeedsWork = false;
+      return hadPending;
+    }
+
     function completeRecovery(feedback) {
       const shouldReturnToAssessment = restStartedBeforeAssessment && !hasAssessedToday();
       const firstRecoverySample = Number(state.breaks || 0) === 0;
@@ -11823,14 +11851,7 @@
         breakTarget: Number(els.breakTarget.value)
       });
       restStartedBeforeAssessment = false;
-      state.breaks += 1;
-      elapsedSeconds = 0;
-      startedAt = null;
-      sessionSource = "idle";
-      lastNudgeAt = 0;
-      closePendingReminder("completed");
-      state.deferReminderUntilBreak = false;
-      state.deferReminderNeedsWork = false;
+      closeBreakRound({ reminderStatus: "completed" });
 
       if (plan.symptomRelief) softenSymptoms(plan.symptomRelief);
       if (plan.nextFocusTarget) {

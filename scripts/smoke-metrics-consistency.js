@@ -99,10 +99,19 @@ function main() {
   assertEqual(countOccurrences(indexHtml, "state.reminderStats.shown += 1"), 1, "reminderStats.shown has exactly one writer");
 
   // --- 4. co-travel: user recovery event + completed counter move together
+  // 2026-07-10: round closure lives in ONE shared path (closeBreakRound) used by
+  // both completeRecovery and the island micro-rest completion. The co-travel
+  // guarantee is now: completeRecovery walks closeBreakRound, and closeBreakRound
+  // is the one that closes the pending reminder.
   const completeRecoveryBody = functionBody(indexHtml, "completeRecovery");
+  const closeBreakRoundBody = functionBody(indexHtml, "closeBreakRound");
   assert(
-    completeRecoveryBody.includes('closePendingReminder("completed")'),
-    "completeRecovery closes the pending reminder as completed (event + counter co-travel)"
+    completeRecoveryBody.includes('closeBreakRound({ reminderStatus: "completed" })'),
+    "completeRecovery closes the round through the shared closeBreakRound path"
+  );
+  assert(
+    closeBreakRoundBody.includes("closePendingReminder(reminderStatus)"),
+    "closeBreakRound closes the pending reminder (event + counter co-travel)"
   );
   assert(
     completeRecoveryBody.includes('appendDataEvent("recovery_event"'),
