@@ -157,7 +157,7 @@ function main() {
   assertNotMatches(indexHtml, /现在像是一个恢复断点/, "natural-break nudge no longer fires its own system notification");
   assertNotMatches(indexHtml, /miraExited\(\) && !state\.settings\.systemNotifyToggle && window\.eyeflowDesktop\?\.notify/, "exited-Mira reminder fallback is delivered by main.js, not the dashboard");
   assertMatches(mainJs, /const quietedByUser = Boolean\(state\.reminderDeferred\) \|\| snoozeUntil > now;[\s\S]*hideCompanionPanel\(\);[\s\S]*return;/, "desktop panel respects snooze and busy-later responses");
-  assertMatches(mainJs, /const hasReminderOpening = Boolean\(state\.isRunning \|\| state\.reminderOpening \|\| state\.naturalBreak \|\| state\.reminderPending\);/, "desktop panel requires an interruption opening");
+  assertMatches(mainJs, /const hasReminderOpening = Boolean\(state\.isRunning \|\| state\.reminderOpening \|\| state\.naturalBreak \|\| state\.reminderPending \|\| state\.breakDue\);/, "desktop panel requires an interruption opening — and the break point itself counts as one (2026-07-10)");
   assertIncludes(breakLockHtml, "再点一次确认退出", "break lock emergency exit requires confirmation");
   assertIncludes(breakLockHtml, "interrupted: true", "break lock reports interrupted force exits");
   const finishBreakLockBody = functionBody(mainJs, "finishBreakLock");

@@ -2385,9 +2385,12 @@ function notify(message) {
 // Reminder-path banners only (the coordinator). ≥60s between banners, so level
 // jitter or transactional retries can never chain system notifications. Returns
 // ok:false when throttled so the caller does not count it as a delivery.
-function notifyReminder(message) {
+// `urgent` (codex review 2026-07-10): when the banner is the round's ONLY designated
+// channel (island disabled / non-darwin) the break point must not be droppable by the
+// throttle — the once-per-round latch already limits it to a single shot.
+function notifyReminder(message, { urgent = false } = {}) {
   const now = Date.now();
-  if (now - lastReminderNotifyAt < REMINDER_NOTIFY_MIN_INTERVAL_MS) {
+  if (!urgent && now - lastReminderNotifyAt < REMINDER_NOTIFY_MIN_INTERVAL_MS) {
     return { ok: false, supported: true, throttled: true };
   }
   const sent = notify(message);
@@ -2736,7 +2739,12 @@ function applyInterventionBehavior(state) {
     return;
   }
 
-  const hasReminderOpening = Boolean(state.isRunning || state.reminderOpening || state.naturalBreak || state.reminderPending);
+  // breakDue is itself an opening (codex review 2026-07-10): in auto tracking
+  // isRunning is false, and at the exact break point the user may be mid-typing
+  // (no reminderOpening, no naturalBreak) with the pending record still blocked by
+  // the renderer cooldown — without breakDue here the coordinator returned before
+  // breakBypass could ever fire the round's capsule.
+  const hasReminderOpening = Boolean(state.isRunning || state.reminderOpening || state.naturalBreak || state.reminderPending || state.breakDue);
   if (!hasReminderOpening) {
     if (levelChanged && companionVisible) hideCompanionPanel();
     return;
@@ -2816,7 +2824,7 @@ function applyInterventionBehavior(state) {
       }
     }
     if (showNotify) {
-      const sent = notifyReminder(reminderMessage);
+      const sent = notifyReminder(reminderMessage, { urgent: breakDue && !showRest });
       delivered = delivered || Boolean(sent && sent.ok);
     }
     // The break capsule is the PRIMARY channel at the real break point: a system
@@ -2839,6 +2847,12 @@ function applyInterventionBehavior(state) {
         if (breakDue) breakRestSurfaced = true;
       }
     }
+  } else {
+    // No delivery attempted this frame — the failure streak is broken. The retry
+    // bound counts CONSECUTIVE blocked attempts; without this reset, stale failures
+    // from an earlier round leaked into the next break point and surrendered early
+    // (codex review 2026-07-10).
+    reminderDeliveryRetries = 0;
   }
 }
 

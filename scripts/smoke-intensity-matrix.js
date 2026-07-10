@@ -115,13 +115,13 @@ function main() {
   );
   assertMatches(
     mainJs,
-    /const REMINDER_NOTIFY_MIN_INTERVAL_MS = 60 \* 1000;[\s\S]*function notifyReminder\(message\)[\s\S]*?if \(now - lastReminderNotifyAt < REMINDER_NOTIFY_MIN_INTERVAL_MS\)/,
+    /const REMINDER_NOTIFY_MIN_INTERVAL_MS = 60 \* 1000;[\s\S]*function notifyReminder\(message, \{ urgent = false \} = \{\}\)[\s\S]*?if \(!urgent && now - lastReminderNotifyAt < REMINDER_NOTIFY_MIN_INTERVAL_MS\)/,
     "reminder banners self-throttle to at most one per minute (2026-07-10)"
   );
   assertMatches(
     mainJs,
-    /if \(showNotify\) \{\s*const sent = notifyReminder\(reminderMessage\);/,
-    "the coordinator uses the throttled reminder banner, not raw notify"
+    /if \(showNotify\) \{\s*const sent = notifyReminder\(reminderMessage, \{ urgent: breakDue && !showRest \}\);/,
+    "the coordinator uses the throttled reminder banner; the sole-channel break banner is urgent"
   );
 
   assertIncludes(indexHtml, "L4</strong>强制爱：只在你主动选择后启用", "L4 user-facing rule requires explicit opt-in");
