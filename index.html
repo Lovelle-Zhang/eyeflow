@@ -296,7 +296,8 @@
     .ma-theme { align-self: end; display: grid; gap: 1cqi; margin-top: auto; }
     .ma-theme small, .ma-note { font-size: max(1.95cqi, 9px); line-height: 1.35; color: var(--muted-soft); }
     .ma-switch { min-width: 0; display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.5cqi; padding: 0.6cqi; border-radius: 1.5cqi; background: rgba(255,255,255,0.54); border: 1px solid var(--line); }
-    .ma-switch span { min-width: 0; min-height: 3.7cqi; display: grid; place-items: center; border-radius: 1cqi; font-size: max(1.95cqi, 9px); line-height: 1.1; color: var(--muted); white-space: nowrap; }
+    .ma-switch :is(span, button) { min-width: 0; min-height: 3.7cqi; display: grid; place-items: center; border-radius: 1cqi; font-size: max(1.95cqi, 9px); line-height: 1.1; color: var(--muted); white-space: nowrap; }
+    .ma-switch button { border: 0; background: none; font-family: inherit; padding: 0; cursor: pointer; }
     .ma-switch .is-active { color: var(--mira-strong); background: rgba(31,122,94,0.12); box-shadow: inset 0 0 0 1px rgba(31,122,94,0.08); }
     .ma-main { min-width: 0; padding: 4.8cqi 5.2cqi; display: grid; align-content: start; gap: 2.5cqi; }
     .ma-top { display: flex; align-items: start; justify-content: space-between; gap: 2cqi; }
@@ -381,12 +382,45 @@
     .tenets strong { display: block; font-size: var(--t-sub); font-weight: 500; letter-spacing: 0.01em; color: var(--ink); }
     .tenets p { margin: var(--s3) 0 0; font-size: var(--t-small); line-height: 1.6; color: var(--muted); text-wrap: pretty; }
     .theme-block { padding-block: clamp(76px, 10vh, 116px); }
-    .theme-strip { margin: var(--s12) auto 0; max-width: 780px; display: grid; grid-template-columns: minmax(0, 0.82fr) minmax(0, 1.18fr); gap: clamp(28px, 5vw, 56px); align-items: start; padding-block: var(--s8); border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); text-align: left; }
-    .theme-control { display: grid; gap: var(--s4); }
-    .theme-label { margin: 0; font-size: var(--t-small); color: var(--muted-soft); }
-    .theme-segment { display: grid; grid-template-columns: repeat(3, 1fr); gap: 4px; padding: 4px; border-radius: 12px; border: 1px solid var(--line); background: rgba(255,255,255,0.44); }
-    .theme-segment span { min-height: 34px; display: grid; place-items: center; border-radius: 8px; font-size: var(--t-small); line-height: 1.1; color: var(--muted); white-space: nowrap; }
-    .theme-segment .is-active { color: var(--mira-strong); background: var(--mira-soft); box-shadow: inset 0 0 0 1px rgba(31,122,94,0.08); }
+    .theme-strip { margin: var(--s12) auto 0; max-width: 640px; padding-block: var(--s8); border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); text-align: left; }
+
+    /* ── 白天/夜晚活体演示 — 同一块今天页,在两套 app 真实 token 间交叉淡入。
+       夜晚值 verbatim 取自 eyeflow-design-system.css 的 data-theme="dark" 块;
+       页面 token 在演示卡子树内整组换值,ma-* 规则自动跟随(一份渲染路径)。
+       过渡只走 background-color/color/border-color——所有浏览器原生可插值,
+       不碰渐变和 @property(部分合成路径不插值,会整块直切=闪烁)。
+       所以演示卡底改纯色;chrome 圆点用一颗明暗两版都可读的中性灰,压根不用变。 */
+    .theme-demo { max-width: 780px; margin: var(--s8) auto 0; transition: border-color 0.6s var(--ease); }
+    .theme-demo::before { background-image:
+      radial-gradient(circle 4.5px at 21px 17px, rgba(128,127,120,0.4) 99%, transparent),
+      radial-gradient(circle 4.5px at 41px 17px, rgba(128,127,120,0.4) 99%, transparent),
+      radial-gradient(circle 4.5px at 61px 17px, rgba(128,127,120,0.4) 99%, transparent);
+      background-color: #FCFBF8; transition: background-color 0.6s var(--ease), border-color 0.6s var(--ease); }
+    .theme-demo .mock-app { background: #F7F5EE; transition: background-color 0.6s var(--ease); }
+    .theme-demo :is(.ma-side, .ma-brand, .ma-nav span, .ma-theme small, .ma-switch, .ma-switch span, .ma-switch button, .ma-kicker, .ma-title, .ma-status, .ma-card, .ma-card strong, .ma-card p, .ma-meter, .ma-meter i, .ma-mini, .ma-mini span, .ma-mini b) {
+      transition: background-color 0.6s var(--ease), color 0.6s var(--ease), border-color 0.6s var(--ease), box-shadow 0.6s var(--ease); }
+    .theme-demo.is-night {
+      --ink: #f3f4f6; --ink-soft: #d3d5d9; --muted: #9a9aa3; --muted-soft: #6f6f78;
+      --line: rgba(255,255,255,0.10); --line-soft: rgba(255,255,255,0.06);
+      --panel-strong: #26282b;
+      --mira: #4fc99c; --mira-strong: #62d3aa; --mira-soft: rgba(79,201,156,0.16); --mira-line: rgba(79,201,156,0.30);
+      border-color: rgba(20,20,19,0.3);
+    }
+    .theme-demo.is-night::before { background-color: #26282b; border-bottom-color: rgba(255,255,255,0.07); }
+    .theme-demo.is-night .mock-app { background: #1B1D1F; }
+    /* 初始状态(自动档判定)直接落位,不播加载时的假淡入。 */
+    .theme-demo.no-fade, .theme-demo.no-fade::before, .theme-demo.no-fade * { transition: none !important; }
+    .theme-demo.is-night .ma-side { background: #1b1c1e; }
+    .theme-demo.is-night .ma-nav .is-active { background: rgba(79,201,156,0.16); }
+    .theme-demo.is-night .ma-switch { background: rgba(255,255,255,0.07); }
+    .theme-demo.is-night .ma-switch .is-active { background: rgba(79,201,156,0.16); box-shadow: inset 0 0 0 1px rgba(79,201,156,0.12); }
+    .theme-demo.is-night .ma-status { background: rgba(79,201,156,0.10); }
+    .theme-demo.is-night .ma-card { background: #212325; box-shadow: none; }
+    .theme-demo.is-night .ma-meter { background: rgba(255,255,255,0.09); }
+    .theme-demo.is-night .ma-mini { background: rgba(255,255,255,0.05); }
+    /* 演示卡里 app 自己的外观开关就是真开关——给够触点,不加新视觉。 */
+    .theme-demo .ma-switch :is(span, button) { min-height: max(4.2cqi, 32px); }
+    .theme-demo .ma-switch button:not(.is-active):hover { color: var(--ink-soft); }
     .theme-list { list-style: none; margin: 0; padding: 0; display: grid; gap: var(--s4); }
     .theme-list li { display: grid; grid-template-columns: 16px 1fr; gap: var(--s3); align-items: start; font-size: var(--t-small); line-height: 1.65; color: var(--muted); }
     .theme-list li::before { content: ""; width: 6px; height: 6px; margin-top: 0.68em; border-radius: 50%; background: var(--mira); opacity: 0.72; }
@@ -440,7 +474,7 @@
       .ma-theme { grid-column: 1 / -1; gap: 6px; }
       .ma-theme small { font-size: 10px; }
       .ma-switch { border-radius: 10px; gap: 3px; padding: 3px; }
-      .ma-switch span { min-height: 26px; border-radius: 7px; font-size: 10px; }
+      .ma-switch :is(span, button) { min-height: 26px; border-radius: 7px; font-size: 10px; }
       .ma-main { padding: var(--s6); gap: var(--s4); }
       .ma-top { align-items: center; }
       .ma-kicker { font-size: 10px; margin-bottom: 4px; }
@@ -916,20 +950,54 @@
       <p class="body" data-en="<span class='copy-line'>EyeFlow uses your Mac's timezone and the day's sunrise and sunset to choose Day or Night.</span><span class='copy-line'>Day stays clean and clear; Night lowers brightness.</span><span class='copy-line'>If you prefer, you can also pin either mode manually.</span>"><span class="copy-line">EyeFlow 会按这台 Mac 的时区、当天日出和日落，自动判断白天或夜晚。</span><span class="copy-line">白天保持清爽，夜晚自动压低亮度。</span><span class="copy-line">你也可以手动固定在白天或晚上。</span></p>
     </div>
     <div class="theme-strip">
-      <div class="theme-control" aria-hidden="true">
-        <p class="theme-label" data-en="Appearance">外观</p>
-        <div class="theme-segment">
-          <span class="is-active" data-en="Auto">自动</span>
-          <span data-en="Day">白天</span>
-          <span data-en="Night">晚上</span>
-        </div>
-        <p class="theme-label" data-en="Auto follows your local day rhythm.">自动跟随本地昼夜节奏。</p>
-      </div>
       <ul class="theme-list">
         <li data-en="No extra setup: keep Auto on and EyeFlow changes with the day.">不需要额外设置：保持「自动」，EyeFlow 会跟着一天自己切换。</li>
-        <li data-en="Daytime screenshots on this page now use the same clean light surface.">页面里的界面展示，统一采用清爽的白天版本。</li>
+        <li data-en="The view below is live — flip the appearance switch in its sidebar to see Night.">下面这块界面是真的——点侧栏里的外观开关，看看晚上的样子。</li>
         <li data-en="Night mode still exists for late hours, with lower contrast and a softer reading feel.">夜晚版本仍然保留，适合晚间使用，亮度和对比会更轻。</li>
       </ul>
+    </div>
+    <!-- 活体演示:mock 侧栏里 app 自己的外观开关就是真开关——点它,
+         这块今天页在白天/夜晚两套 app 真实 token 间交叉淡入;
+         「自动」按访客本地时间真实决定。 -->
+    <div class="screen-card is-window theme-demo reveal">
+      <article class="mock-app mock-app-demo" role="group" aria-label="EyeFlow 今天页的外观演示：用侧栏的外观开关，在白天与夜晚之间切换" data-en-label="A live preview of EyeFlow's Today view — use the appearance switch in the sidebar to move between Day and Night">
+        <aside class="ma-side">
+          <div class="ma-brand" aria-hidden="true"><span class="ma-mark"></span><b>EyeFlow</b></div>
+          <nav class="ma-nav" aria-hidden="true">
+            <span class="is-active" data-en="Today">今天</span>
+            <span data-en="These Days">这几天</span>
+            <span data-en="Settings">设置</span>
+          </nav>
+          <div class="ma-theme">
+            <small data-en="Appearance">外观</small>
+            <div class="ma-switch" role="group" aria-label="外观" data-en-label="Appearance">
+              <button type="button" class="is-active" data-mode="auto" aria-pressed="true" data-en="Auto">自动</button>
+              <button type="button" data-mode="day" aria-pressed="false" data-en="Day">白天</button>
+              <button type="button" data-mode="night" aria-pressed="false" data-en="Night">晚上</button>
+            </div>
+            <small data-en="Auto · by timezone">自动 · 按时区</small>
+          </div>
+        </aside>
+        <div class="ma-main">
+          <div class="ma-top">
+            <div>
+              <span class="ma-kicker" data-en="Mira is here">Mira 在这里</span>
+              <strong class="ma-title" data-en="Today">今天</strong>
+            </div>
+            <span class="ma-status ma-status-demo" data-en="Daytime">白天版</span>
+          </div>
+          <div class="ma-card">
+            <strong data-en="I'm right here.">我在旁边。</strong>
+            <p data-en="No need to start anything. When the screen is active, I will quietly keep time.">不用特意开始。有屏幕活动时，我会轻轻记着。</p>
+            <div class="ma-meter" aria-hidden="true"><i></i></div>
+          </div>
+          <div class="ma-row" aria-hidden="true">
+            <div class="ma-mini"><span data-en="Focus">专注</span><b data-en="0 min">0 分钟</b></div>
+            <div class="ma-mini"><span data-en="Rest">歇眼</span><b data-en="0 min">0 分钟</b></div>
+            <div class="ma-mini"><span data-en="Rhythm">节奏</span><b data-en="Ready">待开始</b></div>
+          </div>
+        </div>
+      </article>
     </div>
   </section>
 
@@ -1094,6 +1162,35 @@
       } catch (e) {}
       btns.forEach((b) => b.addEventListener("click", () => apply(b.dataset.lang)));
       apply(init);
+    })();
+
+    (function () { // 白天/夜晚活体演示 — mock 里 app 自己的外观开关是真开关
+      const demo = document.querySelector(".theme-demo");
+      if (!demo) return;
+      const btns = [...demo.querySelectorAll(".ma-switch button[data-mode]")];
+      const status = demo.querySelector(".ma-status-demo");
+      // App 的自动档按时区日出日落;页面演示用 7:00–19:00 近似本地昼夜。
+      const resolve = (mode) => mode !== "auto" ? mode : ((new Date().getHours() >= 7 && new Date().getHours() < 19) ? "day" : "night");
+      function apply(mode) {
+        const night = resolve(mode) === "night";
+        demo.classList.toggle("is-night", night);
+        btns.forEach((b) => {
+          const on = b.dataset.mode === mode;
+          b.classList.toggle("is-active", on);
+          b.setAttribute("aria-pressed", String(on));
+        });
+        // 状态徽标跟主题走,且双语快照同步更新,语言切换后不回跳。
+        status.dataset.en = night ? "Night" : "Daytime";
+        status.dataset.zh = night ? "晚上版" : "白天版";
+        status.textContent = document.documentElement.lang === "en" ? status.dataset.en : status.dataset.zh;
+      }
+      demo.addEventListener("click", (e) => {
+        const b = e.target.closest("button[data-mode]");
+        if (b) apply(b.dataset.mode);
+      });
+      demo.classList.add("no-fade"); // 初始落位不播过渡,交互后才交叉淡入
+      apply("auto");
+      requestAnimationFrame(() => requestAnimationFrame(() => demo.classList.remove("no-fade")));
     })();
   </script>
 </body>
