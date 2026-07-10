@@ -147,6 +147,7 @@ function main() {
   assertPackageScript(pkg, "smoke:retention", "node scripts/smoke-retention-moments.js");
   assertPackageScript(pkg, "smoke:rest", "node scripts/smoke-rest-flow.js");
   assertPackageScript(pkg, "smoke:visual", "node scripts/smoke-visual-utils-test.js");
+  assertPackageScript(pkg, "smoke:landing", "node scripts/smoke-landing-brand.js");
   assertPackageScript(pkg, "smoke:release", "node scripts/smoke-release-flow.js");
   assertPackageScript(pkg, "smoke:installed", "node scripts/smoke-installed-app.js");
   assertPackageScript(pkg, "smoke:app", "node scripts/smoke-packaged-app.js");
@@ -193,6 +194,7 @@ function main() {
   assertMatches(verifyJs, /\["Check source onboarding flow",\s*"smoke:onboarding"\]/, "verify checks onboarding smoke");
   assertMatches(verifyJs, /\["Check retention moments",\s*"smoke:retention"\]/, "verify checks retention smoke");
   assertMatches(verifyJs, /\["Check visual smoke helper",\s*"smoke:visual"\]/, "verify checks visual helper smoke");
+  assertMatches(verifyJs, /\["Check landing brand marks",\s*"smoke:landing"\]/, "verify checks landing brand smoke");
   assertMatches(verifyJs, /\["Check release wiring",\s*"smoke:release"\]/, "verify checks release wiring");
 
   assertIncludes(installLocalJs, "/Applications/EyeFlow.app", "local install target");

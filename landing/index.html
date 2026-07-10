@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <title>EyeFlow - Mira 的桌面陪伴空间</title>
   <meta name="description" content="EyeFlow 里住着 Mira：盯太久时，她轻轻提醒你抬头看远处。不打断、不监视、不伤眼。macOS 菜单栏应用，免费、本地运行、Apple 公证。">
-  <link rel="icon" type="image/svg+xml" href="favicon.svg?v=2">
+  <link rel="icon" type="image/svg+xml" href="favicon.svg?v=3">
   <link rel="canonical" href="https://eyeflow.app/">
   <meta property="og:type" content="website">
   <meta property="og:url" content="https://eyeflow.app/">
@@ -194,15 +194,11 @@
     .ant { position: absolute; top: var(--at); left: var(--al); width: var(--aw); height: var(--ah); border-top: var(--astroke) solid rgba(180,222,208,0.22); border-radius: 50%; z-index: 0; transform-origin: 50% 100%; animation: sway var(--sway) var(--ease) infinite; }
 
     /* EyeFlow brand mark — browser favicon, nav mark and app-mock marks share
-       the same dark rounded square. Mira's character avatar remains separate. */
+       the source app icon. Mira's character avatar remains separate. */
     nav .mark, .ma-mark, .ms-mark {
-      position: relative; border-radius: 30%; overflow: hidden;
-      background: linear-gradient(150deg, #1f3937, #142224);
-      box-shadow: inset 0 0 0 0.5px rgba(127,241,213,0.12);
-    }
-    nav .mark::before, .ma-mark::before, .ms-mark::before {
-      content: ""; position: absolute; top: 35%; left: 20%; width: 60%; height: 24%;
-      border-radius: 999px; background: rgba(6,13,15,0.92);
+      display: block; flex: 0 0 auto;
+      background: url("favicon.svg") center / contain no-repeat;
+      box-shadow: none;
     }
 
     @keyframes float { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-5px); } }

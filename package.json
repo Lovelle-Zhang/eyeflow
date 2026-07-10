@@ -28,6 +28,7 @@
     "smoke:retention": "node scripts/smoke-retention-moments.js",
     "smoke:rest": "node scripts/smoke-rest-flow.js",
     "smoke:visual": "node scripts/smoke-visual-utils-test.js",
+    "smoke:landing": "node scripts/smoke-landing-brand.js",
     "smoke:release": "node scripts/smoke-release-flow.js",
     "smoke:installed": "node scripts/smoke-installed-app.js",
     "smoke:app": "node scripts/smoke-packaged-app.js",
