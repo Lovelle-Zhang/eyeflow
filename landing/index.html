@@ -164,6 +164,7 @@
     .hero-row { display: block; }
     .hero-row + .hero-row { margin-top: 0.08em; }
     .hero-row > span { white-space: nowrap; }
+    .hero-row > span + span { margin-left: -0.12em; }
     .hero-slogan .kw-mira { text-decoration: none; color: inherit; font-weight: inherit; }
     .cta + .meta { margin-top: 22px; }
     .hero .stage { position: relative; display: grid; justify-items: center; gap: var(--s6); margin: var(--s8) 0 var(--s6); }
@@ -329,6 +330,7 @@
     .tenets strong { display: block; font-size: var(--t-sub); font-weight: 500; letter-spacing: 0.01em; color: var(--ink); }
     .tenets p { margin: var(--s3) 0 0; font-size: var(--t-small); line-height: 1.6; color: var(--muted); text-wrap: pretty; }
     .brand-line { max-width: 22em; }
+    .brand-line .cl + .cl { margin-left: 0.18em; }
     .waitlist { margin-top: var(--s6); }
     .waitlist a { color: var(--mira-strong); text-decoration: none; border-bottom: 1px solid var(--mira-line); padding-bottom: 1px; margin-left: 6px; }
     .daily-row { display: grid; grid-template-columns: minmax(0, 0.95fr) minmax(0, 1fr); gap: clamp(56px, 8vw, 96px); align-items: center; margin-top: var(--s32); }
@@ -441,8 +443,10 @@
       .hero-slogan { max-width: 10.5em; font-size: 1.75rem; line-height: 1.42; }
       .hero-row + .hero-row { margin-top: 0.24em; }
       .hero-row > span { display: block; }
+      .hero-row > span + span { margin-left: 0; }
       .hero .stage { margin: 30px 0 26px; }
       h2 .cl, .sub .cl { display: block; white-space: nowrap; }
+      .brand-line .cl + .cl { margin-left: 0; }
       .body .copy-line { display: block; white-space: nowrap; }
       .body { max-width: 19em; font-size: 1rem; line-height: 1.82; }
       .sub { max-width: 19em; font-size: 1rem; line-height: 1.78; }
