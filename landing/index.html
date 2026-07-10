@@ -262,34 +262,68 @@
     .closing { text-align: center; padding-top: clamp(76px, 10vh, 116px); padding-bottom: calc(var(--section) + var(--s8)); }
     .screen-card { min-width: 0; border-radius: 16px; border: 1px solid var(--line); overflow: hidden; container-type: inline-size; box-shadow: 0 2px 24px rgba(29,31,26,0.05); }
     .screen-card img { display: block; width: 100%; height: auto; }
+    .screen-card :is(.mock-app, .mock-break, .mock-share) { width: 100%; }
 
     /* ── Act 5/6 live mocks — the real surfaces rebuilt from app tokens,
        like the island/companion: interfaces at work, not screenshots.
        All internal sizes in cqi so each mock scales like an image. ── */
 
-    /* break-lock (L4 全屏恢复) — colours verbatim from break-lock.html:
-       bg #17231e→#0f1a17, ink #e7f1ec, mint #8bd8c1, line rgba(176,218,203,.18). */
-    .mock-break { position: relative; aspect-ratio: 1.6; display: grid; justify-items: center; align-content: center; gap: 8px; gap: 1.7cqi; padding: 16px; padding: 3.2cqi; text-align: center; color: #e7f1ec;
-      background: linear-gradient(180deg, rgba(139,216,193,0.055), transparent 38%), linear-gradient(180deg, #17231e 0%, #0f1a17 100%); }
+    /* Daytime app surfaces — calm, light, and consistent with the page's paper tokens. */
+    .mock-app { aspect-ratio: 1.62; display: grid; grid-template-columns: 22.5cqi minmax(0, 1fr); overflow: hidden; text-align: left; color: var(--ink); background: linear-gradient(180deg, var(--panel-strong), #F2F3E8); }
+    .ma-side { min-width: 0; padding: 4.2cqi 2.5cqi; display: grid; align-content: start; gap: 2.3cqi; background: rgba(232,233,221,0.68); border-right: 1px solid var(--line); }
+    .ma-brand { display: inline-flex; align-items: center; gap: 1.6cqi; min-width: 0; font-size: max(2.4cqi, 10px); line-height: 1.2; font-weight: 600; color: var(--ink); }
+    .ma-mark { position: relative; width: 3.2cqi; height: 3.2cqi; min-width: 14px; min-height: 14px; border-radius: 24%; background: linear-gradient(150deg, #1f3937, #142224); }
+    .ma-mark::before { content: ""; position: absolute; top: 35%; left: 20%; width: 60%; height: 24%; border-radius: 999px; background: rgba(6,13,15,0.9); }
+    .ma-nav { display: grid; gap: 0.9cqi; margin-top: 1.2cqi; }
+    .ma-nav span { min-height: 4.5cqi; display: flex; align-items: center; padding-inline: 1.6cqi; border-radius: 1.3cqi; font-size: max(2.2cqi, 10px); line-height: 1.2; color: var(--muted); white-space: nowrap; }
+    .ma-nav .is-active { color: var(--mira-strong); background: rgba(31,122,94,0.11); }
+    .ma-theme { align-self: end; display: grid; gap: 1cqi; margin-top: auto; }
+    .ma-theme small, .ma-note { font-size: max(1.95cqi, 9px); line-height: 1.35; color: var(--muted-soft); }
+    .ma-switch { min-width: 0; display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.5cqi; padding: 0.6cqi; border-radius: 1.5cqi; background: rgba(255,255,255,0.54); border: 1px solid var(--line); }
+    .ma-switch span { min-width: 0; min-height: 3.7cqi; display: grid; place-items: center; border-radius: 1cqi; font-size: max(1.95cqi, 9px); line-height: 1.1; color: var(--muted); white-space: nowrap; }
+    .ma-switch .is-active { color: var(--mira-strong); background: rgba(31,122,94,0.12); box-shadow: inset 0 0 0 1px rgba(31,122,94,0.08); }
+    .ma-main { min-width: 0; padding: 4.8cqi 5.2cqi; display: grid; align-content: start; gap: 2.5cqi; }
+    .ma-top { display: flex; align-items: start; justify-content: space-between; gap: 2cqi; }
+    .ma-kicker { display: block; margin-bottom: 0.8cqi; font-size: max(2cqi, 9px); line-height: 1.2; color: var(--muted-soft); }
+    .ma-title { display: block; font-size: max(4.3cqi, 16px); line-height: 1.2; font-weight: 600; color: var(--ink); letter-spacing: 0; }
+    .ma-status { padding: 1cqi 1.8cqi; border-radius: 1.2cqi; background: rgba(31,122,94,0.1); color: var(--mira-strong); font-size: max(2cqi, 9px); line-height: 1.2; white-space: nowrap; }
+    .ma-card { min-width: 0; padding: 2.7cqi; border-radius: 1.7cqi; border: 1px solid var(--line); background: rgba(255,255,255,0.62); display: grid; gap: 1.6cqi; box-shadow: 0 1px 1px rgba(46,50,38,0.03); }
+    .ma-card strong { font-size: max(2.8cqi, 12px); line-height: 1.35; font-weight: 600; color: var(--ink); }
+    .ma-card p { margin: 0; font-size: max(2.25cqi, 10px); line-height: 1.45; color: var(--muted); }
+    .ma-meter { height: 1cqi; min-height: 4px; border-radius: 999px; background: rgba(46,54,40,0.08); overflow: hidden; }
+    .ma-meter i { display: block; width: 38%; height: 100%; border-radius: inherit; background: var(--mira); }
+    .ma-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.2cqi; }
+    .ma-mini { min-width: 0; padding: 1.7cqi; border-radius: 1.3cqi; background: rgba(255,255,255,0.48); border: 1px solid var(--line-soft); }
+    .ma-mini span { display: block; font-size: max(1.9cqi, 9px); line-height: 1.25; color: var(--muted-soft); white-space: nowrap; }
+    .ma-mini b { display: block; margin-top: 0.6cqi; font-size: max(2.8cqi, 11px); line-height: 1.2; font-weight: 600; color: var(--ink); white-space: nowrap; }
+    .ma-list { display: grid; gap: 1.1cqi; }
+    .ma-list span { display: grid; grid-template-columns: 5.6cqi 1fr auto; gap: 1.3cqi; align-items: center; font-size: max(2.1cqi, 10px); color: var(--muted); }
+    .ma-list i { height: 0.8cqi; min-height: 3px; border-radius: 999px; background: rgba(31,122,94,0.15); overflow: hidden; }
+    .ma-list i::before { content: ""; display: block; width: var(--w); height: 100%; border-radius: inherit; background: var(--mira); }
+    .ma-list b { font-size: max(2.1cqi, 10px); font-weight: 500; color: var(--ink-soft); white-space: nowrap; }
+
+    /* break-lock (L4 全屏恢复) — same surface, now shown in the daytime theme. */
+    .mock-break { position: relative; aspect-ratio: 1.6; display: grid; justify-items: center; align-content: center; gap: 8px; gap: 1.7cqi; padding: 16px; padding: 3.2cqi; text-align: center; color: var(--ink);
+      background: linear-gradient(180deg, rgba(31,122,94,0.07), transparent 42%), linear-gradient(180deg, var(--panel-strong) 0%, #F0F1E7 100%); }
     .mock-break .mira { width: auto; height: auto; animation: none; }
     .mock-break .mira::before { display: none; }
     .mock-break .pet { --rest: 0.92; --peak: 0.99; }
     .mb-title { font-size: 18px; font-size: max(4cqi, 15px); font-weight: 650; letter-spacing: 0.02em; }
-    .mb-copy { margin: -4px 0 0; margin: -0.8cqi 0 0; font-size: 12px; font-size: max(2.5cqi, 11px); color: rgba(231,241,236,0.62); }
+    .mb-copy { margin: -4px 0 0; margin: -0.8cqi 0 0; font-size: 12px; font-size: max(2.5cqi, 11px); color: var(--muted); }
     .mb-steps { display: flex; gap: 1.6cqi; }
-    .mb-steps span { padding: 1cqi 2.4cqi; border-radius: 999px; border: 1px solid rgba(176,218,203,0.18); font-size: 11px; font-size: max(2.3cqi, 10px); color: rgba(231,241,236,0.55); white-space: nowrap; }
-    .mb-steps .on { border-color: rgba(139,216,193,0.6); color: #8bd8c1; background: rgba(139,216,193,0.08); }
+    .mb-steps span { padding: 1cqi 2.4cqi; border-radius: 999px; border: 1px solid var(--line); font-size: 11px; font-size: max(2.3cqi, 10px); color: var(--muted); white-space: nowrap; }
+    .mb-steps .on { border-color: var(--mira-line); color: var(--mira-strong); background: var(--mira-soft); }
     /* live ring: conic drains through the mock's 12s rest loop (like the island). */
     .mb-ring { width: 96px; width: max(19cqi, 88px); aspect-ratio: 1; border-radius: 50%; display: grid; place-items: center; margin-top: 0.4cqi;
-      background: conic-gradient(#8bd8c1 var(--mbp), rgba(230,244,238,0.1) 0);
-      box-shadow: inset 0 0 0 1px rgba(231,241,236,0.055); animation: mbDrain 12s linear infinite; }
-    .mb-timer { width: 76%; aspect-ratio: 1; border-radius: 50%; background: rgba(15,26,23,0.94); border: 1px solid rgba(176,218,203,0.18); display: grid; place-content: center; gap: 0.4cqi; text-align: center; }
-    .mb-tlabel { font-size: 9px; font-size: max(1.9cqi, 9px); letter-spacing: 0.12em; color: rgba(231,241,236,0.42); }
+      background: conic-gradient(var(--mira) var(--mbp), rgba(31,122,94,0.13) 0);
+      box-shadow: inset 0 0 0 1px var(--line); animation: mbDrain 12s linear infinite; }
+    .mb-timer { width: 76%; aspect-ratio: 1; border-radius: 50%; background: rgba(255,255,255,0.72); border: 1px solid var(--line); display: grid; place-content: center; gap: 0.4cqi; text-align: center; }
+    .mb-tlabel { font-size: 9px; font-size: max(1.9cqi, 9px); letter-spacing: 0.12em; color: var(--muted-soft); }
     .mb-tvals { position: relative; display: block; width: 44px; width: max(9cqi, 42px); height: 1.25em; font-size: 15px; font-size: max(3.4cqi, 13px); font-weight: 700; font-variant-numeric: tabular-nums; }
     .mb-tvals i { position: absolute; inset: 0; font-style: normal; opacity: 0; animation: mbTick 12s linear infinite; }
     .mb-tvals i:nth-child(2) { animation-delay: 4s; }
     .mb-tvals i:nth-child(3) { animation-delay: 8s; }
-    .mb-escape { margin-top: 2px; margin-top: 0.5cqi; padding: 5px 14px; padding: 1.1cqi 3cqi; border-radius: 10px; border: 1px solid rgba(117,232,200,0.36); font-size: 11px; font-size: max(2.2cqi, 10px); color: rgba(231,241,236,0.75); }
+    .mb-escape { margin-top: 2px; margin-top: 0.5cqi; padding: 5px 14px; padding: 1.1cqi 3cqi; border-radius: 10px; border: 1px solid var(--mira-line); font-size: 11px; font-size: max(2.2cqi, 10px); color: var(--mira-strong); background: rgba(255,255,255,0.36); }
     @keyframes mbDrain { 0% { --mbp: 96%; } 100% { --mbp: 3%; } }
     /* Registered so the conic angle interpolates smoothly; without @property
        support the keyframe still applies discretely — alive, just steppier. */
@@ -331,6 +365,16 @@
     .tenets li + li { border-left: 1px solid var(--line); }
     .tenets strong { display: block; font-size: var(--t-sub); font-weight: 500; letter-spacing: 0.01em; color: var(--ink); }
     .tenets p { margin: var(--s3) 0 0; font-size: var(--t-small); line-height: 1.6; color: var(--muted); text-wrap: pretty; }
+    .theme-block { padding-block: clamp(76px, 10vh, 116px); }
+    .theme-strip { margin: var(--s12) auto 0; max-width: 780px; display: grid; grid-template-columns: minmax(0, 0.82fr) minmax(0, 1.18fr); gap: clamp(28px, 5vw, 56px); align-items: start; padding-block: var(--s8); border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); text-align: left; }
+    .theme-control { display: grid; gap: var(--s4); }
+    .theme-label { margin: 0; font-size: var(--t-small); color: var(--muted-soft); }
+    .theme-segment { display: grid; grid-template-columns: repeat(3, 1fr); gap: 4px; padding: 4px; border-radius: 12px; border: 1px solid var(--line); background: rgba(255,255,255,0.44); }
+    .theme-segment span { min-height: 34px; display: grid; place-items: center; border-radius: 8px; font-size: var(--t-small); line-height: 1.1; color: var(--muted); white-space: nowrap; }
+    .theme-segment .is-active { color: var(--mira-strong); background: var(--mira-soft); box-shadow: inset 0 0 0 1px rgba(31,122,94,0.08); }
+    .theme-list { list-style: none; margin: 0; padding: 0; display: grid; gap: var(--s4); }
+    .theme-list li { display: grid; grid-template-columns: 16px 1fr; gap: var(--s3); align-items: start; font-size: var(--t-small); line-height: 1.65; color: var(--muted); }
+    .theme-list li::before { content: ""; width: 6px; height: 6px; margin-top: 0.68em; border-radius: 50%; background: var(--mira); opacity: 0.72; }
     .brand-line { max-width: 22em; }
     .brand-line .cl + .cl { margin-left: 0.18em; }
     .final-panel .actions { margin-top: var(--s6); }
@@ -364,13 +408,37 @@
       .daily-row, .daily-row.is-reverse { grid-template-columns: 1fr; }
       .daily-row .daily-copy, .daily-row.is-reverse .daily-copy { order: 1; justify-self: start; max-width: 19em; }
       .daily-row h2 + .body { margin-top: var(--s3); }
-      .daily-row .screen-card, .daily-row .mock-stack { width: min(100%, 360px); justify-self: center; }
+      .daily-row .screen-card { width: min(100%, 320px); max-width: calc(100vw - 48px); justify-self: start; }
+      .daily-row .mock-stack { width: min(100%, 320px); justify-self: center; }
       .stakes { grid-template-columns: 1fr; max-width: 28em; margin-top: var(--s12); }
       .stake { padding: var(--s6) 0; }
       .stake + .stake { border-left: 0; border-top: 1px solid var(--line); }
       /* Phones: release the mock aspect lock — with legibility floors the content
          outgrows the ratio box and screen-card overflow:hidden clips it (Safari). */
-      .mock-break, .mock-share { aspect-ratio: auto; }
+      .mock-app, .mock-break, .mock-share { aspect-ratio: auto; }
+      .mock-app { grid-template-columns: 1fr; }
+      .ma-side { grid-template-columns: auto 1fr; align-items: start; padding: var(--s4); gap: var(--s3); border-right: 0; border-bottom: 1px solid var(--line); }
+      .ma-brand { font-size: 11px; gap: 6px; }
+      .ma-mark { width: 16px; height: 16px; }
+      .ma-nav { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 4px; margin-top: 0; }
+      .ma-nav span { min-height: 28px; justify-content: center; padding-inline: 4px; border-radius: 8px; font-size: 10px; }
+      .ma-theme { grid-column: 1 / -1; gap: 6px; }
+      .ma-theme small { font-size: 10px; }
+      .ma-switch { border-radius: 10px; gap: 3px; padding: 3px; }
+      .ma-switch span { min-height: 26px; border-radius: 7px; font-size: 10px; }
+      .ma-main { padding: var(--s6); gap: var(--s4); }
+      .ma-top { align-items: center; }
+      .ma-kicker { font-size: 10px; margin-bottom: 4px; }
+      .ma-title { font-size: 18px; }
+      .ma-status { padding: 5px 9px; border-radius: 8px; font-size: 10px; }
+      .ma-card { padding: var(--s4); border-radius: 12px; gap: var(--s3); }
+      .ma-card strong { font-size: 13px; }
+      .ma-card p { font-size: 11px; }
+      .ma-row { gap: var(--s3); }
+      .ma-mini { padding: var(--s3); border-radius: 8px; }
+      .ma-mini span, .ma-mini b, .ma-list span, .ma-list b { font-size: 10px; }
+      .ma-list { gap: var(--s3); }
+      .ma-list span { grid-template-columns: 34px 1fr auto; gap: var(--s3); }
       .mock-break { padding-block: 6cqi; }
       .mock-share { gap: var(--s4); padding: var(--s6); }
       .ms-metrics { flex-wrap: wrap; gap: var(--s4) var(--s8); }
@@ -384,12 +452,15 @@
          overflow:hidden that clipped Mira at the top (Safari). Content-driven
          height can never clip. */
     }
+    @media (max-width: 720px) {
+      .theme-strip { grid-template-columns: 1fr; max-width: 25em; gap: var(--s8); }
+    }
     .final-panel { max-width: 860px; min-height: 340px; margin-inline: auto; padding: 38px clamp(24px, 6vw, 64px) 40px; display: grid; justify-items: center; align-content: center; border-radius: 18px; border: 1px solid rgba(255,255,255,0.07); background: rgba(24,26,27,0.9); box-shadow: 0 18px 46px rgba(0,0,0,0.18); }
     /* 纸页里「变暗的一刻」——局部切回 app 暗色 token,文字/CTA/Mira 保持亮色读感 */
     .final-panel { --ink: #f3f4f6; --ink-soft: #d3d5d9; --muted: #9a9aa3; --muted-soft: #6f6f78; --line: rgba(255,255,255,0.08); --mira: #4fc99c; --mira-strong: #62d3aa; --mira-soft: rgba(79,201,156,0.16); --mira-line: rgba(79,201,156,0.30); }
-    .final-panel .pet, .mock-break .pet { background: linear-gradient(150deg, #1a3230 0%, #21403c 48%, #152523 100%); box-shadow: inset 0 0 0 1px rgba(127,241,213,0.08), inset 0 -10px 20px rgba(3,10,12,0.28), 0 20px 44px -12px rgba(0,0,0,0.5); }
-    .final-panel .pet::before, .mock-break .pet::before { background: linear-gradient(90deg, rgba(129,239,216,0.16), rgba(108,176,255,0.10)), rgba(6,13,15,0.92); }
-    .final-panel .mouth, .mock-break .mouth { border-bottom-color: rgba(126,244,216,0.5); }
+    .final-panel .pet { background: linear-gradient(150deg, #1a3230 0%, #21403c 48%, #152523 100%); box-shadow: inset 0 0 0 1px rgba(127,241,213,0.08), inset 0 -10px 20px rgba(3,10,12,0.28), 0 20px 44px -12px rgba(0,0,0,0.5); }
+    .final-panel .pet::before { background: linear-gradient(90deg, rgba(129,239,216,0.16), rgba(108,176,255,0.10)), rgba(6,13,15,0.92); }
+    .final-panel .mouth { border-bottom-color: rgba(126,244,216,0.5); }
     .final-panel .mira { width: 88px; height: 88px; margin-bottom: var(--s6); }
     .final-panel .pet { --rest: 1.05; --peak: 1.08; }
 
@@ -602,7 +673,44 @@
         <p class="body" data-en="She never rushes you. Timing starts softly only when the screen is active — until then, she just waits."><span class="copy-line">她不催你开始。</span><span class="copy-line">有屏幕活动时，才轻轻开始计时。</span><span class="copy-line">在那之前，她就安静待着。</span></p>
       </div>
       <div class="screen-card reveal">
-        <img src="shots/today.png" alt="EyeFlow 今天页：Mira 说「我在旁边」，现在先不计时" data-en-alt="EyeFlow's Today view: Mira says 'I'm right here' — not timing yet" loading="lazy" width="2560" height="1584">
+        <article class="mock-app mock-app-today" role="img" aria-label="EyeFlow 白天版今天页：Mira 说「我在旁边」，默认外观为自动" data-en-label="EyeFlow's daytime Today view: Mira says 'I'm right here', with appearance set to Auto">
+          <aside class="ma-side" aria-hidden="true">
+            <div class="ma-brand"><span class="ma-mark"></span><b>EyeFlow</b></div>
+            <nav class="ma-nav" aria-label="mock navigation">
+              <span class="is-active" data-en="Today">今天</span>
+              <span data-en="These Days">这几天</span>
+              <span data-en="Settings">设置</span>
+            </nav>
+            <div class="ma-theme">
+              <small data-en="Appearance">外观</small>
+              <div class="ma-switch">
+                <span class="is-active" data-en="Auto">自动</span>
+                <span data-en="Day">白天</span>
+                <span data-en="Night">晚上</span>
+              </div>
+              <small data-en="Auto · by timezone">自动 · 按时区</small>
+            </div>
+          </aside>
+          <div class="ma-main">
+            <div class="ma-top">
+              <div>
+                <span class="ma-kicker" data-en="Mira is here">Mira 在这里</span>
+                <strong class="ma-title" data-en="Today">今天</strong>
+              </div>
+              <span class="ma-status" data-en="Daytime">白天版</span>
+            </div>
+            <div class="ma-card">
+              <strong data-en="I'm right here.">我在旁边。</strong>
+              <p data-en="No need to start anything. When the screen is active, I will quietly keep time.">不用特意开始。有屏幕活动时，我会轻轻记着。</p>
+              <div class="ma-meter" aria-hidden="true"><i></i></div>
+            </div>
+            <div class="ma-row" aria-hidden="true">
+              <div class="ma-mini"><span data-en="Focus">专注</span><b data-en="0 min">0 分钟</b></div>
+              <div class="ma-mini"><span data-en="Rest">歇眼</span><b data-en="0 min">0 分钟</b></div>
+              <div class="ma-mini"><span data-en="Rhythm">节奏</span><b data-en="Ready">待开始</b></div>
+            </div>
+          </div>
+        </article>
       </div>
     </div>
   </section>
@@ -699,7 +807,43 @@
         <p class="body" data-en="When the record is thin, she says so — &quot;no rush to judge yet.&quot; Blanks over invented numbers."><span class="copy-line">记录还少时，她会说「先不急着下判断」。</span><span class="copy-line">宁可留白，也不编一个好看的数字。</span></p>
       </div>
       <div class="screen-card reveal">
-        <img src="shots/days.png" alt="EyeFlow 这几天页：Mira 的观察——记录还少，先不急着下判断" data-en-alt="EyeFlow's These Days view: Mira's observation — record still thin, no rush to judge" loading="lazy" width="2560" height="1584">
+        <article class="mock-app mock-app-days" role="img" aria-label="EyeFlow 白天版这几天页：记录还少，Mira 先不急着下判断" data-en-label="EyeFlow's daytime These Days view: record still thin, so Mira doesn't rush to judge">
+          <aside class="ma-side" aria-hidden="true">
+            <div class="ma-brand"><span class="ma-mark"></span><b>EyeFlow</b></div>
+            <nav class="ma-nav" aria-label="mock navigation">
+              <span data-en="Today">今天</span>
+              <span class="is-active" data-en="These Days">这几天</span>
+              <span data-en="Settings">设置</span>
+            </nav>
+            <div class="ma-theme">
+              <small data-en="Appearance">外观</small>
+              <div class="ma-switch">
+                <span class="is-active" data-en="Auto">自动</span>
+                <span data-en="Day">白天</span>
+                <span data-en="Night">晚上</span>
+              </div>
+              <small data-en="Auto · by timezone">自动 · 按时区</small>
+            </div>
+          </aside>
+          <div class="ma-main">
+            <div class="ma-top">
+              <div>
+                <span class="ma-kicker" data-en="Mira's notes">Mira 的观察</span>
+                <strong class="ma-title" data-en="These Days">这几天</strong>
+              </div>
+              <span class="ma-status" data-en="Daytime">白天版</span>
+            </div>
+            <div class="ma-card">
+              <strong data-en="No rush to judge yet.">先不急着下判断。</strong>
+              <p data-en="The record is still thin. I will leave blanks before making up pretty numbers.">记录还少。宁可先留白，也不编一个好看的数字。</p>
+            </div>
+            <div class="ma-list" aria-hidden="true">
+              <span><b data-en="Mon">周一</b><i style="--w: 68%"></i><b data-en="6 h">6 小时</b></span>
+              <span><b data-en="Tue">周二</b><i style="--w: 42%"></i><b data-en="4 h">4 小时</b></span>
+              <span><b data-en="Today">今天</b><i style="--w: 23%"></i><b data-en="thin">偏少</b></span>
+            </div>
+          </div>
+        </article>
       </div>
     </div>
   </section>
@@ -743,6 +887,30 @@
       <li><strong data-en="No pressure">不制造压力</strong><p data-en="No scores, no red alerts.">没有分数，没有红色警告。</p></li>
       <li><strong data-en="Local by default">数据留在本地</strong><p data-en="Your state and habits stay on this Mac.">状态、感受、习惯，默认只在这台 Mac。</p></li>
     </ul>
+  </section>
+
+  <section class="block narrow theme-block col reveal">
+    <div class="head">
+      <p class="eyebrow" data-en="Day / Night">白天 / 夜晚</p>
+      <h2 data-en="Auto by default — quiet in both light and dark."><span class="cl">默认自动切换，</span><span class="cl">白天夜晚都安静。</span></h2>
+      <p class="body" data-en="<span class='copy-line'>EyeFlow uses your Mac's timezone and the day's sunrise and sunset to choose Day or Night.</span><span class='copy-line'>Day stays clean and clear; Night lowers brightness.</span><span class='copy-line'>If you prefer, you can also pin either mode manually.</span>"><span class="copy-line">EyeFlow 会按这台 Mac 的时区、当天日出和日落，自动判断白天或夜晚。</span><span class="copy-line">白天保持清爽，夜晚自动压低亮度。</span><span class="copy-line">你也可以手动固定在白天或晚上。</span></p>
+    </div>
+    <div class="theme-strip">
+      <div class="theme-control" aria-hidden="true">
+        <p class="theme-label" data-en="Appearance">外观</p>
+        <div class="theme-segment">
+          <span class="is-active" data-en="Auto">自动</span>
+          <span data-en="Day">白天</span>
+          <span data-en="Night">晚上</span>
+        </div>
+        <p class="theme-label" data-en="Auto follows your local day rhythm.">自动跟随本地昼夜节奏。</p>
+      </div>
+      <ul class="theme-list">
+        <li data-en="No extra setup: keep Auto on and EyeFlow changes with the day.">不需要额外设置：保持「自动」，EyeFlow 会跟着一天自己切换。</li>
+        <li data-en="Daytime screenshots on this page now use the same clean light surface.">页面里的界面展示，统一采用清爽的白天版本。</li>
+        <li data-en="Night mode still exists for late hours, with lower contrast and a softer reading feel.">夜晚版本仍然保留，适合晚间使用，亮度和对比会更轻。</li>
+      </ul>
+    </div>
   </section>
 
   <!-- ── Act 4 · 跟 Mira 歇一下（参与式护眼一刻） ─────────────── -->
