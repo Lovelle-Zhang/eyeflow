@@ -105,8 +105,8 @@ function main() {
   );
   assertMatches(
     mainJs,
-    /restDelivered = startIslandMicroRest\(islandRestMessage\(level\), state\.reminderId \|\| null\);[\s\S]*?const primaryOk = !primaryRestWanted \|\| restDelivered;[\s\S]*?if \(delivered\) \{\s*lastReminderAt = now;[\s\S]*?lastStableInterventionLevel = level;\s*pendingEscalationLevel = 0;\s*\}/,
-    "reminder delivery is transactional: latch/cooldown consumed only after the channel confirmed (2026-07-10)"
+    /function surfaceReminderChannels\(decision\)[\s\S]*?if \(!breakDue && now - lastSurfacedAt < SURFACE_MIN_INTERVAL_MS\)[\s\S]*?restDelivered = startIslandMicroRest\(islandRestMessage\(level\), reminderId \|\| null\);[\s\S]*?function applyInterventionBehavior\(state\)[\s\S]*?const surfaced = surfaceReminderChannels\(\{[\s\S]*?const primaryOk = !primaryRestWanted \|\| restDelivered;[\s\S]*?if \(delivered\) \{\s*lastReminderAt = now;[\s\S]*?lastStableInterventionLevel = level;\s*pendingEscalationLevel = 0;\s*\}/,
+    "reminder delivery is transactional through the single exit: unified floor + latch/cooldown consumed only after the channel confirmed (2026-07-10)"
   );
   assertMatches(
     mainJs,

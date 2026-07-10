@@ -73,6 +73,12 @@ const ESCALATION_DWELL_MS = 12 * 1000;
 // system notifications back-to-back. companion:notify (user-triggered) stays raw.
 let lastReminderNotifyAt = 0;
 const REMINDER_NOTIFY_MIN_INTERVAL_MS = 60 * 1000;
+// Unified floor across ALL user-facing interruption surfaces (bubble / pill /
+// capsule / banner): one surfacing per minute, enforced at the single exit
+// (surfaceReminderChannels). The real break point is exempt — its once-per-round
+// latch is the stronger guard (2026-07-10).
+let lastSurfacedAt = 0;
+const SURFACE_MIN_INTERVAL_MS = 60 * 1000;
 let lastMenuIntensity = null;
 let breakRestSurfaced = false;
 let autoPanelTimer = null;
@@ -2700,6 +2706,60 @@ function broadcastState(state) {
   applyInterventionBehavior(latestState);
 }
 
+// ── Single exit for every user-facing interruption surface ──────────────────
+// (Mira bubble / island heads-up pill / island look-away capsule / system banner)
+// 治本第一块砖 (docs/REMINDER_AUDIT_2026-07-10.md §六): the pressure-engine rework
+// needs trigger DECISIONS collapsed into a pure function and delivery collapsed
+// into one exit. This is that exit: it takes an explicit decision object, owns
+// the unified min-interval across ALL surfaces, and reports what actually
+// reached the screen. No other production code may pop a reminder surface
+// directly — new surfaces must be added HERE, inside the same floor.
+// Exceptions to the floor (both pre-existing, both deliberate): the real break
+// point (breakDue) is exempt — its once-per-round latch (breakRestSurfaced) is
+// the stronger guard — and its sole-channel banner rides `urgent` through
+// notifyReminder's own window.
+function surfaceReminderChannels(decision) {
+  const { now, level, breakDue, showBubble, showRest, showNotify, reminderMessage, reminderId, forceMode } = decision;
+  if (!breakDue && now - lastSurfacedAt < SURFACE_MIN_INTERVAL_MS) {
+    // Floor refused: something already interrupted the user within the last
+    // minute. Not a failed delivery — the caller leaves its books untouched.
+    return { attempted: false, delivered: false, restDelivered: false };
+  }
+  let delivered = false;
+  let restDelivered = false;
+  if (showBubble) {
+    showCompanionPanel();
+    delivered = true;
+    if (autoPanelTimer) {
+      clearTimeout(autoPanelTimer);
+      autoPanelTimer = null;
+    }
+    if (level === 2) {
+      autoPanelTimer = setTimeout(() => {
+        if (Number(latestState.interventionLevel || 1) === 2) hideCompanionPanel();
+      }, 9000);
+    }
+  }
+  // Mira exited → the island IS the reminder. At the real break point it runs the
+  // look-away micro-rest (带计时, self-closing); before the target it's only a
+  // no-countdown heads-up pill (提醒边界热身) — never a full rest capsule too early.
+  if (showRest) {
+    if (breakDue) {
+      restDelivered = startIslandMicroRest(islandRestMessage(level), reminderId || null);
+      delivered = delivered || restDelivered;
+    } else {
+      const pill = showNotchIsland({ mode: "text", message: islandNoticeMessage({ forceMode }, level) });
+      delivered = delivered || Boolean(pill && pill.ok);
+    }
+  }
+  if (showNotify) {
+    const sent = notifyReminder(reminderMessage, { urgent: breakDue && !showRest });
+    delivered = delivered || Boolean(sent && sent.ok);
+  }
+  if (delivered) lastSurfacedAt = now;
+  return { attempted: true, delivered, restDelivered };
+}
+
 function applyInterventionBehavior(state) {
   const level = Number(state.interventionLevel || 1);
   const now = Date.now();
@@ -2789,44 +2849,33 @@ function applyInterventionBehavior(state) {
   // multi-buzzes across drifting per-channel timers. An upward escalation
   // (e.g. L2 → L3) re-surfaces immediately.
   if (escalated || breakBypass || now - lastReminderAt > reminderCooldown) {
-    // Transactional delivery (2026-07-10 stopgap): deliver FIRST, consume the
-    // latch/cooldown only after a channel confirmed it reached the screen. The old
-    // order booked lastReminderAt/breakRestSurfaced up front, so a blocked island
-    // (look-away already running, break-lock covering it, window error) silently
-    // ate the once-per-round break capsule and the 12-min pending cooldown kept it
-    // buried. Now a failed delivery leaves the books untouched and the very next
-    // publish retries — bounded by MAX_REMINDER_DELIVERY_RETRIES.
-    let delivered = false;
-    let restDelivered = false;
-    if (showBubble) {
-      showCompanionPanel();
-      delivered = true;
-      if (autoPanelTimer) {
-        clearTimeout(autoPanelTimer);
-        autoPanelTimer = null;
-      }
-      if (level === 2) {
-        autoPanelTimer = setTimeout(() => {
-          if (Number(latestState.interventionLevel || 1) === 2) hideCompanionPanel();
-        }, 9000);
-      }
+    // Transactional delivery (2026-07-10 stopgap): deliver FIRST via the single
+    // exit, consume the latch/cooldown only after a channel confirmed it reached
+    // the screen. The old order booked lastReminderAt/breakRestSurfaced up front,
+    // so a blocked island (look-away already running, break-lock covering it,
+    // window error) silently ate the once-per-round break capsule and the 12-min
+    // pending cooldown kept it buried. Now a failed delivery leaves the books
+    // untouched and the very next publish retries — bounded by
+    // MAX_REMINDER_DELIVERY_RETRIES.
+    const surfaced = surfaceReminderChannels({
+      now,
+      level,
+      breakDue,
+      showBubble,
+      showRest,
+      showNotify,
+      reminderMessage,
+      reminderId: state.reminderId || null,
+      forceMode: Boolean(state.forceMode)
+    });
+    if (!surfaced.attempted) {
+      // The unified floor refused (a surface interrupted the user <60s ago and
+      // this is not the break point). Neither a delivery nor a failure — books
+      // and the retry streak stay untouched; cooldown/escalation gates reopen
+      // this later.
+      return;
     }
-    // Mira exited → the island IS the reminder. At the real break point it runs the
-    // look-away micro-rest (带计时, self-closing); before the target it's only a
-    // no-countdown heads-up pill (提醒边界热身) — never a full rest capsule too early.
-    if (showRest) {
-      if (breakDue) {
-        restDelivered = startIslandMicroRest(islandRestMessage(level), state.reminderId || null);
-        delivered = delivered || restDelivered;
-      } else {
-        const pill = showNotchIsland({ mode: "text", message: islandNoticeMessage(state, level) });
-        delivered = delivered || Boolean(pill && pill.ok);
-      }
-    }
-    if (showNotify) {
-      const sent = notifyReminder(reminderMessage, { urgent: breakDue && !showRest });
-      delivered = delivered || Boolean(sent && sent.ok);
-    }
+    const { delivered, restDelivered } = surfaced;
     // The break capsule is the PRIMARY channel at the real break point: a system
     // banner alone must not consume the once-per-round latch, or "banner fired,
     // capsule missing" would still bury the round's look-away.
@@ -3244,6 +3293,9 @@ function showNotchIsland(input, legacyOptions = {}) {
   }
 }
 
+// ⚠️ Open IPC surface with NO production caller (only dev demos/manual tests use
+// it). It bypasses surfaceReminderChannels() — the single exit and its unified
+// min-interval. 治本(压力引擎)时收权或删除:提醒面一律走单出口,不许绕行。
 ipcMain.handle("island:show", (_event, message) => showNotchIsland(message));
 
 // Exactly one EyeFlow. Several bundles share the id com.eyeflow.app (the installed
