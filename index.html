@@ -155,6 +155,9 @@
     .stake.accent .stake-i, .stake.accent .stake-tag { color: var(--mira-strong); }
     .stake.accent p { color: var(--ink-soft); }
     .stakes-close { margin-top: var(--s12); }
+    /* 结语在宽屏上是一句流动的总结,不竖排;inline-block 让换行只落在
+       子句边界(破折号后),不会劈进词里。窄屏(≤600)回到分行的节奏。 */
+    @media (min-width: 600px) { .stakes-close .copy-line { display: inline-block; } }
     .body + .body { margin-top: var(--s6); }
 
     /* ── Hero ───────────────────────────────────────────────── */
