@@ -115,6 +115,16 @@ function main() {
   );
   assertMatches(
     mainJs,
+    /reminder:resolve", \{[\s\S]*?restSeconds: ISLAND_LOOKAWAY_SECONDS/,
+    "island resolve carries the look-away's real length from the sensor's single constant"
+  );
+  assertMatches(
+    indexHtml,
+    /if \(status === "completed"\) \{[\s\S]*?appendDataEvent\("recovery_event", \{[\s\S]*?durationSeconds: Math\.max\(0, Number\(payload\.restSeconds\) \|\| 20\),\s*mode: "island-micro",[\s\S]*?trigger: "island-micro",/,
+    "a completed island micro-rest books a real recovery_event so 歇眼 statistics are honest (2026-07-10 X)"
+  );
+  assertMatches(
+    mainJs,
     /const REMINDER_NOTIFY_MIN_INTERVAL_MS = 60 \* 1000;[\s\S]*function notifyReminder\(message, \{ urgent = false \} = \{\}\)[\s\S]*?if \(!urgent && now - lastReminderNotifyAt < REMINDER_NOTIFY_MIN_INTERVAL_MS\)/,
     "reminder banners self-throttle to at most one per minute (2026-07-10)"
   );

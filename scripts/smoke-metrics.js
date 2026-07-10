@@ -107,6 +107,27 @@ function main() {
   assertEqual(m.recoverySecondsForShareEvent(recIncomplete), 0, "incomplete recovery does not count");
   assertEqual(m.naturalAwaySecondsForEvent(recUser), 0, "user recovery is not natural-away");
 
+  // --- island micro-rest books real recovery (2026-07-10 X 对齐) ---------
+  // The island's 20s look-away used to close only the reminder ledger and book
+  // ZERO 歇眼 seconds. Seed an island-micro event and prove every recovery
+  // consumer counts it — its mode must never fall into the system-* exclusions.
+  const recIslandMicro = {
+    type: "recovery_event",
+    durationSeconds: 20,
+    mode: "island-micro",
+    completed: true,
+    acceptedRest: true,
+    trigger: "island-micro"
+  };
+  assert(m.isUserRecovery(recIslandMicro), "island micro-rest is user recovery");
+  assertEqual(m.recoverySecondsForShareEvent(recIslandMicro), 20, "island micro-rest books its real 20 seconds");
+  assertEqual(m.naturalAwaySecondsForEvent(recIslandMicro), 0, "island micro-rest is not natural-away");
+  assertEqual(
+    m.recoverySecondsForDay({ events: [recUser, recIslandMicro, recIslandMicro] }),
+    160,
+    "歇眼 rises by 20s per completed island micro-rest (120 + 2×20)"
+  );
+
   // --- predicates -------------------------------------------------------
   assert(m.isUserRecovery(recUser), "recUser is user recovery");
   assert(!m.isUserRecovery(recAuto), "system-detected is not user recovery");

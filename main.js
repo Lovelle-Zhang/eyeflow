@@ -2964,7 +2964,10 @@ function startIslandMicroRest(message, reminderId) {
       dashboardWindow.webContents.send("reminder:resolve", {
         status: restedAway ? "completed" : "ignored",
         reminderId: reminderId || null,
-        source: "island-micro-rest"
+        source: "island-micro-rest",
+        // The look-away's real length, so the renderer books the recovery ledger
+        // from the sensor's single source instead of duplicating the constant.
+        restSeconds: ISLAND_LOOKAWAY_SECONDS
       });
     }
     showNotchIsland({ mode: "restResult", ok: restedAway });

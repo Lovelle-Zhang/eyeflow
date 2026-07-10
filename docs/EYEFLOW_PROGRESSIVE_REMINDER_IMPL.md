@@ -57,6 +57,26 @@
 （岛 / L2 默认 / 菜单四档的体感确认了）再叠这层，否则在未验证的改动上再架重构，两边都不好定位。
 规格现在备好，不必立刻让 CC 动。
 
+### 2026-07-10 dogfood 增补（已拍板，治本时必须纳入）
+
+背景：`docs/REMINDER_AUDIT_2026-07-10.md`（L3 缺席 + 连跳的全链路审计）与止血分支
+`reminder-l3-stopgap` 的后续发现。三件事随压力引擎一起做，不单独提前：
+
+1. **Y · micro / full 休息正式分层**：岛 20s look-away = **micro**（时长固定、只**降压**、
+   不清零轮次）；breakTarget 完整休息（overlay / break-lock）= **full**（**清零**轮次/压力）。
+   两层直接映射到压力引擎的降压/清零语义。落地时给设置页"休息时长"补一句
+   「只管完整休息」的说明（已拍板：现在不动文案）。
+2. **recovery_event 时长口径统一成"实际时长"**：现状四种口径并存——手动 overlay 与
+   系统休眠记 `breakTarget` **目标值**、自动离屏记实际 `idleSeconds`、force 中断记 0、
+   岛 micro 记实际 20s（2026-07-10 X 号对齐后）。治本时全部统一为实际发生时长，
+   金句/复盘同步换算（"one metric → one function" 纪律）。
+3. **岛 completed/ignored 判定语义修正**：现在用 `getSystemIdleTime` 猜"是否照做"，
+   猜错记 `ignored`，而 ignored 计数喂给静默闸（ignored≥2 → 断点前全静默）——
+   一环错账污染提醒引擎。压力引擎里重定义：传感不确定时**不记负面账**，
+   ignored 只在用户显式跳过时记。
+4. （工程遗留）`island:show` IPC 无生产调用方且绕过 `surfaceReminderChannels()`
+   单出口——收权或删除（main.js 处已有 ⚠️ 注释）。
+
 ---
 
 ## 1. 渐进式提醒系统（本次核心）

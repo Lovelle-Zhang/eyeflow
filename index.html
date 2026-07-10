@@ -10356,6 +10356,25 @@
         const had = closePendingReminder(status);
         if (!had) return;
         if (status === "completed") {
+          // 岛的 20 秒 look-away 是真实发生的恢复——补进 recovery_event 账本，
+          // 让「歇眼」统计和下面这句"已记录"都为真（2026-07-10 X 号对齐：此前
+          // 岛只销 reminder 账，歇眼记 0 秒）。mode 取"island-micro"：metrics 的
+          // 口径过滤只排除 system-detected / system-lifecycle，用户跟着做的
+          // micro-rest 属于 user recovery。时长来自传感器侧的单一常量
+          // （payload.restSeconds = ISLAND_LOOKAWAY_SECONDS），不在这里复制 20。
+          appendDataEvent("recovery_event", {
+            startedAt: "",
+            endedAt: new Date().toISOString(),
+            durationSeconds: Math.max(0, Number(payload.restSeconds) || 20),
+            mode: "island-micro",
+            completed: true,
+            feedback: "auto",
+            postRestFeedback: "auto",
+            acceptedRest: true,
+            trigger: "island-micro",
+            loadAfter: computeEyeLoad(),
+            ...rhythmEventContext()
+          });
           addSystemLog("在顶部岛完成了一次微休息", "你看远处休息了一下，EyeFlow 已记录这次恢复。");
         }
         render();
