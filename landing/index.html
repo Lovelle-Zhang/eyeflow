@@ -87,7 +87,8 @@
     /* ── Nav (not sticky) ───────────────────────────────────── */
     nav { position: relative; z-index: 2; display: flex; align-items: center; justify-content: space-between; padding: 22px 0 0; }
     nav .brand { display: inline-flex; align-items: center; gap: 9px; font-size: var(--t-small); font-weight: 500; letter-spacing: 0.01em; color: var(--ink); }
-    nav .mark { width: 20px; height: 20px; }
+    nav .mark { width: 20px; height: 20px; border-radius: 6px; background: linear-gradient(150deg, #1f3937, #142224); box-shadow: inset 0 0 0 0.5px rgba(127,241,213,0.12); position: relative; }
+    nav .mark::before { content: ""; position: absolute; top: 7px; left: 4px; width: 12px; height: 5px; border-radius: 99px; background: rgba(6,13,15,0.92); }
     nav .right { display: inline-flex; align-items: center; gap: 16px; }
     .lang { display: inline-flex; align-items: center; gap: 7px; }
     .lang button { border: 0; background: none; color: var(--muted-soft); font: inherit; font-size: 13px; cursor: pointer; padding: 2px; line-height: 1; transition: color 0.25s var(--ease); }
@@ -171,41 +172,18 @@
     .cta { display: inline-flex; align-items: center; justify-content: center; min-height: 46px; padding: 0 var(--s6); border-radius: var(--radius); border: 1px solid var(--mira-line); background: rgba(31,122,94,0.10); color: var(--mira-strong); font-size: var(--t-body); font-weight: 500; text-decoration: none; transition: background 0.25s var(--ease), border-color 0.25s var(--ease); }
     .cta:hover { background: rgba(79,201,156,0.24); border-color: rgba(79,201,156,0.44); }
 
-    /* ── EyeFlow mark (same glyph as the browser/page identity) ──── */
+    /* ── Mira (app dark-mode companion; the one signature) ──── */
     .mira { position: relative; display: grid; place-items: center; width: 190px; height: 190px; animation: float 8s var(--ease) infinite; }
     .mira::before { content: ""; position: absolute; width: 210px; height: 210px; border-radius: 50%; background: radial-gradient(circle, rgba(31,122,94,0.06), transparent 66%); }
-    .brand-mark,
-    nav .mark,
-    .ma-mark,
-    .ms-mark,
     .pet {
-      position: relative;
-      border-radius: 30%;
-      background: linear-gradient(150deg, #1f3937, #142224);
-      box-shadow: inset 0 0 0 0.5px rgba(127,241,213,0.12);
-      overflow: hidden;
-    }
-    .brand-mark::before,
-    nav .mark::before,
-    .ma-mark::before,
-    .ms-mark::before,
-    .pet::before {
-      content: "";
-      position: absolute;
-      top: 35%;
-      left: 20%;
-      width: 60%;
-      height: 24%;
-      border-radius: 999px;
-      background: rgba(6,13,15,0.92);
-    }
-    .pet {
-      width: var(--ms); aspect-ratio: 1;
-      box-shadow: inset 0 0 0 0.5px rgba(127,241,213,0.12), 0 18px 40px -14px rgba(46,50,38,0.22);
+      position: relative; width: var(--ms); aspect-ratio: 1; border-radius: 18px 18px 16px 16px;
+      background: linear-gradient(150deg, #fbfcf6 0%, #edf6ef 50%, #e5edf1 100%);
+      box-shadow: inset 0 0 0 1px rgba(24,32,31,0.06), inset 0 -8px 18px rgba(15,159,122,0.08), 0 18px 40px -14px rgba(46,50,38,0.22);
       display: grid; place-items: center; overflow: hidden;
       transform: scale(var(--rest)); transform-origin: center; animation: breathe var(--breath) var(--ease) infinite;
     }
-    .pet::after { display: none; }
+    .pet::before { content: ""; position: absolute; top: var(--vt); left: var(--vl); width: var(--vw); height: var(--vh); border-radius: 999px; background: linear-gradient(90deg, rgba(127,232,207,0.22), rgba(104,166,232,0.16)), rgba(20,34,36,0.88); box-shadow: inset 0 0 0 1px rgba(255,255,255,0.12); }
+    .pet::after { content: ""; position: absolute; top: var(--st); right: var(--sr); width: var(--ss); height: var(--ss); border-radius: 50%; background: #80d7bd; box-shadow: 0 0 10px rgba(128,215,189,0.45); animation: signal var(--breath) var(--ease) infinite; }
     .face { position: absolute; top: var(--ft); left: var(--fl); width: var(--fw); height: var(--fh); z-index: 1; }
     .face::before, .face::after { content: ""; position: absolute; top: 0; width: var(--eye); height: var(--eye); border-radius: 50%; background: #cdd6d1; }
     .face::before { left: 1px; } .face::after { right: 1px; }
@@ -215,7 +193,6 @@
     .cheek { position: absolute; top: var(--ct); width: var(--cw); height: var(--ch); border-radius: 999px; background: rgba(255,139,176,0.2); z-index: 1; }
     .cheek.l { left: var(--coff); } .cheek.r { right: var(--coff); }
     .ant { position: absolute; top: var(--at); left: var(--al); width: var(--aw); height: var(--ah); border-top: var(--astroke) solid rgba(180,222,208,0.22); border-radius: 50%; z-index: 0; transform-origin: 50% 100%; animation: sway var(--sway) var(--ease) infinite; }
-    .pet :is(.ant, .face, .mouth, .cheek) { display: none; }
 
     @keyframes float { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-5px); } }
     @keyframes breathe { 0%,100% { transform: scale(var(--rest)) translateY(0); } 40%,52% { transform: scale(var(--peak)) translateY(var(--lift)); } 88% { transform: scale(var(--rest)) translateY(0); } }
@@ -624,7 +601,7 @@
     </h1>
 
     <div class="stage">
-      <div class="mira" role="img" aria-label="EyeFlow 标识，安静呼吸着" data-en-label="EyeFlow mark, quietly breathing">
+      <div class="mira" role="img" aria-label="Mira，安静呼吸着的小生物" data-en-label="Mira, a small creature quietly breathing">
         <div class="pet" aria-hidden="true">
           <div class="ant"></div><div class="face"></div>
           <div class="cheek l"></div><div class="cheek r"></div><div class="mouth"></div>
@@ -744,7 +721,14 @@
         <div class="mock-cell">
         <p class="mock-tag" data-en="At the top">顶部提醒岛</p>
         <div class="island live" role="img" aria-label="EyeFlow 顶部提醒岛：看看远方休息一下，看完自动记录" data-en-label="EyeFlow's reminder island at the top of the screen: look into the distance to rest, logged automatically when you're done">
-          <span class="ic brand-mark" aria-hidden="true"></span>
+          <svg class="ic" viewBox="0 0 1024 1024" aria-hidden="true">
+            <defs><linearGradient id="isl-bg" x1="216" y1="156" x2="826" y2="874" gradientUnits="userSpaceOnUse"><stop offset="0" stop-color="#EAFFF6"/><stop offset=".58" stop-color="#BDEAFF"/><stop offset="1" stop-color="#F3EEC7"/></linearGradient></defs>
+            <rect width="1024" height="1024" rx="230" fill="url(#isl-bg)"/>
+            <rect x="177" y="335" width="671" height="318" rx="159" fill="#0E1C20"/>
+            <circle cx="380" cy="468" r="46" fill="#F8FFFC"/>
+            <circle cx="644" cy="468" r="46" fill="#F8FFFC"/>
+            <circle cx="803" cy="344" r="82" fill="#6FE7C3"/>
+          </svg>
           <div class="isl-body">
             <div class="isl-msg">
               <span class="rest" data-en="Look into the distance.">看看远方，休息一下。</span>
