@@ -12,6 +12,7 @@ const checks = [
   ["Check event/counter store consistency", "smoke:metrics-consistency"],
   ["Check reminder intensity matrix", "smoke:intensity"],
   ["Check session UI state", "smoke:session"],
+  ["Check reminder pressure engine scenario table", "smoke:reminder-engine"],
   ["Check current visual capture gate", "smoke:current-capture"],
   ["Check rest recovery flow", "smoke:rest"],
   ["Check source onboarding flow", "smoke:onboarding"],
