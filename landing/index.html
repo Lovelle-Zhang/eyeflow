@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <title>EyeFlow - Mira 的桌面陪伴空间</title>
   <meta name="description" content="EyeFlow 里住着 Mira：盯太久时，她轻轻提醒你抬头看远处。不打断、不监视、不伤眼。macOS 菜单栏应用，免费、本地运行、Apple 公证。">
-  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1024 1024'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='180' y1='120' x2='840' y2='900' gradientUnits='userSpaceOnUse'%3E%3Cstop offset='0' stop-color='%231f3937'/%3E%3Cstop offset='1' stop-color='%23142224'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect x='128' y='128' width='768' height='768' rx='210' fill='url(%23g)'/%3E%3Crect x='282' y='420' width='460' height='184' rx='92' fill='%23060d0f' fill-opacity='.92'/%3E%3C/svg%3E">
+  <link rel="icon" type="image/svg+xml" href="favicon.svg?v=2">
   <link rel="canonical" href="https://eyeflow.app/">
   <meta property="og:type" content="website">
   <meta property="og:url" content="https://eyeflow.app/">
@@ -87,8 +87,7 @@
     /* ── Nav (not sticky) ───────────────────────────────────── */
     nav { position: relative; z-index: 2; display: flex; align-items: center; justify-content: space-between; padding: 22px 0 0; }
     nav .brand { display: inline-flex; align-items: center; gap: 9px; font-size: var(--t-small); font-weight: 500; letter-spacing: 0.01em; color: var(--ink); }
-    nav .mark { width: 20px; height: 20px; border-radius: 6px; background: linear-gradient(150deg, #1f3937, #142224); box-shadow: inset 0 0 0 0.5px rgba(127,241,213,0.12); position: relative; }
-    nav .mark::before { content: ""; position: absolute; top: 7px; left: 4px; width: 12px; height: 5px; border-radius: 99px; background: rgba(6,13,15,0.92); }
+    nav .mark { width: 20px; height: 20px; }
     nav .right { display: inline-flex; align-items: center; gap: 16px; }
     .lang { display: inline-flex; align-items: center; gap: 7px; }
     .lang button { border: 0; background: none; color: var(--muted-soft); font: inherit; font-size: 13px; cursor: pointer; padding: 2px; line-height: 1; transition: color 0.25s var(--ease); }
@@ -194,6 +193,18 @@
     .cheek.l { left: var(--coff); } .cheek.r { right: var(--coff); }
     .ant { position: absolute; top: var(--at); left: var(--al); width: var(--aw); height: var(--ah); border-top: var(--astroke) solid rgba(180,222,208,0.22); border-radius: 50%; z-index: 0; transform-origin: 50% 100%; animation: sway var(--sway) var(--ease) infinite; }
 
+    /* EyeFlow brand mark — browser favicon, nav mark and app-mock marks share
+       the same dark rounded square. Mira's character avatar remains separate. */
+    nav .mark, .ma-mark, .ms-mark {
+      position: relative; border-radius: 30%; overflow: hidden;
+      background: linear-gradient(150deg, #1f3937, #142224);
+      box-shadow: inset 0 0 0 0.5px rgba(127,241,213,0.12);
+    }
+    nav .mark::before, .ma-mark::before, .ms-mark::before {
+      content: ""; position: absolute; top: 35%; left: 20%; width: 60%; height: 24%;
+      border-radius: 999px; background: rgba(6,13,15,0.92);
+    }
+
     @keyframes float { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-5px); } }
     @keyframes breathe { 0%,100% { transform: scale(var(--rest)) translateY(0); } 40%,52% { transform: scale(var(--peak)) translateY(var(--lift)); } 88% { transform: scale(var(--rest)) translateY(0); } }
     @keyframes signal { 0%,100% { transform: scale(0.98); } 46% { transform: scale(1.05); } }
@@ -272,8 +283,7 @@
     .mock-app { aspect-ratio: 1.62; display: grid; grid-template-columns: 22.5cqi minmax(0, 1fr); overflow: hidden; text-align: left; color: var(--ink); background: linear-gradient(180deg, var(--panel-strong), #F2F3E8); }
     .ma-side { min-width: 0; padding: 4.2cqi 2.5cqi; display: grid; align-content: start; gap: 2.3cqi; background: rgba(232,233,221,0.68); border-right: 1px solid var(--line); }
     .ma-brand { display: inline-flex; align-items: center; gap: 1.6cqi; min-width: 0; font-size: max(2.4cqi, 10px); line-height: 1.2; font-weight: 600; color: var(--ink); }
-    .ma-mark { position: relative; width: 3.2cqi; height: 3.2cqi; min-width: 14px; min-height: 14px; border-radius: 24%; background: linear-gradient(150deg, #1f3937, #142224); }
-    .ma-mark::before { content: ""; position: absolute; top: 35%; left: 20%; width: 60%; height: 24%; border-radius: 999px; background: rgba(6,13,15,0.9); }
+    .ma-mark { width: 3.2cqi; height: 3.2cqi; min-width: 14px; min-height: 14px; }
     .ma-nav { display: grid; gap: 0.9cqi; margin-top: 1.2cqi; }
     .ma-nav span { min-height: 4.5cqi; display: flex; align-items: center; padding-inline: 1.6cqi; border-radius: 1.3cqi; font-size: max(2.2cqi, 10px); line-height: 1.2; color: var(--muted); white-space: nowrap; }
     .ma-nav .is-active { color: var(--mira-strong); background: rgba(31,122,94,0.11); }
@@ -343,8 +353,7 @@
     .ms-divider { width: 100%; height: 1px; background: var(--line); margin-top: 1cqi; }
     .ms-footer { width: 100%; display: flex; align-items: center; justify-content: space-between; }
     .ms-brand { display: inline-flex; align-items: center; gap: 1.8cqi; }
-    .ms-mark { width: 16px; height: 16px; width: 3.4cqi; height: 3.4cqi; border-radius: 22%; background: linear-gradient(150deg, #1f3937, #142224); box-shadow: inset 0 0 0 0.5px rgba(127,241,213,0.12); position: relative; }
-    .ms-mark::before { content: ""; position: absolute; top: 34%; left: 20%; width: 60%; height: 26%; border-radius: 99px; background: rgba(6,13,15,0.92); }
+    .ms-mark { width: 16px; height: 16px; width: 3.4cqi; height: 3.4cqi; }
     .ms-brand b { display: block; font-size: 12px; font-size: max(2.5cqi, 11px); font-weight: 600; color: var(--ink); line-height: 1.3; }
     .ms-brand i { display: block; font-style: normal; font-size: 10px; font-size: max(2.1cqi, 10px); color: var(--muted-soft); }
     .ms-domain { font-size: 11px; font-size: max(2.3cqi, 10px); color: var(--muted-soft); }
