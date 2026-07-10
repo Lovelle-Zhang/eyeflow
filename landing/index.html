@@ -17,8 +17,8 @@
   <style>
     /* ============================================================
        仅用 EyeFlow 现有 dark-mode token，不引入新色/新渐变。
-       结构：单栏 · Hero = 一句主张 + 一句副文案 + Mira 呼吸 + 一个 Download。
-       排版：标题 -0.02em / 正文 1.6（Flighty）。macOS 原生字面。
+       结构：单栏 · Hero = 一句主张 + Mira 呼吸 + 一个 Download。
+       排版：中文零字距，关键句手工断行；正文长行只用留白和行高。
        ============================================================ */
     :root {
       color-scheme: light;
@@ -97,7 +97,7 @@
     nav .dl { font-size: var(--t-small); font-weight: 500; color: var(--mira-strong); text-decoration: none; }
 
     /* ── Type — all sizes/measures/rhythm from tokens, no one-offs ─ */
-    h1 { margin: 0; font-size: var(--t-display); font-weight: 300; letter-spacing: 0.02em; line-height: 1.42; color: var(--ink); }
+    h1 { margin: 0; font-size: var(--t-display); font-weight: 300; letter-spacing: 0; line-height: 1.42; color: var(--ink); }
     h2 { margin: 0; max-width: var(--measure-head); margin-inline: auto; font-size: var(--t-title); font-weight: 500; letter-spacing: 0.01em; line-height: 1.45; color: var(--ink); }
     .sub { margin: 0; max-width: var(--measure-sub); margin-inline: auto; font-size: var(--t-sub); font-weight: 400; line-height: 1.85; color: var(--muted); }
     .body { margin: 0; max-width: var(--measure); margin-inline: auto; font-size: var(--t-body); font-weight: 400; line-height: 1.9; color: var(--muted); }
@@ -116,7 +116,7 @@
 
     /* Line-breaking rigor — balance short text, avoid orphans in body, and apply
        strict CJK kinsoku so punctuation never orphans at a line edge. */
-    h1, h2, .sub { text-wrap: balance; }
+    h2, .sub { text-wrap: balance; }
     .body { text-wrap: pretty; }
     body { line-break: strict; }
     /* Keep each CJK clause (comma/period/colon/dash-delimited) whole, so a
@@ -159,12 +159,15 @@
     /* ── Hero ───────────────────────────────────────────────── */
     .hero { text-align: center; padding-top: clamp(84px, 14vh, 156px); padding-bottom: 0; }
     .hero h1 + .sub { margin-top: var(--flow-title); }
-    /* 主 slogan:体感钩当头。CJK 500 字重(排版课),两行由 <br> 定死断点。 */
-    .hero-slogan { margin: 0 auto; max-width: 16em; font-size: var(--t-display); line-height: 1.5; font-weight: 300; letter-spacing: 0.02em; color: var(--ink); }
+    /* 主 slogan:体感钩当头。语义行手工排版，避免移动端把关键词拆坏。 */
+    .hero-slogan { margin: 0 auto; max-width: 17em; font-size: var(--t-display); line-height: 1.42; font-weight: 300; letter-spacing: 0; color: var(--ink); text-wrap: auto; }
+    .hero-row { display: block; }
+    .hero-row + .hero-row { margin-top: 0.08em; }
+    .hero-row > span { white-space: nowrap; }
     .hero-slogan .kw-mira { text-decoration: none; color: inherit; font-weight: inherit; }
-    .cta + .meta { margin-top: var(--s6); }
+    .cta + .meta { margin-top: 22px; }
     .hero .stage { position: relative; display: grid; justify-items: center; gap: var(--s6); margin: var(--s8) 0 var(--s6); }
-    .cta { display: inline-flex; align-items: center; justify-content: center; min-height: 48px; padding: 0 var(--s6); border-radius: var(--radius); border: 1px solid var(--mira-line); background: var(--mira-soft); color: var(--mira-strong); font-size: var(--t-body); font-weight: 500; text-decoration: none; transition: background 0.25s var(--ease), border-color 0.25s var(--ease); }
+    .cta { display: inline-flex; align-items: center; justify-content: center; min-height: 46px; padding: 0 var(--s6); border-radius: var(--radius); border: 1px solid var(--mira-line); background: rgba(31,122,94,0.10); color: var(--mira-strong); font-size: var(--t-body); font-weight: 500; text-decoration: none; transition: background 0.25s var(--ease), border-color 0.25s var(--ease); }
     .cta:hover { background: rgba(79,201,156,0.24); border-color: rgba(79,201,156,0.44); }
 
     /* ── Mira (app dark-mode companion; the one signature) ──── */
@@ -419,22 +422,30 @@
     html[lang="en"] h1 { letter-spacing: -0.03em; line-height: 1.05; }
 
     /* Chinese typography — treat CJK by its own rules, not Latin's. Lighter weight
-       reads more refined; gentle POSITIVE tracking (字距) gives characters air;
-       roomier leading. (Latin keeps its tight, negative-tracked settings above.) */
+       and deliberate line breaks carry the refinement; normal text keeps zero
+       tracking so the page does not feel airy-but-loose. */
     html[lang="zh-CN"] { font-family: "PingFang SC", "Hiragino Sans GB", -apple-system, BlinkMacSystemFont, sans-serif; }
-    html[lang="zh-CN"] h1 { font-weight: 300; letter-spacing: 0.02em; line-height: 1.42; }
+    html[lang="zh-CN"] h1 { font-weight: 300; letter-spacing: 0; line-height: 1.42; }
     html[lang="zh-CN"] .stakes-lead { font-weight: 300; }   /* Display 例外:细体,不随 CJK h2 加粗 */
-    html[lang="zh-CN"] h2 { font-weight: 500; letter-spacing: 0.03em; line-height: 1.42; }
-    html[lang="zh-CN"] .sub { letter-spacing: 0.03em; line-height: 1.85; }
-    html[lang="zh-CN"] .body { letter-spacing: 0.03em; line-height: 1.9; }
-    html[lang="zh-CN"] .eyebrow { letter-spacing: 0.32em; }
-    html[lang="zh-CN"] .meta { letter-spacing: 0.06em; }
+    html[lang="zh-CN"] h2 { font-weight: 500; letter-spacing: 0; line-height: 1.42; }
+    html[lang="zh-CN"] .sub { letter-spacing: 0; line-height: 1.85; }
+    html[lang="zh-CN"] .body { letter-spacing: 0; line-height: 1.9; }
+    html[lang="zh-CN"] .eyebrow { letter-spacing: 0.16em; }
+    html[lang="zh-CN"] .meta { letter-spacing: 0; line-height: 1.45; }
 
     @media (max-width: 560px) {
       .col { padding-inline: 20px; }
-      h1 { font-size: clamp(2rem, 9vw, 2.6rem); }
+      nav .right { gap: 0; }
+      .lang { display: none; }
+      .hero { padding-top: clamp(78px, 12vh, 104px); }
+      .hero-slogan { max-width: 10.5em; font-size: 1.75rem; line-height: 1.42; }
+      .hero-row + .hero-row { margin-top: 0.24em; }
+      .hero-row > span { display: block; }
+      .hero .stage { margin: 30px 0 26px; }
       .mira { width: 150px; height: 150px; }
       .hero { min-height: auto; }
+      .cta { min-height: 44px; padding-inline: 22px; }
+      .cta + .meta { margin-top: 20px; }
       .final-panel { min-height: 360px; }
       .tenets { grid-template-columns: 1fr; max-width: 28em; margin-inline: auto; }
       .tenets li { padding: var(--s6) 0; }
@@ -479,9 +490,9 @@
 
   <!-- ── Hero · 主 slogan(体感钩)────────────────────────────── -->
   <section class="hero col">
-    <h1 class="hero-slogan">
-      <span class="cl" data-en="Screens blur the world a little.">屏幕看久了，世界会有点糊。</span><br>
-      <span class="cl" data-en="<b class='kw-mira'>Mira</b> helps you bring it back into focus."><b class="kw-mira">Mira</b> 陪你，一点点找回清晰。</span>
+    <h1 class="hero-slogan" data-en="<span class='hero-row'><span>Screens blur the world</span> <span>a little.</span></span><span class='hero-row'><span><b class='kw-mira'>Mira</b> helps you</span> <span>bring it back into focus.</span></span>">
+      <span class="hero-row"><span>屏幕看久了，</span><span>世界会有点糊。</span></span>
+      <span class="hero-row"><span><b class="kw-mira">Mira</b> 陪你，</span><span>一点点找回清晰。</span></span>
     </h1>
 
     <div class="stage">
