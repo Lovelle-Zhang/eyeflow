@@ -14076,8 +14076,16 @@
     function shouldHoldMiraSilence(load) {
       if (!hasAssessedToday() || state.settings.intensity === "force") return false;
       const targetSeconds = Number(els.focusTarget.value) * 60;
+      // 硬规则（2026-07-10 审计止血）：到达真正断点后永不静默。静默闸只做断点前的
+      // 降噪，不允许吃掉 L2/L3 的断点承诺——此前深度工作/被忽略计数/连续高负荷三条
+      // 都能在 55%–85% 目标后把 level 压回 1，绿胶囊在断点后整段缺席。
+      const silenceBreakDue = ((isRunning || isAutoTracking()) && elapsedSeconds >= targetSeconds)
+        || Boolean(latestActivity && isNaturalBreak(latestActivity));
+      if (silenceBreakDue) return false;
       const stats = state.reminderStats || {};
-      if (latestActivity?.isDeepWorkApp && elapsedSeconds >= targetSeconds * 0.55) return true;
+      // 深度工作静默必须用户显式开启「深度工作时只显示 Mira」开关才生效——
+      // 与设置项的 opt-in 承诺一致（此前漏查开关，默认关也会静默）。
+      if (state.settings.deepWorkMiraOnlyToggle && latestActivity?.isDeepWorkApp && elapsedSeconds >= targetSeconds * 0.55) return true;
       if (Number(stats.ignored || 0) >= 2 && elapsedSeconds >= targetSeconds * 0.65) return true;
       return highWorkStreak(load) >= 3 && (isRunning || isAutoTracking());
     }

@@ -74,6 +74,26 @@ function main() {
     "L3 break-point reminder cannot be swallowed by busy activity"
   );
   assertMatches(
+    indexHtml,
+    /function shouldHoldMiraSilence\(load\)[\s\S]*?const silenceBreakDue =[\s\S]*?if \(silenceBreakDue\) return false;/,
+    "silence gate can never swallow the real break point (2026-07-10 hard rule)"
+  );
+  assertMatches(
+    indexHtml,
+    /if \(state\.settings\.deepWorkMiraOnlyToggle && latestActivity\?\.isDeepWorkApp && elapsedSeconds >= targetSeconds \* 0\.55\) return true;/,
+    "deep-work silence requires the explicit user toggle"
+  );
+  {
+    const deepWorkFnStart = mainJs.indexOf("function isDeepWorkApp");
+    if (deepWorkFnStart < 0) throw new Error("isDeepWorkApp missing from main.js");
+    const deepWorkFn = mainJs.slice(deepWorkFnStart, mainJs.indexOf("}", deepWorkFnStart + 400) + 1);
+    ["Google Chrome", '"Arc"', '"Safari"'].forEach((browser) => {
+      if (deepWorkFn.includes(browser)) {
+        throw new Error(`browsers must not be blanket deep-work apps: found ${browser} in isDeepWorkApp`);
+      }
+    });
+  }
+  assertMatches(
     mainJs,
     /const l3BreakPoint = level >= 3 && breakDue;[\s\S]*const showBubble = companionVisible && level >= 2 && !l3BreakPoint;[\s\S]*const showRest = islandEnabled && level >= 2 && \(companionExited \|\| l3BreakPoint\);[\s\S]*const showNotify = level >= 2 && \(companionExited \|\| l3BreakPoint\) && \(level >= 3 \|\| !islandEnabled\);/,
     "L3 real break point routes to green capsule plus system notification even if Mira is visible"

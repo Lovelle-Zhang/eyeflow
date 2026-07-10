@@ -27,6 +27,7 @@ The rule: do not trust visual labels alone. The source of behavior is `intervent
 Renderer, `index.html`:
 
 - `currentIntervention(load)`: maps current state and `intensity` to behavior/display level and copy.
+- `shouldHoldMiraSilence(load)`: the empathy silence gate, evaluated BEFORE every non-force branch. It may quiet pre-break-point nudges, but it must NEVER return true once the real break point is due (hard rule, 2026-07-10). Deep-work silence inside it requires `deepWorkMiraOnlyToggle`.
 - `shouldSurfaceReminder(intervention, load)`: decides whether a renderer-side pending reminder may be recorded.
 - `maybeRecordReminder(intervention, load)`: creates or upgrades `state.pendingReminder`.
 - `renderInterventionStrategy(load)`: starts L4 directly, otherwise records normal reminders.
@@ -281,6 +282,7 @@ Expected result: top green countdown rest starts automatically.
 
 When L3 does not start the countdown, check these in order:
 
+0. Is `shouldHoldMiraSilence(load)` forcing `level: 1`? The silence gate runs before every non-force branch. Since 2026-07-10 it must return false whenever the real break point is due, and its deep-work branch must require `deepWorkMiraOnlyToggle`. (This gate was the top root cause of the 2026-07-10 "missing green capsule" dogfood bug — see `docs/REMINDER_AUDIT_2026-07-10.md`.)
 1. Is the running process new? Use `ps -axo pid,ppid,etime,command | rg "EyeFlow.app|/Applications/EyeFlow"`. If elapsed time is older than the latest install, the user is testing an old process.
 2. Does installed `index.html` contain `level: state.settings.intensity === "clear" ? 3 : 2` in the normal break-point branch?
 3. Does `publishCompanionState` include `interventionLevel` and `breakDue`?

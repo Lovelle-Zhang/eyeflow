@@ -2902,6 +2902,9 @@ function openAccessibilitySettings() {
 }
 
 function isDeepWorkApp(appName) {
+  // 浏览器不再一刀切算深度工作（2026-07-10 审计止血）：对开发者它们几乎常驻前台，
+  // 会把「深度工作静默」变成永久静默、吃掉断点提醒。真在浏览器里深度工作的场景，
+  // 交给用户的「深度工作时只显示 Mira」开关语义本身，不靠 app 名单猜。
   return [
     "Cursor",
     "Visual Studio Code",
@@ -2909,9 +2912,6 @@ function isDeepWorkApp(appName) {
     "Terminal",
     "iTerm2",
     "Warp",
-    "Google Chrome",
-    "Arc",
-    "Safari",
     "Figma"
   ].some((name) => appName.toLowerCase().includes(name.toLowerCase()));
 }
