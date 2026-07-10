@@ -11838,6 +11838,12 @@
       const hadPending = closePendingReminder(reminderStatus);
       state.deferReminderUntilBreak = false;
       state.deferReminderNeedsWork = false;
+      // 断点已响应 → 下一次提醒重新走完整记录冷却（复用现有账本，不加新账）。
+      // 真机实锤（2026-07-10）：岛完成销账 5 秒后，main 的 activeSeconds 未随轮次
+      // 复位 + 用户恰在 look-away 的 8–45s idle 窗口里 → isNaturalBreak 命中 →
+      // 立刻重录一张新 pending，灰色断点卡"复活"并挂到 12 分钟超时（又喂一次
+      // ignored 错账）。main 侧同窗口的胶囊重发已被统一 60s 地板盖住。
+      state.lastReminderAt = Date.now();
       return hadPending;
     }
 

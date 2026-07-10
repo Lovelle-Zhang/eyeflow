@@ -153,6 +153,11 @@ function main() {
     "completeRecovery walks the same closeBreakRound path as the island completion"
   );
   assertMatches(
+    indexHtml,
+    /function closeBreakRound\(\{ reminderStatus = "completed" \} = \{\}\) \{[\s\S]*?state\.lastReminderAt = Date\.now\(\);[\s\S]*?return hadPending;/,
+    "closing a round re-arms the full reminder-record cooldown — a naturalBreak in the look-away idle window must not re-record a pending 5s later (2026-07-10)"
+  );
+  assertMatches(
     mainJs,
     /const REMINDER_NOTIFY_MIN_INTERVAL_MS = 60 \* 1000;[\s\S]*function notifyReminder\(message, \{ urgent = false \} = \{\}\)[\s\S]*?if \(!urgent && now - lastReminderNotifyAt < REMINDER_NOTIFY_MIN_INTERVAL_MS\)/,
     "reminder banners self-throttle to at most one per minute (2026-07-10)"
