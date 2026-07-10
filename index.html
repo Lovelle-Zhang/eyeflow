@@ -165,7 +165,8 @@
     .hero-row { display: block; }
     .hero-row + .hero-row { margin-top: 0.08em; }
     .hero-row > span { white-space: nowrap; }
-    .hero-row > span + span { margin-left: -0.12em; }
+    /* 只有 CJK 需要收句读后的视觉空隙;拉丁词距是词距,不能吃掉。 */
+    html[lang="zh-CN"] .hero-row > span + span { margin-left: -0.12em; }
     .hero-slogan .kw-mira { text-decoration: none; color: inherit; font-weight: inherit; }
     .cta + .meta { margin-top: 22px; }
     .hero .stage { position: relative; display: grid; justify-items: center; gap: var(--s6); margin: var(--s8) 0 var(--s6); }
@@ -547,14 +548,21 @@
 
     @media (max-width: 560px) {
       .col { padding-inline: 20px; }
-      nav .right { gap: 0; }
-      .lang { display: none; }
-      .hero { padding-top: clamp(78px, 12vh, 104px); }
-      .hero-slogan { max-width: 10.5em; font-size: 1.75rem; line-height: 1.42; }
-      .hero-row + .hero-row { margin-top: 0.24em; }
+      /* 手机不藏语言切换——默认语言跟系统走,入口必须留着。 */
+      nav .right { gap: 12px; }
+      nav .dl { min-height: 32px; padding: 0 13px; }
+      .hero { padding-top: clamp(64px, 10vh, 92px); }
+      .hero-slogan { max-width: 10.5em; font-size: 1.75rem; line-height: 1.5; }
+      /* 两句之间一口呼吸:四行读成两联,不是平铺的四行。 */
+      .hero-row + .hero-row { margin-top: 0.45em; }
       .hero-row > span { display: block; }
-      .hero-row > span + span { margin-left: 0; }
-      .hero .stage { margin: 30px 0 26px; }
+      html[lang="zh-CN"] .hero-row > span + span { margin-left: 0; }
+      /* EN 手机端不逐段硬断行(会掉出 "a little." 孤行):
+         句内自然换行 + balance,一句摊成匀称的两行。 */
+      html[lang="en"] .hero-slogan { max-width: 12em; font-size: 1.625rem; }
+      html[lang="en"] .hero-row { text-wrap: balance; }
+      html[lang="en"] .hero-row > span { display: inline; white-space: normal; }
+      .hero .stage { margin: 26px 0 22px; }
       h2 .cl, .sub .cl { display: block; white-space: nowrap; }
       .brand-line .cl + .cl { margin-left: 0; }
       .body .copy-line { display: block; white-space: normal; }
