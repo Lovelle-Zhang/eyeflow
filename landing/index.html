@@ -325,6 +325,7 @@
     /* 两张卡各自贴合内容、居中——沿用旧版并排时的比例，不再拉伸成等宽长条 */
     .mock-stack .companion-card, .mock-stack .island { max-width: 100%; }
     /* 哲学四条:发丝线四栏,克制无边框。 */
+    .trust-block { padding-block: clamp(84px, 12vh, 132px); }
     .tenets { list-style: none; margin: var(--s12) auto 0; padding: 0; max-width: 920px; display: grid; grid-template-columns: repeat(4, 1fr); text-align: left; }
     .tenets li { padding: var(--s1) clamp(16px, 2vw, 26px); }
     .tenets li + li { border-left: 1px solid var(--line); }
@@ -332,6 +333,7 @@
     .tenets p { margin: var(--s3) 0 0; font-size: var(--t-small); line-height: 1.6; color: var(--muted); text-wrap: pretty; }
     .brand-line { max-width: 22em; }
     .brand-line .cl + .cl { margin-left: 0.18em; }
+    .final-panel .actions { margin-top: var(--s6); }
     .waitlist { margin-top: var(--s6); }
     .waitlist a { color: var(--mira-strong); text-decoration: none; border-bottom: 1px solid var(--mira-line); padding-bottom: 1px; margin-left: 6px; }
     .feature-block { padding-block: clamp(88px, 13vh, 140px); }
@@ -369,6 +371,10 @@
          outgrows the ratio box and screen-card overflow:hidden clips it (Safari). */
       .mock-break, .mock-share { aspect-ratio: auto; }
       .mock-break { padding-block: 6cqi; }
+      .mock-share { gap: var(--s4); padding: var(--s6); }
+      .ms-metrics { flex-wrap: wrap; gap: var(--s4) var(--s8); }
+      .ms-metrics > div { min-width: 74px; }
+      .ms-footer { align-items: flex-end; gap: var(--s4); }
       /* Stacked, both feature rows read the same way: words first, proof after.
          (Desktop alternates sides; the alternation means nothing in one column.) */
       .daily-row .screen-card, .daily-row .mock-stack { order: 2; }
@@ -377,13 +383,13 @@
          overflow:hidden that clipped Mira at the top (Safari). Content-driven
          height can never clip. */
     }
-    .final-panel { max-width: 920px; min-height: 360px; margin-inline: auto; padding: 40px clamp(24px, 6vw, 72px) 42px; display: grid; justify-items: center; align-content: center; border-radius: 18px; border: 1px solid rgba(255,255,255,0.07); background: rgba(24,26,27,0.9); box-shadow: 0 18px 46px rgba(0,0,0,0.18); }
+    .final-panel { max-width: 860px; min-height: 340px; margin-inline: auto; padding: 38px clamp(24px, 6vw, 64px) 40px; display: grid; justify-items: center; align-content: center; border-radius: 18px; border: 1px solid rgba(255,255,255,0.07); background: rgba(24,26,27,0.9); box-shadow: 0 18px 46px rgba(0,0,0,0.18); }
     /* 纸页里「变暗的一刻」——局部切回 app 暗色 token,文字/CTA/Mira 保持亮色读感 */
     .final-panel { --ink: #f3f4f6; --ink-soft: #d3d5d9; --muted: #9a9aa3; --muted-soft: #6f6f78; --line: rgba(255,255,255,0.08); --mira: #4fc99c; --mira-strong: #62d3aa; --mira-soft: rgba(79,201,156,0.16); --mira-line: rgba(79,201,156,0.30); }
     .final-panel .pet, .mock-break .pet { background: linear-gradient(150deg, #1a3230 0%, #21403c 48%, #152523 100%); box-shadow: inset 0 0 0 1px rgba(127,241,213,0.08), inset 0 -10px 20px rgba(3,10,12,0.28), 0 20px 44px -12px rgba(0,0,0,0.5); }
     .final-panel .pet::before, .mock-break .pet::before { background: linear-gradient(90deg, rgba(129,239,216,0.16), rgba(108,176,255,0.10)), rgba(6,13,15,0.92); }
     .final-panel .mouth, .mock-break .mouth { border-bottom-color: rgba(126,244,216,0.5); }
-    .final-panel .mira { width: 96px; height: 96px; margin-bottom: var(--s8); }
+    .final-panel .mira { width: 88px; height: 88px; margin-bottom: var(--s6); }
     .final-panel .pet { --rest: 1.05; --peak: 1.08; }
 
     /* ── Act 4 · 跟 Mira 歇一下（参与式护眼一刻） ───────────────
@@ -391,7 +397,7 @@
        paced by a breathing dot + a soft ring. Gentle by design (scale-only breath,
        no luminance flash); reduced-motion falls back to a manual, still version. */
     .rest-act { min-height: 72vh; display: grid; place-items: center; text-align: center; padding-block: clamp(92px, 13vh, 148px); }
-    .rest-stage { position: relative; width: 100%; max-width: 31em; display: grid; justify-items: center; }
+    .rest-stage { position: relative; width: 100%; max-width: 29em; display: grid; justify-items: center; }
     .rest-panel { display: grid; justify-items: center; gap: var(--s6); }
     .rest-act [data-when] { display: none; }
     .rest-act[data-state="invite"] [data-when="invite"],
@@ -412,7 +418,7 @@
     .rest-btn:hover { background: var(--mira-strong); border-color: transparent; }
     .rest-skip { margin-top: var(--s2); border: 0; background: none; color: var(--muted-soft); font: inherit; font-size: var(--t-small); letter-spacing: 0.04em; cursor: pointer; transition: color 0.25s var(--ease); }
     .rest-skip:hover { color: var(--muted); }
-    .pacer { --circ: 591; position: relative; width: 208px; height: 208px; display: grid; place-items: center; margin: var(--s4) 0; }
+    .pacer { --circ: 591; position: relative; width: 196px; height: 196px; display: grid; place-items: center; margin: var(--s3) 0; }
     .pacer .ring { position: absolute; inset: 0; width: 100%; height: 100%; transform: rotate(-90deg); }
     .pacer .ring circle { fill: none; stroke: var(--line); stroke-width: 2; }
     .pacer .ring .prog { stroke: var(--mira); stroke-width: 3; stroke-linecap: round; stroke-dasharray: var(--circ); stroke-dashoffset: var(--circ); }
@@ -721,9 +727,10 @@
   </section>
 
   <!-- ── 她的规矩(哲学四条,信任层)──────────────────────────── -->
-  <section class="block narrow col reveal">
+  <section class="block narrow trust-block col reveal">
     <div class="head">
       <p class="eyebrow" data-en="Her rules">她的规矩</p>
+      <h2 data-en="Gentle, but with boundaries."><span class="cl">温柔，</span><span class="cl">但有边界。</span></h2>
     </div>
     <ul class="tenets">
       <li><strong data-en="No interrupting">不打断</strong><p data-en="She never forces a stop — unless you chose it.">除非你主动选择，不强制停下。</p></li>
@@ -734,7 +741,7 @@
   </section>
 
   <!-- ── Act 4 · 跟 Mira 歇一下（参与式护眼一刻） ─────────────── -->
-  <section class="rest-act reveal col" data-state="invite" aria-label="跟 Mira 歇一下" data-en-label="Rest with Mira">
+  <section id="rest" class="rest-act col" data-state="invite" aria-label="跟 Mira 歇一下" data-en-label="Rest with Mira">
     <div class="rest-stage">
       <div class="rest-panel" data-when="invite">
         <p class="eyebrow" data-en="Try it right now">现在就试一次</p>
