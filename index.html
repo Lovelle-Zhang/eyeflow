@@ -14094,13 +14094,13 @@
       const memory = ensureMiraMemory();
       const signal = memory.modeSignals[modeSignalKey(kind)];
       if (!signal || Number(signal.count || 0) < 2) return "";
-      const lastAt = Date.parse(signal.lastAt || "");
-      const daysAgo = lastAt ? Math.round((Date.now() - lastAt) / 86400000) : 0;
-      const prefix = daysAgo >= 6 && daysAgo <= 8
-        ? `上${weekdayName(signal.lastAt)}`
-        : `之前的${weekdayName(signal.lastAt)}`;
+      // 事实纪律（2026-07-10，见 MIRA_LANGUAGE.md）：不引用具体星期几——
+      // signal.lastAt 来自"提醒 12 分钟没被理会"的自动记账，可能被误判污染，
+      // 而通知横幅里的"之前的周三"极易被读成"Mira 以为今天是周三"。
+      // 只说模式本身：signal 按当前时段（modeSignalKey → timeBucket(now)）索引，
+      // 所以「以往{时段}」是实时一致、经得起验证的说法。
       const boundary = relationshipLine("pattern", "boundary") || "Mira 只记这个模式，不记你做了什么。";
-      return `${prefix}${signal.bucket}你也容易撑过去不休息。${boundary}`;
+      return `以往${signal.bucket}，你也容易撑过去不休息。${boundary}`;
     }
 
     function highWorkStreak(load) {

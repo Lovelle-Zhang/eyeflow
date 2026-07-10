@@ -118,6 +118,17 @@ function main() {
     /reminder:resolve", \{[\s\S]*?restSeconds: ISLAND_LOOKAWAY_SECONDS/,
     "island resolve carries the look-away's real length from the sensor's single constant"
   );
+  {
+    // 事实纪律(2026-07-10, MIRA_LANGUAGE.md):通知可达的记忆句不得断言星期几——
+    // 历史时间戳的账本可被误判污染,横幅里的"之前的周三"会被读成说错今天日期。
+    const memoryFnStart = indexHtml.indexOf("function modeMemoryLine");
+    if (memoryFnStart < 0) throw new Error("modeMemoryLine missing from index.html");
+    const memoryFn = indexHtml.slice(memoryFnStart, indexHtml.indexOf("\n    }", memoryFnStart));
+    if (memoryFn.includes("weekdayName")) {
+      throw new Error("modeMemoryLine must not assert weekdays — time buckets only (事实纪律 2026-07-10)");
+    }
+  }
+  assertIncludes(indexHtml, "以往${signal.bucket}", "mode memory speaks in real-time-consistent time buckets");
   assertMatches(
     indexHtml,
     /closeBreakRound\(\{ reminderStatus: "completed" \}\);[\s\S]*?appendDataEvent\("recovery_event", \{[\s\S]*?durationSeconds: Math\.max\(0, Number\(payload\.restSeconds\) \|\| 20\),\s*mode: "island-micro",[\s\S]*?trigger: "island-micro",/,
