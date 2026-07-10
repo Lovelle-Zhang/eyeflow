@@ -598,6 +598,8 @@
       html[lang="en"] .hero-row > span { display: inline; white-space: normal; }
       .hero .stage { margin: 26px 0 22px; }
       h2 .cl, .sub .cl { display: block; white-space: nowrap; }
+      /* 正文里的子句:手机上也各占一行(在标点处断),但允许句内自然换行兜底 */
+      .body .cl { display: block; }
       .brand-line .cl + .cl { margin-left: 0; }
       .body .copy-line { display: block; white-space: normal; }
       .body { max-width: 19em; font-size: 1rem; line-height: 1.82; }
@@ -713,7 +715,7 @@
         </div>
       </div>
       <h2 data-en="She doesn't say much — but it lands."><span class="cl">她话很少，</span><span class="cl">但都说在点上。</span></h2>
-      <p class="body" data-en="<b class='kw-mira'>Mira</b> lives inside EyeFlow — a quiet companion for screen work. Stare too long and you slowly lose your edge; what she does is small: a gentle stop, before the fatigue piles up."><span class="copy-line">EyeFlow 里住着 <b class="kw-mira">Mira</b>，一位安静的屏幕工作伙伴。</span><span class="copy-line">屏幕看久了，人会慢慢没状态。</span><span class="copy-line">她做的事很小：</span><span class="copy-line">在疲劳攒起来之前，轻轻停你一下。</span></p>
+      <p class="body" data-en="<b class='kw-mira'>Mira</b> lives inside EyeFlow — a quiet companion for screen work. Stare too long and you slowly lose your edge; what she does is small: a gentle stop, before the fatigue piles up."><span class="copy-line"><span class="cl">EyeFlow 里住着 <b class="kw-mira">Mira</b>，</span><span class="cl">一位安静的屏幕工作伙伴。</span></span><span class="copy-line">屏幕看久了，人会慢慢没状态。</span><span class="copy-line">她做的事很小：</span><span class="copy-line">在疲劳攒起来之前，轻轻停你一下。</span></p>
       <p class="body" data-en="She watches one thing only — how long you’ve looked. No camera, no reading your screen, nothing uploaded."><span class="copy-line">她只看一件事：你盯了多久。</span><span class="copy-line">不开摄像头、不读屏幕内容、不上传。</span></p>
     </div>
   </section>
@@ -947,7 +949,7 @@
     <div class="head">
       <p class="eyebrow" data-en="Day / Night">白天 / 夜晚</p>
       <h2 data-en="Auto by default — quiet in both light and dark."><span class="cl">默认自动切换，</span><span class="cl">白天夜晚都安静。</span></h2>
-      <p class="body" data-en="<span class='copy-line'>EyeFlow uses your Mac's timezone and the day's sunrise and sunset to choose Day or Night.</span><span class='copy-line'>Day stays clean and clear; Night lowers brightness.</span><span class='copy-line'>If you prefer, you can also pin either mode manually.</span>"><span class="copy-line">EyeFlow 会按这台 Mac 的时区、当天日出和日落，自动判断白天或夜晚。</span><span class="copy-line">白天保持清爽，夜晚自动压低亮度。</span><span class="copy-line">你也可以手动固定在白天或晚上。</span></p>
+      <p class="body" data-en="<span class='copy-line'>EyeFlow uses your Mac's timezone and the day's sunrise and sunset to choose Day or Night.</span><span class='copy-line'>Day stays clean and clear; Night lowers brightness.</span><span class='copy-line'>If you prefer, you can also pin either mode manually.</span>"><span class="copy-line"><span class="cl">EyeFlow 会按这台 Mac 的时区、</span><span class="cl">当天日出和日落，</span><span class="cl">自动判断白天或夜晚。</span></span><span class="copy-line">白天保持清爽，夜晚自动压低亮度。</span><span class="copy-line">你也可以手动固定在白天或晚上。</span></p>
     </div>
     <div class="theme-strip">
       <ul class="theme-list">
