@@ -60,6 +60,19 @@ let lastInterventionLevel = 1;
 // spin the retry loop forever.
 let reminderDeliveryRetries = 0;
 const MAX_REMINDER_DELIVERY_RETRIES = 45;
+// Escalation dwell (2026-07-10 stopgap): the renderer recomputes the intervention
+// level every frame from volatile inputs (frontmost app, load, idle window), so a
+// momentary upward flip is usually jitter, not a real escalation. A higher level
+// must hold for the dwell window before it may bypass the shared cooldown. The
+// real break-point capsule is NOT delayed by this — it rides breakBypass.
+let lastStableInterventionLevel = 1;
+let pendingEscalationLevel = 0;
+let pendingEscalationSince = 0;
+const ESCALATION_DWELL_MS = 12 * 1000;
+// Reminder banners self-throttle so coordinator jitter/retries can never chain
+// system notifications back-to-back. companion:notify (user-triggered) stays raw.
+let lastReminderNotifyAt = 0;
+const REMINDER_NOTIFY_MIN_INTERVAL_MS = 60 * 1000;
 let lastMenuIntensity = null;
 let breakRestSurfaced = false;
 let autoPanelTimer = null;
@@ -2369,6 +2382,19 @@ function notify(message) {
   return { ok: true, supported: true };
 }
 
+// Reminder-path banners only (the coordinator). ≥60s between banners, so level
+// jitter or transactional retries can never chain system notifications. Returns
+// ok:false when throttled so the caller does not count it as a delivery.
+function notifyReminder(message) {
+  const now = Date.now();
+  if (now - lastReminderNotifyAt < REMINDER_NOTIFY_MIN_INTERVAL_MS) {
+    return { ok: false, supported: true, throttled: true };
+  }
+  const sent = notify(message);
+  if (sent && sent.ok) lastReminderNotifyAt = now;
+  return sent;
+}
+
 function stopVoice() {
   if (voiceProcess && !voiceProcess.killed) {
     voiceProcess.kill();
@@ -2675,10 +2701,27 @@ function applyInterventionBehavior(state) {
   const level = Number(state.interventionLevel || 1);
   const now = Date.now();
   const levelChanged = level !== lastInterventionLevel;
-  // Only an UPWARD escalation (e.g. L2 → L3) may bypass the shared cooldown to
-  // re-surface immediately; a downshift or L2/L3 jitter must not re-fire channels.
-  const escalated = level > lastInterventionLevel;
   lastInterventionLevel = level;
+  // Only an UPWARD escalation (e.g. L2 → L3) may bypass the shared cooldown to
+  // re-surface immediately — and only after it held for the dwell window
+  // (2026-07-10 stopgap): app-switch/load/idle jitter flips the recomputed level
+  // 1↔3 in seconds, and every raw up-flip used to fire capsule+banner instantly
+  // (the "rapid-fire reminders" dogfood bug). Downshifts settle immediately.
+  let escalated = false;
+  if (level > lastStableInterventionLevel) {
+    if (pendingEscalationLevel !== level) {
+      pendingEscalationLevel = level;
+      pendingEscalationSince = now;
+    }
+    if (now - pendingEscalationSince >= ESCALATION_DWELL_MS) {
+      escalated = true;
+      lastStableInterventionLevel = level;
+      pendingEscalationLevel = 0;
+    }
+  } else {
+    lastStableInterventionLevel = level;
+    pendingEscalationLevel = 0;
+  }
 
   // Runtime visibility: the companion is off-screen if hidden by preference, exited
   // this session via double-click, or hidden by a sleep/lock lifecycle event. The
@@ -2773,7 +2816,7 @@ function applyInterventionBehavior(state) {
       }
     }
     if (showNotify) {
-      const sent = notify(reminderMessage);
+      const sent = notifyReminder(reminderMessage);
       delivered = delivered || Boolean(sent && sent.ok);
     }
     // The break capsule is the PRIMARY channel at the real break point: a system

@@ -103,6 +103,21 @@ function main() {
     /restDelivered = startIslandMicroRest\(islandRestMessage\(level\), state\.reminderId \|\| null\);[\s\S]*?const primaryOk = !primaryRestWanted \|\| restDelivered;[\s\S]*?if \(delivered\) lastReminderAt = now;/,
     "reminder delivery is transactional: latch/cooldown consumed only after the channel confirmed (2026-07-10)"
   );
+  assertMatches(
+    mainJs,
+    /const ESCALATION_DWELL_MS = 12 \* 1000;[\s\S]*if \(now - pendingEscalationSince >= ESCALATION_DWELL_MS\) \{\s*escalated = true;/,
+    "an upward level flip must dwell before it may bypass the shared cooldown (2026-07-10)"
+  );
+  assertMatches(
+    mainJs,
+    /const REMINDER_NOTIFY_MIN_INTERVAL_MS = 60 \* 1000;[\s\S]*function notifyReminder\(message\)[\s\S]*?if \(now - lastReminderNotifyAt < REMINDER_NOTIFY_MIN_INTERVAL_MS\)/,
+    "reminder banners self-throttle to at most one per minute (2026-07-10)"
+  );
+  assertMatches(
+    mainJs,
+    /if \(showNotify\) \{\s*const sent = notifyReminder\(reminderMessage\);/,
+    "the coordinator uses the throttled reminder banner, not raw notify"
+  );
 
   assertIncludes(indexHtml, "L4</strong>强制爱：只在你主动选择后启用", "L4 user-facing rule requires explicit opt-in");
   assertMatches(
