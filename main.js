@@ -471,9 +471,22 @@ function debugPrepareCaptureScript(options = {}) {
   return `(async () => {
     const requestedView = ${JSON.stringify(options.requestedView)};
     const captureTheme = ${JSON.stringify(captureTheme)};
+    // Freeze transitions before the frame is grabbed. The sidebar cross-fades its
+    // background over 240ms (--ef-motion-slow) on theme change; a boot-time
+    // light→dark fade caught mid-way bakes a muddy in-between color into the PNG
+    // (e.g. #515250 instead of the settled #1b1c1e). Killing transitions snaps any
+    // in-flight fade — and any theme we set below — straight to its committed value.
+    if (!document.getElementById("__eyeflowCaptureFreeze")) {
+      const freeze = document.createElement("style");
+      freeze.id = "__eyeflowCaptureFreeze";
+      freeze.textContent = "*,*::before,*::after{transition:none !important;transition-duration:0s !important;transition-delay:0s !important;}";
+      document.head.appendChild(freeze);
+    }
     if (captureTheme === "dark") {
       document.documentElement.setAttribute("data-theme", "dark");
     }
+    // Commit the frozen styles (and any pending theme change) before we continue.
+    void document.documentElement.offsetWidth;
     const targetView = document.querySelector("#" + CSS.escape(requestedView));
     if (!targetView) return { ok: false, reason: "missing requested view", requestedView };
     if (typeof switchView === "function") {
