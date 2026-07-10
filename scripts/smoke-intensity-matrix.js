@@ -98,6 +98,11 @@ function main() {
     /const l3BreakPoint = level >= 3 && breakDue;[\s\S]*const showBubble = companionVisible && level >= 2 && !l3BreakPoint;[\s\S]*const showRest = islandEnabled && level >= 2 && \(companionExited \|\| l3BreakPoint\);[\s\S]*const showNotify = level >= 2 && \(companionExited \|\| l3BreakPoint\) && \(level >= 3 \|\| !islandEnabled\);/,
     "L3 real break point routes to green capsule plus system notification even if Mira is visible"
   );
+  assertMatches(
+    mainJs,
+    /restDelivered = startIslandMicroRest\(islandRestMessage\(level\), state\.reminderId \|\| null\);[\s\S]*?const primaryOk = !primaryRestWanted \|\| restDelivered;[\s\S]*?if \(delivered\) lastReminderAt = now;/,
+    "reminder delivery is transactional: latch/cooldown consumed only after the channel confirmed (2026-07-10)"
+  );
 
   assertIncludes(indexHtml, "L4</strong>强制爱：只在你主动选择后启用", "L4 user-facing rule requires explicit opt-in");
   assertMatches(

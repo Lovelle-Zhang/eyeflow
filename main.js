@@ -54,6 +54,12 @@ let companionExpandBaseBounds = null;
 let companionBoundsTransient = false;
 let lastReminderAt = 0;
 let lastInterventionLevel = 1;
+// Transactional delivery (2026-07-10 stopgap): count consecutive frames where the
+// designated reminder channel failed to reach the screen; give up after the bound
+// so a permanently blocked channel (e.g. break-lock covering the island) cannot
+// spin the retry loop forever.
+let reminderDeliveryRetries = 0;
+const MAX_REMINDER_DELIVERY_RETRIES = 45;
 let lastMenuIntensity = null;
 let breakRestSurfaced = false;
 let autoPanelTimer = null;
@@ -2732,10 +2738,18 @@ function applyInterventionBehavior(state) {
   // multi-buzzes across drifting per-channel timers. An upward escalation
   // (e.g. L2 → L3) re-surfaces immediately.
   if (escalated || breakBypass || now - lastReminderAt > reminderCooldown) {
-    lastReminderAt = now;
-    if (breakDue) breakRestSurfaced = true; // the target break point surfaces once per round
+    // Transactional delivery (2026-07-10 stopgap): deliver FIRST, consume the
+    // latch/cooldown only after a channel confirmed it reached the screen. The old
+    // order booked lastReminderAt/breakRestSurfaced up front, so a blocked island
+    // (look-away already running, break-lock covering it, window error) silently
+    // ate the once-per-round break capsule and the 12-min pending cooldown kept it
+    // buried. Now a failed delivery leaves the books untouched and the very next
+    // publish retries — bounded by MAX_REMINDER_DELIVERY_RETRIES.
+    let delivered = false;
+    let restDelivered = false;
     if (showBubble) {
       showCompanionPanel();
+      delivered = true;
       if (autoPanelTimer) {
         clearTimeout(autoPanelTimer);
         autoPanelTimer = null;
@@ -2751,12 +2765,37 @@ function applyInterventionBehavior(state) {
     // no-countdown heads-up pill (提醒边界热身) — never a full rest capsule too early.
     if (showRest) {
       if (breakDue) {
-        startIslandMicroRest(islandRestMessage(level), state.reminderId || null);
+        restDelivered = startIslandMicroRest(islandRestMessage(level), state.reminderId || null);
+        delivered = delivered || restDelivered;
       } else {
-        showNotchIsland({ mode: "text", message: islandNoticeMessage(state, level) });
+        const pill = showNotchIsland({ mode: "text", message: islandNoticeMessage(state, level) });
+        delivered = delivered || Boolean(pill && pill.ok);
       }
     }
-    if (showNotify) notify(reminderMessage);
+    if (showNotify) {
+      const sent = notify(reminderMessage);
+      delivered = delivered || Boolean(sent && sent.ok);
+    }
+    // The break capsule is the PRIMARY channel at the real break point: a system
+    // banner alone must not consume the once-per-round latch, or "banner fired,
+    // capsule missing" would still bury the round's look-away.
+    const primaryRestWanted = showRest && breakDue;
+    const primaryOk = !primaryRestWanted || restDelivered;
+    if (delivered) lastReminderAt = now;
+    if (delivered && primaryOk) {
+      reminderDeliveryRetries = 0;
+      if (breakDue) breakRestSurfaced = true; // the target break point surfaces once per round
+    } else {
+      reminderDeliveryRetries += 1;
+      if (reminderDeliveryRetries >= MAX_REMINDER_DELIVERY_RETRIES) {
+        // Bounded surrender: the channel stayed blocked for the whole retry window
+        // (~45 publishes). Consume the books like the old behavior so the loop
+        // converges; the round's capsule is conceded to the next cooldown/round.
+        reminderDeliveryRetries = 0;
+        lastReminderAt = now;
+        if (breakDue) breakRestSurfaced = true;
+      }
+    }
   }
 }
 
@@ -2780,10 +2819,12 @@ function islandNoticeMessage(state, level) {
 }
 
 const ISLAND_LOOKAWAY_SECONDS = 20;
+// Returns true only when the look-away actually reached the screen — the coordinator
+// uses this to decide whether the once-per-round break latch may be consumed.
 function startIslandMicroRest(message, reminderId) {
-  if (islandRestActive) return; // one look-away at a time; the cooldown handles the rest
+  if (islandRestActive) return false; // one look-away at a time; the cooldown handles the rest
   const shown = showNotchIsland({ mode: "rest", message, breakSeconds: ISLAND_LOOKAWAY_SECONDS });
-  if (!shown || !shown.ok) return; // island unavailable (non-darwin / break-lock) — leave the ledger to its own timeout
+  if (!shown || !shown.ok) return false; // island unavailable (non-darwin / break-lock) — leave the ledger to its own timeout
   islandRestActive = true;
   if (islandRestTimer) clearTimeout(islandRestTimer);
   islandRestTimer = setTimeout(() => {
@@ -2811,6 +2852,7 @@ function startIslandMicroRest(message, reminderId) {
     }
     showNotchIsland({ mode: "restResult", ok: restedAway });
   }, ISLAND_LOOKAWAY_SECONDS * 1000);
+  return true;
 }
 
 // Cancel an in-flight look-away so its timer can't fire after the island was hidden
