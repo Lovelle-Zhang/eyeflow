@@ -100,18 +100,18 @@ function main() {
   }
   assertMatches(
     mainJs,
-    /const l3BreakPoint = level >= 3 && breakDue;[\s\S]*const showBubble = companionVisible && level >= 2 && !l3BreakPoint;[\s\S]*const showRest = islandEnabled && level >= 2 && \(companionExited \|\| l3BreakPoint\);[\s\S]*const showNotify = level >= 2 && \(companionExited \|\| l3BreakPoint\) && \(level >= 3 \|\| !islandEnabled\);/,
-    "L3 real break point routes to green capsule plus system notification even if Mira is visible"
+    /const showBubble = companionVisible && level < 3;[\s\S]*const showRest = islandEnabled && !deepWorkQuiet && \(companionExited \|\| level >= 3\);[\s\S]*const showNotify = !deepWorkQuiet && \(companionExited \|\| level >= 3\) && \(level >= 3 \|\| !islandEnabled\);/,
+    "level-3 intent routes to green capsule plus system notification even if Mira is visible (P3)"
   );
   assertMatches(
     mainJs,
-    /function surfaceReminderChannels\(decision\)[\s\S]*?if \(!breakDue && now - lastSurfacedAt < SURFACE_MIN_INTERVAL_MS\)[\s\S]*?restDelivered = startIslandMicroRest\(islandRestMessage\(level\), reminderId \|\| null\);[\s\S]*?function applyInterventionBehavior\(state\)[\s\S]*?const surfaced = surfaceReminderChannels\(\{[\s\S]*?const primaryOk = !primaryRestWanted \|\| restDelivered;[\s\S]*?if \(delivered\) \{\s*lastReminderAt = now;[\s\S]*?lastStableInterventionLevel = level;\s*pendingEscalationLevel = 0;\s*\}/,
-    "reminder delivery is transactional through the single exit: unified floor + latch/cooldown consumed only after the channel confirmed (2026-07-10)"
+    /function surfaceReminderChannels\(decision\)[\s\S]*?if \(!breakDue && now - lastSurfacedAt < SURFACE_MIN_INTERVAL_MS\)[\s\S]*?restDelivered = startIslandMicroRest\(islandRestMessage\(level\), reminderId \|\| null\);[\s\S]*?function applyInterventionBehavior\(state\)[\s\S]*?const surfaced = surfaceReminderChannels\(\{[\s\S]*?const primaryOk = !primaryRestWanted \|\| restDelivered;[\s\S]*?if \(delivered\) lastReminderAt = now;[\s\S]*?lastDeliveredIntentKey = intentKey;/,
+    "reminder delivery is transactional through the single exit; the intent key is consumed only after the channel confirmed (P3)"
   );
   assertMatches(
     mainJs,
-    /const ESCALATION_DWELL_MS = 12 \* 1000;[\s\S]*if \(now - pendingEscalationSince >= ESCALATION_DWELL_MS\) \{\s*escalated = true;/,
-    "an upward level flip must dwell before it may bypass the shared cooldown (2026-07-10)"
+    /const intentKey = `\$\{level\}\|\$\{surface\}\|\$\{breakDue\}`;\s*const isNewIntent = intentKey !== lastDeliveredIntentKey;\s*if \(!isNewIntent && now - lastReminderAt < REMIND_REFRESH_MS\) return;/,
+    "the coordinator consumes the monotonic intent as a level signal: one delivery per intent + gentle refresh (P3; dwell/escalated/breakBypass retired)"
   );
   assertMatches(
     mainJs,

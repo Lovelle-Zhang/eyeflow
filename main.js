@@ -60,15 +60,11 @@ let lastInterventionLevel = 1;
 // spin the retry loop forever.
 let reminderDeliveryRetries = 0;
 const MAX_REMINDER_DELIVERY_RETRIES = 45;
-// Escalation dwell (2026-07-10 stopgap): the renderer recomputes the intervention
-// level every frame from volatile inputs (frontmost app, load, idle window), so a
-// momentary upward flip is usually jitter, not a real escalation. A higher level
-// must hold for the dwell window before it may bypass the shared cooldown. The
-// real break-point capsule is NOT delayed by this — it rides breakBypass.
-let lastStableInterventionLevel = 1;
-let pendingEscalationLevel = 0;
-let pendingEscalationSince = 0;
-const ESCALATION_DWELL_MS = 12 * 1000;
+// P3:意图是压力引擎的单调水平信号。同一意图只投递一次(lastDeliveredIntentKey);
+// due 持续未结算时按 REMIND_REFRESH 温和重发。dwell/escalated/breakBypass 的
+// 防抖机构随旧的每帧重算 level 一起退役——单调信号没有边沿可防。
+let lastDeliveredIntentKey = "";
+const REMIND_REFRESH_MS = 10 * 60 * 1000;
 // Reminder banners self-throttle so coordinator jitter/retries can never chain
 // system notifications back-to-back. companion:notify (user-triggered) stays raw.
 let lastReminderNotifyAt = 0;
@@ -80,7 +76,6 @@ const REMINDER_NOTIFY_MIN_INTERVAL_MS = 60 * 1000;
 let lastSurfacedAt = 0;
 const SURFACE_MIN_INTERVAL_MS = 60 * 1000;
 let lastMenuIntensity = null;
-let breakRestSurfaced = false;
 let autoPanelTimer = null;
 let hoverOpenTimer = null;
 let hoverCloseTimer = null;
@@ -2714,10 +2709,9 @@ function broadcastState(state) {
 // the unified min-interval across ALL surfaces, and reports what actually
 // reached the screen. No other production code may pop a reminder surface
 // directly — new surfaces must be added HERE, inside the same floor.
-// Exceptions to the floor (both pre-existing, both deliberate): the real break
-// point (breakDue) is exempt — its once-per-round latch (breakRestSurfaced) is
-// the stronger guard — and its sole-channel banner rides `urgent` through
-// notifyReminder's own window.
+// Exceptions to the floor: the real break point (breakDue) is exempt — the
+// intent-key ledger (one delivery per intent) is the stronger guard — and its
+// sole-channel banner rides `urgent` through notifyReminder's own window.
 function surfaceReminderChannels(decision) {
   const { now, level, breakDue, showBubble, showRest, showNotify, reminderMessage, reminderId, forceMode } = decision;
   if (!breakDue && now - lastSurfacedAt < SURFACE_MIN_INTERVAL_MS) {
@@ -2762,29 +2756,11 @@ function surfaceReminderChannels(decision) {
 
 function applyInterventionBehavior(state) {
   const level = Number(state.interventionLevel || 1);
+  const surface = String(state.interventionSurface || "none");
+  const breakDue = Boolean(state.breakDue);
   const now = Date.now();
   const levelChanged = level !== lastInterventionLevel;
   lastInterventionLevel = level;
-  // Only an UPWARD escalation (e.g. L2 → L3) may bypass the shared cooldown to
-  // re-surface immediately — and only after it held for the dwell window
-  // (2026-07-10 stopgap): app-switch/load/idle jitter flips the recomputed level
-  // 1↔3 in seconds, and every raw up-flip used to fire capsule+banner instantly
-  // (the "rapid-fire reminders" dogfood bug). Downshifts settle immediately.
-  let escalated = false;
-  if (level > lastStableInterventionLevel) {
-    if (pendingEscalationLevel !== level) {
-      pendingEscalationLevel = level;
-      pendingEscalationSince = now;
-    }
-    if (now - pendingEscalationSince >= ESCALATION_DWELL_MS) {
-      escalated = true;
-      lastStableInterventionLevel = level;
-      pendingEscalationLevel = 0;
-    }
-  } else {
-    lastStableInterventionLevel = level;
-    pendingEscalationLevel = 0;
-  }
 
   // Runtime visibility: the companion is off-screen if hidden by preference, exited
   // this session via double-click, or hidden by a sleep/lock lifecycle event. The
@@ -2799,120 +2775,74 @@ function applyInterventionBehavior(state) {
     return;
   }
 
-  // breakDue is itself an opening (codex review 2026-07-10): in auto tracking
-  // isRunning is false, and at the exact break point the user may be mid-typing
-  // (no reminderOpening, no naturalBreak) with the pending record still blocked by
-  // the renderer cooldown — without breakDue here the coordinator returned before
-  // breakBypass could ever fire the round's capsule.
-  const hasReminderOpening = Boolean(state.isRunning || state.reminderOpening || state.naturalBreak || state.reminderPending || state.breakDue);
-  if (!hasReminderOpening) {
+  // P3:意图是水平信号(压力引擎单调产出),投递层只做两件事——
+  // ①新意图投递一次(同意图不重发,病例 C3/C9);②due 持续未结算时按温和节奏
+  // 重发(REMIND_REFRESH)。dwell/escalated/breakBypass 全部退役:单调信号
+  // 没有边沿可防抖,"该不该提醒"已在引擎里定死。
+  // hard-full 由渲染端 startForceBreak 直接接管,不走打扰面。
+  if (level < 2 || surface === "hard-full") {
     if (levelChanged && companionVisible) hideCompanionPanel();
+    lastDeliveredIntentKey = ""; // 意图回落(结算/离开)→ 投递账清零,下一轮重新算
     return;
   }
 
   const islandEnabled = desktopPreferenceDefaults().showReminderIsland !== false;
-  const reminderMessage = state.message || "找一个恢复断点，看远处 20 秒。";
+  // 深度工作开关 = 用户显式选的投递风格:压掉 island/banner,保 Mira 面(C1:
+  // 风格可以变,due 不许动——所以只影响 showRest/showNotify,不影响是否投递)。
+  const deepWorkQuiet = Boolean(state.deepWorkQuiet);
+  const reminderMessage = state.interventionCopy || state.message || "找一个恢复断点，看远处 20 秒。";
 
-  // The REAL break point (manual timer hit its target, or an auto-mode natural pause) is
-  // the moment that most deserves the full look-away. It surfaces the countdown capsule
-  // and BYPASSES the shared cooldown once per round — so an earlier pre-target heads-up
-  // can't eat it. Before the target, the "提醒边界" heads-up is only a no-countdown pill.
-  const breakDue = Boolean(state.breakDue);
-  const l3BreakPoint = level >= 3 && breakDue;
-  // Two independent questions, kept separate so the same level always behaves the same:
-  //   (1) how strong is the reminder; (2) where can Mira deliver it. Mira on screen
-  //   carries L2 in her bubble. L3 at the real break point gets the clear top capsule
-  //   and system banner even when Mira is visible.
-  const showBubble = companionVisible && level >= 2 && !l3BreakPoint;
-  const showRest = islandEnabled && level >= 2 && (companionExited || l3BreakPoint);
-  // System notification is the away/lock-screen backup, governed by macOS itself (no
-  // in-app toggle). L3 at the real break point is also explicit enough to join it.
-  const showNotify = level >= 2 && (companionExited || l3BreakPoint) && (level >= 3 || !islandEnabled);
-
-  if (!breakDue) breakRestSurfaced = false; // re-arm the once-per-break-point latch each round
-  const breakBypass = breakDue && !breakRestSurfaced;
+  // 通道路由:Mira 在屏时 level 2 走她的气泡;level 3(明确档)即使在屏也上
+  // 胶囊+横幅(与既有 L3 承诺一致);Mira 退出时胶囊是主通道。
+  const showBubble = companionVisible && level < 3;
+  const showRest = islandEnabled && !deepWorkQuiet && (companionExited || level >= 3);
+  const showNotify = !deepWorkQuiet && (companionExited || level >= 3) && (level >= 3 || !islandEnabled);
 
   if (!showBubble && !showRest && !showNotify) {
-    // Nothing to surface (L1, or a non-break reminder while Mira is on screen and quiet).
     if (levelChanged && companionVisible) hideCompanionPanel();
     return;
   }
 
-  const reminderWaiting = Boolean(state.reminderPending);
-  const reminderCooldown = reminderWaiting
-    ? 12 * 60 * 1000
-    : level >= 3
-      ? 6 * 60 * 1000
-      : 8 * 60 * 1000;
+  const intentKey = `${level}|${surface}|${breakDue}`;
+  const isNewIntent = intentKey !== lastDeliveredIntentKey;
+  if (!isNewIntent && now - lastReminderAt < REMIND_REFRESH_MS) return;
 
-  // ONE coordinated surfacing on a single shared cooldown, so a reminder never
-  // multi-buzzes across drifting per-channel timers. An upward escalation
-  // (e.g. L2 → L3) re-surfaces immediately.
-  if (escalated || breakBypass || now - lastReminderAt > reminderCooldown) {
-    // Transactional delivery (2026-07-10 stopgap): deliver FIRST via the single
-    // exit, consume the latch/cooldown only after a channel confirmed it reached
-    // the screen. The old order booked lastReminderAt/breakRestSurfaced up front,
-    // so a blocked island (look-away already running, break-lock covering it,
-    // window error) silently ate the once-per-round break capsule and the 12-min
-    // pending cooldown kept it buried. Now a failed delivery leaves the books
-    // untouched and the very next publish retries — bounded by
-    // MAX_REMINDER_DELIVERY_RETRIES.
-    const surfaced = surfaceReminderChannels({
-      now,
-      level,
-      breakDue,
-      showBubble,
-      showRest,
-      showNotify,
-      reminderMessage,
-      reminderId: state.reminderId || null,
-      forceMode: Boolean(state.forceMode)
-    });
-    if (!surfaced.attempted) {
-      // The unified floor refused (a surface interrupted the user <60s ago and
-      // this is not the break point). Neither a delivery nor a failure — books
-      // and the retry streak stay untouched; cooldown/escalation gates reopen
-      // this later.
-      return;
-    }
-    const { delivered, restDelivered } = surfaced;
-    // The break capsule is the PRIMARY channel at the real break point: a system
-    // banner alone must not consume the once-per-round latch, or "banner fired,
-    // capsule missing" would still bury the round's look-away.
-    const primaryRestWanted = showRest && breakDue;
-    const primaryOk = !primaryRestWanted || restDelivered;
-    if (delivered) {
-      lastReminderAt = now;
-      // Ledger sync (2026-07-10 热身双跳): a level that was successfully DELIVERED to
-      // the user is the confirmed stable level, no matter which gate path opened
-      // (cooldown / breakBypass / escalated). Without this, a cooldown-path fire at a
-      // level whose dwell was still pending left the escalation ledger behind — the
-      // dwell completed seconds later, `escalated` re-opened the gate, and the same
-      // heads-up pill fired twice within seconds. Delivery ledger and escalation
-      // ledger must never disagree about what the user has already seen.
-      lastStableInterventionLevel = level;
-      pendingEscalationLevel = 0;
-    }
-    if (delivered && primaryOk) {
-      reminderDeliveryRetries = 0;
-      if (breakDue) breakRestSurfaced = true; // the target break point surfaces once per round
-    } else {
-      reminderDeliveryRetries += 1;
-      if (reminderDeliveryRetries >= MAX_REMINDER_DELIVERY_RETRIES) {
-        // Bounded surrender: the channel stayed blocked for the whole retry window
-        // (~45 publishes). Consume the books like the old behavior so the loop
-        // converges; the round's capsule is conceded to the next cooldown/round.
-        reminderDeliveryRetries = 0;
-        lastReminderAt = now;
-        if (breakDue) breakRestSurfaced = true;
-      }
-    }
-  } else {
-    // No delivery attempted this frame — the failure streak is broken. The retry
-    // bound counts CONSECUTIVE blocked attempts; without this reset, stale failures
-    // from an earlier round leaked into the next break point and surrendered early
-    // (codex review 2026-07-10).
+  // Transactional delivery(保留):先投递、确认真的上屏,再消耗投递账;失败
+  // 下一次 publish 重试,有界退让。
+  const surfaced = surfaceReminderChannels({
+    now,
+    level,
+    breakDue,
+    showBubble,
+    showRest,
+    showNotify,
+    reminderMessage,
+    reminderId: state.reminderId || null,
+    forceMode: Boolean(state.forceMode)
+  });
+  if (!surfaced.attempted) {
+    // 统一 60s 地板拒绝:非投递非失败,账本不动,下帧再看。
+    return;
+  }
+  const { delivered, restDelivered } = surfaced;
+  // The break capsule is the PRIMARY channel at the real break point: a system
+  // banner alone must not consume the intent, or "banner fired, capsule missing"
+  // would bury the round's look-away.
+  const primaryRestWanted = showRest && breakDue;
+  const primaryOk = !primaryRestWanted || restDelivered;
+  if (delivered) lastReminderAt = now;
+  if (delivered && primaryOk) {
     reminderDeliveryRetries = 0;
+    lastDeliveredIntentKey = intentKey;
+  } else {
+    reminderDeliveryRetries += 1;
+    if (reminderDeliveryRetries >= MAX_REMINDER_DELIVERY_RETRIES) {
+      // Bounded surrender: the channel stayed blocked for the whole retry window.
+      // Consume the intent so the loop converges; the refresh cadence retries later.
+      reminderDeliveryRetries = 0;
+      lastReminderAt = now;
+      lastDeliveredIntentKey = intentKey;
+    }
   }
 }
 
