@@ -157,10 +157,30 @@
 ### 阶段闸（每关给用户看）
 
 - **P0** 本规格确认 ✅（2026-07-10 批准，照此执行不改）
-- **P1** 场景表 v1 确认（用例行 = 病例 + 基线，含期望意图序列）←（当前）
-- **P2** 引擎模块 + smoke 全绿（不接线，旧引擎照跑）
-- **P3** 接线：渲染端翻译层 + main 简化 + 旧闸清退，全 smoke + codex 复审
-- **P4** 装机 dogfood 验证，病例逐条对照销案
+- **P1** 场景表 v1 确认 ✅（2026-07-10 逐行批准，MICRO_RELIEF=15min 为体验参数）
+- **P2** 引擎模块 + smoke 全绿 ✅（65 checks，先红后绿，`smoke-reminder-engine` 入 verify 链）
+- **P3** 接线 ✅（决策三条已批：渲染端宿主/away 只清压力/hard-full→startForceBreak）：
+  翻译层替换 currentIntervention → main 删 dwell/escalated/breakBypass（intent-key
+  投递 + 10min 温和重发）→ 静默闸/busy 闸清退（smoke 以"不存在"断言钉死）→
+  smoke 对齐 + codex 复审 → rebuild
+- **P4** 装机 dogfood 验证 ←（当前）：真机一天，C1–C9 逐条销案（重点：岛歇完后
+  15 分钟真安静）后收官；收官时全面重写 EYEFLOW_INTENSITY_LEVELS.md
+
+### P3 接线注记 · interim surface 映射（2026-07-10）
+
+引擎产出的 surface 在完整 UI 面落地前的临时映射（触发语义已按场景表生效，
+差的只是"长什么样"）：
+
+| 引擎 surface | 当前落地 | 目标形态（后续 UI 项） |
+|---|---|---|
+| `glow`(L1) | Mira 状态/颜色变化（不打扰面） | §1 项 3：全屏透明光晕 overlay.html（遵 D4） |
+| `island-micro`(L2) | 岛 20s look-away 胶囊（已在） | 不变 |
+| `soft-full`(L3) | 岛胶囊 + 系统横幅（≈旧 L3 行为） | §1 项 5：软全屏建议（break-lock 软态，一键跳过） |
+| `hard-full`(L3 force) | 既有 break-lock kiosk（startForceBreak） | 不变 |
+
+另：`focusTarget`（本轮目标分钟）不再驱动提醒——它只属于「本轮节奏」计时 UI 与
+统计；提醒节奏 = 40/60/90min 连续用眼。设置页文案的对应更新与 Y 的
+「休息时长只管完整休息」说明一起做。
 
 ## 0c. P1 场景表 v1（2026-07-10 · 待逐行确认）
 

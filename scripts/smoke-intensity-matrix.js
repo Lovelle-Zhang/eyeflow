@@ -36,6 +36,29 @@ function main() {
   assertIncludes(intensityDocs, "startIslandMicroRest()", "intensity docs name the green countdown rest entry point");
   assertIncludes(intensityDocs, "process elapsed time must be newer than the install", "intensity docs cover old-process install drift");
 
+  // ── P3 新架构正向钉:引擎是唯一触发源 ─────────────────────────────
+  assertIncludes(indexHtml, '<script src="eyeflow-reminder-engine.js"></script>', "the pressure engine module is loaded by the renderer");
+  assertMatches(
+    indexHtml,
+    /window\.eyeflowDesktop\.onActivity\(\(activity\) => \{[\s\S]*?stepReminderEngine\(activity\.idleSeconds\);/,
+    "the engine heartbeat rides main's unconditional 5s activity broadcast (throttle-proof)"
+  );
+  assertMatches(
+    indexHtml,
+    /state\.reminderEngine = reminderEngineState/,
+    "engine pressure state persists across restarts"
+  );
+  assertMatches(
+    indexHtml,
+    /gapMs >= 0 && gapMs < engine\.PARAMS\.AWAY_FULL_SECONDS \* 1000/,
+    "restart restore follows away semantics: a short gap keeps pressure, a real absence starts fresh"
+  );
+  assertMatches(
+    indexHtml,
+    /const intent = currentReminderIntent\(\);/,
+    "currentIntervention is a translation layer over the engine intent — no trigger logic of its own"
+  );
+
   assertIncludes(indexHtml, "L1</strong>只改变状态球、表情和文字，不弹气泡，也不打断你。", "L1 user-facing rule stays quiet-only");
   assertMatches(
     indexHtml,

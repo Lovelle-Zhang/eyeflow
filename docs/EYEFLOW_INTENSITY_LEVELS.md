@@ -1,5 +1,18 @@
 # EyeFlow L1-L4 Reminder Levels
 
+> **⚠️ 2026-07-10 P3 — trigger architecture replaced.** Reminder triggering now
+> lives in the pure-function pressure engine `eyeflow-reminder-engine.js`
+> (thresholds 40/60/90min continuous eye time × intensity ceiling; behavior
+> pinned by the scenario table in `EYEFLOW_PROGRESSIVE_REMINDER_IMPL.md` §0c and
+> executed by `scripts/smoke-reminder-engine.js`). The renderer's
+> `currentIntervention` is a TRANSLATION layer (intent → copy), and main's
+> `applyInterventionBehavior` is an intent consumer (one delivery per intent +
+> gentle refresh). The old per-frame level computation, silence gates
+> (`shouldHoldMiraSilence`), surface gates (`shouldSurfaceReminder` /
+> `isBusyForReminder`), escalation dwell and break-point latch are DELETED —
+> the matrix smoke fails if they reappear. Sections below describing the old
+> trigger conditions are historical until this doc's full rewrite lands with P4.
+
 This file is the canonical self-check for EyeFlow's reminder levels. If any L1-L4 behavior changes, update this file and `scripts/smoke-intensity-matrix.js` in the same commit.
 
 ## Why This Exists
@@ -24,10 +37,16 @@ The rule: do not trust visual labels alone. The source of behavior is `intervent
 
 ## Code Map
 
+Engine, `eyeflow-reminder-engine.js` (P3, the only trigger authority):
+
+- `pressureStep(prev, obs)`: monotonic pressure from `{ nowMs, idleSeconds }` only.
+- `intentFor(state, settings)`: pressure level × intensity ceiling → `{ level, surface, breakDue, context }`.
+- `settleRest(state, rest)`: micro reduces / full resets / micro-skip feeds the L3 gate / micro-uncertain books nothing.
+
 Renderer, `index.html`:
 
-- `currentIntervention(load)`: maps current state and `intensity` to behavior/display level and copy.
-- `shouldHoldMiraSilence(load)`: the empathy silence gate, evaluated BEFORE every non-force branch. It may quiet pre-break-point nudges, but it must NEVER return true once the real break point is due (hard rule, 2026-07-10). Deep-work silence inside it requires `deepWorkMiraOnlyToggle`.
+- `currentIntervention(load)`: TRANSLATION layer — engine intent → level/displayLevel/title/copy. No trigger logic. Force escape window suppresses the intent here only; `hard-full` maps to level 4 → `startForceBreak`.
+- `closeBreakRound({ reminderStatus, settle })`: the single round-closure + pressure-settlement exit.
 - `shouldSurfaceReminder(intervention, load)`: decides whether a renderer-side pending reminder may be recorded.
 - `maybeRecordReminder(intervention, load)`: creates or upgrades `state.pendingReminder`.
 - `renderInterventionStrategy(load)`: starts L4 directly, otherwise records normal reminders.
