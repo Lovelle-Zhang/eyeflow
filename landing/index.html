@@ -16,39 +16,43 @@
   <meta name="twitter:image" content="https://eyeflow.app/shots/share-card.png">
   <style>
     /* ============================================================
-       仅用 EyeFlow 现有 dark-mode token，不引入新色/新渐变。
+       Anthropic 式设计体系:象牙纸底 · 暖墨 · 衬线大标题 · 墨色胶囊按钮。
+       Mira 绿只留作她本人的签名色(眼睛/下划线/唯一实心绿按钮)。
        结构：单栏 · Hero = 一句主张 + Mira 呼吸 + 一个 Download。
-       排版：中文零字距，关键句手工断行；正文长行只用留白和行高。
+       排版：标题衬线(Georgia+Songti)、正文无衬线;中文零字距,关键句手工断行。
        ============================================================ */
     :root {
       color-scheme: light;
       --font: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Helvetica Neue", "PingFang SC", "Hiragino Sans GB", sans-serif;
+      /* Anthropic 的版面声音是现代衬线(Tiempos/Copernicus 气质)——
+         零外链字体前提下,拉丁走 Georgia,CJK 落到宋体系。 */
+      --font-display: Georgia, "Songti SC", STSong, "Noto Serif SC", "Noto Serif CJK SC", "Times New Roman", serif;
 
-      /* 暖纸色系(design-system 白天主题 verbatim). */
-      --ink: #1d1d1f; --ink-soft: #38383b; --muted: #6b6b70; --muted-soft: #98989f;
-      --line: rgba(46,54,40,0.09); --line-soft: rgba(0,0,0,0.05);
-      --panel: #F7F8F0; --wash: #E8E9DD; --wash-2: #DDDED0; --panel-strong: #FAFAF4;
+      /* 象牙纸色系(Anthropic ivory/cream/warm-ink).
+         muted-soft 定在小字 AA 线上(≥4.5:1 on wash),13px 说明文字也要读得清。 */
+      --ink: #141413; --ink-soft: #3d3d3a; --muted: #5f5e57; --muted-soft: #6d6b62;
+      --line: rgba(20,20,19,0.11); --line-soft: rgba(20,20,19,0.06);
+      --panel: #FAF9F5; --wash: #F0EEE6; --panel-strong: #FCFBF8;
       --mira: #1f7a5e; --mira-strong: #1a6b52; --mira-soft: rgba(31,122,94,0.13); --mira-line: rgba(31,122,94,0.23);
-      --shadow-lift: 0 0 0 0.5px rgba(46,50,38,0.05), 0 1px 2px rgba(46,50,38,0.05), 0 10px 28px -8px rgba(46,50,38,0.13);
+      --shadow-lift: 0 0 0 0.5px rgba(20,20,19,0.05), 0 1px 2px rgba(20,20,19,0.05), 0 10px 28px -8px rgba(20,20,19,0.13);
 
       /* 4/8-based spacing scale. */
-      --s1: 4px; --s2: 8px; --s3: 12px; --s4: 16px; --s6: 24px; --s8: 32px; --s12: 48px; --s16: 64px; --s24: 96px; --s32: 128px;
-      --radius: 12px; --radius-lg: 14px;
+      --s1: 4px; --s2: 8px; --s3: 12px; --s4: 16px; --s6: 24px; --s8: 32px; --s12: 48px; --s16: 64px; --s24: 96px;
+      --radius-lg: 18px;
       --ease: cubic-bezier(0.4, 0, 0.2, 1);
 
-      /* ── 字体系统:全站只 4 个字号 · 3 个字重(docs/LANDING_DESIGN.md)──
-         原来 7 个字号 token + 一堆硬编码 → 归并到 Display/Title/Body/Caption 四值。
-         Display 300 细 / Title 500 / Body 400 / Caption 400。 */
-      --t-display: clamp(1.75rem, 4vw, 2.6rem);              /* Display 28→42px */
-      --t-title: 1.3125rem;                                   /* Title 21px */
-      --t-lede: 1.0625rem; --t-sub: 1.0625rem; --t-body: 1.0625rem;  /* → Body 17px */
+      /* ── 字体系统:全站只 4 个字号(docs/LANDING_DESIGN.md)──
+         Display/Title 走衬线 400(CJK 宋体无中间字重,靠字体本身与字号立层级),
+         Body 400 / Caption 400 无衬线。 */
+      --t-display: clamp(1.875rem, 4.4vw, 2.875rem);          /* Display 30→46px */
+      --t-title: 1.375rem;                                    /* Title 22px */
+      --t-sub: 1.0625rem; --t-body: 1.0625rem;                /* → Body 17px */
       --t-small: 0.8125rem; --t-eyebrow: 0.8125rem;           /* → Caption 13px */
       /* one set of measures (em-based: ≈1 CJK char, ≈2 latin chars) */
-      --measure: 26em; --measure-lede: 22em; --measure-sub: 20em; --measure-head: 16em;
+      --measure: 26em; --measure-sub: 20em; --measure-head: 16em;
       /* one vertical rhythm */
       --section: clamp(104px, 16vh, 168px);
       --flow-title: var(--s6);   /* title → body */
-      --flow-figure: var(--s16); /* copy → figure */
 
       /* Mira geometry (58-unit canonical). */
       --ms: 58px; --vt: 19px; --vl: 10px; --vw: 38px; --vh: 18px;
@@ -67,16 +71,10 @@
     html { scroll-behavior: smooth; -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
     body {
       margin: 0; font-family: var(--font); font-weight: 400; color: var(--ink);
-      font-size: var(--t-body); line-height: 1.9; -webkit-font-smoothing: antialiased; text-rendering: optimizeLegibility;
-      background:
-        radial-gradient(120% 80% at 50% -8%, #F1F2E6 0%, var(--wash) 60%);
+      font-size: var(--t-body); line-height: 1.85; -webkit-font-smoothing: antialiased; text-rendering: optimizeLegibility;
+      /* Anthropic 式平铺象牙纸——不加噪点、不加渐变,让留白与发丝线自己说话。 */
       background-color: var(--wash);
       min-height: 100vh;
-    }
-    /* Faint material grain — texture hint, not decoration. */
-    body::before {
-      content: ""; position: fixed; inset: 0; z-index: 0; pointer-events: none; opacity: 0.22; mix-blend-mode: soft-light;
-      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
     }
 
     /* One grid: nav, hero and screenshots share this width; text is centered
@@ -93,13 +91,16 @@
     .lang button { border: 0; background: none; color: var(--muted-soft); font: inherit; font-size: 13px; cursor: pointer; padding: 2px; line-height: 1; transition: color 0.25s var(--ease); }
     .lang button[aria-pressed="true"] { color: var(--ink); }
     .lang .s { width: 1px; height: 10px; background: var(--line); }
-    nav .dl { font-size: var(--t-small); font-weight: 500; color: var(--mira-strong); text-decoration: none; }
+    /* Anthropic 式导航主按钮:墨色小胶囊。 */
+    nav .dl { display: inline-flex; align-items: center; min-height: 34px; padding: 0 16px; border-radius: 999px; background: var(--ink); color: var(--panel); font-size: var(--t-small); font-weight: 500; text-decoration: none; transition: background 0.25s var(--ease); }
+    nav .dl:hover { background: #2e2e2b; }
 
-    /* ── Type — all sizes/measures/rhythm from tokens, no one-offs ─ */
-    h1 { margin: 0; font-size: var(--t-display); font-weight: 300; letter-spacing: 0; line-height: 1.42; color: var(--ink); }
-    h2 { margin: 0; max-width: var(--measure-head); margin-inline: auto; font-size: var(--t-title); font-weight: 500; letter-spacing: 0.01em; line-height: 1.45; color: var(--ink); }
-    .sub { margin: 0; max-width: var(--measure-sub); margin-inline: auto; font-size: var(--t-sub); font-weight: 400; line-height: 1.85; color: var(--muted); }
-    .body { margin: 0; max-width: var(--measure); margin-inline: auto; font-size: var(--t-body); font-weight: 400; line-height: 1.9; color: var(--muted); }
+    /* ── Type — all sizes/measures/rhythm from tokens, no one-offs.
+       标题层换衬线(Anthropic 的编辑气质),正文层保持无衬线的界面气质。 ─ */
+    h1 { margin: 0; font-family: var(--font-display); font-size: var(--t-display); font-weight: 400; letter-spacing: 0; line-height: 1.4; color: var(--ink); }
+    h2 { margin: 0; max-width: var(--measure-head); margin-inline: auto; font-family: var(--font-display); font-size: var(--t-title); font-weight: 400; letter-spacing: 0; line-height: 1.45; color: var(--ink); }
+    .sub { margin: 0; max-width: var(--measure-sub); margin-inline: auto; font-size: var(--t-sub); font-weight: 400; line-height: 1.8; color: var(--muted); }
+    .body { margin: 0; max-width: var(--measure); margin-inline: auto; font-size: var(--t-body); font-weight: 400; line-height: 1.85; color: var(--muted); }
     .eyebrow { margin: 0 0 var(--s4); font-size: var(--t-eyebrow); font-weight: 500; letter-spacing: 0.16em; text-transform: uppercase; color: var(--muted-soft); }
     .meta { margin: 0; font-size: var(--t-small); color: var(--muted-soft); }
 
@@ -144,7 +145,7 @@
     .head > .eyebrow + h2 { margin-top: 0; }
 
     /* Act 0 · 眼睛这件事 — 理性说服层:强度 · 责任 · 不可逆(字号走 4 号系统) */
-    .stakes-lead { max-width: 19em; font-size: var(--t-display); font-weight: 300; line-height: 1.42; }
+    .stakes-lead { max-width: 19em; font-size: var(--t-display); font-weight: 400; line-height: 1.42; }
     .stakes { list-style: none; margin: var(--s16) auto 0; padding: 0; max-width: 960px; display: grid; grid-template-columns: repeat(3, 1fr); text-align: left; }
     .stake { position: relative; padding: var(--s1) clamp(22px, 3vw, 36px); }
     .stake + .stake { border-left: 1px solid var(--line); }
@@ -154,22 +155,27 @@
     .stake.accent .stake-i, .stake.accent .stake-tag { color: var(--mira-strong); }
     .stake.accent p { color: var(--ink-soft); }
     .stakes-close { margin-top: var(--s12); }
+    /* 结语在宽屏上是一句流动的总结,不竖排;inline-block 让换行只落在
+       子句边界(破折号后),不会劈进词里。窄屏(≤600)回到分行的节奏。 */
+    @media (min-width: 600px) { .stakes-close .copy-line { display: inline-block; } }
     .body + .body { margin-top: var(--s6); }
 
     /* ── Hero ───────────────────────────────────────────────── */
     .hero { text-align: center; padding-top: clamp(84px, 14vh, 156px); padding-bottom: 0; }
     .hero h1 + .sub { margin-top: var(--flow-title); }
     /* 主 slogan:体感钩当头。语义行手工排版，避免移动端把关键词拆坏。 */
-    .hero-slogan { margin: 0 auto; max-width: 17em; font-size: var(--t-display); line-height: 1.42; font-weight: 300; letter-spacing: 0; color: var(--ink); text-wrap: auto; }
+    .hero-slogan { margin: 0 auto; max-width: 17em; font-size: var(--t-display); line-height: 1.42; font-weight: 400; letter-spacing: 0; color: var(--ink); text-wrap: auto; }
     .hero-row { display: block; }
     .hero-row + .hero-row { margin-top: 0.08em; }
     .hero-row > span { white-space: nowrap; }
-    .hero-row > span + span { margin-left: -0.12em; }
+    /* 只有 CJK 需要收句读后的视觉空隙;拉丁词距是词距,不能吃掉。 */
+    html[lang="zh-CN"] .hero-row > span + span { margin-left: -0.12em; }
     .hero-slogan .kw-mira { text-decoration: none; color: inherit; font-weight: inherit; }
     .cta + .meta { margin-top: 22px; }
     .hero .stage { position: relative; display: grid; justify-items: center; gap: var(--s6); margin: var(--s8) 0 var(--s6); }
-    .cta { display: inline-flex; align-items: center; justify-content: center; min-height: 46px; padding: 0 var(--s6); border-radius: var(--radius); border: 1px solid var(--mira-line); background: rgba(31,122,94,0.10); color: var(--mira-strong); font-size: var(--t-body); font-weight: 500; text-decoration: none; transition: background 0.25s var(--ease), border-color 0.25s var(--ease); }
-    .cta:hover { background: rgba(79,201,156,0.24); border-color: rgba(79,201,156,0.44); }
+    /* Anthropic 式主按钮:墨色实心胶囊,悬停只做一档极小的明度回弹(护眼:无闪烁)。 */
+    .cta { display: inline-flex; align-items: center; justify-content: center; min-height: 48px; padding: 0 var(--s8); border-radius: 999px; border: 1px solid transparent; background: var(--ink); color: var(--panel); font-size: var(--t-body); font-weight: 500; text-decoration: none; transition: background 0.25s var(--ease); }
+    .cta:hover { background: #2e2e2b; }
 
     /* ── Mira (app dark-mode companion; the one signature) ──── */
     .mira { position: relative; display: grid; place-items: center; width: 190px; height: 190px; animation: float 8s var(--ease) infinite; }
@@ -177,7 +183,7 @@
     .pet {
       position: relative; width: var(--ms); aspect-ratio: 1; border-radius: 18px 18px 16px 16px;
       background: linear-gradient(150deg, #fbfcf6 0%, #edf6ef 50%, #e5edf1 100%);
-      box-shadow: inset 0 0 0 1px rgba(24,32,31,0.06), inset 0 -8px 18px rgba(15,159,122,0.08), 0 18px 40px -14px rgba(46,50,38,0.22);
+      box-shadow: inset 0 0 0 1px rgba(24,32,31,0.06), inset 0 -8px 18px rgba(15,159,122,0.08), 0 18px 40px -14px rgba(20,20,19,0.2);
       display: grid; place-items: center; overflow: hidden;
       transform: scale(var(--rest)); transform-origin: center; animation: breathe var(--breath) var(--ease) infinite;
     }
@@ -217,7 +223,7 @@
 
     /* ── Reminder island — Mira's lightest touch, rebuilt from app tokens ─ */
     /* Pixel-matched to the app's island.html — same padding, radius, green, shadow, type. */
-    .island { display: inline-flex; align-items: center; gap: 13px; max-width: 100%; padding: 14px 26px 14px 16px; border-radius: 999px; background: rgba(26, 107, 82, 0.97); color: #f6f7f9; font-size: 16.5px; font-weight: 600; line-height: 1.25; letter-spacing: 0.01em; box-shadow: 0 14px 32px -12px rgba(46,50,38,0.26), inset 0 0 0 1px rgba(255,255,255,0.14); }
+    .island { display: inline-flex; align-items: center; gap: 13px; max-width: 100%; padding: 14px 26px 14px 16px; border-radius: 999px; background: rgba(26, 107, 82, 0.97); color: #f6f7f9; font-size: 16.5px; font-weight: 600; line-height: 1.25; letter-spacing: 0.01em; box-shadow: 0 14px 32px -12px rgba(20,20,19,0.24), inset 0 0 0 1px rgba(255,255,255,0.14); }
     .island .ic { width: 54px; height: 54px; flex: 0 0 auto; display: block; border-radius: 15px; }
     /* Live island — loops its real self-closing rest: 看远处 → the bar drains → 已记录 ✓.
        Slow (8s) and gentle (a draining bar + a crossfade, no flash). It's the island
@@ -267,7 +273,14 @@
        Mira keeps breathing + blinking in the bubble throughout. */
 
     .closing { text-align: center; padding-top: clamp(76px, 10vh, 116px); padding-bottom: calc(var(--section) + var(--s8)); }
-    .screen-card { min-width: 0; border-radius: 16px; border: 1px solid var(--line); overflow: hidden; container-type: inline-size; box-shadow: 0 2px 24px rgba(29,31,26,0.05); }
+    .screen-card { min-width: 0; border-radius: var(--radius-lg); border: 1px solid var(--line); overflow: hidden; container-type: inline-size; box-shadow: 0 1px 2px rgba(20,20,19,0.04), 0 24px 48px -28px rgba(20,20,19,0.16); }
+    /* Anthropic 式产品截图呈现:app 界面套 macOS 窗口镀边——
+       奶油 chrome 条 + 三颗中性圆点(不用红黄绿:护眼 DNA,页面无高饱和噪点)。 */
+    .screen-card.is-window::before { content: ""; display: block; height: 34px; border-bottom: 1px solid var(--line-soft); background:
+      radial-gradient(circle 4.5px at 21px 17px, rgba(20,20,19,0.14) 99%, transparent),
+      radial-gradient(circle 4.5px at 41px 17px, rgba(20,20,19,0.14) 99%, transparent),
+      radial-gradient(circle 4.5px at 61px 17px, rgba(20,20,19,0.14) 99%, transparent),
+      var(--panel-strong); }
     .screen-card img { display: block; width: 100%; height: auto; }
     .screen-card :is(.mock-app, .mock-break, .mock-share) { width: 100%; }
 
@@ -276,8 +289,8 @@
        All internal sizes in cqi so each mock scales like an image. ── */
 
     /* Daytime app surfaces — calm, light, and consistent with the page's paper tokens. */
-    .mock-app { aspect-ratio: 1.62; display: grid; grid-template-columns: 22.5cqi minmax(0, 1fr); overflow: hidden; text-align: left; color: var(--ink); background: linear-gradient(180deg, var(--panel-strong), #F2F3E8); }
-    .ma-side { min-width: 0; padding: 4.2cqi 2.5cqi; display: grid; align-content: start; gap: 2.3cqi; background: rgba(232,233,221,0.68); border-right: 1px solid var(--line); }
+    .mock-app { aspect-ratio: 1.62; display: grid; grid-template-columns: 22.5cqi minmax(0, 1fr); overflow: hidden; text-align: left; color: var(--ink); background: linear-gradient(180deg, var(--panel-strong), #F1EFE7); }
+    .ma-side { min-width: 0; padding: 4.2cqi 2.5cqi; display: grid; align-content: start; gap: 2.3cqi; background: rgba(230,227,217,0.68); border-right: 1px solid var(--line); }
     .ma-brand { display: inline-flex; align-items: center; gap: 1.6cqi; min-width: 0; font-size: max(2.4cqi, 10px); line-height: 1.2; font-weight: 600; color: var(--ink); }
     .ma-mark { width: 3.2cqi; height: 3.2cqi; min-width: 14px; min-height: 14px; }
     .ma-nav { display: grid; gap: 0.9cqi; margin-top: 1.2cqi; }
@@ -286,17 +299,18 @@
     .ma-theme { align-self: end; display: grid; gap: 1cqi; margin-top: auto; }
     .ma-theme small, .ma-note { font-size: max(1.95cqi, 9px); line-height: 1.35; color: var(--muted-soft); }
     .ma-switch { min-width: 0; display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.5cqi; padding: 0.6cqi; border-radius: 1.5cqi; background: rgba(255,255,255,0.54); border: 1px solid var(--line); }
-    .ma-switch span { min-width: 0; min-height: 3.7cqi; display: grid; place-items: center; border-radius: 1cqi; font-size: max(1.95cqi, 9px); line-height: 1.1; color: var(--muted); white-space: nowrap; }
+    .ma-switch :is(span, button) { min-width: 0; min-height: 3.7cqi; display: grid; place-items: center; border-radius: 1cqi; font-size: max(1.95cqi, 9px); line-height: 1.1; color: var(--muted); white-space: nowrap; }
+    .ma-switch button { border: 0; background: none; font-family: inherit; padding: 0; cursor: pointer; }
     .ma-switch .is-active { color: var(--mira-strong); background: rgba(31,122,94,0.12); box-shadow: inset 0 0 0 1px rgba(31,122,94,0.08); }
     .ma-main { min-width: 0; padding: 4.8cqi 5.2cqi; display: grid; align-content: start; gap: 2.5cqi; }
     .ma-top { display: flex; align-items: start; justify-content: space-between; gap: 2cqi; }
     .ma-kicker { display: block; margin-bottom: 0.8cqi; font-size: max(2cqi, 9px); line-height: 1.2; color: var(--muted-soft); }
     .ma-title { display: block; font-size: max(4.3cqi, 16px); line-height: 1.2; font-weight: 600; color: var(--ink); letter-spacing: 0; }
     .ma-status { padding: 1cqi 1.8cqi; border-radius: 1.2cqi; background: rgba(31,122,94,0.1); color: var(--mira-strong); font-size: max(2cqi, 9px); line-height: 1.2; white-space: nowrap; }
-    .ma-card { min-width: 0; padding: 2.7cqi; border-radius: 1.7cqi; border: 1px solid var(--line); background: rgba(255,255,255,0.62); display: grid; gap: 1.6cqi; box-shadow: 0 1px 1px rgba(46,50,38,0.03); }
+    .ma-card { min-width: 0; padding: 2.7cqi; border-radius: 1.7cqi; border: 1px solid var(--line); background: rgba(255,255,255,0.62); display: grid; gap: 1.6cqi; box-shadow: 0 1px 1px rgba(20,20,19,0.03); }
     .ma-card strong { font-size: max(2.8cqi, 12px); line-height: 1.35; font-weight: 600; color: var(--ink); }
     .ma-card p { margin: 0; font-size: max(2.25cqi, 10px); line-height: 1.45; color: var(--muted); }
-    .ma-meter { height: 1cqi; min-height: 4px; border-radius: 999px; background: rgba(46,54,40,0.08); overflow: hidden; }
+    .ma-meter { height: 1cqi; min-height: 4px; border-radius: 999px; background: rgba(20,20,19,0.07); overflow: hidden; }
     .ma-meter i { display: block; width: 38%; height: 100%; border-radius: inherit; background: var(--mira); }
     .ma-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.2cqi; }
     .ma-mini { min-width: 0; padding: 1.7cqi; border-radius: 1.3cqi; background: rgba(255,255,255,0.48); border: 1px solid var(--line-soft); }
@@ -310,7 +324,7 @@
 
     /* break-lock (L4 全屏恢复) — same surface, now shown in the daytime theme. */
     .mock-break { position: relative; aspect-ratio: 1.6; display: grid; justify-items: center; align-content: center; gap: 8px; gap: 1.7cqi; padding: 16px; padding: 3.2cqi; text-align: center; color: var(--ink);
-      background: linear-gradient(180deg, rgba(31,122,94,0.07), transparent 42%), linear-gradient(180deg, var(--panel-strong) 0%, #F0F1E7 100%); }
+      background: linear-gradient(180deg, rgba(31,122,94,0.07), transparent 42%), linear-gradient(180deg, var(--panel-strong) 0%, #F0EEE6 100%); }
     .mock-break .mira { width: auto; height: auto; animation: none; }
     .mock-break .mira::before { display: none; }
     .mock-break .pet { --rest: 0.92; --peak: 0.99; }
@@ -341,7 +355,7 @@
     .mock-share { aspect-ratio: 1.62; display: grid; align-content: center; justify-items: start; gap: 10px; gap: 2.1cqi; padding: 22px 28px; padding: 4.6cqi 6cqi; text-align: left; background: var(--panel); }
     .ms-date { font-size: 12px; font-size: max(2.6cqi, 11px); color: var(--muted); }
     .ms-eyebrow { font-size: 11px; font-size: max(2.4cqi, 10px); letter-spacing: 0.14em; color: var(--mira-strong); }
-    .ms-insight { max-width: 30ch; font-family: "Songti SC", STSong, "Noto Serif CJK SC", Georgia, serif; font-size: 20px; font-size: max(4.5cqi, 16px); line-height: 1.5; font-weight: 600; color: var(--ink); }
+    .ms-insight { max-width: 30ch; font-family: var(--font-display); font-size: 20px; font-size: max(4.5cqi, 16px); line-height: 1.5; font-weight: 600; color: var(--ink); }
     .ms-metrics { display: flex; gap: 32px; gap: 7cqi; margin-top: 0.6cqi; }
     .ms-metrics > div { display: grid; gap: 0.8cqi; }
     .ms-metrics span { font-size: 11px; font-size: max(2.3cqi, 10px); color: var(--muted); }
@@ -371,12 +385,45 @@
     .tenets strong { display: block; font-size: var(--t-sub); font-weight: 500; letter-spacing: 0.01em; color: var(--ink); }
     .tenets p { margin: var(--s3) 0 0; font-size: var(--t-small); line-height: 1.6; color: var(--muted); text-wrap: pretty; }
     .theme-block { padding-block: clamp(76px, 10vh, 116px); }
-    .theme-strip { margin: var(--s12) auto 0; max-width: 780px; display: grid; grid-template-columns: minmax(0, 0.82fr) minmax(0, 1.18fr); gap: clamp(28px, 5vw, 56px); align-items: start; padding-block: var(--s8); border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); text-align: left; }
-    .theme-control { display: grid; gap: var(--s4); }
-    .theme-label { margin: 0; font-size: var(--t-small); color: var(--muted-soft); }
-    .theme-segment { display: grid; grid-template-columns: repeat(3, 1fr); gap: 4px; padding: 4px; border-radius: 12px; border: 1px solid var(--line); background: rgba(255,255,255,0.44); }
-    .theme-segment span { min-height: 34px; display: grid; place-items: center; border-radius: 8px; font-size: var(--t-small); line-height: 1.1; color: var(--muted); white-space: nowrap; }
-    .theme-segment .is-active { color: var(--mira-strong); background: var(--mira-soft); box-shadow: inset 0 0 0 1px rgba(31,122,94,0.08); }
+    .theme-strip { margin: var(--s12) auto 0; max-width: 640px; padding-block: var(--s8); border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); text-align: left; }
+
+    /* ── 白天/夜晚活体演示 — 同一块今天页,在两套 app 真实 token 间交叉淡入。
+       夜晚值 verbatim 取自 eyeflow-design-system.css 的 data-theme="dark" 块;
+       页面 token 在演示卡子树内整组换值,ma-* 规则自动跟随(一份渲染路径)。
+       过渡只走 background-color/color/border-color——所有浏览器原生可插值,
+       不碰渐变和 @property(部分合成路径不插值,会整块直切=闪烁)。
+       所以演示卡底改纯色;chrome 圆点用一颗明暗两版都可读的中性灰,压根不用变。 */
+    .theme-demo { max-width: 780px; margin: var(--s8) auto 0; transition: border-color 0.6s var(--ease); }
+    .theme-demo::before { background-image:
+      radial-gradient(circle 4.5px at 21px 17px, rgba(128,127,120,0.4) 99%, transparent),
+      radial-gradient(circle 4.5px at 41px 17px, rgba(128,127,120,0.4) 99%, transparent),
+      radial-gradient(circle 4.5px at 61px 17px, rgba(128,127,120,0.4) 99%, transparent);
+      background-color: #FCFBF8; transition: background-color 0.6s var(--ease), border-color 0.6s var(--ease); }
+    .theme-demo .mock-app { background: #F7F5EE; transition: background-color 0.6s var(--ease); }
+    .theme-demo :is(.ma-side, .ma-brand, .ma-nav span, .ma-theme small, .ma-switch, .ma-switch span, .ma-switch button, .ma-kicker, .ma-title, .ma-status, .ma-card, .ma-card strong, .ma-card p, .ma-meter, .ma-meter i, .ma-mini, .ma-mini span, .ma-mini b) {
+      transition: background-color 0.6s var(--ease), color 0.6s var(--ease), border-color 0.6s var(--ease), box-shadow 0.6s var(--ease); }
+    .theme-demo.is-night {
+      --ink: #f3f4f6; --ink-soft: #d3d5d9; --muted: #9a9aa3; --muted-soft: #6f6f78;
+      --line: rgba(255,255,255,0.10); --line-soft: rgba(255,255,255,0.06);
+      --panel-strong: #26282b;
+      --mira: #4fc99c; --mira-strong: #62d3aa; --mira-soft: rgba(79,201,156,0.16); --mira-line: rgba(79,201,156,0.30);
+      border-color: rgba(20,20,19,0.3);
+    }
+    .theme-demo.is-night::before { background-color: #26282b; border-bottom-color: rgba(255,255,255,0.07); }
+    .theme-demo.is-night .mock-app { background: #1B1D1F; }
+    /* 初始状态(自动档判定)直接落位,不播加载时的假淡入。 */
+    .theme-demo.no-fade, .theme-demo.no-fade::before, .theme-demo.no-fade * { transition: none !important; }
+    .theme-demo.is-night .ma-side { background: #1b1c1e; }
+    .theme-demo.is-night .ma-nav .is-active { background: rgba(79,201,156,0.16); }
+    .theme-demo.is-night .ma-switch { background: rgba(255,255,255,0.07); }
+    .theme-demo.is-night .ma-switch .is-active { background: rgba(79,201,156,0.16); box-shadow: inset 0 0 0 1px rgba(79,201,156,0.12); }
+    .theme-demo.is-night .ma-status { background: rgba(79,201,156,0.10); }
+    .theme-demo.is-night .ma-card { background: #212325; box-shadow: none; }
+    .theme-demo.is-night .ma-meter { background: rgba(255,255,255,0.09); }
+    .theme-demo.is-night .ma-mini { background: rgba(255,255,255,0.05); }
+    /* 演示卡里 app 自己的外观开关就是真开关——给够触点,不加新视觉。 */
+    .theme-demo .ma-switch :is(span, button) { min-height: max(4.2cqi, 32px); }
+    .theme-demo .ma-switch button:not(.is-active):hover { color: var(--ink-soft); }
     .theme-list { list-style: none; margin: 0; padding: 0; display: grid; gap: var(--s4); }
     .theme-list li { display: grid; grid-template-columns: 16px 1fr; gap: var(--s3); align-items: start; font-size: var(--t-small); line-height: 1.65; color: var(--muted); }
     .theme-list li::before { content: ""; width: 6px; height: 6px; margin-top: 0.68em; border-radius: 50%; background: var(--mira); opacity: 0.72; }
@@ -430,7 +477,7 @@
       .ma-theme { grid-column: 1 / -1; gap: 6px; }
       .ma-theme small { font-size: 10px; }
       .ma-switch { border-radius: 10px; gap: 3px; padding: 3px; }
-      .ma-switch span { min-height: 26px; border-radius: 7px; font-size: 10px; }
+      .ma-switch :is(span, button) { min-height: 26px; border-radius: 7px; font-size: 10px; }
       .ma-main { padding: var(--s6); gap: var(--s4); }
       .ma-top { align-items: center; }
       .ma-kicker { font-size: 10px; margin-bottom: 4px; }
@@ -460,7 +507,7 @@
     @media (max-width: 720px) {
       .theme-strip { grid-template-columns: 1fr; max-width: 25em; gap: var(--s8); }
     }
-    .final-panel { max-width: 860px; min-height: 340px; margin-inline: auto; padding: 38px clamp(24px, 6vw, 64px) 40px; display: grid; justify-items: center; align-content: center; border-radius: 16px; border: 1px solid var(--line); background: linear-gradient(180deg, var(--panel-strong), rgba(247,248,240,0.78)); box-shadow: 0 2px 24px rgba(29,31,26,0.05); }
+    .final-panel { max-width: 860px; min-height: 340px; margin-inline: auto; padding: 38px clamp(24px, 6vw, 64px) 40px; display: grid; justify-items: center; align-content: center; border-radius: 20px; border: 1px solid var(--line); background: var(--panel); box-shadow: 0 1px 2px rgba(20,20,19,0.04), 0 24px 48px -28px rgba(20,20,19,0.12); }
     .final-panel .mira { width: 88px; height: 88px; margin-bottom: var(--s6); }
     .final-panel .pet { --rest: 1.05; --peak: 1.08; }
 
@@ -486,7 +533,7 @@
     .pacer .pet { --rest: 1.5; --peak: 1.56; }
     /* NOTE: must beat the later `.pacer { margin }` — same-specificity source-order trap. */
     .pacer.pacer-invite { margin-bottom: var(--s2); }
-    .rest-btn { margin-top: var(--s2); background: var(--mira); border-color: transparent; color: var(--wash); font-weight: 500; font-size: var(--t-body); min-height: 52px; padding: 0 var(--s8); }
+    .rest-btn { margin-top: var(--s2); background: var(--mira); border-color: transparent; color: var(--panel); font-weight: 500; font-size: var(--t-body); min-height: 52px; padding: 0 var(--s8); }
     .rest-btn:hover { background: var(--mira-strong); border-color: transparent; }
     .rest-skip { margin-top: var(--s2); border: 0; background: none; color: var(--muted-soft); font: inherit; font-size: var(--t-small); letter-spacing: 0.04em; cursor: pointer; transition: color 0.25s var(--ease); }
     .rest-skip:hover { color: var(--muted); }
@@ -517,33 +564,45 @@
     .reveal.in { opacity: 1; transform: none; }
     .closing .sub { margin-top: var(--s4); }
 
-    /* Latin needs a wider measure than CJK — override the tokens once. */
-    html[lang="en"] { --measure: 34em; --measure-lede: 30em; --measure-sub: 26em; --measure-head: 22em; }
-    html[lang="en"] h1 { letter-spacing: -0.03em; line-height: 1.05; }
+    /* Latin needs a wider measure than CJK — override the tokens once.
+       Georgia 衬线不吃负字距,给一点点就够;行高比无衬线略松。 */
+    html[lang="en"] { --measure: 34em; --measure-sub: 26em; --measure-head: 22em; }
+    html[lang="en"] h1 { letter-spacing: -0.01em; line-height: 1.15; }
+    html[lang="en"] h2 { line-height: 1.35; }
 
     /* Chinese typography — treat CJK by its own rules, not Latin's. Lighter weight
        and deliberate line breaks carry the refinement; normal text keeps zero
        tracking so the page does not feel airy-but-loose. */
     html[lang="zh-CN"] { font-family: "PingFang SC", "Hiragino Sans GB", -apple-system, BlinkMacSystemFont, sans-serif; }
-    html[lang="zh-CN"] h1 { font-weight: 300; letter-spacing: 0; line-height: 1.42; }
-    html[lang="zh-CN"] .stakes-lead { font-weight: 300; }   /* Display 例外:细体,不随 CJK h2 加粗 */
-    html[lang="zh-CN"] h2 { font-weight: 500; letter-spacing: 0; line-height: 1.42; }
-    html[lang="zh-CN"] .sub { letter-spacing: 0; line-height: 1.85; }
-    html[lang="zh-CN"] .body { letter-spacing: 0; line-height: 1.9; }
+    /* CJK 衬线(宋体)没有细体/中间字重,一律 400 regular;行高比拉丁衬线更松。 */
+    html[lang="zh-CN"] h1 { font-weight: 400; letter-spacing: 0; line-height: 1.45; }
+    html[lang="zh-CN"] .stakes-lead { font-weight: 400; }
+    html[lang="zh-CN"] h2 { font-weight: 400; letter-spacing: 0; line-height: 1.5; }
+    html[lang="zh-CN"] .sub { letter-spacing: 0; line-height: 1.8; }
+    html[lang="zh-CN"] .body { letter-spacing: 0; line-height: 1.85; }
     html[lang="zh-CN"] .eyebrow { letter-spacing: 0.16em; }
     html[lang="zh-CN"] .meta { letter-spacing: 0; line-height: 1.45; }
 
     @media (max-width: 560px) {
       .col { padding-inline: 20px; }
-      nav .right { gap: 0; }
-      .lang { display: none; }
-      .hero { padding-top: clamp(78px, 12vh, 104px); }
-      .hero-slogan { max-width: 10.5em; font-size: 1.75rem; line-height: 1.42; }
-      .hero-row + .hero-row { margin-top: 0.24em; }
+      /* 手机不藏语言切换——默认语言跟系统走,入口必须留着。 */
+      nav .right { gap: 12px; }
+      nav .dl { min-height: 32px; padding: 0 13px; }
+      .hero { padding-top: clamp(64px, 10vh, 92px); }
+      .hero-slogan { max-width: 10.5em; font-size: 1.75rem; line-height: 1.5; }
+      /* 两句之间一口呼吸:四行读成两联,不是平铺的四行。 */
+      .hero-row + .hero-row { margin-top: 0.45em; }
       .hero-row > span { display: block; }
-      .hero-row > span + span { margin-left: 0; }
-      .hero .stage { margin: 30px 0 26px; }
+      html[lang="zh-CN"] .hero-row > span + span { margin-left: 0; }
+      /* EN 手机端不逐段硬断行(会掉出 "a little." 孤行):
+         句内自然换行 + balance,一句摊成匀称的两行。 */
+      html[lang="en"] .hero-slogan { max-width: 12em; font-size: 1.625rem; }
+      html[lang="en"] .hero-row { text-wrap: balance; }
+      html[lang="en"] .hero-row > span { display: inline; white-space: normal; }
+      .hero .stage { margin: 26px 0 22px; }
       h2 .cl, .sub .cl { display: block; white-space: nowrap; }
+      /* 正文里的子句:手机上也各占一行(在标点处断),但允许句内自然换行兜底 */
+      .body .cl { display: block; }
       .brand-line .cl + .cl { margin-left: 0; }
       .body .copy-line { display: block; white-space: normal; }
       .body { max-width: 19em; font-size: 1rem; line-height: 1.82; }
@@ -659,7 +718,7 @@
         </div>
       </div>
       <h2 data-en="She doesn't say much — but it lands."><span class="cl">她话很少，</span><span class="cl">但都说在点上。</span></h2>
-      <p class="body" data-en="<b class='kw-mira'>Mira</b> lives inside EyeFlow — a quiet companion for screen work. Stare too long and you slowly lose your edge; what she does is small: a gentle stop, before the fatigue piles up."><span class="copy-line">EyeFlow 里住着 <b class="kw-mira">Mira</b>，一位安静的屏幕工作伙伴。</span><span class="copy-line">屏幕看久了，人会慢慢没状态。</span><span class="copy-line">她做的事很小：</span><span class="copy-line">在疲劳攒起来之前，轻轻停你一下。</span></p>
+      <p class="body" data-en="<b class='kw-mira'>Mira</b> lives inside EyeFlow — a quiet companion for screen work. Stare too long and you slowly lose your edge; what she does is small: a gentle stop, before the fatigue piles up."><span class="copy-line"><span class="cl">EyeFlow 里住着 <b class="kw-mira">Mira</b>，</span><span class="cl">一位安静的屏幕工作伙伴。</span></span><span class="copy-line">屏幕看久了，人会慢慢没状态。</span><span class="copy-line">她做的事很小：</span><span class="copy-line">在疲劳攒起来之前，轻轻停你一下。</span></p>
       <p class="body" data-en="She watches one thing only — how long you’ve looked. No camera, no reading your screen, nothing uploaded."><span class="copy-line">她只看一件事：你盯了多久。</span><span class="copy-line">不开摄像头、不读屏幕内容、不上传。</span></p>
     </div>
   </section>
@@ -672,7 +731,7 @@
         <h2 data-en="&quot;I'm right here.&quot;">「我在旁边。」</h2>
         <p class="body" data-en="She never rushes you. Timing starts softly only when the screen is active — until then, she just waits."><span class="copy-line">她不催你开始。</span><span class="copy-line">有屏幕活动时，才轻轻开始计时。</span><span class="copy-line">在那之前，她就安静待着。</span></p>
       </div>
-      <div class="screen-card reveal">
+      <div class="screen-card is-window reveal">
         <article class="mock-app mock-app-today" role="img" aria-label="EyeFlow 白天版今天页：Mira 说「我在旁边」，默认外观为自动" data-en-label="EyeFlow's daytime Today view: Mira says 'I'm right here', with appearance set to Auto">
           <aside class="ma-side" aria-hidden="true">
             <div class="ma-brand"><span class="ma-mark"></span><b>EyeFlow</b></div>
@@ -771,7 +830,7 @@
         <h2 data-en="She walks you through it."><span class="cl">离开屏幕一下，</span><span class="cl">她带着。</span></h2>
         <p class="body" data-en="Gaze far, slow blinks, slow breaths — step by step, no need to watch the screen. And when you're back, just one line: welcome back."><span class="copy-line">远眺、慢眨眼、慢呼吸。</span><span class="copy-line">一步步带，不用盯着屏幕。</span><span class="copy-line">回来时，她只说一句：欢迎回来。</span></p>
       </div>
-      <div class="screen-card reveal">
+      <div class="screen-card is-window reveal">
         <div class="mock-break" role="img" aria-label="EyeFlow 全屏恢复：Mira 陪你看向远处，环形倒计时走完自动回来" data-en-label="EyeFlow's full-screen break: Mira looks into the distance with you while the ring counts down">
           <div class="mira" aria-hidden="true">
             <div class="pet">
@@ -806,7 +865,7 @@
         <h2 data-en="She writes down what she saw."><span class="cl">看到什么，</span><span class="cl">就记什么。</span></h2>
         <p class="body" data-en="When the record is thin, she says so — &quot;no rush to judge yet.&quot; Blanks over invented numbers."><span class="copy-line">记录还少时，她会说「先不急着下判断」。</span><span class="copy-line">宁可留白，也不编一个好看的数字。</span></p>
       </div>
-      <div class="screen-card reveal">
+      <div class="screen-card is-window reveal">
         <article class="mock-app mock-app-days" role="img" aria-label="EyeFlow 白天版这几天页：记录还少，Mira 先不急着下判断" data-en-label="EyeFlow's daytime These Days view: record still thin, so Mira doesn't rush to judge">
           <aside class="ma-side" aria-hidden="true">
             <div class="ma-brand"><span class="ma-mark"></span><b>EyeFlow</b></div>
@@ -893,23 +952,57 @@
     <div class="head">
       <p class="eyebrow" data-en="Day / Night">白天 / 夜晚</p>
       <h2 data-en="Auto by default — quiet in both light and dark."><span class="cl">默认自动切换，</span><span class="cl">白天夜晚都安静。</span></h2>
-      <p class="body" data-en="<span class='copy-line'>EyeFlow uses your Mac's timezone and the day's sunrise and sunset to choose Day or Night.</span><span class='copy-line'>Day stays clean and clear; Night lowers brightness.</span><span class='copy-line'>If you prefer, you can also pin either mode manually.</span>"><span class="copy-line">EyeFlow 会按这台 Mac 的时区、当天日出和日落，自动判断白天或夜晚。</span><span class="copy-line">白天保持清爽，夜晚自动压低亮度。</span><span class="copy-line">你也可以手动固定在白天或晚上。</span></p>
+      <p class="body" data-en="<span class='copy-line'>EyeFlow uses your Mac's timezone and the day's sunrise and sunset to choose Day or Night.</span><span class='copy-line'>Day stays clean and clear; Night lowers brightness.</span><span class='copy-line'>If you prefer, you can also pin either mode manually.</span>"><span class="copy-line"><span class="cl">EyeFlow 会按这台 Mac 的时区、</span><span class="cl">当天日出和日落，</span><span class="cl">自动判断白天或夜晚。</span></span><span class="copy-line">白天保持清爽，夜晚自动压低亮度。</span><span class="copy-line">你也可以手动固定在白天或晚上。</span></p>
     </div>
     <div class="theme-strip">
-      <div class="theme-control" aria-hidden="true">
-        <p class="theme-label" data-en="Appearance">外观</p>
-        <div class="theme-segment">
-          <span class="is-active" data-en="Auto">自动</span>
-          <span data-en="Day">白天</span>
-          <span data-en="Night">晚上</span>
-        </div>
-        <p class="theme-label" data-en="Auto follows your local day rhythm.">自动跟随本地昼夜节奏。</p>
-      </div>
       <ul class="theme-list">
         <li data-en="No extra setup: keep Auto on and EyeFlow changes with the day.">不需要额外设置：保持「自动」，EyeFlow 会跟着一天自己切换。</li>
-        <li data-en="Daytime screenshots on this page now use the same clean light surface.">页面里的界面展示，统一采用清爽的白天版本。</li>
+        <li data-en="The view below is live — flip the appearance switch in its sidebar to see Night.">下面这块界面是真的——点侧栏里的外观开关，看看晚上的样子。</li>
         <li data-en="Night mode still exists for late hours, with lower contrast and a softer reading feel.">夜晚版本仍然保留，适合晚间使用，亮度和对比会更轻。</li>
       </ul>
+    </div>
+    <!-- 活体演示:mock 侧栏里 app 自己的外观开关就是真开关——点它,
+         这块今天页在白天/夜晚两套 app 真实 token 间交叉淡入;
+         「自动」按访客本地时间真实决定。 -->
+    <div class="screen-card is-window theme-demo reveal">
+      <article class="mock-app mock-app-demo" role="group" aria-label="EyeFlow 今天页的外观演示：用侧栏的外观开关，在白天与夜晚之间切换" data-en-label="A live preview of EyeFlow's Today view — use the appearance switch in the sidebar to move between Day and Night">
+        <aside class="ma-side">
+          <div class="ma-brand" aria-hidden="true"><span class="ma-mark"></span><b>EyeFlow</b></div>
+          <nav class="ma-nav" aria-hidden="true">
+            <span class="is-active" data-en="Today">今天</span>
+            <span data-en="These Days">这几天</span>
+            <span data-en="Settings">设置</span>
+          </nav>
+          <div class="ma-theme">
+            <small data-en="Appearance">外观</small>
+            <div class="ma-switch" role="group" aria-label="外观" data-en-label="Appearance">
+              <button type="button" class="is-active" data-mode="auto" aria-pressed="true" data-en="Auto">自动</button>
+              <button type="button" data-mode="day" aria-pressed="false" data-en="Day">白天</button>
+              <button type="button" data-mode="night" aria-pressed="false" data-en="Night">晚上</button>
+            </div>
+            <small data-en="Auto · by timezone">自动 · 按时区</small>
+          </div>
+        </aside>
+        <div class="ma-main">
+          <div class="ma-top">
+            <div>
+              <span class="ma-kicker" data-en="Mira is here">Mira 在这里</span>
+              <strong class="ma-title" data-en="Today">今天</strong>
+            </div>
+            <span class="ma-status ma-status-demo" data-en="Daytime">白天版</span>
+          </div>
+          <div class="ma-card">
+            <strong data-en="I'm right here.">我在旁边。</strong>
+            <p data-en="No need to start anything. When the screen is active, I will quietly keep time.">不用特意开始。有屏幕活动时，我会轻轻记着。</p>
+            <div class="ma-meter" aria-hidden="true"><i></i></div>
+          </div>
+          <div class="ma-row" aria-hidden="true">
+            <div class="ma-mini"><span data-en="Focus">专注</span><b data-en="0 min">0 分钟</b></div>
+            <div class="ma-mini"><span data-en="Rest">歇眼</span><b data-en="0 min">0 分钟</b></div>
+            <div class="ma-mini"><span data-en="Rhythm">节奏</span><b data-en="Ready">待开始</b></div>
+          </div>
+        </div>
+      </article>
     </div>
   </section>
 
@@ -1074,6 +1167,35 @@
       } catch (e) {}
       btns.forEach((b) => b.addEventListener("click", () => apply(b.dataset.lang)));
       apply(init);
+    })();
+
+    (function () { // 白天/夜晚活体演示 — mock 里 app 自己的外观开关是真开关
+      const demo = document.querySelector(".theme-demo");
+      if (!demo) return;
+      const btns = [...demo.querySelectorAll(".ma-switch button[data-mode]")];
+      const status = demo.querySelector(".ma-status-demo");
+      // App 的自动档按时区日出日落;页面演示用 7:00–19:00 近似本地昼夜。
+      const resolve = (mode) => mode !== "auto" ? mode : ((new Date().getHours() >= 7 && new Date().getHours() < 19) ? "day" : "night");
+      function apply(mode) {
+        const night = resolve(mode) === "night";
+        demo.classList.toggle("is-night", night);
+        btns.forEach((b) => {
+          const on = b.dataset.mode === mode;
+          b.classList.toggle("is-active", on);
+          b.setAttribute("aria-pressed", String(on));
+        });
+        // 状态徽标跟主题走,且双语快照同步更新,语言切换后不回跳。
+        status.dataset.en = night ? "Night" : "Daytime";
+        status.dataset.zh = night ? "晚上版" : "白天版";
+        status.textContent = document.documentElement.lang === "en" ? status.dataset.en : status.dataset.zh;
+      }
+      demo.addEventListener("click", (e) => {
+        const b = e.target.closest("button[data-mode]");
+        if (b) apply(b.dataset.mode);
+      });
+      demo.classList.add("no-fade"); // 初始落位不播过渡,交互后才交叉淡入
+      apply("auto");
+      requestAnimationFrame(() => requestAnimationFrame(() => demo.classList.remove("no-fade")));
     })();
   </script>
 </body>
