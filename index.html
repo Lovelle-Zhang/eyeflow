@@ -11868,11 +11868,28 @@
       }
       return reminderEngineState;
     }
+    // 心跳缺帧护栏(对齐 main 活动监视器的 15s gap guard):合盖/挂起时渲染端
+    // 定时器停摆,唤醒后第一帧的 delta 会是整段睡眠时长,而按键唤醒的
+    // idleSeconds≈0——不设防就把睡眠计成连续用眼、秒升 L3。
+    const ENGINE_FRAME_GAP_MS = 15 * 1000;
     function stepReminderEngine(idleSeconds) {
       const engine = window.EyeFlowReminderEngine;
       if (!engine) return;
+      const now = Date.now();
+      const current = ensureReminderEngineState();
+      const gapMs = now - Number(current.lastObsAtMs || now);
+      if (gapMs >= engine.PARAMS.AWAY_FULL_SECONDS * 1000) {
+        // 缺帧 ≥ 真离开阈值 = 睡眠/锁屏级缺席 → 按 away 语义清零重来
+        // (system-rest 生命周期路径的 full 结算与此幂等)。
+        reminderEngineState = engine.createState(now);
+        return;
+      }
+      if (gapMs > ENGINE_FRAME_GAP_MS) {
+        // 短缺帧(节流/卡顿):丢弃未被观测的空窗,只从当下继续累积。
+        reminderEngineState = { ...current, lastObsAtMs: now };
+      }
       const out = engine.pressureStep(ensureReminderEngineState(), {
-        nowMs: Date.now(),
+        nowMs: now,
         idleSeconds: Math.max(0, Number(idleSeconds) || 0)
       });
       reminderEngineState = out.state;

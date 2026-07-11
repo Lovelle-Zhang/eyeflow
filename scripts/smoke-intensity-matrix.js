@@ -55,6 +55,11 @@ function main() {
   );
   assertMatches(
     indexHtml,
+    /const ENGINE_FRAME_GAP_MS = 15 \* 1000;[\s\S]*?if \(gapMs >= engine\.PARAMS\.AWAY_FULL_SECONDS \* 1000\) \{[\s\S]*?reminderEngineState = engine\.createState\(now\);[\s\S]*?if \(gapMs > ENGINE_FRAME_GAP_MS\) \{/,
+    "heartbeat gap guard: a sleep span can never be counted as continuous eye time (aligned with main's 15s activity gap guard)"
+  );
+  assertMatches(
+    indexHtml,
     /const intent = currentReminderIntent\(\);/,
     "currentIntervention is a translation layer over the engine intent — no trigger logic of its own"
   );
