@@ -68,16 +68,16 @@ function main() {
     /title: "该好好歇一下了"/,
     "level-3 translation keeps a clear, honest escalation title (P3; 90min+skip gate lives in the engine)"
   );
-  assertMatches(
-    indexHtml,
-    /function\s+shouldSurfaceReminder\(intervention, load\)[\s\S]*const clearBreakDue = level >= 3[\s\S]*elapsedSeconds >= targetSeconds;[\s\S]*if \(clearBreakDue\) return true;[\s\S]*if \(isBusyForReminder\(\)\) return false;/,
-    "L3 break-point reminder cannot be swallowed by busy activity"
-  );
-  assertMatches(
-    indexHtml,
-    /function shouldHoldMiraSilence\(load\)[\s\S]*?const silenceBreakDue =[\s\S]*?if \(silenceBreakDue\) return false;/,
-    "silence gate can never swallow the real break point (2026-07-10 hard rule)"
-  );
+  // P3 S3:shouldSurfaceReminder/isBusyForReminder 多闸退役——"忙不忙"这类
+  // 启发式不再有资格吞提醒;busy 免打扰的正确位置是投递风格(若未来需要)。
+  if (indexHtml.includes("shouldSurfaceReminder") || indexHtml.includes("isBusyForReminder")) {
+    throw new Error("the old surface/busy gates must stay deleted — intent is the only trigger authority (P3 S3)");
+  }
+  // P3 S3:静默闸整体清退——共情静默曾是"断点缺席"头号病根(病例 C1),
+  // 新架构里它不允许存在:该不该提醒只归压力引擎。
+  if (indexHtml.includes("shouldHoldMiraSilence")) {
+    throw new Error("shouldHoldMiraSilence must stay deleted — empathy may style delivery, never gate breakDue (P3 S3)");
+  }
   assertMatches(
     indexHtml,
     /if \(!intervention\.breakDue\) return;/,
@@ -85,8 +85,8 @@ function main() {
   );
   assertMatches(
     indexHtml,
-    /if \(state\.settings\.deepWorkMiraOnlyToggle && latestActivity\?\.isDeepWorkApp && elapsedSeconds >= targetSeconds \* 0\.55\) return true;/,
-    "deep-work silence requires the explicit user toggle"
+    /deepWorkQuiet: Boolean\(state\.settings\.deepWorkMiraOnlyToggle && latestActivity\?\.isDeepWorkApp\),/,
+    "deep-work is a delivery-style flag gated on the explicit toggle — it can quiet surfaces, never breakDue (P3 S3)"
   );
   {
     const deepWorkFnStart = mainJs.indexOf("function isDeepWorkApp");

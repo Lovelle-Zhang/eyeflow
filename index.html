@@ -11299,14 +11299,6 @@
       if (state.breaks === 0) recordMiraModeSignal("overrun");
       const analysis = computeEyeAnalysis();
       const load = analysis.load;
-      if (shouldHoldMiraSilence(load)) {
-        const memory = ensureMiraMemory();
-        if (now - Number(memory.lastQuietMercyAt || 0) > 45 * 60 * 1000) {
-          memory.lastQuietMercyAt = now;
-          showToast("Mira：今天先不说休息的事了。你看起来在赶什么，专注完再说。");
-        }
-        return;
-      }
       const group = lightReminderGroup(load);
       const memoryLine = modeMemoryLine("overrun");
       showToast(memoryLine ? `Mira：${memoryLine}` : `Mira：${lightReminderLine(group, "nudge") || "看一眼远处，再回来。"}`);
@@ -12084,21 +12076,6 @@
       return true;
     }
 
-    function shouldSurfaceReminder(intervention, load) {
-      const level = Number(intervention.level || 1);
-      if (level < 2) return false;
-      if (!(isRunning || isAutoTracking())) return false;
-      const targetSeconds = Number(els.focusTarget.value) * 60;
-      const clearBreakDue = level >= 3
-        && elapsedSeconds >= targetSeconds;
-      if (clearBreakDue) return true;
-      if (isBusyForReminder()) return false;
-      if (latestActivity && isNaturalBreak(latestActivity)) return true;
-      if (load >= 74) {
-        return elapsedSeconds >= Math.min(targetSeconds, 8 * 60);
-      }
-      return elapsedSeconds >= targetSeconds;
-    }
 
     // pending 卡是 intent 的 UI 镜像(P3):breakDue 出现 → 记一张;结算/回落 →
     // 卡随之消失。旧的多闸(busy 阻断/记录冷却/level 门)全部退役——"该不该提醒"
@@ -13369,10 +13346,6 @@
       return Number(activity.idleSeconds || 0) >= 8;
     }
 
-    function isBusyForReminder(activity = latestActivity) {
-      if (!activity) return false;
-      return activity.isWorking && !hasReminderOpening(activity);
-    }
 
     function naturalBreakLabel(activity) {
       if (!activity) return "等待恢复断点";
@@ -14196,32 +14169,7 @@
       return `以往${signal.bucket}，你也容易撑过去不休息。${boundary}`;
     }
 
-    function highWorkStreak(load) {
-      const targetSeconds = Number(els.focusTarget.value) * 60;
-      const currentHigh = load >= 48 || elapsedSeconds >= targetSeconds * 0.85;
-      const historicalHighDays = (state.summaryHistory || [])
-        .slice(0, 2)
-        .filter((day) => historyPeakLoad(day) >= 48 || recordedSecondsForDay(day) >= targetSeconds * 0.85)
-        .length;
-      return (currentHigh ? 1 : 0) + historicalHighDays;
-    }
 
-    function shouldHoldMiraSilence(load) {
-      if (!hasAssessedToday() || state.settings.intensity === "force") return false;
-      const targetSeconds = Number(els.focusTarget.value) * 60;
-      // 硬规则（2026-07-10 审计止血）：到达真正断点后永不静默。静默闸只做断点前的
-      // 降噪，不允许吃掉 L2/L3 的断点承诺——此前深度工作/被忽略计数/连续高负荷三条
-      // 都能在 55%–85% 目标后把 level 压回 1，绿胶囊在断点后整段缺席。
-      const silenceBreakDue = ((isRunning || isAutoTracking()) && elapsedSeconds >= targetSeconds)
-        || Boolean(latestActivity && isNaturalBreak(latestActivity));
-      if (silenceBreakDue) return false;
-      const stats = state.reminderStats || {};
-      // 深度工作静默必须用户显式开启「深度工作时只显示 Mira」开关才生效——
-      // 与设置项的 opt-in 承诺一致（此前漏查开关，默认关也会静默）。
-      if (state.settings.deepWorkMiraOnlyToggle && latestActivity?.isDeepWorkApp && elapsedSeconds >= targetSeconds * 0.55) return true;
-      if (Number(stats.ignored || 0) >= 2 && elapsedSeconds >= targetSeconds * 0.65) return true;
-      return highWorkStreak(load) >= 3 && (isRunning || isAutoTracking());
-    }
 
     function anniversaryLine() {
       const first = ensureMiraMemory().firstAssessment;
@@ -14311,13 +14259,8 @@
         const back = returningLine();
         if (back) return { mood: "calm", title: "你回来了", message: back };
       }
-      if (shouldHoldMiraSilence(load)) {
-        return {
-          mood: "focus",
-          title: "Mira 先保持安静",
-          message: relationshipLine("silence", "hold") || "今天先不说休息的事了。你看起来在赶什么，专注完再说。"
-        };
-      }
+      // 静默闸清退(P3 S3):共情不再决定"说不说",只决定"怎么说"——
+      // 该不该提醒由压力引擎独占,dialogue 只翻译。
       if (kind === "companion") {
         const memoryLine = elapsedMinutes >= focusTargetMinutes * 0.72 ? modeMemoryLine("overrun") : "";
         if (memoryLine) {

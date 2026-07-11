@@ -100,7 +100,9 @@ function main() {
 
   assertIncludes(indexHtml, "第 3 天开始你可能会自然把提醒留到稍后。", "third-day retention cliff copy");
   assertIncludes(indexHtml, "窗口切换、键鼠停顿这类自然断点", "third-day alternate presence strategy");
-  assertIncludes(indexHtml, "今天先不说休息的事了。你看起来在赶什么，专注完再说。", "occasional silence copy");
+  // P3 S3:静默闸清退——"今天先不说"整句随闸下线。共情静默曾吃掉断点承诺
+  // (病例 C1),新架构里共情只许改投递风格,不许改该不该提醒。
+  assertNotMatches(indexHtml, /今天先不说休息的事了/, "the empathy silence line retired with its gate (P3 S3)");
 
   assertIncludes(indexHtml, "档案正在成形", "seventh-day value proof");
   assertIncludes(indexHtml, "EyeFlow 会更清楚哪些提醒真的适合你", "seventh-day forward plan");

@@ -186,10 +186,11 @@ function main() {
     /if \(intent\.level === 1\) \{[\s\S]*?breakDue: false,/,
     "early observation (level-1 intent) does not become an auto-popup (P3: no breakDue before the threshold)"
   );
+  // P3 S3:busy 闸已删——断点意图来自压力引擎,"还在打字"从结构上就吞不掉它。
   assertMatches(
     indexHtml,
-    /function\s+shouldSurfaceReminder\(intervention, load\)[\s\S]*const clearBreakDue = level >= 3[\s\S]*elapsedSeconds >= targetSeconds;[\s\S]*if \(clearBreakDue\) return true;[\s\S]*if \(isBusyForReminder\(\)\) return false;/,
-    "L3 at the real break point must surface even while the user is still working"
+    /if \(!intervention\.breakDue\) return;/,
+    "L3 at the real break point must surface even while the user is still working (intent-only recording, P3)"
   );
   assertMatches(
     indexHtml,
