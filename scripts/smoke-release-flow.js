@@ -414,7 +414,7 @@ function main() {
   assertIncludes(installedSmokeJs, "installed onboarding permission note is muted text", "installed smoke checks lightweight safety boundary");
   assertIncludes(installedSmokeJs, "installed companion delegates system notifications to the main-process coordinator", "installed smoke checks the single reminder-notification authority");
   assertIncludes(installedSmokeJs, "installed break lock emergency exit requires confirmation", "installed smoke checks force emergency exit");
-  assertIncludes(installedSmokeJs, "installed L2 early phase stays visual-only", "installed smoke checks L2 early boundary");
+  assertIncludes(installedSmokeJs, "installed pre-break (level-1) phase stays visual-only (P3)", "installed smoke checks L2 early boundary");
   assertIncludes(installedSmokeJs, "installed profile review opens with Mira insight", "installed smoke checks profile Mira insight opening");
   assertIncludes(installedSmokeJs, "installed profile review answers the next-round plan directly", "installed smoke checks profile next-round overview");
   assertIncludes(installedSmokeJs, "installed profile review labels the reminder timing directly", "installed smoke checks profile reminder timing");
