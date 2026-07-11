@@ -174,7 +174,7 @@ function main() {
     "L4 force takeover bypasses ordinary reminder recording"
   );
   assertIncludes(indexHtml, "强制爱临时退出", "force emergency exit has a quiet cooldown state");
-  assertIncludes(indexHtml, "Mira 先只改变状态和颜色；到恢复断点再短暂提示。", "L2 early phase stays visual-only");
+  assertIncludes(indexHtml, "Mira 先轻轻变化；到恢复断点再说清楚。", "pre-break (level-1) phase stays visual-only (P3 translation layer)");
   assertIncludes(indexHtml, "const FIRST_AHA_SECONDS = 5 * 60;", "Mira still gives a five-minute alive ping");
   assertIncludes(indexHtml, "lastAlivePingSessionId", "alive ping is tracked per session instead of permanently skipped");
   assertIncludes(indexHtml, "sessionId,", "alive ping records the current round id");
@@ -183,8 +183,8 @@ function main() {
   assertNotIncludes(indexHtml, "if (memory.firstAhaAt) return;", "alive ping is no longer a one-time lifetime event");
   assertMatches(
     indexHtml,
-    /const standardEarly = state\.settings\.intensity === "standard";[\s\S]*level: standardEarly \? 1 : 2,/,
-    "L2 early observation does not become an auto-popup"
+    /if \(intent\.level === 1\) \{[\s\S]*?breakDue: false,/,
+    "early observation (level-1 intent) does not become an auto-popup (P3: no breakDue before the threshold)"
   );
   assertMatches(
     indexHtml,

@@ -39,20 +39,20 @@ function main() {
   assertIncludes(indexHtml, "L1</strong>只改变状态球、表情和文字，不弹气泡，也不打断你。", "L1 user-facing rule stays quiet-only");
   assertMatches(
     indexHtml,
-    /state\.settings\.intensity === "quiet" \|\| deepWorkMiraOnly[\s\S]*return \{[\s\S]*level: 1,[\s\S]*title: "只让 Mira 轻轻变化"/,
-    "L1 behavior level is always non-interrupting"
+    /title: intensity === "quiet" \? "只让 Mira 轻轻变化" : "轻轻提个醒"/,
+    "L1 stays non-interrupting: level-1 intent keeps the quiet Mira-only title (P3 translation layer)"
   );
 
   assertIncludes(indexHtml, "L2</strong>到恢复断点时轻提一次", "L2 user-facing rule describes a break-point prompt");
   assertMatches(
     indexHtml,
-    /const standardEarly = state\.settings\.intensity === "standard";[\s\S]*level: standardEarly \? 1 : 2,[\s\S]*title: standardEarly \? "提前观察中" : "提前观察眨眼或远眺"/,
-    "L2 pre-break phase stays visual-only"
+    /if \(intent\.level === 1\) \{[\s\S]*?breakDue: false,/,
+    "pre-break pressure (level 1) never carries breakDue (P3)"
   );
   assertMatches(
     indexHtml,
-    /if \(elapsedMinutes >= focusTargetMinutes\) \{\s*return \{\s*level: state\.settings\.intensity === "clear" \? 3 : 2,\s*displayLevel: chosenDisplayLevel,\s*title: "到恢复断点"/,
-    "L2 reaches behavior level 2 at the break point, while L3 reaches behavior level 3 immediately"
+    /if \(intent\.level === 2\) \{[\s\S]*?breakDue: true,\s*title: "到恢复断点"/,
+    "level-2 intent is the break point: breakDue with the break-point title (P3)"
   );
 
   assertIncludes(indexHtml, "L3</strong>状态信号偏高或明显超出目标时更明确", "L3 user-facing rule describes clear escalation");
@@ -60,13 +60,13 @@ function main() {
   assertIncludes(mainJs, "L3 明确 — 到点胶囊+通知", "L3 menu copy matches the real break-point channel");
   assertMatches(
     indexHtml,
-    /if \(elapsedMinutes >= focusTargetMinutes\) \{\s*return \{\s*level: state\.settings\.intensity === "clear" \? 3 : 2,[\s\S]*title: "到恢复断点"/,
-    "L3 at the normal break point escalates before the +10 minute obvious-overrun branch"
+    /if \(intent\.level === 3\) \{[\s\S]*?breakDue: true,/,
+    "level-3 intent always carries breakDue (P3)"
   );
   assertMatches(
     indexHtml,
-    /state\.settings\.intensity === "clear" && elapsedMinutes >= focusTargetMinutes \+ 10[\s\S]*level: 3,[\s\S]*title: "已经比目标久了不少"/,
-    "L3 obvious overrun escalates to behavior level 3"
+    /title: "该好好歇一下了"/,
+    "level-3 translation keeps a clear, honest escalation title (P3; 90min+skip gate lives in the engine)"
   );
   assertMatches(
     indexHtml,
@@ -80,8 +80,8 @@ function main() {
   );
   assertMatches(
     indexHtml,
-    /title: "到恢复断点"[\s\S]*title: "在恢复断点轻提示"/,
-    "the real break-point escalation is evaluated before the natural-break light prompt (2026-07-10)"
+    /if \(!intervention\.breakDue\) return;/,
+    "reminder recording is driven solely by the engine intent's breakDue (P3; naturalBreak/elapsed heuristics retired)"
   );
   assertMatches(
     indexHtml,
@@ -131,15 +131,15 @@ function main() {
   assertIncludes(indexHtml, "以往${signal.bucket}", "mode memory speaks in real-time-consistent time buckets");
   assertMatches(
     indexHtml,
-    /closeBreakRound\(\{ reminderStatus: "completed" \}\);[\s\S]*?appendDataEvent\("recovery_event", \{[\s\S]*?durationSeconds: Math\.max\(0, Number\(payload\.restSeconds\) \|\| 20\),\s*mode: "island-micro",[\s\S]*?trigger: "island-micro",/,
-    "a completed island micro-rest books a real recovery_event so 歇眼 statistics are honest (2026-07-10 X)"
+    /closeBreakRound\(\{\s*reminderStatus: "completed",\s*settle: \{ kind: "micro", seconds: Math\.max\(0, Number\(payload\.restSeconds\) \|\| 20\) \}\s*\}\);[\s\S]*?appendDataEvent\("recovery_event", \{[\s\S]*?durationSeconds: Math\.max\(0, Number\(payload\.restSeconds\) \|\| 20\),\s*mode: "island-micro",[\s\S]*?trigger: "island-micro",/,
+    "a completed island micro-rest settles the engine as micro AND books the real recovery_event (P3 + X)"
   );
   // 岛完成必须与完整休息走同一条销账路径(closeBreakRound):关本轮 → rest-due 卡、
   // 菜单栏"休息"态、breakDue/闩锁自然回落。禁止在 resolve handler 里手抄轮次关闭。
   assertMatches(
     indexHtml,
-    /function closeBreakRound\(\{ reminderStatus = "completed" \} = \{\}\) \{\s*state\.breaks \+= 1;\s*elapsedSeconds = 0;\s*startedAt = null;\s*sessionSource = "idle";\s*lastNudgeAt = 0;\s*const hadPending = closePendingReminder\(reminderStatus\);/,
-    "closeBreakRound is the single round-closure path (2026-07-10 island/main-flow desync fix)"
+    /function closeBreakRound\(\{ reminderStatus = "completed", settle = null \} = \{\}\) \{\s*state\.breaks \+= 1;\s*elapsedSeconds = 0;\s*startedAt = null;\s*sessionSource = "idle";\s*lastNudgeAt = 0;\s*const hadPending = closePendingReminder\(reminderStatus\);/,
+    "closeBreakRound is the single round-closure path, now carrying the pressure settlement (P3)"
   );
   {
     const closureCopies = (indexHtml.match(/state\.breaks \+= 1;\s*elapsedSeconds = 0;\s*startedAt = null;\s*sessionSource = "idle";/g) || []).length;
@@ -149,13 +149,13 @@ function main() {
   }
   assertMatches(
     indexHtml,
-    /restStartedBeforeAssessment = false;\s*closeBreakRound\(\{ reminderStatus: "completed" \}\);/,
-    "completeRecovery walks the same closeBreakRound path as the island completion"
+    /restStartedBeforeAssessment = false;\s*closeBreakRound\(\{\s*reminderStatus: "completed",\s*settle: \{ kind: "full", seconds: Number\(els\.breakTarget\.value \|\| 0\) \}\s*\}\);/,
+    "completeRecovery walks the same closeBreakRound path with a full pressure settlement (P3)"
   );
   assertMatches(
     indexHtml,
-    /function closeBreakRound\(\{ reminderStatus = "completed" \} = \{\}\) \{[\s\S]*?state\.lastReminderAt = Date\.now\(\);[\s\S]*?return hadPending;/,
-    "closing a round re-arms the full reminder-record cooldown — a naturalBreak in the look-away idle window must not re-record a pending 5s later (2026-07-10)"
+    /function closeBreakRound\(\{ reminderStatus = "completed", settle = null \} = \{\}\) \{[\s\S]*?state\.lastReminderAt = Date\.now\(\);[\s\S]*?settleReminderEngine\(settle\.kind, settle\.seconds\);[\s\S]*?return hadPending;/,
+    "closing a round re-arms the record cooldown AND settles the pressure engine through the single exit (P3)"
   );
   assertMatches(
     mainJs,
@@ -171,8 +171,8 @@ function main() {
   assertIncludes(indexHtml, "L4</strong>强制爱：只在你主动选择后启用", "L4 user-facing rule requires explicit opt-in");
   assertMatches(
     indexHtml,
-    /state\.settings\.intensity === "force"[\s\S]*if \(elapsedMinutes >= focusTargetMinutes\) \{[\s\S]*level: 4,[\s\S]*title: "强制爱：全屏休息"/,
-    "L4 reaches behavior level 4 only at the break point"
+    /if \(intent\.surface === "hard-full"\) \{\s*return \{\s*level: 4,[\s\S]*?title: "强制爱：全屏休息"/,
+    "hard-full intent translates to level 4 and the existing force-break path (P3 decision 3)"
   );
   assertMatches(
     indexHtml,

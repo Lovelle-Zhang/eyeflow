@@ -9671,6 +9671,7 @@
   <script src="eyeflow-rest-flow.js"></script>
   <script src="eyeflow-ui-utils.js"></script>
   <script src="eyeflow-metrics.js"></script>
+  <script src="eyeflow-reminder-engine.js"></script>
   <script src="eyeflow-rhythm.js"></script>
   <script>
     const STORAGE_KEY = "eyeflow-v1";
@@ -10287,6 +10288,9 @@
       window.eyeflowDesktop.onActivity((activity) => {
         latestActivity = activity;
         lastActivityAt = Date.now();
+        // 压力引擎心跳:main 每 5s 无条件广播(窗口隐藏也不受节流),这里是
+        // 引擎的可靠喂帧点;obs 只带 idleSeconds,其余字段结构性进不了引擎。
+        stepReminderEngine(activity.idleSeconds);
         ensureCurrentDay({ toast: true });
         // Manual pause suspends ALL activity-driven session logic (auto-start AND the
         // natural-break auto-complete that could otherwise clear paused → idle → auto).
@@ -10354,17 +10358,21 @@
         const currentId = state.pendingReminder?.status === "pending" ? state.pendingReminder.id : null;
         if (!payload.reminderId || payload.reminderId !== currentId) return;
         if (status === "ignored") {
+          // 岛的 completed/ignored 判定来自键鼠空闲代理——"没停手"不等于"没歇眼"
+          // （病例 C7）。传感拿不准 → 引擎按 micro-uncertain 零记账，不喂 L3 门。
+          settleReminderEngine("micro-uncertain");
           if (!closePendingReminder("ignored")) return;
           render();
           persist();
           return;
         }
         // completed → 与完整休息完成走同一条销账路径（2026-07-10）：关本轮、销
-        // pending、清延后。断点卡（rest-due）、菜单栏"休息"态、breakDue/闩锁都
-        // 派生自 elapsed ≥ target，轮次一关就自然回落——不在各处手动补状态，
-        // 不新增第三本账。micro/full 的"降压不清零"精细分层留给治本 Y。
+        // pending、清延后 + 压力引擎 micro 结算（降压不清零,场景表 C4-C6）。
         const wasRunning = isRunning;
-        closeBreakRound({ reminderStatus: "completed" });
+        closeBreakRound({
+          reminderStatus: "completed",
+          settle: { kind: "micro", seconds: Math.max(0, Number(payload.restSeconds) || 20) }
+        });
         // 岛的 20 秒 look-away 是真实发生的恢复——补进 recovery_event 账本，
         // 让「歇眼」统计和下面这句"已记录"都为真（2026-07-10 X 号对齐：此前
         // 岛只销 reminder 账，歇眼记 0 秒）。mode 取"island-micro"：metrics 的
@@ -10762,6 +10770,14 @@
       // sessionSource are transient session-clock state, so guarding those is fine.)
       state.autoElapsedSeconds = autoElapsedSeconds;
       state.sessionSource = hasAssessedToday() ? sessionSource : "idle";
+      // 压力引擎状态随 state 持久化;重启后由 loadState 按 away 语义决定续用或清零。
+      state.reminderEngine = reminderEngineState
+        ? {
+            eyeSeconds: reminderEngineState.eyeSeconds,
+            skipCount: reminderEngineState.skipCount,
+            lastObsAtMs: reminderEngineState.lastObsAtMs
+          }
+        : null;
       state.lastNudgeAt = lastNudgeAt;
       state.lastNaturalBreakNudgeAt = lastNaturalBreakNudgeAt;
       state.lastActiveSecondsBeforeIdle = lastActiveSecondsBeforeIdle;
@@ -10917,6 +10933,9 @@
       state.deferReminderNeedsWork = false;
       state.forceEscapeUntil = 0;
       closePendingReminder("completed");
+      // 睡眠/锁屏 = 真离开——压力引擎按 full 结算（清零；账仍走本路径的既有
+      // recovery_event，不双记）。
+      settleReminderEngine("full", Number(els.breakTarget.value || 0));
       addSystemLog(
         "系统识别一次休息",
         `${lifecycleReasonLabel(reason)}，已结束这一轮${minutes > 0 ? ` ${minutes} 分钟` : ""}专注并记录为休息。`
@@ -11229,6 +11248,8 @@
     }
 
     function tick() {
+      // 手动计时期间补 1s 粒度心跳(idle 取最近一次 activity 广播的读数)。
+      stepReminderEngine(Number(latestActivity?.idleSeconds) || 0);
       if (ensureCurrentDay({ toast: true })) {
         render();
         persist();
@@ -11793,6 +11814,8 @@
 
     function snoozeBreak() {
       stopBreakRestTimer();
+      // 显式延后 = 用户明确跳过这次 micro——喂 L3 门的唯一合法信号（C7）。
+      settleReminderEngine("micro-skip");
       const hadPendingReminder = closePendingReminder("snoozed");
       state.snoozeUntil = Date.now() + SNOOZE_MINUTES * 60 * 1000;
       elapsedSeconds = Math.max(0, elapsedSeconds - SNOOZE_MINUTES * 60);
@@ -11812,6 +11835,8 @@
     }
 
     function deferReminderUntilBreak() {
+      // 「忙完再说」同为显式跳过——喂 L3 门（C7）。
+      settleReminderEngine("micro-skip");
       const hadPendingReminder = closePendingReminder("snoozed");
       state.deferReminderUntilBreak = true;
       state.deferReminderNeedsWork = true;
@@ -11824,12 +11849,66 @@
       persist();
     }
 
+    // ── 压力引擎宿主（P3 决策 1：渲染端持有，main 只当传感器）──────────
+    // eyeflow-reminder-engine 是提醒触发的唯一决策源（纯函数，场景表 0c 钉死）。
+    // 心跳：main 每 5s 无条件广播 activity（含 idleSeconds），onActivity 喂帧；
+    // 手动计时时 tick() 再补 1s 粒度。结算一律走 settleReminderEngine——
+    // micro（岛 20s）/ full（overlay、L4、系统休眠）/ micro-skip（显式延后）/
+    // micro-uncertain（传感拿不准，零记账）。
+    let reminderEngineState = null;
+    function ensureReminderEngineState() {
+      if (!reminderEngineState) {
+        const engine = window.EyeFlowReminderEngine;
+        const saved = state.reminderEngine;
+        const gapMs = saved ? Date.now() - Number(saved.lastObsAtMs || 0) : Infinity;
+        if (saved && gapMs >= 0 && gapMs < engine.PARAMS.AWAY_FULL_SECONDS * 1000) {
+          // 重启间隔 < AWAY_FULL:重启不是休息,压力续用(引擎语义跨进程一致)。
+          reminderEngineState = {
+            eyeSeconds: Math.max(0, Number(saved.eyeSeconds) || 0),
+            skipCount: Math.max(0, Number(saved.skipCount) || 0),
+            away: false,
+            lastObsAtMs: Date.now()
+          };
+        } else {
+          // 无存档或缺席 ≥ AWAY_FULL:按真离开语义从零开始。
+          reminderEngineState = engine.createState(Date.now());
+        }
+      }
+      return reminderEngineState;
+    }
+    function stepReminderEngine(idleSeconds) {
+      const engine = window.EyeFlowReminderEngine;
+      if (!engine) return;
+      const out = engine.pressureStep(ensureReminderEngineState(), {
+        nowMs: Date.now(),
+        idleSeconds: Math.max(0, Number(idleSeconds) || 0)
+      });
+      reminderEngineState = out.state;
+      // away-full 结算只清压力（P3 决策 2）：自然离屏的 recovery_event 照旧由
+      // 既有 maybeAutoCompleteBreak 路径记账，这里不开新账，避免双记。
+    }
+    function settleReminderEngine(kind, seconds) {
+      const engine = window.EyeFlowReminderEngine;
+      if (!engine) return null;
+      const result = engine.settleRest(ensureReminderEngineState(), { kind, seconds });
+      reminderEngineState = result.state;
+      return result.ledger;
+    }
+    function currentReminderIntent() {
+      const engine = window.EyeFlowReminderEngine;
+      if (!engine) {
+        return { level: 0, surface: "none", breakDue: false, context: { level: 0, surface: "none", bucket: "", minutes: 0 } };
+      }
+      return engine.intentFor(ensureReminderEngineState(), { intensity: state.settings.intensity || "standard" });
+    }
+
     // 「断点已响应」的唯一销账路径：关本轮（elapsed 归零 → rest-due 卡、菜单栏
-    // "休息"态、breakDue/闩锁全部由派生自然回落）+ 销 pending + 清延后。
+    // "休息"态、breakDue/闩锁全部由派生自然回落）+ 销 pending + 清延后 +
+    // 压力引擎结算（settle 参数决定 micro/full）。
     // completeRecovery（完整休息）与岛 micro-rest 完成共用这一条——别再各处手抄
     // 这几行（2026-07-10：岛完成只销了 reminder 账没关轮次，断点卡和菜单栏状态
     // 挂死，就是"多本账不同步"的又一次显形）。
-    function closeBreakRound({ reminderStatus = "completed" } = {}) {
+    function closeBreakRound({ reminderStatus = "completed", settle = null } = {}) {
       state.breaks += 1;
       elapsedSeconds = 0;
       startedAt = null;
@@ -11844,6 +11923,10 @@
       // 立刻重录一张新 pending，灰色断点卡"复活"并挂到 12 分钟超时（又喂一次
       // ignored 错账）。main 侧同窗口的胶囊重发已被统一 60s 地板盖住。
       state.lastReminderAt = Date.now();
+      // 压力引擎结算（P3）：micro 降压 / full 清零——触发源的回落只经这一个口。
+      if (settle && settle.kind) {
+        settleReminderEngine(settle.kind, settle.seconds);
+      }
       return hadPending;
     }
 
@@ -11857,7 +11940,10 @@
         breakTarget: Number(els.breakTarget.value)
       });
       restStartedBeforeAssessment = false;
-      closeBreakRound({ reminderStatus: "completed" });
+      closeBreakRound({
+        reminderStatus: "completed",
+        settle: { kind: "full", seconds: Number(els.breakTarget.value || 0) }
+      });
 
       if (plan.symptomRelief) softenSymptoms(plan.symptomRelief);
       if (plan.nextFocusTarget) {
@@ -12014,28 +12100,30 @@
       return elapsedSeconds >= targetSeconds;
     }
 
+    // pending 卡是 intent 的 UI 镜像(P3):breakDue 出现 → 记一张;结算/回落 →
+    // 卡随之消失。旧的多闸(busy 阻断/记录冷却/level 门)全部退役——"该不该提醒"
+    // 只归引擎;defer/snooze 是用户亲手的静音,保留尊重。
     function maybeRecordReminder(intervention, load) {
       const level = Number(intervention.level || 1);
       const now = Date.now();
       const pending = state.pendingReminder;
       if (pending?.status === "pending" && now - Date.parse(pending.at) > 12 * 60 * 1000) {
+        // 12 分钟没被理会:reminder 台账记 ignored(反馈统计/文案记忆用);
+        // 压力引擎不吃这个——超时不是显式跳过(C7),不喂 L3 门。
         closePendingReminder("ignored");
         recordMiraModeSignal("overrun");
         addSystemLog("一次提醒没顾上", "这次提醒你没顾上。EyeFlow 会用它来判断提醒是否太频繁。");
       }
-      if (level < 2) return;
-      if (!shouldSurfaceReminder(intervention, load)) return;
+      if (!intervention.breakDue) return;
       const deferredUntilBreak = Boolean(state.deferReminderUntilBreak);
       if (deferredUntilBreak && state.deferReminderNeedsWork) return;
       if (deferredUntilBreak && !hasReminderOpening()) return;
-      if (!deferredUntilBreak && isBusyForReminder()) return;
       if (deferredUntilBreak && hasReminderOpening()) {
         state.deferReminderUntilBreak = false;
       }
       const snoozeReady = Number(state.snoozeUntil || 0) > 0 && now >= Number(state.snoozeUntil || 0);
       if (Number(state.snoozeUntil || 0) > 0 && !snoozeReady) return;
       if (snoozeReady) state.snoozeUntil = 0;
-      const cooldown = level >= 3 ? 4 * 60 * 1000 : 8 * 60 * 1000;
       if (pending?.status === "pending") {
         const pendingLevel = Number(pending.level || 1);
         if (level > pendingLevel) {
@@ -12046,7 +12134,6 @@
         }
         return;
       }
-      if (!deferredUntilBreak && !snoozeReady && now - (state.lastReminderAt || 0) < cooldown) return;
       state.lastReminderAt = now;
       state.pendingReminder = {
         id: `reminder-${now}`,
@@ -14293,140 +14380,89 @@
       };
     }
 
+    // ── 翻译层(P3):压力引擎意图 → 界面语言 ─────────────────────────
+    // 触发决策 100% 来自 eyeflow-reminder-engine(场景表 0c 是唯一事实源);
+    // 这里只做三件事:①把 intent 翻成 level/displayLevel/title/copy;
+    // ②force 逃逸期在翻译层把 intent 压到 L1(引擎不感知,P3 决策 3);
+    // ③hard-full → level 4,走既有 startForceBreak。任何"该不该提醒"的
+    // 判断都不允许出现在这里——那是引擎的事。
     function currentIntervention(load) {
-      const focusTargetMinutes = Number(els.focusTarget.value);
-      const elapsedMinutes = elapsedSeconds / 60;
-      const symptoms = currentSymptoms();
-      const reminderGroup = lightReminderGroup(load, symptoms);
-      const reminderLine = lightReminderLine(reminderGroup, Math.floor(elapsedMinutes / 5));
-      const deepWorkMiraOnly = latestActivity
-        && state.settings.deepWorkMiraOnlyToggle
-        && latestActivity.isDeepWorkApp;
+      const intensity = state.settings.intensity || "standard";
+      const intent = currentReminderIntent();
+      const minutes = Number(intent.context.minutes || 0);
+      const displayLevel = intensity === "force" ? 4 : intensity === "clear" ? 3 : intensity === "standard" ? 2 : 1;
+      const reminderLine = lightReminderLine(lightReminderGroup(load, currentSymptoms()), Math.floor(minutes / 5));
 
-      if (state.settings.intensity === "force") {
+      if (intensity === "force") {
         const forceEscapeUntil = Number(state.forceEscapeUntil || 0);
         if (forceEscapeUntil > Date.now()) {
           const remainingMinutes = Math.max(1, Math.ceil((forceEscapeUntil - Date.now()) / 60000));
           return {
             level: 1,
             displayLevel: 4,
+            surface: "none",
+            breakDue: false,
             title: "强制爱临时退出",
-            copy: `这次强制恢复已中断，Mira 会安静 ${remainingMinutes} 分钟。下一轮到恢复断点后会恢复 L4 规则。`
+            copy: `这次强制恢复已中断，Mira 会安静 ${remainingMinutes} 分钟。压力还在累积，之后到点会恢复接管。`
           };
         }
-        if (!(isRunning || isAutoTracking())) {
-          return {
-            level: 1,
-            displayLevel: 4,
-            title: "强制爱待命",
-            copy: isAutoTracking()
-              ? "Mira 正在记录这一轮。需要停下时点暂停；到恢复断点我会接管。"
-              : "Mira 会先安静陪伴；这一轮到恢复断点后进入全屏恢复。"
-          };
-        }
-        if (elapsedMinutes >= focusTargetMinutes) {
-          return {
-            level: 4,
-            title: "强制爱：全屏休息",
-            copy: "这一轮已经到恢复断点。EyeFlow 会进入全屏恢复，倒计时结束前不恢复工作界面。"
-          };
-        }
-        // L4 预告：全屏接管前先打个招呼，别太突兀。这是提醒（level 2，无计时），不是休息。
-        if (elapsedMinutes >= focusTargetMinutes * 0.72) {
-          return {
-            level: 2,
-            displayLevel: 4,
-            title: "快到恢复断点",
-            copy: "这一轮快到点了——到点会进入全屏恢复。先把手里的收个尾。"
-          };
-        }
+      }
+
+      if (intent.surface === "hard-full") {
         return {
-          level: 1,
+          level: 4,
           displayLevel: 4,
-          title: "强制爱已开启",
-          copy: "Mira 会先安静陪伴；到恢复断点后直接进入全屏恢复。"
+          surface: "hard-full",
+          breakDue: true,
+          title: "强制爱：全屏休息",
+          copy: `已经连续用眼 ${minutes} 分钟，两次提醒也没歇上。EyeFlow 会进入全屏恢复，倒计时结束前不恢复工作界面。`
         };
       }
 
-      if (shouldHoldMiraSilence(load)) {
-        return {
-          level: 1,
-          displayLevel: 1,
-          title: "Mira 先保持安静",
-          copy: "今天先不说休息的事了。你看起来在赶什么，专注完再说。"
-        };
-      }
-
-      if (state.settings.intensity === "quiet" || deepWorkMiraOnly) {
-        return {
-          level: 1,
-          title: "只让 Mira 轻轻变化",
-            copy: deepWorkMiraOnly
-              ? "看起来在深度工作，暂时只更新 Mira 状态，不弹出提示。"
-            : `当前是安静模式，默认只用状态球和文字变化。${reminderLine || "看到 Mira 变色时先眨几下，不用停下。"}`
-        };
-      }
-
-      const chosenDisplayLevel = state.settings.intensity === "clear" ? 3 : 2;
-
-      if (state.settings.intensity === "clear" && elapsedMinutes >= focusTargetMinutes + 10) {
+      if (intent.level === 3) {
         return {
           level: 3,
-          displayLevel: 3,
-          title: "已经比目标久了不少",
-          copy: "这轮已经超过目标时间较久，Mira 会更明确地建议你休息。"
+          displayLevel,
+          surface: intent.surface,
+          breakDue: true,
+          title: "该好好歇一下了",
+          copy: lightReminderLine("gaze", "due") || `已经连续用眼 ${minutes} 分钟，前面的提醒也没顾上。现在找个断点，看远处 20 秒。`
         };
       }
 
-      if (state.settings.intensity === "clear" && load >= 74) {
-        return {
-          level: 3,
-          displayLevel: 3,
-          title: "状态偏高，准备提醒",
-          copy: "眼睛信号偏高。Mira 会先观察节奏，持续一小段时间后再明确提醒。"
-        };
-      }
-
-      // 顺序即语义（2026-07-10 审计止血）：真正到点的升级判定必须先于 naturalBreak 的
-      // 轻提示——此前 naturalBreak 排在前面，auto 模式下已过目标又恰好停手 8–45 秒时
-      // 会返回 L2，遮蔽 clear 档的 L3，胶囊在 Mira 在屏时整段缺席（老 bug 换入口复活）。
-      if (elapsedMinutes >= focusTargetMinutes) {
-        return {
-          level: state.settings.intensity === "clear" ? 3 : 2,
-          displayLevel: chosenDisplayLevel,
-          title: "到恢复断点",
-          copy: lightReminderLine("gaze", "due") || "这轮已经到恢复断点。先眨几下，再看远处 20 秒。"
-        };
-      }
-
-      if (latestActivity && isNaturalBreak(latestActivity)) {
+      if (intent.level === 2) {
         return {
           level: 2,
-          displayLevel: chosenDisplayLevel,
-          title: "在恢复断点轻提示",
-          copy: `你刚停下来一下，Mira 会借这个空隙提醒你：${lightReminderLine("gaze", "opening") || "看一眼远处，再回来。"}`
+          displayLevel,
+          surface: intent.surface,
+          breakDue: true,
+          title: "到恢复断点",
+          copy: intensity === "force"
+            ? `已经连续用眼 ${minutes} 分钟。先跟着歇 20 秒；再攒下去、两次没歇，会进入全屏恢复。`
+            : (lightReminderLine("gaze", "due") || `已经连续用眼 ${minutes} 分钟。先眨几下，再看远处 20 秒。`)
         };
       }
 
-      if (load >= 48 || elapsedMinutes >= focusTargetMinutes * 0.72) {
-        const standardEarly = state.settings.intensity === "standard";
+      if (intent.level === 1) {
         return {
-          level: standardEarly ? 1 : 2,
-          displayLevel: chosenDisplayLevel,
-          title: standardEarly ? "提前观察中" : "提前观察眨眼或远眺",
-          copy: standardEarly
-            ? reminderLine || "这一轮进入中段。Mira 先只改变状态和颜色；到恢复断点再短暂提示。"
-            : reminderLine || "这一轮进入中段。Mira 会轻轻展开一次提醒；到恢复断点再说清楚。"
+          level: 1,
+          displayLevel,
+          surface: intent.surface,
+          breakDue: false,
+          title: intensity === "quiet" ? "只让 Mira 轻轻变化" : "轻轻提个醒",
+          copy: reminderLine || `连续用眼 ${minutes} 分钟了。Mira 先轻轻变化；到恢复断点再说清楚。`
         };
       }
 
       return {
-        level: 1,
-        displayLevel: chosenDisplayLevel,
-        title: state.settings.intensity === "clear" ? "明确提醒已开启" : "轻提示已开启",
-        copy: state.settings.intensity === "clear"
-          ? "Mira 先保持安静；到恢复断点、状态信号偏高或明显超出目标时，会更明确地带你恢复。"
-          : "Mira 先保持安静；到恢复断点时，会短暂提示你眨眼和远眺。"
+        level: 0,
+        displayLevel,
+        surface: "none",
+        breakDue: false,
+        title: intensity === "clear" ? "明确提醒已开启" : intensity === "force" ? "强制爱已开启" : intensity === "quiet" ? "安静陪伴中" : "轻提示已开启",
+        copy: intensity === "quiet"
+          ? "当前是安静模式，默认只用状态球和文字变化。看到 Mira 变色时先眨几下，不用停下。"
+          : "Mira 先安静陪伴；连续用眼到恢复断点时会提醒你。"
       };
     }
 
@@ -16505,9 +16541,10 @@
       const displayLevel = Number(intervention.displayLevel || intervention.level || 1);
       const reminderOpening = hasReminderOpening();
       const naturalBreak = Boolean(latestActivity && isNaturalBreak(latestActivity));
-      // "真正到断点" = 手动计时到达目标，或自动模式的自然停顿。main 用它区分：断点前的
-      // 提醒边界热身只跳"不带计时的绿胶囊"，真到断点才跳"带计时的" look-away 胶囊，且绕过冷却。
-      const breakDue = Boolean(((isRunning || isAutoTracking()) && Number(elapsedSeconds) >= Number(els.focusTarget.value) * 60) || naturalBreak);
+      // P3:breakDue 唯一来源 = 压力引擎意图(翻译层透传)。旧的
+      // elapsed≥focusTarget / naturalBreak 推导退役——activeSeconds 棘轮
+      // 一类的陈旧信号(病例 C6/C9)从此进不了触发链。
+      const breakDue = Boolean(intervention.breakDue);
       publishCompanionState({
         mood,
         title,
@@ -16524,10 +16561,13 @@
         isRunning,
         interventionLevel: behaviorLevel,
         interventionDisplayLevel: displayLevel,
+        interventionSurface: intervention.surface || "none",
         interventionTitle: intervention.title,
         interventionCopy: intervention.copy,
         forceMode: state.settings.intensity === "force",
         forceBreakActive: Boolean(forceBreakActive),
+        // 深度工作开关 = 投递风格(只压 island/banner,保 Mira 面),永不改 breakDue(C1)
+        deepWorkQuiet: Boolean(state.settings.deepWorkMiraOnlyToggle && latestActivity?.isDeepWorkApp),
         reminderPending: state.pendingReminder?.status === "pending",
         reminderId: state.pendingReminder?.status === "pending" ? state.pendingReminder.id : null,
         reminderDeferred: Boolean(state.deferReminderUntilBreak),

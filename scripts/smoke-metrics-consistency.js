@@ -106,8 +106,10 @@ function main() {
   const completeRecoveryBody = functionBody(indexHtml, "completeRecovery");
   const closeBreakRoundBody = functionBody(indexHtml, "closeBreakRound");
   assert(
-    completeRecoveryBody.includes('closeBreakRound({ reminderStatus: "completed" })'),
-    "completeRecovery closes the round through the shared closeBreakRound path"
+    completeRecoveryBody.includes("closeBreakRound({")
+      && completeRecoveryBody.includes('reminderStatus: "completed"')
+      && completeRecoveryBody.includes('settle: { kind: "full"'),
+    "completeRecovery closes the round through the shared closeBreakRound path with a full pressure settlement (P3)"
   );
   assert(
     closeBreakRoundBody.includes("closePendingReminder(reminderStatus)"),

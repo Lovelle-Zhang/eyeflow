@@ -72,7 +72,9 @@ function main() {
   assertIncludes(recoveryDataJs, "找一个3米以外的点，看5秒。", "gaze reminder line uses relaxed wording");
   assertIncludes(recoveryDataJs, "眼睛需要一个不是像素的东西。", "gaze reminder memorable line");
   assertIncludes(recoveryDataJs, "肩膀放下来。", "body relax reminder line");
-  assertIncludes(indexHtml, "Mira 会借这个空隙提醒你", "natural-break reminder timing");
+  // P3: reminder timing comes from the pressure engine's continuous-eye-time
+  // intent; the old activity-window "natural break" copy retired with its branch.
+  assertIncludes(indexHtml, "连续用眼", "reminder copy speaks in continuous eye-time terms (P3)");
   assertIncludes(indexHtml, "不会突然打断", "reminder does not feel like a popup interruption");
   assertIncludes(indexHtml, "看向远处", "rest uses one clear instruction");
   assertIncludes(indexHtml, "不用盯着屏幕，20 秒后再回来。", "rest asks users to leave the screen");
