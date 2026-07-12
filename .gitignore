@@ -33,5 +33,7 @@ coverage/
 .vscode/
 
 # Claude Code local config and preview output
-.claude/
+.claude/*
+!.claude/skills/
+!.claude/launch.json
 .preview-out/
