@@ -14165,9 +14165,11 @@
       const previous = memory.modeSignals[key] || {};
       const previousAt = Date.parse(previous.lastAt || "");
       const shouldCount = !previousAt || Date.now() - previousAt > 2 * 60 * 60 * 1000;
+      // D3 根治:不再缓存时段。signal 只存"模式计数"这一结构事实;显示用的
+      // 时段一律由压力引擎实时给(见 modeMemoryLine)。缓存过期显示错时段的
+      // 病根(周三 bug)就此从数据侧铲除。
       memory.modeSignals[key] = {
         kind,
-        bucket: timeBucket(now),
         count: Number(previous.count || 0) + (shouldCount ? 1 : 0),
         lastAt: now.toISOString()
       };
@@ -14177,13 +14179,15 @@
       const memory = ensureMiraMemory();
       const signal = memory.modeSignals[modeSignalKey(kind)];
       if (!signal || Number(signal.count || 0) < 2) return "";
-      // 事实纪律（2026-07-10，见 MIRA_LANGUAGE.md）：不引用具体星期几——
-      // signal.lastAt 来自"提醒 12 分钟没被理会"的自动记账，可能被误判污染，
-      // 而通知横幅里的"之前的周三"极易被读成"Mira 以为今天是周三"。
-      // 只说模式本身：signal 按当前时段（modeSignalKey → timeBucket(now)）索引，
-      // 所以「以往{时段}」是实时一致、经得起验证的说法。
+      // 事实纪律（2026-07-10，见 MIRA_LANGUAGE.md）：不引用具体星期几，也不读
+      // 记账时缓存的时段字段（已从 signal 里删除）——那是写入那一刻的旧值，缓存
+      // 过期就显示错时段（"之前的周三"被读成"Mira 以为今天是周三"，即周三 bug 病根）。
+      // D3 根治：显示的时段直接读压力引擎的单一事实 intent.context.bucket（实时
+      // 算）。索引口径（modeSignalKey → timeBucket）与引擎 timeBucketOf 阈值逐字节
+      // 一致，故「计数桶」与「显示桶」在同一时刻恒等，说法实时一致、经得起验证。
+      const intent = currentReminderIntent();
       const boundary = relationshipLine("pattern", "boundary") || "Mira 只记这个模式，不记你做了什么。";
-      return `以往${signal.bucket}，你也容易撑过去不休息。${boundary}`;
+      return `以往${intent.context.bucket}，你也容易撑过去不休息。${boundary}`;
     }
 
 

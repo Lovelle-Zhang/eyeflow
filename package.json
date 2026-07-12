@@ -25,6 +25,7 @@
     "smoke:session": "node scripts/smoke-session-flow.js",
     "smoke:reminder-engine": "node scripts/smoke-reminder-engine.js",
     "smoke:build-manifest": "node scripts/smoke-build-manifest.js",
+    "smoke:intent-wiring": "node scripts/smoke-intent-wiring.js",
     "smoke:current-capture": "node scripts/smoke-current-visual-capture.js",
     "smoke:onboarding": "node scripts/smoke-onboarding-flow.js",
     "smoke:retention": "node scripts/smoke-retention-moments.js",

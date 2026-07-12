@@ -156,7 +156,12 @@ function main() {
       throw new Error("modeMemoryLine must not assert weekdays — time buckets only (事实纪律 2026-07-10)");
     }
   }
-  assertIncludes(indexHtml, "以往${signal.bucket}", "mode memory speaks in real-time-consistent time buckets");
+  // D3 根治:记忆句显示的时段直接读压力引擎的单一事实(intent.context.bucket,
+  // 实时算),不再读记账时缓存的 signal.bucket(缓存过期显示错时段 = 周三 bug 病根)。
+  assertIncludes(indexHtml, "以往${intent.context.bucket}", "mode memory reads the live time bucket from the pressure engine (single source)");
+  if (indexHtml.includes("signal.bucket")) {
+    throw new Error("cached signal.bucket must not resurface — the time bucket comes from intent.context.bucket only (D3)");
+  }
   assertMatches(
     indexHtml,
     /closeBreakRound\(\{\s*reminderStatus: "completed",\s*settle: \{ kind: "micro", seconds: Math\.max\(0, Number\(payload\.restSeconds\) \|\| 20\) \}\s*\}\);[\s\S]*?appendDataEvent\("recovery_event", \{[\s\S]*?durationSeconds: Math\.max\(0, Number\(payload\.restSeconds\) \|\| 20\),\s*mode: "island-micro",[\s\S]*?trigger: "island-micro",/,
