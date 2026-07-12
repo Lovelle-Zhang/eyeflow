@@ -58,6 +58,7 @@
       "eyeflow-rest-flow.js",
       "eyeflow-ui-utils.js",
       "eyeflow-metrics.js",
+      "eyeflow-reminder-engine.js",
       "companion.html",
       "break-lock.html",
       "island.html",
