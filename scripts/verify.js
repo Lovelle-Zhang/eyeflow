@@ -13,6 +13,7 @@ const checks = [
   ["Check reminder intensity matrix", "smoke:intensity"],
   ["Check session UI state", "smoke:session"],
   ["Check reminder pressure engine scenario table", "smoke:reminder-engine"],
+  ["Check build.files covers HTML-referenced assets", "smoke:build-manifest"],
   ["Check current visual capture gate", "smoke:current-capture"],
   ["Check rest recovery flow", "smoke:rest"],
   ["Check source onboarding flow", "smoke:onboarding"],
