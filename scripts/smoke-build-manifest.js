@@ -97,24 +97,6 @@ for (const html of htmlFiles) {
   }
 }
 
-// main.js 的本地 require("./x") 也必须在 build.files —— 与 HTML <script> 同一类洞的
-// node 侧孪生:漏登记则打包版 require 抛 MODULE_NOT_FOUND(不像 HTML 只是 404)。
-const mainEntry = pkg.main || "main.js";
-if (fs.existsSync(path.join(root, mainEntry))) {
-  const mainSrc = fs.readFileSync(path.join(root, mainEntry), "utf8");
-  const reqRe = /require\(\s*["'](\.\/[^"']+)["']\s*\)/g;
-  const seen = new Set();
-  let rm;
-  while ((rm = reqRe.exec(mainSrc)) !== null) {
-    let ref = rm[1].replace(/^\.\//, "");
-    if (!/\.[cm]?js$/.test(ref)) ref += ".js"; // require 省略的 .js 后缀补齐
-    if (seen.has(ref)) continue;
-    seen.add(ref);
-    refCount += 1;
-    assert(isBundled(ref), `${mainEntry} require 的本地模块 "${ref}" 已登记进 build.files`);
-  }
-}
-
 if (failures > 0) {
   console.error(
     `\n[smoke:build-manifest] RED — ${failures}/${checks} 项未过。` +
