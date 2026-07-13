@@ -1,17 +1,24 @@
 'use strict';
 
 /**
- * Preload bridge.
- *
- * Intentionally minimal for the skeleton: it exposes only static identity
- * metadata to the renderer over a locked-down contextBridge. No IPC, no
- * privileged APIs — those get added deliberately, per feature, later.
+ * Preload bridge — the single trusted channel between main and renderer.
+ * Exposes identity metadata plus a narrow energy/IPC surface over a locked-down
+ * contextBridge. The renderer stays a pure painter: it can listen for updates
+ * and fire dev actions, nothing more.
  */
 
-const { contextBridge } = require('electron');
+const { contextBridge, ipcRenderer } = require('electron');
 const { APP_CONFIG } = require('../../config/app.config');
 
 contextBridge.exposeInMainWorld('eyeflow', {
   productName: APP_CONFIG.productName,
   appId: APP_CONFIG.appId,
+
+  // renderer → main
+  ready: () => ipcRenderer.send('ui:ready'),
+  dev: (action) => ipcRenderer.send('ui:dev', action),
+
+  // main → renderer
+  onInit: (cb) => ipcRenderer.on('energy:init', (_e, payload) => cb(payload)),
+  onUpdate: (cb) => ipcRenderer.on('energy:update', (_e, payload) => cb(payload)),
 });

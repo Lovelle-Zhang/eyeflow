@@ -20,11 +20,13 @@ function createMainWindow() {
     title: APP_CONFIG.productName,
     show: false,
     webPreferences: {
-      // Security defaults: no node in the renderer, isolated context, and a
-      // narrow preload bridge. Established from day one.
+      // Security defaults: isolated context, no node in the renderer, a narrow
+      // preload bridge. sandbox is off so the trusted preload can require our
+      // local config/IPC modules; contextIsolation remains the key protection
+      // and the renderer only ever loads our own local content.
       contextIsolation: true,
       nodeIntegration: false,
-      sandbox: true,
+      sandbox: false,
       preload: path.join(__dirname, '..', 'preload', 'index.js'),
     },
   });

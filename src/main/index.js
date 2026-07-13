@@ -14,6 +14,7 @@ const { configureIsolatedPaths } = require('./paths');
 const { ensureSingleInstance } = require('./single-instance');
 const { createMainWindow, focusMainWindow } = require('./window');
 const { registerLifecycle } = require('./lifecycle');
+const { startEnergyService } = require('./energy-service');
 
 // 1. Isolate identity + user-data BEFORE anything else touches disk.
 const userDataPath = configureIsolatedPaths(app);
@@ -26,6 +27,9 @@ const isPrimary = ensureSingleInstance(app, focusMainWindow);
 if (!isPrimary) {
   app.quit();
 } else {
-  // 3. Wire lifecycle → window creation.
-  registerLifecycle(app, createMainWindow);
+  // 3. Wire lifecycle → window creation, then start the energy loop for it.
+  registerLifecycle(app, () => {
+    const win = createMainWindow();
+    startEnergyService(win);
+  });
 }
