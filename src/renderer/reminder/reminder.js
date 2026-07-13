@@ -8,15 +8,23 @@ const api = window.reminder || {};
 const capsule = document.getElementById('capsule');
 const mira = document.getElementById('mira');
 const text = document.getElementById('text');
+const track = document.getElementById('track');
 const fill = document.getElementById('fill');
 const count = document.getElementById('count');
 
-api.onShow?.(({ capsuleCss, mira: svg, text: prompt, durationSec }) => {
+api.onShow?.(({ kind, capsuleCss, mira: svg, text: prompt, durationSec }) => {
   capsule.style.background = capsuleCss; // 气色 at reminder time (§8.3)
   mira.innerHTML = svg;
   text.textContent = prompt;
-  count.textContent = String(durationSec);
-  fill.style.width = '100%';
+
+  // §5.1 二级建议 has no eye-rest countdown — just the message. §6.1 一级 does.
+  const isNap = kind === 'nap';
+  track.style.display = isNap ? 'none' : '';
+  count.style.display = isNap ? 'none' : '';
+  if (!isNap) {
+    count.textContent = String(durationSec);
+    fill.style.width = '100%';
+  }
 
   capsule.classList.remove('in');
   void capsule.offsetWidth; // reflow so the float-out transition plays

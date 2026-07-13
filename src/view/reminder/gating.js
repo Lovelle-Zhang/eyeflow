@@ -18,6 +18,10 @@ const REMINDER_DEFAULTS = Object.freeze({
   gapSec: 2,
   bufferMaxMs: 5 * 60 * 1000, // 5 minutes
   bufferPollMs: 500, // how often the buffer re-checks for a gap
+
+  // §5.1 二级明确提醒 "停留久一点": how long the nap suggestion dwells before
+  // tucking away. No eye-rest countdown, no credit — it just suggests a nap.
+  napSuggestDwellMs: 8000,
 });
 
 /**

@@ -34,9 +34,11 @@ function startEnergyService(win, { intervalMs = 1000 } = {}) {
         capsuleCss: energyToColor(energy).css,
         events,
       });
-      // remind_short (energy crossed line X) → float out the top capsule (§5.2/§6.1).
-      if (events.includes('remind_short') && controller) {
-        controller.trigger({ energy });
+      // Energy crossed a line (§5.2) → float out the top capsule (§6.1).
+      // remind_nap (crossed Y) is more urgent than remind_short (crossed X).
+      if (controller) {
+        if (events.includes('remind_nap')) controller.trigger({ level: 'nap' });
+        else if (events.includes('remind_short')) controller.trigger({ level: 'short', energy });
       }
     },
   });
@@ -72,7 +74,8 @@ function startEnergyService(win, { intervalMs = 1000 } = {}) {
     else if (action === 'shortBreak') driver.shortBreak();
     else if (action === 'nap') driver.nap();
     else if (action === 'reset') driver.reset();
-    else if (action === 'remind') controller.trigger({ energy: driver.state.energy });
+    else if (action === 'remind') controller.trigger({ level: 'short', energy: driver.state.energy });
+    else if (action === 'remindNap') controller.trigger({ level: 'nap' });
   };
   ipcMain.on('ui:dev', onDev);
 

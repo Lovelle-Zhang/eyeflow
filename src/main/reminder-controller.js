@@ -15,7 +15,7 @@ const { energyToColor } = require('../view/capsule/energy-color');
 const { miraSvg } = require('../view/mira/mira-svg');
 const { shortBreakFrame, SHORT_BREAK_MS } = require('../view/reminder/short-break');
 const { earnedShortBreak, shouldFloatNow, REMINDER_DEFAULTS } = require('../view/reminder/gating');
-const { SHORT_BREAK_PROMPTS } = require('../view/reminder/copy');
+const { SHORT_BREAK_PROMPTS, NAP_SUGGEST_PROMPTS } = require('../view/reminder/copy');
 
 function createReminderController({ getIdleSec, getEnergy, onShortBreakComplete } = {}) {
   const idleSec = typeof getIdleSec === 'function' ? getIdleSec : () => 0;
@@ -23,8 +23,9 @@ function createReminderController({ getIdleSec, getEnergy, onShortBreakComplete 
   let busy = false;
   let timer = null;
   let bufferTimer = null;
-  let promptIndex = 0;
-  let earned = false; // D2: was this break actually rested?
+  let shortIndex = 0;
+  let napIndex = 0;
+  let earned = false; // D2: was this (short) break actually rested?
 
   const send = (channel, payload) => {
     if (win && !win.isDestroyed()) win.webContents.send(channel, payload);
@@ -46,15 +47,33 @@ function createReminderController({ getIdleSec, getEnergy, onShortBreakComplete 
 
   ipcMain.on('reminder:tucked', finish);
 
-  function runCountdown(energy) {
+  function runSession(level, energy) {
+    const isNap = level === 'nap';
+
     send('reminder:show', {
+      kind: level,
       capsuleCss: energyToColor(energy).css,
-      mira: miraSvg({ variant: 'full', eyes: 'closed' }), // 短歇 = 眨一次长眼 (§6.3)
-      text: SHORT_BREAK_PROMPTS[promptIndex % SHORT_BREAK_PROMPTS.length],
+      // 短歇 = 眨一次长眼 (§6.3, closed); 二级建议 = 面对你说话 (open eyes).
+      mira: miraSvg({ variant: 'full', eyes: isNap ? 'open' : 'closed' }),
+      text: isNap
+        ? NAP_SUGGEST_PROMPTS[napIndex % NAP_SUGGEST_PROMPTS.length]
+        : SHORT_BREAK_PROMPTS[shortIndex % SHORT_BREAK_PROMPTS.length],
       durationSec: Math.round(SHORT_BREAK_MS / 1000),
     });
-    promptIndex += 1;
 
+    if (isNap) {
+      // §5.1 二级: a suggestion that dwells then tucks. No eye-rest countdown,
+      // no credit — recovery comes from an actual nap (§6.3) or stepping away.
+      napIndex += 1;
+      timer = setTimeout(() => {
+        timer = null;
+        send('reminder:tuck');
+      }, REMINDER_DEFAULTS.napSuggestDwellMs);
+      return;
+    }
+
+    // §6.1 一级: the 20s eye-rest countdown, credited only if actually rested (D2).
+    shortIndex += 1;
     const start = process.hrtime.bigint();
     timer = setInterval(() => {
       const elapsed = Number(process.hrtime.bigint() - start) / 1e6;
@@ -69,21 +88,24 @@ function createReminderController({ getIdleSec, getEnergy, onShortBreakComplete 
     }, 200);
   }
 
-  function floatOut(fallbackEnergy) {
+  function floatOut(level, fallbackEnergy) {
     // energy may have drifted during buffering → prefer a fresh read (§8.3).
     const energy = typeof getEnergy === 'function' ? getEnergy() : fallbackEnergy;
     if (!win || win.isDestroyed()) win = createReminderWindow();
     win.showInactive();
     if (win.webContents.isLoading()) {
-      win.webContents.once('did-finish-load', () => runCountdown(energy));
+      win.webContents.once('did-finish-load', () => runSession(level, energy));
     } else {
-      runCountdown(energy);
+      runSession(level, energy);
     }
   }
 
   return {
-    /** A short break is due (§6.1). Buffer past dense typing (§6.2), then float. */
-    trigger({ energy } = {}) {
+    /**
+     * A reminder is due (§6.1). Buffer past dense typing (§6.2), then float out.
+     * @param {{ level?: 'short'|'nap', energy?: number }} [opts]
+     */
+    trigger({ level = 'short', energy } = {}) {
       if (busy) return; // one session at a time; ignore re-entrant reminders
       busy = true;
       earned = false;
@@ -94,7 +116,7 @@ function createReminderController({ getIdleSec, getEnergy, onShortBreakComplete 
         const waitedMs = Number(process.hrtime.bigint() - bufferStart) / 1e6;
         if (shouldFloatNow(idleSec(), waitedMs)) {
           bufferTimer = null;
-          floatOut(energy);
+          floatOut(level, energy);
         } else {
           bufferTimer = setTimeout(attempt, REMINDER_DEFAULTS.bufferPollMs);
         }

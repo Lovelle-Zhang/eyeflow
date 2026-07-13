@@ -12,4 +12,10 @@ const SHORT_BREAK_PROMPTS = [
   '让眼睛松一下。',
 ];
 
-module.exports = { SHORT_BREAK_PROMPTS };
+// 二级明确提醒 (MIRA_LANGUAGE §四) — 更明确但不指责，"咱们"同盟语气；仍是邀请，不命令。
+const NAP_SUGGEST_PROMPTS = [
+  '撑挺久了，这次真的歇一下吧。',
+  '要不要小睡一会儿？我陪你。',
+];
+
+module.exports = { SHORT_BREAK_PROMPTS, NAP_SUGGEST_PROMPTS };
