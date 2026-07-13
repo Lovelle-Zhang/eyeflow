@@ -14,14 +14,15 @@ const { createReminderWindow } = require('./overlay/reminder-window');
 const { energyToColor } = require('../view/capsule/energy-color');
 const { miraSvg } = require('../view/mira/mira-svg');
 const { shortBreakFrame, SHORT_BREAK_MS } = require('../view/reminder/short-break');
-const { earnedShortBreak } = require('../view/reminder/gating');
+const { earnedShortBreak, shouldFloatNow, REMINDER_DEFAULTS } = require('../view/reminder/gating');
 const { SHORT_BREAK_PROMPTS } = require('../view/reminder/copy');
 
-function createReminderController({ getIdleSec, onShortBreakComplete } = {}) {
+function createReminderController({ getIdleSec, getEnergy, onShortBreakComplete } = {}) {
   const idleSec = typeof getIdleSec === 'function' ? getIdleSec : () => 0;
   let win = null;
   let busy = false;
   let timer = null;
+  let bufferTimer = null;
   let promptIndex = 0;
   let earned = false; // D2: was this break actually rested?
 
@@ -68,22 +69,41 @@ function createReminderController({ getIdleSec, onShortBreakComplete } = {}) {
     }, 200);
   }
 
+  function floatOut(fallbackEnergy) {
+    // energy may have drifted during buffering → prefer a fresh read (§8.3).
+    const energy = typeof getEnergy === 'function' ? getEnergy() : fallbackEnergy;
+    if (!win || win.isDestroyed()) win = createReminderWindow();
+    win.showInactive();
+    if (win.webContents.isLoading()) {
+      win.webContents.once('did-finish-load', () => runCountdown(energy));
+    } else {
+      runCountdown(energy);
+    }
+  }
+
   return {
-    /** Float out a short break for the given current energy (§6.1). */
-    trigger({ energy }) {
+    /** A short break is due (§6.1). Buffer past dense typing (§6.2), then float. */
+    trigger({ energy } = {}) {
       if (busy) return; // one session at a time; ignore re-entrant reminders
       busy = true;
       earned = false;
-      if (!win || win.isDestroyed()) win = createReminderWindow();
-      win.showInactive();
-      if (win.webContents.isLoading()) {
-        win.webContents.once('did-finish-load', () => runCountdown(energy));
-      } else {
-        runCountdown(energy);
-      }
+
+      // §6.2 smart buffer: wait for a natural gap, but no longer than the cap.
+      const bufferStart = process.hrtime.bigint();
+      const attempt = () => {
+        const waitedMs = Number(process.hrtime.bigint() - bufferStart) / 1e6;
+        if (shouldFloatNow(idleSec(), waitedMs)) {
+          bufferTimer = null;
+          floatOut(energy);
+        } else {
+          bufferTimer = setTimeout(attempt, REMINDER_DEFAULTS.bufferPollMs);
+        }
+      };
+      attempt();
     },
     destroy() {
       if (timer) clearInterval(timer);
+      if (bufferTimer) clearTimeout(bufferTimer);
       ipcMain.removeListener('reminder:tucked', finish);
       if (win && !win.isDestroyed()) win.destroy();
       win = null;

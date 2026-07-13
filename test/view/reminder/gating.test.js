@@ -7,7 +7,11 @@
 const { test } = require('node:test');
 const assert = require('node:assert/strict');
 
-const { earnedShortBreak, REMINDER_DEFAULTS } = require('../../../src/view/reminder/gating');
+const {
+  earnedShortBreak,
+  shouldFloatNow,
+  REMINDER_DEFAULTS,
+} = require('../../../src/view/reminder/gating');
 
 test('default rest-credit threshold is a sensible chunk of the 20s window', () => {
   assert.ok(REMINDER_DEFAULTS.restCreditSec > 0 && REMINDER_DEFAULTS.restCreditSec <= 20);
@@ -32,4 +36,30 @@ test('kept typing through it (idle ~0) earns nothing → escalates toward Y', ()
 test('threshold is tunable (§9.7)', () => {
   assert.equal(earnedShortBreak(10, 8), true);
   assert.equal(earnedShortBreak(7, 8), false);
+});
+
+// §6.2 smart buffer
+test('buffer defaults exist: a natural-gap size and a 5-minute cap', () => {
+  assert.ok(REMINDER_DEFAULTS.gapSec > 0);
+  assert.equal(REMINDER_DEFAULTS.bufferMaxMs, 5 * 60 * 1000);
+});
+
+test('a natural gap (idle ≥ gapSec) floats out immediately — even with no wait', () => {
+  assert.equal(shouldFloatNow(REMINDER_DEFAULTS.gapSec, 0), true);
+  assert.equal(shouldFloatNow(REMINDER_DEFAULTS.gapSec + 5, 0), true);
+});
+
+test('dense typing (idle < gapSec) keeps buffering while under the cap', () => {
+  assert.equal(shouldFloatNow(0, 1000), false);
+  assert.equal(shouldFloatNow(REMINDER_DEFAULTS.gapSec - 1, 120000), false);
+});
+
+test('dense typing that never yields floats anyway at the 5-minute cap', () => {
+  assert.equal(shouldFloatNow(0, REMINDER_DEFAULTS.bufferMaxMs), true);
+  assert.equal(shouldFloatNow(0, REMINDER_DEFAULTS.bufferMaxMs + 1), true);
+});
+
+test('buffer knobs are tunable (§9.7)', () => {
+  assert.equal(shouldFloatNow(3, 0, { gapSec: 5 }), false);
+  assert.equal(shouldFloatNow(0, 100, { bufferMaxMs: 100 }), true);
 });
