@@ -1,0 +1,43 @@
+{
+  "name": "eyeflow-next",
+  "productName": "EyeFlow Next",
+  "version": "0.0.0",
+  "private": true,
+  "description": "EyeFlow Next — a brand-new, independent desktop app. Not related to and does not share code, identity, or data with the frozen legacy codex-project / EyeFlow app.",
+  "author": "EyeFlow",
+  "license": "UNLICENSED",
+  "main": "src/main/index.js",
+  "scripts": {
+    "start": "electron .",
+    "test": "node --test \"test/**/*.test.js\"",
+    "verify": "node scripts/verify.mjs",
+    "dist": "electron-builder"
+  },
+  "devDependencies": {
+    "electron": "^32.0.0",
+    "electron-builder": "^25.0.0"
+  },
+  "build": {
+    "appId": "app.eyeflow.next",
+    "productName": "EyeFlow Next",
+    "artifactName": "EyeFlow-Next-${version}.${ext}",
+    "directories": {
+      "output": "release"
+    },
+    "files": [
+      "config/**/*",
+      "src/**/*",
+      "package.json"
+    ],
+    "mac": {
+      "category": "public.app-category.productivity",
+      "target": ["dmg", "zip"]
+    },
+    "win": {
+      "target": ["nsis"]
+    },
+    "linux": {
+      "target": ["AppImage"]
+    }
+  }
+}
