@@ -15,6 +15,7 @@ const checks = [
   ["Check reminder pressure engine scenario table", "smoke:reminder-engine"],
   ["Check build.files covers HTML-referenced assets", "smoke:build-manifest"],
   ["Check intent field wiring parity", "smoke:intent-wiring"],
+  ["Check passive-viewing presence logic", "smoke:presence"],
   ["Check current visual capture gate", "smoke:current-capture"],
   ["Check rest recovery flow", "smoke:rest"],
   ["Check source onboarding flow", "smoke:onboarding"],

@@ -2,6 +2,7 @@ const { app, BrowserWindow, Menu, Tray, nativeImage, ipcMain, Notification, clip
 const path = require("node:path");
 const fs = require("node:fs");
 const { execFile, spawnSync } = require("node:child_process");
+const presence = require("./eyeflow-presence");
 
 let dashboardWindow;
 let companionWindow;
@@ -3015,6 +3016,22 @@ function isDeepWorkApp(appName) {
 // round running / keeps reminding, and only a genuine ≥5min absence counts as rest. When
 // uncertain (idle but maybe still watching), we err toward protecting the eyes.
 const PRESENT_IDLE_SECONDS = 5 * 60;
+// 被动观看在场信号(视频/演示):持有显示级息屏断言时把上报 idle 钳到 cap 以下,
+// 让引擎不再把"零输入的看视频"假清零。CAP 明确"在场";MAX_HOLD 是跑逃护栏——
+// 断言被空放媒体长时间持有、人已离开时松开钳制。仅 darwin 有 pmset。
+const VIEWING_IDLE_CAP_SECONDS = 30;
+const VIEWING_MAX_HOLD_SECONDS = 45 * 60;
+const VIEWING_POLL_INTERVAL_MS = 10 * 1000;
+let displayViewingActive = false;
+let viewingCheckedAt = 0;
+// pmset -g assertions 读显示级"阻止息屏"断言(异步、缓存、失败保守回落到原始 idle)。
+function refreshDisplayViewingActive() {
+  if (process.platform !== "darwin") return;
+  execFile("/usr/bin/pmset", ["-g", "assertions"], { timeout: 2000 }, (error, stdout) => {
+    if (error) return; // 读失败:保留上次值,effectiveIdle 会退回信任原始 idle 的行为
+    displayViewingActive = presence.parseDisplayViewingActive(stdout);
+  });
+}
 
 function startActivityMonitor() {
   let lastActivityTickAt = Date.now();
@@ -3031,7 +3048,15 @@ function startActivityMonitor() {
       activeWorkStartedAt = null;
     }
     lastActivityTickAt = tickNow;
-    const idleSeconds = powerMonitor.getSystemIdleTime();
+    const rawIdleSeconds = powerMonitor.getSystemIdleTime();
+    // Passive-viewing presence (视频/演示): refresh the display-sleep assertion on a
+    // slower cadence than the 5s tick, then translate raw idle → effective idle so
+    // watching a tutorial with zero input no longer reads as "away" and clears eye
+    // pressure. Locked screen stays authoritative (never clamped). See eyeflow-presence.
+    if (tickNow - viewingCheckedAt > VIEWING_POLL_INTERVAL_MS) {
+      viewingCheckedAt = tickNow;
+      refreshDisplayViewingActive();
+    }
     // Self-heal the lock latch from the OS truth each tick (codex review):
     // if lock-screen/unlock-screen was ever missed, the event-only latch would
     // stick — permanently dead activity on a missed unlock, or a lock counted
@@ -3043,6 +3068,17 @@ function startActivityMonitor() {
     } else if (screenLocked && (systemIdleState === "active" || systemIdleState === "idle")) {
       screenLocked = false;
     }
+    // Viewing-aware effective idle: while a display-sleep assertion is held (video/演示),
+    // report a present idle so the engine keeps accumulating; locked screen and a runaway
+    // hold both fall back to raw idle. Every downstream consumer (engine presence,
+    // isWorking, naturalBreak) reads this single corrected value.
+    const idleSeconds = presence.effectiveIdleSeconds({
+      rawIdleSeconds,
+      viewingActive: displayViewingActive,
+      screenLocked,
+      cap: VIEWING_IDLE_CAP_SECONDS,
+      maxHoldSeconds: VIEWING_MAX_HOLD_SECONDS
+    });
     const accessibilityTrusted = hasAccessibilityPermission();
     const desktopPrefs = desktopPreferenceDefaults();
     const enhancedDesktopSensing = Boolean(desktopPrefs.enhancedDesktopSensing);
@@ -3064,6 +3100,8 @@ function startActivityMonitor() {
     broadcastActivity({
       activeApp,
       idleSeconds,
+      rawIdleSeconds,
+      displayViewingActive,
       accessibilityTrusted,
       enhancedDesktopSensing,
       platform: process.platform,
