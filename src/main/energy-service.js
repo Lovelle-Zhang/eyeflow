@@ -11,6 +11,7 @@
 const { ipcMain } = require('electron');
 const { createEnergyDriver } = require('./driver/energy-driver');
 const { getIdleSec } = require('./driver/system-idle');
+const { createReminderController } = require('./reminder-controller');
 const { energyToColor } = require('../view/capsule/energy-color');
 const { miraSvg } = require('../view/mira/mira-svg');
 
@@ -21,15 +22,27 @@ function startEnergyService(win, { intervalMs = 1000 } = {}) {
     }
   };
 
+  // The reminder overlay credits a short break back when its 20s finishes (§6.1).
+  let controller;
+
   // Presenter: map engine energy → the capsule's 气色 (§8.3) for the renderer.
   const driver = createEnergyDriver({
     getIdleSec,
-    onUpdate: ({ energy, events }) =>
+    onUpdate: ({ energy, events }) => {
       send('energy:update', {
         energy,
         capsuleCss: energyToColor(energy).css,
         events,
-      }),
+      });
+      // remind_short (energy crossed line X) → float out the top capsule (§5.2/§6.1).
+      if (events.includes('remind_short') && controller) {
+        controller.trigger({ energy });
+      }
+    },
+  });
+
+  controller = createReminderController({
+    onShortBreakComplete: () => driver.shortBreak(),
   });
 
   // Impure loop: real elapsed time via a monotonic clock, sampled each interval.
@@ -57,6 +70,7 @@ function startEnergyService(win, { intervalMs = 1000 } = {}) {
     else if (action === 'shortBreak') driver.shortBreak();
     else if (action === 'nap') driver.nap();
     else if (action === 'reset') driver.reset();
+    else if (action === 'remind') controller.trigger({ energy: driver.state.energy });
   };
   ipcMain.on('ui:dev', onDev);
 
@@ -64,6 +78,7 @@ function startEnergyService(win, { intervalMs = 1000 } = {}) {
     clearInterval(timer);
     ipcMain.removeListener('ui:ready', onReady);
     ipcMain.removeListener('ui:dev', onDev);
+    controller.destroy();
   });
 
   return driver;

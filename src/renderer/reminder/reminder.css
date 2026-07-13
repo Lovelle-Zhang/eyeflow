@@ -1,0 +1,114 @@
+/* Top reminder capsule — CHARTER §8.4 (locked spec). Background is set live to
+   the 气色 from energyToColor(); the capsule floats out from the top edge. */
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  height: 100%;
+  background: transparent;
+  overflow: hidden;
+  font-family:
+    -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial,
+    sans-serif;
+}
+
+/* Horizontal centering without transform, so the float animation owns transform. */
+.stage {
+  position: fixed;
+  top: 6px;
+  left: 0;
+  right: 0;
+  display: flex;
+  justify-content: center;
+}
+
+.capsule {
+  display: inline-flex;
+  align-items: center;
+  gap: 13px;
+  padding: 12px 22px 12px 14px;
+  border-radius: 18px;
+  max-width: 92vw;
+  background: hsla(157, 61%, 26%, 0.97);
+  box-shadow:
+    0 12px 34px rgba(0, 0, 0, 0.26),
+    0 6px 16px rgba(0, 0, 0, 0.4),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.12);
+
+  /* float-out / tuck (§8.4) */
+  transform: translateY(-190%);
+  opacity: 0;
+  transition:
+    transform 360ms cubic-bezier(0.22, 1, 0.36, 1),
+    opacity 280ms ease;
+}
+
+.capsule.in {
+  transform: translateY(0);
+  opacity: 1;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .capsule,
+  .capsule.in {
+    transform: none; /* 护眼：只交叉淡入，不滑动 (§8.4) */
+    transition: opacity 280ms ease;
+  }
+}
+
+.capsule__mira {
+  width: 32px;
+  height: 32px;
+  flex: 0 0 auto;
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.capsule__mira svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.capsule__body {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 168px;
+}
+
+.capsule__text {
+  font-size: 16px;
+  font-weight: 600;
+  line-height: 1.2;
+  letter-spacing: 0.01em;
+  color: #f6f7f9;
+}
+
+.capsule__track {
+  height: 3px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.16);
+  overflow: hidden;
+}
+
+.capsule__fill {
+  height: 100%;
+  width: 100%;
+  border-radius: 999px;
+  background: #6fe7c3;
+  transition: width 1s linear;
+}
+
+.capsule__count {
+  font-size: 15px;
+  font-weight: 600;
+  color: #6fe7c3;
+  font-variant-numeric: tabular-nums;
+  min-width: 1.6em;
+  text-align: right;
+}
