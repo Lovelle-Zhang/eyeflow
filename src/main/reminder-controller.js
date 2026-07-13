@@ -14,13 +14,16 @@ const { createReminderWindow } = require('./overlay/reminder-window');
 const { energyToColor } = require('../view/capsule/energy-color');
 const { miraSvg } = require('../view/mira/mira-svg');
 const { shortBreakFrame, SHORT_BREAK_MS } = require('../view/reminder/short-break');
+const { earnedShortBreak } = require('../view/reminder/gating');
 const { SHORT_BREAK_PROMPTS } = require('../view/reminder/copy');
 
-function createReminderController({ onShortBreakComplete } = {}) {
+function createReminderController({ getIdleSec, onShortBreakComplete } = {}) {
+  const idleSec = typeof getIdleSec === 'function' ? getIdleSec : () => 0;
   let win = null;
   let busy = false;
   let timer = null;
   let promptIndex = 0;
+  let earned = false; // D2: was this break actually rested?
 
   const send = (channel, payload) => {
     if (win && !win.isDestroyed()) win.webContents.send(channel, payload);
@@ -34,7 +37,9 @@ function createReminderController({ onShortBreakComplete } = {}) {
     if (win && !win.isDestroyed()) win.hide();
     if (busy) {
       busy = false;
-      if (onShortBreakComplete) onShortBreakComplete();
+      // D2: only credit the recharge if the user actually rested (歇完就安静).
+      // Kept typing through it → no credit → energy keeps falling toward Y.
+      if (earned && onShortBreakComplete) onShortBreakComplete();
     }
   }
 
@@ -57,6 +62,7 @@ function createReminderController({ onShortBreakComplete } = {}) {
       if (f.done) {
         clearInterval(timer);
         timer = null;
+        earned = earnedShortBreak(idleSec()); // D2: sample rest as the break ends
         send('reminder:tuck');
       }
     }, 200);
@@ -67,6 +73,7 @@ function createReminderController({ onShortBreakComplete } = {}) {
     trigger({ energy }) {
       if (busy) return; // one session at a time; ignore re-entrant reminders
       busy = true;
+      earned = false;
       if (!win || win.isDestroyed()) win = createReminderWindow();
       win.showInactive();
       if (win.webContents.isLoading()) {

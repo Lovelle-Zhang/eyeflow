@@ -42,6 +42,7 @@ function startEnergyService(win, { intervalMs = 1000 } = {}) {
   });
 
   controller = createReminderController({
+    getIdleSec,
     onShortBreakComplete: () => driver.shortBreak(),
   });
 
