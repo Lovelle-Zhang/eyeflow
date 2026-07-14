@@ -1,100 +1,116 @@
 'use strict';
 
 /**
- * Energy service — main-process wiring (landing-order step 6, milestone ①).
- *
- * Composes: system idle → driver (engine) → presenter (energyToColor / miraSvg)
- * → IPC → renderer. The engine/view functions stay pure and separately tested;
- * this layer only glues them and owns the impure interval + IPC.
+ * Energy service — the windowless core (§9.4 composition). Owns the driver
+ * (engine), the reminder + nap controllers, the "today" ledger, the nap-duration
+ * setting, and the tick loop. Publishes a panel-ready payload to subscribers;
+ * the menubar wires the UI. Pure engine/view/records functions stay separate.
  */
 
-const { ipcMain } = require('electron');
+const { DEFAULT_PARAMS } = require('../engine/energy');
 const { createEnergyDriver } = require('./driver/energy-driver');
 const { getIdleSec } = require('./driver/system-idle');
 const { createReminderController } = require('./reminder-controller');
 const { createNapController } = require('./nap-controller');
-const { energyToColor } = require('../view/capsule/energy-color');
-const { miraSvg } = require('../view/mira/mira-svg');
+const { energyToColor, energyStateLabel } = require('../view/capsule/energy-color');
+const { emptyRecord, recordTick, recordRest, formatEyeUse } = require('../records/today');
+const { DEFAULT_NAP_MS } = require('../view/nap/nap');
 
-function startEnergyService(win, { intervalMs = 1000 } = {}) {
-  const send = (channel, payload) => {
-    if (!win.isDestroyed()) {
-      win.webContents.send(channel, payload);
-    }
-  };
+/** Local YYYY-MM-DD for the day-boundary reset (只做今天). */
+function dayKey(d) {
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+}
 
-  // The reminder overlay credits a short break back when its 20s finishes (§6.1).
+function startEnergyService({ intervalMs = 1000 } = {}) {
+  let record = emptyRecord(dayKey(new Date()));
+  let napMs = DEFAULT_NAP_MS;
+  const subscribers = new Set();
+
+  const napController = createNapController({
+    onNapComplete: () => {
+      driver.nap();
+      record = recordRest(record, 'nap');
+      push();
+    },
+  });
+
   let controller;
-
-  // Presenter: map engine energy → the capsule's 气色 (§8.3) for the renderer.
   const driver = createEnergyDriver({
     getIdleSec,
     onUpdate: ({ energy, events }) => {
-      send('energy:update', {
-        energy,
-        capsuleCss: energyToColor(energy).css,
-        events,
-      });
-      // Energy crossed a line (§5.2) → float out the top capsule (§6.1).
-      // remind_nap (crossed Y) is more urgent than remind_short (crossed X).
       if (controller) {
         if (events.includes('remind_nap')) controller.trigger({ level: 'nap' });
         else if (events.includes('remind_short')) controller.trigger({ level: 'short', energy });
       }
+      push();
     },
   });
 
   controller = createReminderController({
     getIdleSec,
     getEnergy: () => driver.state.energy,
-    onShortBreakComplete: () => driver.shortBreak(),
+    onShortBreakComplete: () => {
+      driver.shortBreak();
+      record = recordRest(record, 'short'); // D2: only genuine rests reach here
+      push();
+    },
   });
 
-  // The fullscreen nap ritual refills to full on completion (§6.3/§5.4.3).
-  const napController = createNapController({
-    onNapComplete: () => driver.nap(),
-  });
+  function payload() {
+    const energy = driver.state.energy;
+    return {
+      energy,
+      capsuleCss: energyToColor(energy).css,
+      state: energyStateLabel(energy),
+      eyeUseText: formatEyeUse(record.eyeUseMs).text,
+      shortBreaks: record.shortBreaks,
+      naps: record.naps,
+      napMs,
+    };
+  }
 
-  // Impure loop: real elapsed time via a monotonic clock, sampled each interval.
+  function push() {
+    const p = payload();
+    for (const fn of subscribers) fn(p);
+  }
+
   let last = process.hrtime.bigint();
   const timer = setInterval(() => {
     const now = process.hrtime.bigint();
     const dtMs = Number(now - last) / 1e6;
     last = now;
-    driver.tick(dtMs);
+    const active = getIdleSec() < DEFAULT_PARAMS.idleGraceSec;
+    record = recordTick(record, { dtMs, active, dateKey: dayKey(new Date()) });
+    driver.tick(dtMs); // → onUpdate → push (record already updated)
   }, intervalMs);
 
-  // Renderer handshake: send the constant Mira assets, then paint initial state.
-  const onReady = () => {
-    send('energy:init', {
-      miraOpen: miraSvg({ variant: 'full', eyes: 'open' }),
-      miraClosed: miraSvg({ variant: 'full', eyes: 'closed' }),
-    });
-    driver.reset();
+  return {
+    subscribe(fn) {
+      subscribers.add(fn);
+      return () => subscribers.delete(fn);
+    },
+    push,
+    act(kind) {
+      if (kind === 'short') controller.trigger({ level: 'short', energy: driver.state.energy });
+      else if (kind === 'nap') napController.start(napMs);
+    },
+    setDuration(ms) {
+      napMs = ms;
+      push();
+    },
+    dev(action) {
+      if (action === 'ff') driver.tick(60000);
+      else if (action === 'remind') controller.trigger({ level: 'short', energy: driver.state.energy });
+      else if (action === 'remindNap') controller.trigger({ level: 'nap' });
+      else if (action === 'napRitual') napController.start(12000);
+      else if (action === 'reset') driver.reset();
+    },
+    destroy() {
+      clearInterval(timer);
+      controller.destroy();
+      napController.destroy();
+    },
   };
-  ipcMain.on('ui:ready', onReady);
-
-  // Temporary dev controls (replaced by real reminder/rest UI in step 6 proper).
-  const onDev = (_event, action) => {
-    if (action === 'ff') driver.tick(60000);
-    else if (action === 'shortBreak') driver.shortBreak();
-    else if (action === 'nap') driver.nap();
-    else if (action === 'reset') driver.reset();
-    else if (action === 'remind') controller.trigger({ level: 'short', energy: driver.state.energy });
-    else if (action === 'remindNap') controller.trigger({ level: 'nap' });
-    else if (action === 'napRitual') napController.start(12000); // dev: short 12s nap
-  };
-  ipcMain.on('ui:dev', onDev);
-
-  win.on('closed', () => {
-    clearInterval(timer);
-    ipcMain.removeListener('ui:ready', onReady);
-    ipcMain.removeListener('ui:dev', onDev);
-    controller.destroy();
-    napController.destroy();
-  });
-
-  return driver;
 }
 
 module.exports = { startEnergyService };
