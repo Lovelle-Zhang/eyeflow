@@ -15,6 +15,7 @@ const { ensureSingleInstance } = require('./single-instance');
 const { startEnergyService } = require('./energy-service');
 const { createMenubar } = require('./menubar');
 const { createSettingsStore } = require('./settings-store');
+const { runOnboarding } = require('./onboarding-controller');
 
 // 1. Isolate identity + user-data before anything touches disk.
 const userDataPath = configureIsolatedPaths(app);
@@ -38,6 +39,17 @@ if (!isPrimary) {
     });
     menubar = createMenubar(service);
     app.on('before-quit', () => service.flush()); // persist today's ledger (§7)
+
+    // First run: the one-time onboarding 相遇仪式 (§7). Never shown again.
+    if (!saved.onboardingDone) {
+      runOnboarding({
+        onDone: (napMs) => {
+          settings.save({ onboardingDone: true, napMs });
+          service.setDuration(napMs);
+          menubar.showPanel(); // "我就在上面陪着你" → land on the panel
+        },
+      });
+    }
   });
 
   // Menubar app: stay alive with no windows open (the tray keeps it running).
