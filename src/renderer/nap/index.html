@@ -1,0 +1,22 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta
+      http-equiv="Content-Security-Policy"
+      content="default-src 'self'; script-src 'self'; style-src 'self'"
+    />
+    <title>EyeFlow Next · nap</title>
+    <link rel="stylesheet" href="nap.css" />
+  </head>
+  <body>
+    <main class="nap">
+      <div id="mira" class="nap__mira"></div>
+      <div id="clock" class="nap__clock">0:00</div>
+      <div class="nap__track"><div id="fill" class="nap__fill"></div></div>
+      <p id="message" class="nap__message">闭上眼，缓一缓。</p>
+      <p id="hint" class="nap__hint">按 Esc 结束</p>
+    </main>
+    <script src="nap.js"></script>
+  </body>
+</html>

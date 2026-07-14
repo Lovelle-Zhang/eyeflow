@@ -12,6 +12,7 @@ const { ipcMain } = require('electron');
 const { createEnergyDriver } = require('./driver/energy-driver');
 const { getIdleSec } = require('./driver/system-idle');
 const { createReminderController } = require('./reminder-controller');
+const { createNapController } = require('./nap-controller');
 const { energyToColor } = require('../view/capsule/energy-color');
 const { miraSvg } = require('../view/mira/mira-svg');
 
@@ -49,6 +50,11 @@ function startEnergyService(win, { intervalMs = 1000 } = {}) {
     onShortBreakComplete: () => driver.shortBreak(),
   });
 
+  // The fullscreen nap ritual refills to full on completion (§6.3/§5.4.3).
+  const napController = createNapController({
+    onNapComplete: () => driver.nap(),
+  });
+
   // Impure loop: real elapsed time via a monotonic clock, sampled each interval.
   let last = process.hrtime.bigint();
   const timer = setInterval(() => {
@@ -76,6 +82,7 @@ function startEnergyService(win, { intervalMs = 1000 } = {}) {
     else if (action === 'reset') driver.reset();
     else if (action === 'remind') controller.trigger({ level: 'short', energy: driver.state.energy });
     else if (action === 'remindNap') controller.trigger({ level: 'nap' });
+    else if (action === 'napRitual') napController.start(12000); // dev: short 12s nap
   };
   ipcMain.on('ui:dev', onDev);
 
@@ -84,6 +91,7 @@ function startEnergyService(win, { intervalMs = 1000 } = {}) {
     ipcMain.removeListener('ui:ready', onReady);
     ipcMain.removeListener('ui:dev', onDev);
     controller.destroy();
+    napController.destroy();
   });
 
   return driver;

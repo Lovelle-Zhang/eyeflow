@@ -1,0 +1,108 @@
+/* Fullscreen nap ritual (CHARTER §6.3). Borrowed technique (approved): a soft
+   H157 gradient wash + generous whitespace + big calm type — all in the locked
+   palette, no hue drift. */
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  height: 100%;
+  overflow: hidden;
+}
+
+body {
+  font-family:
+    -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial,
+    sans-serif;
+  /* deep emerald wash, hue 157 family (§8.3) */
+  background:
+    radial-gradient(130% 100% at 50% 22%, #1a6b52 0%, #123f34 46%, #0e1c20 100%);
+  color: #eafff6;
+}
+
+.nap {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2.2rem;
+  padding: 6vh 8vw;
+  text-align: center;
+}
+
+.nap__mira {
+  width: 220px;
+  height: 220px;
+  animation: breathe 5s ease-in-out infinite; /* 缓慢呼吸 (§6.3) */
+}
+
+.nap__mira svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.nap.is-awake .nap__mira {
+  animation: none; /* wake: settle, brighten */
+}
+
+@keyframes breathe {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.035);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .nap__mira {
+    animation: none;
+  }
+}
+
+.nap__clock {
+  font-size: 64px;
+  font-weight: 200;
+  letter-spacing: 0.02em;
+  font-variant-numeric: tabular-nums;
+  color: #eafff6;
+}
+
+.nap__track {
+  width: min(360px, 60vw);
+  height: 3px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.14);
+  overflow: hidden;
+}
+
+.nap__fill {
+  height: 100%;
+  width: 0%;
+  border-radius: 999px;
+  background: #6fe7c3;
+  transition: width 0.3s linear;
+}
+
+.nap__message {
+  margin: 0;
+  font-size: 20px;
+  font-weight: 500;
+  color: rgba(234, 255, 246, 0.92);
+}
+
+.nap__hint {
+  margin: 0;
+  font-size: 13px;
+  color: rgba(234, 255, 246, 0.4);
+}
+
+.nap.is-awake .nap__hint {
+  visibility: hidden;
+}
