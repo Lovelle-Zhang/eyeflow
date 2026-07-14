@@ -56,18 +56,20 @@ body {
   transform: scale(1);
 }
 
-/* the hero: the matte green capsule with The Pulse core breathing at its center */
+/* the hero: a BIG capsule (standard full-pill shape) with a green gradient fill
+   (moodboard treatment, in the locked H157 family), The Pulse breathing inside */
 .ob-hero {
-  width: 300px;
-  height: 132px;
+  width: 384px;
+  height: 168px;
   display: flex;
   align-items: center;
   justify-content: center;
   flex: 0 0 auto;
+  background: linear-gradient(152deg, #3aa77f 0%, #1a6b52 46%, #0c3225 100%);
 }
 
 .ob-hero .mira {
-  --mf: 64px;
+  --mf: 80px;
 }
 
 .ob-hero.leave {
