@@ -63,6 +63,8 @@ function createNapController({ onNapComplete } = {}) {
   }
 
   return {
+    /** Is a nap ritual on screen right now? (used to suppress reminders, #4) */
+    isBusy: () => busy,
     /** Begin the fullscreen nap for the chosen duration (§6.3/§6.4). */
     start(durationMs = DEFAULT_NAP_MS) {
       if (busy) return;

@@ -42,8 +42,10 @@ if (!isPrimary) {
 
     // First run: the one-time onboarding 相遇仪式 (§7). Never shown again.
     if (!saved.onboardingDone) {
+      service.setOnboardingActive(true); // no reminders during the ritual (#4)
       runOnboarding({
         onDone: (napMs) => {
+          service.setOnboardingActive(false);
           settings.save({ onboardingDone: true, napMs });
           service.setDuration(napMs);
           menubar.showPanel(); // "我就在上面陪着你" → land on the panel

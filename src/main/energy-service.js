@@ -15,8 +15,8 @@ const { createReminderController } = require('./reminder-controller');
 const { createNapController } = require('./nap-controller');
 const { createRecordsStore } = require('./records-store');
 const { createEnergyStore } = require('./energy-store');
-const { energyToColor, energyStateLabel } = require('../view/capsule/energy-color');
-const { dayKey, recordTick, recordRest, formatEyeUse } = require('../records/today');
+const { buildPanelPayload } = require('./energy-presenter');
+const { dayKey, recordTick, recordRest } = require('../records/today');
 const { DEFAULT_NAP_MS } = require('../view/nap/nap');
 
 function startEnergyService({ intervalMs = 1000, napMs: initialNapMs = DEFAULT_NAP_MS, persistNapMs } = {}) {
@@ -25,6 +25,7 @@ function startEnergyService({ intervalMs = 1000, napMs: initialNapMs = DEFAULT_N
   const energyStore = createEnergyStore();
   const savedEnergy = energyStore.load(); // resume energy across restart (#2)
   let napMs = initialNapMs;
+  let onboardingActive = false; // suppress reminders during the intro ritual (#4)
   const subscribers = new Set();
 
   const napController = createNapController({
@@ -43,7 +44,8 @@ function startEnergyService({ intervalMs = 1000, napMs: initialNapMs = DEFAULT_N
       ? { energy: savedEnergy.energy, l1Armed: savedEnergy.l1Armed, l2Armed: savedEnergy.l2Armed }
       : undefined,
     onUpdate: ({ energy, events }) => {
-      if (controller) {
+      // Not during a nap ritual or onboarding — don't stack rituals (#4).
+      if (controller && !napController.isBusy() && !onboardingActive) {
         if (events.includes('remind_nap')) controller.trigger({ level: 'nap' });
         else if (events.includes('remind_short')) controller.trigger({ level: 'short', energy });
       }
@@ -67,21 +69,8 @@ function startEnergyService({ intervalMs = 1000, napMs: initialNapMs = DEFAULT_N
     driver.applyAway(Date.now() - savedEnergy.savedAt);
   }
 
-  function payload() {
-    const energy = driver.state.energy;
-    return {
-      energy,
-      capsuleCss: energyToColor(energy).css,
-      state: energyStateLabel(energy),
-      eyeUseText: formatEyeUse(record.eyeUseMs).text,
-      shortBreaks: record.shortBreaks,
-      naps: record.naps,
-      napMs,
-    };
-  }
-
   function push() {
-    const p = payload();
+    const p = buildPanelPayload({ energy: driver.state.energy, record, napMs });
     for (const fn of subscribers) fn(p);
   }
 
@@ -118,6 +107,10 @@ function startEnergyService({ intervalMs = 1000, napMs: initialNapMs = DEFAULT_N
       napMs = ms;
       if (persistNapMs) persistNapMs(ms); // §6.4 setting persists
       push();
+    },
+    /** Suppress auto reminders while the onboarding ritual is on screen (#4). */
+    setOnboardingActive(active) {
+      onboardingActive = active;
     },
     dev(action) {
       if (action === 'ff') driver.tick(60000);
