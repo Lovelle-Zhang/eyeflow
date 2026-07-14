@@ -7,7 +7,6 @@
 const api = window.onboarding || {};
 const el = (id) => document.getElementById(id);
 const card = el('card');
-const capsule = el('miracap');
 const face = el('face');
 const msg = el('msg');
 const track = el('track');
@@ -117,7 +116,7 @@ async function run() {
   msg.classList.add('brand');
   say('守护你看清世界的方式。');
   await delay(2800);
-  capsule.classList.add('leave'); // 缩进菜单栏
+  face.classList.add('is-leaving'); // 光缩进菜单栏
   card.classList.remove('in');
   await delay(700);
   api.done(chosenNapMs);

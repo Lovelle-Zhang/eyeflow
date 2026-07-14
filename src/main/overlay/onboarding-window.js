@@ -9,7 +9,7 @@ const { BrowserWindow, screen } = require('electron');
  * A transparent, centered window so the frosted glass card floats over the
  * desktop. Interactive (buttons / duration pick), so it stays focusable.
  */
-const OB_SIZE = { width: 600, height: 700 };
+const OB_SIZE = { width: 820, height: 520 }; // landscape — the page itself is a big capsule
 
 function createOnboardingWindow() {
   const { workArea } = screen.getPrimaryDisplay();
