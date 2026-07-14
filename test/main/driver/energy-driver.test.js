@@ -77,3 +77,30 @@ test('reminder events reach onUpdate as energy crosses lines', () => {
   assert.ok(seen.includes('remind_short'));
   assert.ok(seen.includes('remind_nap'));
 });
+
+// applyAway: credit a KNOWN time gap (sleep / offline) as away-recharge — used
+// for #1 sleep/wake and #2 offline resume. Reuses the engine's AWAY band.
+test('applyAway recharges at the away rate for a known gap', () => {
+  const d = createEnergyDriver({ getIdleSec: () => 0 });
+  d.tick(60 * 60000); // drain to floor
+  assert.equal(d.state.energy, 0);
+  d.applyAway(6 * 60000); // 6 min away → rechargePerMin(6.667) * 6 ≈ 40
+  assert.ok(Math.abs(d.state.energy - 40) < 0.5, `energy ${d.state.energy}`);
+});
+
+test('applyAway clamps at full for a long gap', () => {
+  const d = createEnergyDriver({ getIdleSec: () => 0 });
+  d.tick(60 * 60000);
+  d.applyAway(10 * 60 * 60000); // slept 10h → full, not overflowing
+  assert.equal(d.state.energy, 100);
+});
+
+test('applyAway re-arms both reminder lines as energy rises back up', () => {
+  const d = createEnergyDriver({ getIdleSec: () => 0 });
+  d.tick(60 * 60000); // fired both lines → disarmed
+  assert.equal(d.state.l1Armed, false);
+  d.applyAway(60 * 60000); // recharge to full
+  assert.equal(d.state.energy, 100);
+  assert.equal(d.state.l1Armed, true);
+  assert.equal(d.state.l2Armed, true);
+});

@@ -20,6 +20,12 @@ const DEFAULT_PARAMS = Object.freeze({
   idleGraceSec: 30, // active → paused boundary
   awaySec: 300, // paused → away(recharge) boundary (§5.3 "5 分钟")
 
+  // Safety cap on how much time a single tick may advance. Any larger gap
+  // (system sleep, background throttling, a stall) is NOT continuous screen use,
+  // so a tick never advances more than this — prevents the energy cratering or
+  // spiking after a gap (#1). Real sleep is credited precisely via suspend/resume.
+  maxTickMs: 3000,
+
   lineX: 50, // L1 (light reminder) line
   lineY: 20, // L2 (explicit reminder) line; Y < X
 });

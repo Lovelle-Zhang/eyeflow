@@ -7,6 +7,7 @@
  * the menubar wires the UI. Pure engine/view/records functions stay separate.
  */
 
+const { powerMonitor } = require('electron');
 const { DEFAULT_PARAMS } = require('../engine/energy');
 const { createEnergyDriver } = require('./driver/energy-driver');
 const { getIdleSec } = require('./driver/system-idle');
@@ -76,13 +77,32 @@ function startEnergyService({ intervalMs = 1000, napMs: initialNapMs = DEFAULT_N
   let last = process.hrtime.bigint();
   const timer = setInterval(() => {
     const now = process.hrtime.bigint();
-    const dtMs = Number(now - last) / 1e6;
+    // Clamp: a single tick never advances more than maxTickMs. Any bigger gap
+    // (sleep / throttle / stall) is not continuous screen use (#1).
+    const dtMs = Math.min(Number(now - last) / 1e6, DEFAULT_PARAMS.maxTickMs);
     last = now;
     const active = getIdleSec() < DEFAULT_PARAMS.idleGraceSec;
     record = recordTick(record, { dtMs, active, dateKey: dayKey(new Date()) });
     store.save(record);
     driver.tick(dtMs); // → onUpdate → push (record already updated)
   }, intervalMs);
+
+  // System sleep: timers freeze, so the gap is credited precisely on wake as
+  // away time (= rest → recharge), and the tick clock is reset (#1).
+  let suspendedAt = null;
+  const onSuspend = () => {
+    suspendedAt = Date.now();
+  };
+  const onResume = () => {
+    if (suspendedAt != null) {
+      driver.applyAway(Date.now() - suspendedAt); // slept = away → recharge (clamps at full)
+      suspendedAt = null;
+    }
+    last = process.hrtime.bigint();
+    push();
+  };
+  powerMonitor.on('suspend', onSuspend);
+  powerMonitor.on('resume', onResume);
 
   return {
     subscribe(fn) {
@@ -116,6 +136,8 @@ function startEnergyService({ intervalMs = 1000, napMs: initialNapMs = DEFAULT_N
     },
     destroy() {
       clearInterval(timer);
+      powerMonitor.removeListener('suspend', onSuspend);
+      powerMonitor.removeListener('resume', onResume);
       store.flush();
       controller.destroy();
       napController.destroy();

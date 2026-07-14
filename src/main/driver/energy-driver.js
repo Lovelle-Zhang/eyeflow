@@ -43,6 +43,14 @@ function createEnergyDriver({ getIdleSec, params = DEFAULT_PARAMS, onUpdate } = 
     shortBreak() {
       return run({ kind: 'shortBreak' });
     },
+    /**
+     * Credit a KNOWN time gap (system sleep / app was closed) as away time →
+     * recharge. Reuses the engine's AWAY band; energy clamps at full. Bypasses
+     * the live idle reading (after wake, idle is unreliable). (#1/#2)
+     */
+    applyAway(awayMs) {
+      return run({ kind: 'tick', dtMs: awayMs, idleSec: params.awaySec });
+    },
     /** A completed full rest → refill to full. */
     nap() {
       return run({ kind: 'nap' });
