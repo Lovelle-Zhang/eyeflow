@@ -1,41 +1,39 @@
-/* Shared design tokens (§8.2) — one language, dark (default) + light, following
-   the system appearance. Hue stays locked at 157; the light comes from luminosity
-   and warmth, not a new hue. Every surface reads from these vars — no more
-   stamping a flat card per screen. */
+/* Mira design tokens (§8.2/§8.4/§8.5, standardized). Matte, calm, native —
+   the glow was over-reach; the vessel is a flat matte green pill, expression
+   comes from The Pulse light core. Hue stays 157. Dark default + light. */
 
 :root {
-  /* the welcome/rest scene backdrop: deep emerald with a warm halo of light */
+  /* the matte green capsule vessel — locked from the landing .island */
+  --cap-color: rgba(26, 107, 82, 0.97); /* #1A6B52 matte; panel/reminder set live 气色 */
+  --cap-shadow:
+    0 14px 32px -12px rgba(20, 20, 19, 0.24),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.14);
+  --cap-text: #f6f7f9;
+  --on-green-line: rgba(255, 255, 255, 0.18);
+  --mint: #6fe7c3;
+
+  /* Mira: a dark lens holding a breathing light core (The Pulse) */
+  --lens: radial-gradient(130% 150% at 34% 22%, #123029, #07140f 80%);
+  --lens-inset: inset 0 1px 2px rgba(140, 240, 210, 0.14);
+  --pulse: #f4fff9;
+  --pulse-mid: #8fe6c0;
+  --pulse-glow: rgba(111, 231, 195, 0.4);
+
+  /* scene backdrops (onboarding / nap) — warm-lit, restrained */
   --scene-bg:
-    radial-gradient(44% 40% at 50% 40%, rgba(243, 238, 199, 0.12) 0%, transparent 56%),
-    radial-gradient(66% 62% at 50% 44%, #2c8067 0%, #1a6b52 30%, #103f31 66%, #081f1a 100%);
+    radial-gradient(46% 42% at 50% 40%, rgba(243, 238, 199, 0.1) 0%, transparent 56%),
+    radial-gradient(66% 62% at 50% 44%, #1f6b52 0%, #164434 40%, #0e2a22 74%, #081f1a 100%);
   --text: #edfff7;
   --text-soft: rgba(237, 255, 247, 0.62);
   --hairline: rgba(255, 255, 255, 0.16);
-  --mint: #6fe7c3;
-
-  /* the §3 energy capsule — a luminous hero, not a flat fill. --cap-color is the
-     body color: fixed emerald in scenes, live 气色 on the panel/reminder. */
-  --cap-color: #1a6b52;
-  --cap-glow: 0 0 100px 8px rgba(111, 231, 195, 0.24);
-  --cap-depth:
-    0 36px 72px rgba(0, 0, 0, 0.5),
-    inset 0 2px 1px rgba(255, 255, 255, 0.3),
-    inset 0 -16px 32px rgba(0, 0, 0, 0.3);
-  --lens-bg: radial-gradient(130% 150% at 30% 18%, #183640, #0b1c20 72%);
-  --lens-inset: inset 0 1px 2px rgba(126, 239, 212, 0.3), 0 5px 14px rgba(0, 0, 0, 0.4);
-  --eye: #f7fffc;
-  --eye-glow: 0 0 12px rgba(210, 255, 238, 0.95);
-  --dot: #6fe7c3;
-  --dot-glow: 0 0 18px rgba(111, 231, 195, 0.9);
-
+  --card-shadow: 0 40px 100px rgba(0, 0, 0, 0.5);
   --seg-bg: rgba(255, 255, 255, 0.08);
   --seg-border: rgba(255, 255, 255, 0.16);
-  --card-shadow: 0 40px 100px rgba(0, 0, 0, 0.5);
 
-  /* menubar panel surface (frosted) */
-  --panel-bg: linear-gradient(180deg, rgba(18, 63, 52, 0.72), rgba(14, 28, 32, 0.86));
+  /* menubar panel surface (frosted, neutral-ish) */
+  --panel-bg: linear-gradient(180deg, rgba(20, 40, 33, 0.72), rgba(12, 22, 18, 0.86));
   --panel-border: rgba(255, 255, 255, 0.1);
-  --panel-inset: inset 0 1px 0 rgba(255, 255, 255, 0.12);
+  --panel-inset: inset 0 1px 0 rgba(255, 255, 255, 0.1);
   --row-bg: rgba(255, 255, 255, 0.05);
   --row-hover: rgba(255, 255, 255, 0.09);
 }
@@ -46,16 +44,10 @@
     --text: #123f30;
     --text-soft: rgba(18, 63, 48, 0.62);
     --hairline: rgba(18, 63, 48, 0.14);
-    --cap-glow: 0 0 80px 4px rgba(52, 160, 120, 0.28);
-    --cap-depth:
-      0 30px 60px rgba(28, 80, 58, 0.34),
-      inset 0 2px 1px rgba(255, 255, 255, 0.38),
-      inset 0 -14px 28px rgba(0, 0, 0, 0.2);
+    --card-shadow: 0 40px 100px rgba(28, 80, 58, 0.22);
     --seg-bg: rgba(18, 63, 48, 0.06);
     --seg-border: rgba(18, 63, 48, 0.16);
-    --card-shadow: 0 40px 100px rgba(28, 80, 58, 0.22);
-
-    --panel-bg: linear-gradient(180deg, rgba(255, 255, 255, 0.82), rgba(232, 244, 238, 0.9));
+    --panel-bg: linear-gradient(180deg, rgba(255, 255, 255, 0.84), rgba(233, 244, 238, 0.9));
     --panel-border: rgba(18, 63, 48, 0.1);
     --panel-inset: inset 0 1px 0 rgba(255, 255, 255, 0.6);
     --row-bg: rgba(18, 63, 48, 0.05);

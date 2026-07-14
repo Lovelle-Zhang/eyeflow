@@ -7,6 +7,7 @@ const api = window.panel || {};
 
 const el = (id) => document.getElementById(id);
 const hero = el('hero');
+const mira = el('mira');
 const pct = el('pct');
 const state = el('state');
 const eyeuse = el('eyeuse');
@@ -30,6 +31,7 @@ api.onInit?.(({ napOptions: options }) => {
 
 api.onData?.((d) => {
   hero.style.setProperty('--cap-color', d.capsuleCss); // live 气色 (§8.3)
+  mira.style.setProperty('--energy', Math.max(0, Math.min(1, d.energy / 100))); // 亮度 = 气色
   pct.textContent = `精力 ${Math.round(d.energy)}%`;
   state.textContent = d.state;
 

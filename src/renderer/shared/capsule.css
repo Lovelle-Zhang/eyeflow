@@ -1,91 +1,99 @@
-/* The §3 energy capsule — ONE shared luminous component for every surface.
-   - .lumpill: the luminous pill surface (gloss + glow + depth). Its body color is
-     --cap-color: fixed emerald in scenes, live 气色 (energyToColor) on panel/reminder.
-   - .mira-face: Mira's dark face (lens + glowing eyes + dot), scalable via --mf.
-   Glow/depth/lens/eye/dot values come from theme.css (dark/light). */
+/* The standardized Mira system — ONE component for every surface (§8.4/§8.5).
+   - .capsule: the matte green vessel (flat --cap-color + landing shadow, full pill).
+     Body color is live 气色 on panel/reminder, fixed emerald in scenes.
+   - .mira: a dark lens holding The Pulse — a breathing light core. States via
+     classes (is-blink / is-rest / is-bright); brightness = --energy (气色). */
 
-.lumpill {
-  --cap-color: #1a6b52;
+.capsule {
   border-radius: 999px;
-  background:
-    linear-gradient(
-      176deg,
-      rgba(255, 255, 255, 0.17) 0%,
-      rgba(255, 255, 255, 0.04) 32%,
-      rgba(0, 0, 0, 0.1) 70%,
-      rgba(0, 0, 0, 0.22) 100%
-    ),
-    var(--cap-color);
-  box-shadow: var(--cap-glow), var(--cap-depth);
-  transition:
-    background 500ms ease,
-    transform 700ms cubic-bezier(0.22, 1, 0.36, 1),
-    opacity 700ms ease,
-    filter 800ms ease;
+  background: var(--cap-color);
+  box-shadow: var(--cap-shadow);
+  transition: background 500ms ease;
 }
 
-.lumpill.is-breathing {
+/* ---- Mira: The Pulse (dark lens + breathing light core) ---- */
+.mira {
+  --mf: 44px; /* lens height; everything scales from it */
+  --energy: 1; /* 0–1, dims the core when tired (亮度 = 气色) */
+  width: calc(var(--mf) * 1.55);
+  height: var(--mf);
+  border-radius: calc(var(--mf) / 2);
+  position: relative;
+  flex: 0 0 auto;
+  overflow: hidden;
+  background: var(--lens);
+  box-shadow: var(--lens-inset);
+}
+
+.mira__pulse {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: calc(var(--mf) * 0.64);
+  height: calc(var(--mf) * 0.64);
+  transform: translate(-50%, -50%);
+  border-radius: 50%;
+  background: radial-gradient(
+    circle,
+    var(--pulse) 0%,
+    var(--pulse-mid) 36%,
+    var(--pulse-glow) 56%,
+    transparent 74%
+  );
+  opacity: calc(0.35 + 0.65 * var(--energy));
   animation: mira-breathe 5s ease-in-out infinite;
+  transition:
+    width 350ms ease,
+    height 350ms ease,
+    border-radius 350ms ease,
+    opacity 500ms ease;
 }
 
-.lumpill.is-bright {
-  filter: brightness(1.12) saturate(1.06);
+/* 感知 / 醒来发亮 — the field spreads */
+.mira.is-bright .mira__pulse {
+  width: calc(var(--mf) * 0.94);
+  height: calc(var(--mf) * 0.94);
+}
+
+/* 短歇 · 眨眼 — the light collapses to a thin slit */
+.mira.is-blink .mira__pulse {
+  width: calc(var(--mf) * 0.13);
+  height: calc(var(--mf) * 0.72);
+  border-radius: 999px;
+  animation: none;
+}
+
+/* 小睡 · 深睡 — a dim resting line, very slow */
+.mira.is-rest .mira__pulse {
+  width: calc(var(--mf) * 0.58);
+  height: calc(var(--mf) * 0.1);
+  border-radius: 999px;
+  opacity: 0.45;
+  animation: mira-rest 6s ease-in-out infinite;
 }
 
 @keyframes mira-breathe {
   0%,
   100% {
-    transform: scale(1);
+    transform: translate(-50%, -50%) scale(1);
   }
   50% {
-    transform: scale(1.035);
+    transform: translate(-50%, -50%) scale(1.14);
+  }
+}
+
+@keyframes mira-rest {
+  0%,
+  100% {
+    opacity: 0.38;
+  }
+  50% {
+    opacity: 0.58;
   }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .lumpill.is-breathing {
-    animation: none;
+  .mira__pulse {
+    animation: none !important;
   }
-}
-
-.mira-face {
-  --mf: 62px;
-  width: calc(var(--mf) * 1.8);
-  height: var(--mf);
-  border-radius: calc(var(--mf) / 2);
-  position: relative;
-  flex: 0 0 auto;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: calc(var(--mf) * 0.29);
-  background: var(--lens-bg);
-  box-shadow: var(--lens-inset);
-}
-
-.mira-face__eye {
-  width: calc(var(--mf) * 0.26);
-  height: calc(var(--mf) * 0.26);
-  border-radius: 50%;
-  background: var(--eye);
-  box-shadow: var(--eye-glow);
-  transition:
-    height 180ms ease,
-    border-radius 180ms ease;
-}
-
-.mira-face.closed .mira-face__eye {
-  height: calc(var(--mf) * 0.07);
-  border-radius: 999px;
-}
-
-.mira-face__dot {
-  position: absolute;
-  top: calc(var(--mf) * -0.11);
-  right: calc(var(--mf) * -0.18);
-  width: calc(var(--mf) * 0.34);
-  height: calc(var(--mf) * 0.34);
-  border-radius: 50%;
-  background: var(--dot);
-  box-shadow: var(--dot-glow);
 }

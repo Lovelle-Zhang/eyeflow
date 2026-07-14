@@ -15,9 +15,8 @@ const fill = el('fill');
 const message = el('message');
 
 api.onStart?.(({ durationSec }) => {
-  face.classList.add('closed'); // 深闭眼 (§6.3)
-  capsule.classList.add('is-breathing');
-  capsule.classList.remove('is-bright');
+  face.classList.add('is-rest'); // 深睡：光收成缓慢的一线 (§6.3)
+  face.classList.remove('is-bright');
   root.classList.remove('is-awake');
   clock.textContent = formatStart(durationSec);
   fill.style.width = '0%';
@@ -30,9 +29,8 @@ api.onFrame?.(({ clock: text, fraction }) => {
 });
 
 api.onDone?.(() => {
-  face.classList.remove('closed'); // 睁眼
-  capsule.classList.remove('is-breathing');
-  capsule.classList.add('is-bright');
+  face.classList.remove('is-rest'); // 醒来：光溢成场
+  face.classList.add('is-bright');
   root.classList.add('is-awake');
   clock.textContent = '';
   fill.style.width = '100%';

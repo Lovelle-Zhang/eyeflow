@@ -56,18 +56,18 @@ body {
   transform: scale(1);
 }
 
-/* the luminous hero capsule (treatment from .lumpill; here just size + layout) */
+/* the hero: the matte green capsule with The Pulse core breathing at its center */
 .ob-hero {
   width: 300px;
   height: 132px;
   display: flex;
   align-items: center;
-  padding: 0 26px 0 20px;
+  justify-content: center;
   flex: 0 0 auto;
 }
 
-.ob-hero .mira-face {
-  --mf: 62px;
+.ob-hero .mira {
+  --mf: 64px;
 }
 
 .ob-hero.leave {

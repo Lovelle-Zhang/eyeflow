@@ -32,17 +32,15 @@ body {
 }
 
 .nap-hero {
+  width: 250px;
+  height: 116px;
   display: flex;
   align-items: center;
-  padding: 0 40px 0 30px;
+  justify-content: center;
 }
 
-.nap-hero .mira-face {
+.nap-hero .mira {
   --mf: 92px;
-}
-
-.nap.is-awake .nap-hero {
-  /* is-breathing removed in JS; brighten handled by .is-bright */
 }
 
 .nap__clock {

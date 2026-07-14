@@ -19,7 +19,7 @@ napbtn.addEventListener('click', () => api.napNow?.());
 
 api.onShow?.(({ kind, capsuleCss, text: prompt, durationSec }) => {
   capsule.style.setProperty('--cap-color', capsuleCss); // 气色 at reminder time (§8.3)
-  face.classList.toggle('closed', kind !== 'nap'); // 短歇=闭眼眨眼; 二级建议=睁眼
+  face.classList.toggle('is-blink', kind !== 'nap'); // 短歇=闭眼眨眼; 二级建议=睁眼
   text.textContent = prompt;
 
   const isNap = kind === 'nap';
