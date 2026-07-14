@@ -1,6 +1,6 @@
-/* Onboarding 相遇仪式 (CHARTER §7): an INDEPENDENT, CENTERED welcome scene. The
-   §3 energy capsule is the luminous hero (not an app-icon tile); light + warmth
-   + hierarchy carry it. Tokens (dark/light) live in ../shared/theme.css. */
+/* Onboarding 相遇仪式 (CHARTER §7): centered welcome scene. Capsule component +
+   tokens are shared (../shared/theme.css, ../shared/capsule.css); this file is
+   just the scene's own layout. */
 
 * {
   box-sizing: border-box;
@@ -29,7 +29,6 @@ body {
   padding: 20px;
 }
 
-/* The welcome scene as a rounded, centered tile (bounded → not fullscreen). */
 .ob__card {
   width: 100%;
   max-width: 520px;
@@ -57,90 +56,23 @@ body {
   transform: scale(1);
 }
 
-/* Luminous energy capsule (§3) — the hero. */
-.miracap {
+/* the luminous hero capsule (treatment from .lumpill; here just size + layout) */
+.ob-hero {
   width: 300px;
   height: 132px;
-  border-radius: 66px;
-  flex: 0 0 auto;
   display: flex;
   align-items: center;
   padding: 0 26px 0 20px;
-  background: var(--cap-body);
-  box-shadow: var(--cap-glow), var(--cap-depth);
-  transition:
-    transform 700ms cubic-bezier(0.22, 1, 0.36, 1),
-    opacity 700ms ease,
-    filter 800ms ease;
+  flex: 0 0 auto;
 }
 
-.miracap__lens {
-  width: 112px;
-  height: 62px;
-  border-radius: 31px;
-  position: relative;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 20px;
-  background: var(--lens-bg);
-  box-shadow: var(--lens-inset);
+.ob-hero .mira-face {
+  --mf: 62px;
 }
 
-.miracap__eye {
-  width: 16px;
-  height: 16px;
-  border-radius: 50%;
-  background: var(--eye);
-  box-shadow: var(--eye-glow);
-  transition:
-    height 180ms ease,
-    border-radius 180ms ease;
-}
-
-.miracap.closed .miracap__eye {
-  height: 4px;
-  border-radius: 2px;
-}
-
-.miracap__dot {
-  position: absolute;
-  top: -7px;
-  right: -12px;
-  width: 24px;
-  height: 24px;
-  border-radius: 50%;
-  background: var(--dot);
-  box-shadow: var(--dot-glow);
-}
-
-.miracap.breathe {
-  animation: mira-breathe 5s ease-in-out infinite;
-}
-
-.miracap.bright {
-  filter: brightness(1.12) saturate(1.06);
-}
-
-.miracap.leave {
+.ob-hero.leave {
   transform: translateY(-54vh) scale(0.12);
   opacity: 0;
-}
-
-@keyframes mira-breathe {
-  0%,
-  100% {
-    transform: scale(1);
-  }
-  50% {
-    transform: scale(1.035);
-  }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .miracap.breathe {
-    animation: none;
-  }
 }
 
 .ob__msg {

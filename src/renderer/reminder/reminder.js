@@ -1,23 +1,24 @@
 'use strict';
 
-// Pure painter for the reminder overlay. Receives show/frame/tuck from main,
-// plays the float-out / tuck, and reports back when it has finished tucking.
+// Reminder overlay painter. Drives the shared 气色 capsule: sets its color from
+// the live energy, blinks (short) or opens eyes (nap suggestion), floats out,
+// runs the countdown, tucks away.
 
 const api = window.reminder || {};
 
-const capsule = document.getElementById('capsule');
-const mira = document.getElementById('mira');
-const text = document.getElementById('text');
-const track = document.getElementById('track');
-const fill = document.getElementById('fill');
-const count = document.getElementById('count');
+const el = (id) => document.getElementById(id);
+const capsule = el('capsule');
+const face = el('face');
+const text = el('text');
+const track = el('track');
+const fill = el('fill');
+const count = el('count');
 
-api.onShow?.(({ kind, capsuleCss, mira: svg, text: prompt, durationSec }) => {
-  capsule.style.background = capsuleCss; // 气色 at reminder time (§8.3)
-  mira.innerHTML = svg;
+api.onShow?.(({ kind, capsuleCss, text: prompt, durationSec }) => {
+  capsule.style.setProperty('--cap-color', capsuleCss); // 气色 at reminder time (§8.3)
+  face.classList.toggle('closed', kind !== 'nap'); // 短歇=闭眼眨眼; 二级建议=睁眼
   text.textContent = prompt;
 
-  // §5.1 二级建议 has no eye-rest countdown — just the message. §6.1 一级 does.
   const isNap = kind === 'nap';
   track.style.display = isNap ? 'none' : '';
   count.style.display = isNap ? 'none' : '';
@@ -37,7 +38,7 @@ api.onFrame?.(({ remainingSec, remainingFraction }) => {
 });
 
 api.onTuck?.(() => {
-  capsule.classList.remove('in'); // slides back up (§8.4)
+  capsule.classList.remove('in'); // slides back up
   let notified = false;
   const done = () => {
     if (notified) return;
@@ -45,5 +46,5 @@ api.onTuck?.(() => {
     api.tucked?.();
   };
   capsule.addEventListener('transitionend', done, { once: true });
-  setTimeout(done, 500); // fallback if transitionend doesn't fire
+  setTimeout(done, 500);
 });

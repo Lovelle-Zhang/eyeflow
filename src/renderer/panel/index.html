@@ -7,6 +7,8 @@
       content="default-src 'self'; script-src 'self'; style-src 'self'"
     />
     <title>EyeFlow Next</title>
+    <link rel="stylesheet" href="../shared/theme.css" />
+    <link rel="stylesheet" href="../shared/capsule.css" />
     <link rel="stylesheet" href="panel.css" />
   </head>
   <body>
@@ -21,14 +23,15 @@
         </button>
       </div>
 
-      <div class="hero" id="hero">
-        <div class="hero__mira" id="mira"></div>
+      <div class="hero lumpill" id="hero">
+        <div class="mira-face">
+          <span class="mira-face__eye"></span>
+          <span class="mira-face__eye"></span>
+          <span class="mira-face__dot"></span>
+        </div>
         <div class="hero__body">
-          <div class="hero__line">
-            <span class="hero__pct" id="pct">精力 —</span>
-            <span class="hero__state" id="state"></span>
-          </div>
-          <div class="hero__track"><div class="hero__fill" id="fill"></div></div>
+          <div class="hero__pct" id="pct">精力 —</div>
+          <div class="hero__state" id="state"></div>
         </div>
       </div>
 

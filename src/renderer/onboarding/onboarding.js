@@ -8,6 +8,7 @@ const api = window.onboarding || {};
 const el = (id) => document.getElementById(id);
 const card = el('card');
 const capsule = el('miracap');
+const face = el('face');
 const msg = el('msg');
 const track = el('track');
 const fill = el('fill');
@@ -17,7 +18,7 @@ let napOptions = [];
 let chosenNapMs = 180000;
 
 const delay = (ms) => new Promise((r) => setTimeout(r, ms));
-const setEyes = (state) => capsule.classList.toggle('closed', state === 'closed');
+const setEyes = (state) => face.classList.toggle('closed', state === 'closed');
 
 function say(text) {
   msg.classList.remove('in');
@@ -84,7 +85,7 @@ async function shortLoop(ms) {
 }
 
 async function run() {
-  capsule.classList.add('breathe');
+  capsule.classList.add('is-breathing');
   await delay(800);
 
   // 登场 + 自我介绍
@@ -99,10 +100,10 @@ async function run() {
   say('看看远处吧。');
   await shortLoop(20000);
   setEyes('open');
-  capsule.classList.add('bright');
+  capsule.classList.add('is-bright');
   say('这样就好。是不是清楚了一点？');
   await delay(2800);
-  capsule.classList.remove('bright');
+  capsule.classList.remove('is-bright');
 
   // 引出小睡 + 选时长
   await line('刚才那个，是短歇——像眨一次长眼，随时来一下。', 2800);

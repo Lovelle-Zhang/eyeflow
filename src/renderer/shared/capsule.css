@@ -1,0 +1,91 @@
+/* The §3 energy capsule — ONE shared luminous component for every surface.
+   - .lumpill: the luminous pill surface (gloss + glow + depth). Its body color is
+     --cap-color: fixed emerald in scenes, live 气色 (energyToColor) on panel/reminder.
+   - .mira-face: Mira's dark face (lens + glowing eyes + dot), scalable via --mf.
+   Glow/depth/lens/eye/dot values come from theme.css (dark/light). */
+
+.lumpill {
+  --cap-color: #1a6b52;
+  border-radius: 999px;
+  background:
+    linear-gradient(
+      176deg,
+      rgba(255, 255, 255, 0.17) 0%,
+      rgba(255, 255, 255, 0.04) 32%,
+      rgba(0, 0, 0, 0.1) 70%,
+      rgba(0, 0, 0, 0.22) 100%
+    ),
+    var(--cap-color);
+  box-shadow: var(--cap-glow), var(--cap-depth);
+  transition:
+    background 500ms ease,
+    transform 700ms cubic-bezier(0.22, 1, 0.36, 1),
+    opacity 700ms ease,
+    filter 800ms ease;
+}
+
+.lumpill.is-breathing {
+  animation: mira-breathe 5s ease-in-out infinite;
+}
+
+.lumpill.is-bright {
+  filter: brightness(1.12) saturate(1.06);
+}
+
+@keyframes mira-breathe {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.035);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .lumpill.is-breathing {
+    animation: none;
+  }
+}
+
+.mira-face {
+  --mf: 62px;
+  width: calc(var(--mf) * 1.8);
+  height: var(--mf);
+  border-radius: calc(var(--mf) / 2);
+  position: relative;
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: calc(var(--mf) * 0.29);
+  background: var(--lens-bg);
+  box-shadow: var(--lens-inset);
+}
+
+.mira-face__eye {
+  width: calc(var(--mf) * 0.26);
+  height: calc(var(--mf) * 0.26);
+  border-radius: 50%;
+  background: var(--eye);
+  box-shadow: var(--eye-glow);
+  transition:
+    height 180ms ease,
+    border-radius 180ms ease;
+}
+
+.mira-face.closed .mira-face__eye {
+  height: calc(var(--mf) * 0.07);
+  border-radius: 999px;
+}
+
+.mira-face__dot {
+  position: absolute;
+  top: calc(var(--mf) * -0.11);
+  right: calc(var(--mf) * -0.18);
+  width: calc(var(--mf) * 0.34);
+  height: calc(var(--mf) * 0.34);
+  border-radius: 50%;
+  background: var(--dot);
+  box-shadow: var(--dot-glow);
+}

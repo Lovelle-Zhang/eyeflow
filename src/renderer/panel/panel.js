@@ -1,17 +1,14 @@
 'use strict';
 
 // Menubar panel painter (§4). Pure view: consumes engine/records data pushed
-// from main, paints the capsule 气色 + today stats, and reports user actions
-// (short break / nap / duration setting) back. No logic.
+// from main, drives the shared 气色 capsule + today stats, reports actions.
 
 const api = window.panel || {};
 
 const el = (id) => document.getElementById(id);
-const mira = el('mira');
 const hero = el('hero');
 const pct = el('pct');
 const state = el('state');
-const fill = el('fill');
 const eyeuse = el('eyeuse');
 const rests = el('rests');
 const restsLabel = el('rests-label');
@@ -23,28 +20,25 @@ const segs = el('segs');
 let napOptions = [];
 
 function reportHeight() {
-  api.resize?.(document.getElementById('panel').offsetHeight + 24);
+  api.resize?.(el('panel').offsetHeight + 24);
 }
 
-api.onInit?.(({ mira: svg, napOptions: options }) => {
-  mira.innerHTML = svg;
+api.onInit?.(({ napOptions: options }) => {
   napOptions = options || [];
   reportHeight();
 });
 
 api.onData?.((d) => {
-  hero.style.background = d.capsuleCss;
+  hero.style.setProperty('--cap-color', d.capsuleCss); // live 气色 (§8.3)
   pct.textContent = `精力 ${Math.round(d.energy)}%`;
   state.textContent = d.state;
-  fill.style.width = `${Math.round(d.energy)}%`;
 
   eyeuse.textContent = d.eyeUseText;
   const total = d.shortBreaks + d.naps;
   rests.textContent = `${total} 次`;
   restsLabel.textContent = `歇息（短歇 ${d.shortBreaks} · 小睡 ${d.naps}）`;
 
-  const min = Math.round(d.napMs / 60000);
-  napSub.textContent = `完整 · ${min} 分钟`;
+  napSub.textContent = `完整 · ${Math.round(d.napMs / 60000)} 分钟`;
   renderSegs(d.napMs);
   reportHeight();
 });

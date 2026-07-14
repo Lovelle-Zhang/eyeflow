@@ -1,22 +1,26 @@
 'use strict';
 
-// Fullscreen nap ritual painter. Shows deep-closed breathing Mira + calm
-// countdown; on done, wakes to open eyes + a brand-soul welcome, then closes.
-// Esc or a click ends the rest early (main grants no credit for that).
+// Fullscreen nap ritual painter. Drives the shared capsule: deep-closed +
+// breathing during the rest; wakes to open + bright + a brand-soul welcome, then
+// closes. Esc or a click ends the rest early (main grants no credit for that).
 
 const api = window.nap || {};
 
-const root = document.querySelector('.nap');
-const mira = document.getElementById('mira');
-const clock = document.getElementById('clock');
-const fill = document.getElementById('fill');
-const message = document.getElementById('message');
+const el = (id) => document.getElementById(id);
+const root = el('nap');
+const capsule = el('capsule');
+const face = el('face');
+const clock = el('clock');
+const fill = el('fill');
+const message = el('message');
 
-api.onStart?.(({ mira: svg, durationSec }) => {
-  mira.innerHTML = svg;
+api.onStart?.(({ durationSec }) => {
+  face.classList.add('closed'); // 深闭眼 (§6.3)
+  capsule.classList.add('is-breathing');
+  capsule.classList.remove('is-bright');
+  root.classList.remove('is-awake');
   clock.textContent = formatStart(durationSec);
   fill.style.width = '0%';
-  root.classList.remove('is-awake');
   message.textContent = '闭上眼，缓一缓。';
 });
 
@@ -25,8 +29,10 @@ api.onFrame?.(({ clock: text, fraction }) => {
   fill.style.width = `${Math.min(1, fraction) * 100}%`;
 });
 
-api.onDone?.(({ mira: svg }) => {
-  mira.innerHTML = svg; // open eyes, awake
+api.onDone?.(() => {
+  face.classList.remove('closed'); // 睁眼
+  capsule.classList.remove('is-breathing');
+  capsule.classList.add('is-bright');
   root.classList.add('is-awake');
   clock.textContent = '';
   fill.style.width = '100%';
@@ -35,7 +41,6 @@ api.onDone?.(({ mira: svg }) => {
   setTimeout(() => api.closed?.(), 2600);
 });
 
-// End early — no credit (main decides).
 document.addEventListener('keydown', (e) => {
   if (e.key === 'Escape') api.cancel?.();
 });
