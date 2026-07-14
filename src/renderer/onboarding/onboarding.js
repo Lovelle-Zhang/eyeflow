@@ -19,6 +19,10 @@ let chosenNapMs = 180000;
 const delay = (ms) => new Promise((r) => setTimeout(r, ms));
 const setEyes = (state) => face.classList.toggle('is-blink', state === 'closed');
 
+// The page doubles as a charge meter for the demo (§7): tired 气色 → vivid.
+const PAGE_VIVID = 'linear-gradient(150deg, #3aa77f 0%, #1a6b52 46%, #0c3225 100%)';
+const PAGE_TIRED = 'linear-gradient(150deg, #61776b 0%, #46564c 46%, #313b34 100%)';
+
 function say(text) {
   msg.classList.remove('in');
   void msg.offsetWidth; // reflow → fade the new line in
@@ -93,11 +97,18 @@ async function run() {
   say('现在，我们先一起试一次。');
   await button('好，来试试');
 
-  // 第一个短歇 loop
-  setEyes('closed');
-  say('看看远处吧。');
+  // 第一个短歇 loop —— 整页当充电条:气色先淡下去,休息时一点点亮回来
+  face.classList.add('is-rest');
+  card.style.transition = 'background 1200ms ease';
+  card.style.background = PAGE_TIRED;
+  say('看屏幕久了，气色会一点点淡下去。');
+  await delay(2600);
+  say('那就歇一下——看看远处，看着它亮回来。');
+  card.style.transition = 'background 20000ms linear';
+  card.style.background = PAGE_VIVID;
   await shortLoop(20000);
-  setEyes('open');
+  card.style.transition = ''; // back to the page's default transition
+  face.classList.remove('is-rest');
   face.classList.add('is-bright');
   say('这样就好。是不是清楚了一点？');
   await delay(2800);
