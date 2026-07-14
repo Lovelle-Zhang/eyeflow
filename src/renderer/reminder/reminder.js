@@ -13,6 +13,9 @@ const text = el('text');
 const track = el('track');
 const fill = el('fill');
 const count = el('count');
+const napbtn = el('napbtn');
+
+napbtn.addEventListener('click', () => api.napNow?.());
 
 api.onShow?.(({ kind, capsuleCss, text: prompt, durationSec }) => {
   capsule.style.setProperty('--cap-color', capsuleCss); // 气色 at reminder time (§8.3)
@@ -22,6 +25,7 @@ api.onShow?.(({ kind, capsuleCss, text: prompt, durationSec }) => {
   const isNap = kind === 'nap';
   track.style.display = isNap ? 'none' : '';
   count.style.display = isNap ? 'none' : '';
+  napbtn.hidden = !isNap; // §5.1 二级: actionable "小睡" button
   if (!isNap) {
     count.textContent = String(durationSec);
     fill.style.width = '100%';

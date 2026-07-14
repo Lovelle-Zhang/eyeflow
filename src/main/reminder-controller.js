@@ -1,23 +1,19 @@
 'use strict';
 
 /**
- * Reminder controller (CHARTER §6.1): on a `remind_short` event, float the top
- * capsule out, run the 20s eye-rest, then tuck it away. On completion, credit a
- * short break back to the engine (歇完就安静). One session at a time.
- *
- * Owns the impure interval + overlay window; the countdown math and copy are the
- * separately-tested pure modules.
+ * Reminder controller (CHARTER §6.1): float the top capsule out, run the 20s
+ * eye-rest (L1) or the nap suggestion (L2), then tuck away. One session at a
+ * time. Owns the impure interval + overlay window; math/copy are pure modules.
  */
 
 const { ipcMain } = require('electron');
 const { createReminderWindow } = require('./overlay/reminder-window');
 const { energyToColor } = require('../view/capsule/energy-color');
-const { miraSvg } = require('../view/mira/mira-svg');
 const { shortBreakFrame, SHORT_BREAK_MS } = require('../view/reminder/short-break');
 const { earnedShortBreak, shouldFloatNow, REMINDER_DEFAULTS } = require('../view/reminder/gating');
 const { SHORT_BREAK_PROMPTS, NAP_SUGGEST_PROMPTS } = require('../view/reminder/copy');
 
-function createReminderController({ getIdleSec, getEnergy, onShortBreakComplete } = {}) {
+function createReminderController({ getIdleSec, getEnergy, onShortBreakComplete, onNapNow } = {}) {
   const idleSec = typeof getIdleSec === 'function' ? getIdleSec : () => 0;
   let win = null;
   let busy = false;
@@ -36,7 +32,10 @@ function createReminderController({ getIdleSec, getEnergy, onShortBreakComplete 
       clearInterval(timer);
       timer = null;
     }
-    if (win && !win.isDestroyed()) win.hide();
+    if (win && !win.isDestroyed()) {
+      win.setIgnoreMouseEvents(true); // back to click-through for the next float
+      win.hide();
+    }
     if (busy) {
       busy = false;
       // D2: only credit the recharge if the user actually rested (歇完就安静).
@@ -45,16 +44,21 @@ function createReminderController({ getIdleSec, getEnergy, onShortBreakComplete 
     }
   }
 
+  // §5.1 二级: the user accepted the nap suggestion → start the ritual + tuck.
+  const onNapAccepted = () => {
+    if (busy && onNapNow) onNapNow();
+    send('reminder:tuck');
+  };
+
   ipcMain.on('reminder:tucked', finish);
+  ipcMain.on('reminder:nap-now', onNapAccepted);
 
   function runSession(level, energy) {
     const isNap = level === 'nap';
 
     send('reminder:show', {
-      kind: level,
+      kind: level, // renderer blinks (short) or opens eyes (nap) on the shared capsule
       capsuleCss: energyToColor(energy).css,
-      // 短歇 = 眨一次长眼 (§6.3, closed); 二级建议 = 面对你说话 (open eyes).
-      mira: miraSvg({ variant: 'full', eyes: isNap ? 'open' : 'closed' }),
       text: isNap
         ? NAP_SUGGEST_PROMPTS[napIndex % NAP_SUGGEST_PROMPTS.length]
         : SHORT_BREAK_PROMPTS[shortIndex % SHORT_BREAK_PROMPTS.length],
@@ -62,8 +66,9 @@ function createReminderController({ getIdleSec, getEnergy, onShortBreakComplete 
     });
 
     if (isNap) {
-      // §5.1 二级: a suggestion that dwells then tucks. No eye-rest countdown,
-      // no credit — recovery comes from an actual nap (§6.3) or stepping away.
+      // §5.1 二级: a suggestion that dwells then tucks. Clickable (a "小睡" button
+      // → nap ritual); no eye-rest countdown, no auto-credit.
+      if (win && !win.isDestroyed()) win.setIgnoreMouseEvents(false);
       napIndex += 1;
       timer = setTimeout(() => {
         timer = null;
@@ -133,6 +138,7 @@ function createReminderController({ getIdleSec, getEnergy, onShortBreakComplete 
       if (timer) clearInterval(timer);
       if (bufferTimer) clearTimeout(bufferTimer);
       ipcMain.removeListener('reminder:tucked', finish);
+      ipcMain.removeListener('reminder:nap-now', onNapAccepted);
       if (win && !win.isDestroyed()) win.destroy();
       win = null;
     },

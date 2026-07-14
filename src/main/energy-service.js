@@ -62,6 +62,7 @@ function startEnergyService({ intervalMs = 1000, napMs: initialNapMs = DEFAULT_N
       store.save(record);
       push();
     },
+    onNapNow: () => napController.start(napMs), // §5.1 二级建议被接受 → 小睡 (#3)
   });
 
   // Offline resume (#2): credit the time the app was closed as away → recharge.

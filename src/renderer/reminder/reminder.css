@@ -101,3 +101,21 @@ body {
   min-width: 1.6em;
   text-align: right;
 }
+
+.rem__nap {
+  font: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  color: #0e1c20;
+  background: var(--mint);
+  border: none;
+  border-radius: 999px;
+  padding: 7px 15px;
+  margin-left: 2px;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.rem__nap:hover {
+  filter: brightness(1.05);
+}

@@ -13,4 +13,5 @@ contextBridge.exposeInMainWorld('reminder', {
   onFrame: (cb) => ipcRenderer.on('reminder:frame', (_e, payload) => cb(payload)),
   onTuck: (cb) => ipcRenderer.on('reminder:tuck', () => cb()),
   tucked: () => ipcRenderer.send('reminder:tucked'),
+  napNow: () => ipcRenderer.send('reminder:nap-now'),
 });
