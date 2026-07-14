@@ -17,10 +17,10 @@ const { energyToColor, energyStateLabel } = require('../view/capsule/energy-colo
 const { dayKey, recordTick, recordRest, formatEyeUse } = require('../records/today');
 const { DEFAULT_NAP_MS } = require('../view/nap/nap');
 
-function startEnergyService({ intervalMs = 1000 } = {}) {
+function startEnergyService({ intervalMs = 1000, napMs: initialNapMs = DEFAULT_NAP_MS, persistNapMs } = {}) {
   const store = createRecordsStore();
   let record = store.load(); // resume today, or start fresh (§7)
-  let napMs = DEFAULT_NAP_MS;
+  let napMs = initialNapMs;
   const subscribers = new Set();
 
   const napController = createNapController({
@@ -100,6 +100,7 @@ function startEnergyService({ intervalMs = 1000 } = {}) {
     },
     setDuration(ms) {
       napMs = ms;
+      if (persistNapMs) persistNapMs(ms); // §6.4 setting persists
       push();
     },
     dev(action) {

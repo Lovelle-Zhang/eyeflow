@@ -14,6 +14,7 @@ const { configureIsolatedPaths } = require('./paths');
 const { ensureSingleInstance } = require('./single-instance');
 const { startEnergyService } = require('./energy-service');
 const { createMenubar } = require('./menubar');
+const { createSettingsStore } = require('./settings-store');
 
 // 1. Isolate identity + user-data before anything touches disk.
 const userDataPath = configureIsolatedPaths(app);
@@ -29,7 +30,12 @@ if (!isPrimary) {
 } else {
   app.whenReady().then(() => {
     if (app.dock) app.dock.hide(); // menubar app: no dock icon
-    const service = startEnergyService();
+    const settings = createSettingsStore();
+    const saved = settings.load();
+    const service = startEnergyService({
+      napMs: saved.napMs, // §6.4 duration setting persists
+      persistNapMs: (ms) => settings.save({ napMs: ms }),
+    });
     menubar = createMenubar(service);
     app.on('before-quit', () => service.flush()); // persist today's ledger (§7)
   });
