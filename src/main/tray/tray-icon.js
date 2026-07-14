@@ -54,26 +54,17 @@ function inRoundRect(px, py, x1, y1, x2, y2, rad) {
 
 const inCircle = (px, py, cx, cy, r) => (px - cx) ** 2 + (py - cy) ** 2 <= r * r;
 
-/** The Mira silhouette (proportions echo §8.5: eyes slightly above center). */
+/** The Pulse silhouette: a capsule with one central light core (§ MIRA_SYSTEM). */
 function miraTrayPng() {
   const { width: W, height: H } = TRAY_CANVAS;
-  const cap = { x1: 0.05 * W, y1: 0.3 * H, x2: 0.8 * W, y2: 0.92 * H };
+  const cap = { x1: 0.13 * W, y1: 0.24 * H, x2: 0.87 * W, y2: 0.76 * H }; // centered pill
   const rad = (cap.y2 - cap.y1) / 2;
-  const eyeR = 0.055 * W;
-  const eyes = [
-    { x: 0.27 * W, y: 0.54 * H },
-    { x: 0.58 * W, y: 0.54 * H },
-  ];
-  const dot = { x: 0.86 * W, y: 0.2 * H, r: 0.1 * W };
+  const core = { x: 0.5 * W, y: 0.5 * H, r: 0.115 * W }; // the pulse — knocked out as light
 
   const sampler = (x, y) => {
     const px = x + 0.5;
     const py = y + 0.5;
-    if (inCircle(px, py, dot.x, dot.y, dot.r)) return 255;
-    if (
-      inRoundRect(px, py, cap.x1, cap.y1, cap.x2, cap.y2, rad) &&
-      !eyes.some((e) => inCircle(px, py, e.x, e.y, eyeR))
-    ) {
+    if (inRoundRect(px, py, cap.x1, cap.y1, cap.x2, cap.y2, rad) && !inCircle(px, py, core.x, core.y, core.r)) {
       return 255;
     }
     return 0;

@@ -1,55 +1,30 @@
 'use strict';
 
 /**
- * Small Mira character SVG — CHARTER §8.5 (locked, inherited from app icon).
+ * Mira SVG — The Pulse (CHARTER §8.5 superseded → docs/MIRA_SYSTEM.md). A dark
+ * lens (§8.5 geometry) holding ONE luminous breathing-light core — not two eyes.
+ * Used for the app icon (the UI surfaces render the pulse in CSS, not this SVG).
  *
- * Small Mira is the CHARACTER (§3): a constant face — dark capsule + white eyes
- * + green dot — that does NOT change with energy. Energy 气色 lives on the big
- * green capsule (§8.3), not here. Small Mira only animates its eyes during rest
- * (open / blink / closed), so `eyes` is parametrized for §6.3 later.
- *
- * Pure: options in → SVG string out. All coordinates are on the locked
- * 1024×1024 canvas base; the 'full' variant adds canvas margin via a transform.
+ * Pure: options in → SVG string out, on the locked 1024×1024 canvas.
  */
 
-// Locked geometry (§8.5), shared by both variants — the green dot and eye
-// centers stay at identical coords across variants ("同构").
 const CANVAS = 1024;
-const LENS = { x: 177, y: 335, w: 671, h: 318, rx: 159 }; // 2.11:1, rx ≈ half-height
-const EYE_L = { cx: 380, cy: 468 }; // y=468 sits just above lens center (494) → "有神"
-const EYE_R = { cx: 644, cy: 468 };
-const DOT = { cx: 803, cy: 344 }; // top-right outer edge
+const LENS = { x: 177, y: 335, w: 671, h: 318, rx: 159 }; // §8.5 dark lens
+const CORE = { cx: 512, cy: 494, r: 128 }; // pulse core, centered in the lens
 
-// Colors (§8.5).
 const C = {
   bgMintWhite: '#EAFFF6',
   bgSky: '#BDEAFF',
   bgWarm: '#F3EEC7',
   lensDarkA: '#0E1C20',
   lensDarkB: '#10272A',
-  eye: '#F8FFFC',
-  dot: '#6FE7C3', // same mint as the progress line (§8.4) — intentional echo
+  pulse: '#f4fff9',
+  pulseMid: '#8fe6c0',
   stroke: '#7EEFD4',
 };
 
-/** Eyes: open = white circles; closed = thin rounded bars (blink/nap). */
-function eyesMarkup(r, state) {
-  if (state === 'closed') {
-    const barH = Math.round(r * 0.36);
-    const barW = r * 2;
-    const y = EYE_L.cy - barH / 2;
-    const bar = (cx) =>
-      `<rect x="${cx - r}" y="${y}" width="${barW}" height="${barH}" rx="${barH / 2}" fill="${C.eye}"/>`;
-    return `${bar(EYE_L.cx)}${bar(EYE_R.cx)}`;
-  }
-  return (
-    `<circle cx="${EYE_L.cx}" cy="${EYE_L.cy}" r="${r}" fill="${C.eye}"/>` +
-    `<circle cx="${EYE_R.cx}" cy="${EYE_R.cy}" r="${r}" fill="${C.eye}"/>`
-  );
-}
-
-/** Full render: glossy mint base, dark-gradient lens, mint stroke, canvas margin. */
-function fullVariant(eyes) {
+/** Full render: glossy mint plate, dark-gradient lens, a glowing pulse core. */
+function fullVariant() {
   const defs =
     '<defs>' +
     `<linearGradient id="miraBg" gradientUnits="userSpaceOnUse" x1="216" y1="156" x2="826" y2="874">` +
@@ -61,6 +36,12 @@ function fullVariant(eyes) {
     `<stop offset="0" stop-color="${C.lensDarkA}"/>` +
     `<stop offset="1" stop-color="${C.lensDarkB}"/>` +
     '</linearGradient>' +
+    `<radialGradient id="miraPulse" gradientUnits="userSpaceOnUse" cx="${CORE.cx}" cy="${CORE.cy}" r="${CORE.r}">` +
+    `<stop offset="0" stop-color="${C.pulse}"/>` +
+    `<stop offset="0.36" stop-color="${C.pulseMid}"/>` +
+    `<stop offset="0.62" stop-color="${C.pulseMid}" stop-opacity="0.35"/>` +
+    `<stop offset="1" stop-color="${C.pulseMid}" stop-opacity="0"/>` +
+    '</radialGradient>' +
     '</defs>';
 
   const body =
@@ -68,30 +49,29 @@ function fullVariant(eyes) {
     `<rect x="0" y="0" width="${CANVAS}" height="${CANVAS}" rx="216" fill="url(#miraBg)"/>` +
     `<rect x="${LENS.x}" y="${LENS.y}" width="${LENS.w}" height="${LENS.h}" rx="${LENS.rx}" ` +
     `fill="url(#miraLens)" stroke="${C.stroke}" stroke-width="31" stroke-opacity="0.18"/>` +
-    eyesMarkup(44, eyes) +
-    `<circle cx="${DOT.cx}" cy="${DOT.cy}" r="79" fill="${C.dot}"/>` +
+    `<circle cx="${CORE.cx}" cy="${CORE.cy}" r="${CORE.r}" fill="url(#miraPulse)"/>` +
     '</g>';
 
   return defs + body;
 }
 
-/** Flat 32px avatar: solid fills, no gradients, slightly larger eyes/dot (§8.5). */
-function flatVariant(eyes) {
+/** Flat 32px variant: solid fills, no gradients; the core distills to a dot. */
+function flatVariant() {
   return (
     `<rect x="0" y="0" width="${CANVAS}" height="${CANVAS}" rx="230" fill="${C.bgMintWhite}"/>` +
     `<rect x="${LENS.x}" y="${LENS.y}" width="${LENS.w}" height="${LENS.h}" rx="${LENS.rx}" fill="${C.lensDarkA}"/>` +
-    eyesMarkup(46, eyes) +
-    `<circle cx="${DOT.cx}" cy="${DOT.cy}" r="82" fill="${C.dot}"/>`
+    `<circle cx="${CORE.cx}" cy="${CORE.cy}" r="96" fill="${C.pulseMid}"/>` +
+    `<circle cx="${CORE.cx}" cy="${CORE.cy}" r="52" fill="${C.pulse}"/>`
   );
 }
 
 /**
- * @param {{variant?: 'full'|'flat', eyes?: 'open'|'closed'}} [opts]
+ * @param {{variant?: 'full'|'flat'}} [opts]
  * @returns {string} SVG markup
  */
 function miraSvg(opts = {}) {
-  const { variant = 'full', eyes = 'open' } = opts;
-  const inner = variant === 'flat' ? flatVariant(eyes) : fullVariant(eyes);
+  const { variant = 'full' } = opts;
+  const inner = variant === 'flat' ? flatVariant() : fullVariant();
   return (
     `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${CANVAS} ${CANVAS}" ` +
     `role="img" aria-label="Mira">${inner}</svg>`
