@@ -4,19 +4,22 @@ const path = require('node:path');
 const { BrowserWindow, screen } = require('electron');
 
 /**
- * The first-run onboarding window (CHARTER §7): a fullscreen, centered welcome
- * scene — the one-time 相遇仪式. Interactive (buttons / duration pick), so it is
- * focusable and does NOT ignore mouse events. Simple-fullscreen covers the
- * menubar/dock without switching macOS spaces.
+ * The first-run onboarding window (CHARTER §7): an INDEPENDENT, CENTERED welcome
+ * scene — the one-time 相遇仪式 — NOT a fullscreen takeover (that's the §6.3 nap).
+ * A transparent, centered window so the frosted glass card floats over the
+ * desktop. Interactive (buttons / duration pick), so it stays focusable.
  */
+const OB_SIZE = { width: 600, height: 700 };
+
 function createOnboardingWindow() {
-  const { bounds } = screen.getPrimaryDisplay();
+  const { workArea } = screen.getPrimaryDisplay();
   const win = new BrowserWindow({
-    x: bounds.x,
-    y: bounds.y,
-    width: bounds.width,
-    height: bounds.height,
+    width: OB_SIZE.width,
+    height: OB_SIZE.height,
+    x: Math.round(workArea.x + (workArea.width - OB_SIZE.width) / 2),
+    y: Math.round(workArea.y + (workArea.height - OB_SIZE.height) / 2),
     frame: false,
+    transparent: true,
     resizable: false,
     movable: false,
     minimizable: false,
@@ -24,7 +27,6 @@ function createOnboardingWindow() {
     skipTaskbar: true,
     show: false,
     hasShadow: false,
-    backgroundColor: '#0E1C20',
     alwaysOnTop: true,
     fullscreenable: false,
     webPreferences: {

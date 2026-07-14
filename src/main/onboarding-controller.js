@@ -13,7 +13,6 @@ const { NAP_DURATION_OPTIONS_MS, DEFAULT_NAP_MS } = require('../view/nap/nap');
 
 function runOnboarding({ onDone } = {}) {
   const win = createOnboardingWindow();
-  win.setSimpleFullScreen(true);
   win.show();
 
   const napOptions = NAP_DURATION_OPTIONS_MS.map((ms) => ({
@@ -33,7 +32,6 @@ function runOnboarding({ onDone } = {}) {
   ipcMain.once('onboarding:done', (_e, napMs) => {
     ipcMain.removeListener('onboarding:ready', onReady);
     if (!win.isDestroyed()) {
-      win.setSimpleFullScreen(false);
       win.close();
     }
     if (onDone) onDone(napMs);

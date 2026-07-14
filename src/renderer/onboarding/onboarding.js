@@ -5,6 +5,7 @@
 
 const api = window.onboarding || {};
 const el = (id) => document.getElementById(id);
+const card = el('card');
 const mira = el('mira');
 const msg = el('msg');
 const track = el('track');
@@ -119,7 +120,8 @@ async function run() {
   msg.classList.add('brand');
   say('守护你看清世界的方式。');
   await delay(2800);
-  mira.classList.add('leave');
+  mira.classList.add('leave'); // capsule rises toward the menubar
+  card.classList.remove('in'); // card fades away
   await delay(700);
   api.done(chosenNapMs);
 }
@@ -128,6 +130,7 @@ api.onInit?.((payload) => {
   assets = payload;
   chosenNapMs = payload.defaultNapMs;
   setEyes('open');
+  requestAnimationFrame(() => card.classList.add('in')); // card fades in
   run();
 });
 
