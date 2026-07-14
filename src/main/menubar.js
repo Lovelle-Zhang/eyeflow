@@ -61,7 +61,10 @@ function createMenubar(service) {
     e.sender.send('panel:init', { mira: miraSvg({ variant: 'full', eyes: 'open' }), napOptions });
     service.push();
   });
-  ipcMain.on('panel:act', (_e, kind) => service.act(kind));
+  ipcMain.on('panel:act', (_e, kind) => {
+    service.act(kind); // do it now, then dismiss the panel like a menu
+    win.hide();
+  });
   ipcMain.on('panel:set-duration', (_e, ms) => service.setDuration(ms));
   ipcMain.on('panel:resize', (_e, height) => {
     const [w] = win.getSize();

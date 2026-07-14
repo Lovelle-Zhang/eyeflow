@@ -91,8 +91,12 @@ function startEnergyService({ intervalMs = 1000 } = {}) {
     },
     push,
     act(kind) {
-      if (kind === 'short') controller.trigger({ level: 'short', energy: driver.state.energy });
-      else if (kind === 'nap') napController.start(napMs);
+      // User-initiated → immediate (bypass the §6.2 auto-reminder buffer).
+      if (kind === 'short') {
+        controller.trigger({ level: 'short', energy: driver.state.energy, immediate: true });
+      } else if (kind === 'nap') {
+        napController.start(napMs);
+      }
     },
     setDuration(ms) {
       napMs = ms;
@@ -100,8 +104,9 @@ function startEnergyService({ intervalMs = 1000 } = {}) {
     },
     dev(action) {
       if (action === 'ff') driver.tick(60000);
-      else if (action === 'remind') controller.trigger({ level: 'short', energy: driver.state.energy });
-      else if (action === 'remindNap') controller.trigger({ level: 'nap' });
+      else if (action === 'remind') {
+        controller.trigger({ level: 'short', energy: driver.state.energy, immediate: true });
+      } else if (action === 'remindNap') controller.trigger({ level: 'nap', immediate: true });
       else if (action === 'napRitual') napController.start(12000);
       else if (action === 'reset') driver.reset();
     },

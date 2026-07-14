@@ -102,13 +102,19 @@ function createReminderController({ getIdleSec, getEnergy, onShortBreakComplete 
 
   return {
     /**
-     * A reminder is due (§6.1). Buffer past dense typing (§6.2), then float out.
-     * @param {{ level?: 'short'|'nap', energy?: number }} [opts]
+     * A reminder is due (§6.1). Auto reminders buffer past dense typing (§6.2);
+     * a user-initiated break (immediate) floats out right away — you asked for it.
+     * @param {{ level?: 'short'|'nap', energy?: number, immediate?: boolean }} [opts]
      */
-    trigger({ level = 'short', energy } = {}) {
+    trigger({ level = 'short', energy, immediate = false } = {}) {
       if (busy) return; // one session at a time; ignore re-entrant reminders
       busy = true;
       earned = false;
+
+      if (immediate) {
+        floatOut(level, energy);
+        return;
+      }
 
       // §6.2 smart buffer: wait for a natural gap, but no longer than the cap.
       const bufferStart = process.hrtime.bigint();
