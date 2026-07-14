@@ -10,13 +10,15 @@
 const { ipcMain } = require('electron');
 const { createNapWindow } = require('./overlay/nap-window');
 const { miraSvg } = require('../view/mira/mira-svg');
+const { energyToColor } = require('../view/capsule/energy-color');
 const { shortBreakFrame } = require('../view/reminder/short-break');
 const { formatClock, DEFAULT_NAP_MS } = require('../view/nap/nap');
 
-function createNapController({ onNapComplete } = {}) {
+function createNapController({ getEnergy, onNapComplete } = {}) {
   let win = null;
   let timer = null;
   let busy = false;
+  let startEnergy = 0;
 
   const send = (channel, payload) => {
     if (win && !win.isDestroyed()) win.webContents.send(channel, payload);
@@ -43,21 +45,30 @@ function createNapController({ onNapComplete } = {}) {
   ipcMain.on('nap:closed', onClosed);
 
   function run(durationMs) {
+    startEnergy = typeof getEnergy === 'function' ? getEnergy() : 0;
     send('nap:start', {
-      mira: miraSvg({ variant: 'full', eyes: 'closed' }), // 深闭眼 (§6.3)
       durationSec: Math.round(durationMs / 1000),
+      energy: startEnergy,
+      capsuleCss: energyToColor(startEnergy).css, // starts at the tired 气色
     });
 
     const start = process.hrtime.bigint();
     timer = setInterval(() => {
       const elapsed = Number(process.hrtime.bigint() - start) / 1e6;
       const f = shortBreakFrame(elapsed, durationMs);
-      send('nap:frame', { clock: formatClock(f.remainingSec), fraction: f.elapsedFraction });
+      // watch yourself charge: energy rises from the start value → full over the nap
+      const charging = startEnergy + (100 - startEnergy) * f.elapsedFraction;
+      send('nap:frame', {
+        clock: formatClock(f.remainingSec),
+        fraction: f.elapsedFraction,
+        energy: charging,
+        capsuleCss: energyToColor(charging).css,
+      });
       if (f.done) {
         clearInterval(timer);
         timer = null;
         if (onNapComplete) onNapComplete(); // 回满 (§5.4.3)
-        send('nap:done', { mira: miraSvg({ variant: 'full', eyes: 'open' }) });
+        send('nap:done', {});
       }
     }, 250);
   }

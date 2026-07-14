@@ -14,18 +14,25 @@ const clock = el('clock');
 const fill = el('fill');
 const message = el('message');
 
-api.onStart?.(({ durationSec }) => {
+const setCharge = (energy, capsuleCss) => {
+  capsule.style.setProperty('--cap-color', capsuleCss); // 气色 brightens as it charges
+  face.style.setProperty('--energy', Math.max(0, Math.min(1, energy / 100)));
+};
+
+api.onStart?.(({ durationSec, energy, capsuleCss }) => {
   face.classList.add('is-rest'); // 深睡：光收成缓慢的一线 (§6.3)
   face.classList.remove('is-bright');
   root.classList.remove('is-awake');
   clock.textContent = formatStart(durationSec);
   fill.style.width = '0%';
   message.textContent = '闭上眼，缓一缓。';
+  setCharge(energy, capsuleCss); // start at the tired 气色
 });
 
-api.onFrame?.(({ clock: text, fraction }) => {
+api.onFrame?.(({ clock: text, fraction, energy, capsuleCss }) => {
   clock.textContent = text;
   fill.style.width = `${Math.min(1, fraction) * 100}%`;
+  setCharge(energy, capsuleCss); // watch the color brighten toward full
 });
 
 api.onDone?.(() => {

@@ -63,13 +63,18 @@
   animation: none;
 }
 
-/* 小睡 · 深睡 — a dim resting line, very slow */
+/* 小睡 · 深睡 — a resting line whose light BRIGHTENS as energy recharges
+   (--energy rises during the nap → you watch yourself charge up) */
 .mira.is-rest .mira__pulse {
   width: calc(var(--mf) * 0.58);
   height: calc(var(--mf) * 0.1);
   border-radius: 999px;
-  opacity: 0.45;
+  opacity: calc(0.28 + 0.55 * var(--energy));
   animation: mira-rest 6s ease-in-out infinite;
+  transition:
+    opacity 500ms ease,
+    width 350ms ease,
+    height 350ms ease;
 }
 
 @keyframes mira-breathe {
@@ -85,10 +90,10 @@
 @keyframes mira-rest {
   0%,
   100% {
-    opacity: 0.38;
+    transform: translate(-50%, -50%) scaleX(1);
   }
   50% {
-    opacity: 0.58;
+    transform: translate(-50%, -50%) scaleX(1.18);
   }
 }
 

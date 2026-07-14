@@ -29,6 +29,7 @@ function startEnergyService({ intervalMs = 1000, napMs: initialNapMs = DEFAULT_N
   const subscribers = new Set();
 
   const napController = createNapController({
+    getEnergy: () => driver.state.energy, // animate the charge-up (气色 brightening) during the nap
     onNapComplete: () => {
       driver.nap();
       record = recordRest(record, 'nap');
