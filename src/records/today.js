@@ -14,6 +14,11 @@ function emptyRecord(dateKey) {
   return { dateKey, eyeUseMs: 0, shortBreaks: 0, naps: 0 };
 }
 
+/** Local YYYY-MM-DD for a Date — the day-boundary key (只做今天). */
+function dayKey(date) {
+  return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
+}
+
 /**
  * Advance the ledger for one tick. Resets first if the day rolled over.
  * @param {object} rec
@@ -43,4 +48,4 @@ function formatEyeUse(ms) {
   return { h, m, text: h > 0 ? `${h}h ${m}m` : `${m}m` };
 }
 
-module.exports = { emptyRecord, recordTick, recordRest, formatEyeUse };
+module.exports = { emptyRecord, dayKey, recordTick, recordRest, formatEyeUse };

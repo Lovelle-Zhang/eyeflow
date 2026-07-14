@@ -31,6 +31,7 @@ if (!isPrimary) {
     if (app.dock) app.dock.hide(); // menubar app: no dock icon
     const service = startEnergyService();
     menubar = createMenubar(service);
+    app.on('before-quit', () => service.flush()); // persist today's ledger (§7)
   });
 
   // Menubar app: stay alive with no windows open (the tray keeps it running).

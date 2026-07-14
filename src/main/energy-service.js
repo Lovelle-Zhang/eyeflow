@@ -12,17 +12,14 @@ const { createEnergyDriver } = require('./driver/energy-driver');
 const { getIdleSec } = require('./driver/system-idle');
 const { createReminderController } = require('./reminder-controller');
 const { createNapController } = require('./nap-controller');
+const { createRecordsStore } = require('./records-store');
 const { energyToColor, energyStateLabel } = require('../view/capsule/energy-color');
-const { emptyRecord, recordTick, recordRest, formatEyeUse } = require('../records/today');
+const { dayKey, recordTick, recordRest, formatEyeUse } = require('../records/today');
 const { DEFAULT_NAP_MS } = require('../view/nap/nap');
 
-/** Local YYYY-MM-DD for the day-boundary reset (只做今天). */
-function dayKey(d) {
-  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
-}
-
 function startEnergyService({ intervalMs = 1000 } = {}) {
-  let record = emptyRecord(dayKey(new Date()));
+  const store = createRecordsStore();
+  let record = store.load(); // resume today, or start fresh (§7)
   let napMs = DEFAULT_NAP_MS;
   const subscribers = new Set();
 
@@ -30,6 +27,7 @@ function startEnergyService({ intervalMs = 1000 } = {}) {
     onNapComplete: () => {
       driver.nap();
       record = recordRest(record, 'nap');
+      store.save(record);
       push();
     },
   });
@@ -52,6 +50,7 @@ function startEnergyService({ intervalMs = 1000 } = {}) {
     onShortBreakComplete: () => {
       driver.shortBreak();
       record = recordRest(record, 'short'); // D2: only genuine rests reach here
+      store.save(record);
       push();
     },
   });
@@ -81,6 +80,7 @@ function startEnergyService({ intervalMs = 1000 } = {}) {
     last = now;
     const active = getIdleSec() < DEFAULT_PARAMS.idleGraceSec;
     record = recordTick(record, { dtMs, active, dateKey: dayKey(new Date()) });
+    store.save(record);
     driver.tick(dtMs); // → onUpdate → push (record already updated)
   }, intervalMs);
 
@@ -110,8 +110,12 @@ function startEnergyService({ intervalMs = 1000 } = {}) {
       else if (action === 'napRitual') napController.start(12000);
       else if (action === 'reset') driver.reset();
     },
+    flush() {
+      store.flush();
+    },
     destroy() {
       clearInterval(timer);
+      store.flush();
       controller.destroy();
       napController.destroy();
     },
