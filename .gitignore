@@ -6,6 +6,10 @@ release/
 dist/
 out/
 
+# Build assets: keep only the committed app icon
+build/*
+!build/icon.icns
+
 # Logs
 *.log
 npm-debug.log*
