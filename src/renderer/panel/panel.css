@@ -1,0 +1,271 @@
+/* Menubar panel (CHARTER §4), locked v2 design. Frosted H157 card + big-number
+   today stats + pill actions + hidden setting. Borrowed techniques (glass /
+   pills / big numbers), all in the locked palette — no hue drift. */
+
+:root {
+  color-scheme: dark;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+}
+
+body {
+  background: transparent;
+  padding: 12px;
+  font-family:
+    -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial,
+    sans-serif;
+}
+
+.panel {
+  padding: 14px;
+  border-radius: 22px;
+  background: linear-gradient(180deg, rgba(18, 63, 52, 0.72), rgba(14, 28, 32, 0.86));
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow:
+    0 24px 60px rgba(0, 0, 0, 0.45),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(30px) saturate(1.2);
+}
+
+.head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 2px 4px 10px;
+}
+
+.head__t {
+  color: rgba(234, 255, 246, 0.55);
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+}
+
+.gear {
+  width: 34px;
+  height: 34px;
+  border-radius: 999px;
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+  color: rgba(234, 255, 246, 0.7);
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+.gear.on {
+  background: rgba(111, 231, 195, 0.16);
+  border-color: rgba(111, 231, 195, 0.4);
+  color: #eafff6;
+}
+
+.hero {
+  display: flex;
+  align-items: center;
+  gap: 13px;
+  padding: 14px 18px 14px 14px;
+  border-radius: 18px;
+  background: hsla(157, 61%, 26%, 0.97);
+  box-shadow:
+    0 8px 22px rgba(0, 0, 0, 0.28),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.12);
+  transition: background 500ms ease;
+}
+
+.hero__mira {
+  width: 40px;
+  height: 40px;
+  border-radius: 11px;
+  overflow: hidden;
+  flex: 0 0 auto;
+}
+
+.hero__mira svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.hero__body {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.hero__line {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+}
+
+.hero__pct {
+  color: #f6f7f9;
+  font-size: 19px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+.hero__state {
+  color: rgba(246, 247, 249, 0.72);
+  font-size: 13px;
+}
+
+.hero__track {
+  height: 3px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.16);
+  overflow: hidden;
+}
+
+.hero__fill {
+  height: 100%;
+  width: 0%;
+  background: #6fe7c3;
+  border-radius: 999px;
+  transition: width 500ms ease;
+}
+
+.stats {
+  display: flex;
+  align-items: center;
+  margin: 16px 4px 14px;
+}
+
+.stat {
+  flex: 1;
+}
+
+.stat__n {
+  color: #eafff6;
+  font-size: 23px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+.stat__l {
+  color: rgba(234, 255, 246, 0.5);
+  font-size: 11px;
+  margin-top: 3px;
+}
+
+.stat__div {
+  width: 1px;
+  height: 34px;
+  background: rgba(255, 255, 255, 0.1);
+  margin: 0 14px;
+}
+
+.rows {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.row {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  width: 100%;
+  text-align: left;
+  cursor: pointer;
+  padding: 13px 14px;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  color: #eafff6;
+  font-family: inherit;
+}
+
+.row:hover {
+  background: rgba(255, 255, 255, 0.09);
+}
+
+.row--primary {
+  background: rgba(111, 231, 195, 0.16);
+  border-color: rgba(111, 231, 195, 0.42);
+}
+
+.row--primary:hover {
+  background: rgba(111, 231, 195, 0.24);
+}
+
+.dot {
+  width: 9px;
+  height: 9px;
+  border-radius: 999px;
+  flex: 0 0 auto;
+  background: #2e6b58;
+}
+
+.row__label {
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.row__sub {
+  margin-left: auto;
+  font-size: 12px;
+  color: rgba(234, 255, 246, 0.5);
+}
+
+.row--primary .row__sub {
+  color: rgba(234, 255, 246, 0.6);
+}
+
+.row__chev {
+  color: rgba(234, 255, 246, 0.4);
+  font-size: 16px;
+}
+
+.row__go {
+  width: 24px;
+  height: 24px;
+  border-radius: 999px;
+  background: #6fe7c3;
+  display: grid;
+  place-items: center;
+}
+
+.settings {
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.settings__t {
+  color: rgba(234, 255, 246, 0.55);
+  font-size: 12px;
+  margin-bottom: 8px;
+}
+
+.segs {
+  display: flex;
+  gap: 8px;
+}
+
+.seg {
+  flex: 1;
+  text-align: center;
+  padding: 9px 0;
+  border-radius: 11px;
+  font-size: 13px;
+  cursor: pointer;
+  color: rgba(234, 255, 246, 0.75);
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.seg.on {
+  background: rgba(111, 231, 195, 0.18);
+  border-color: rgba(111, 231, 195, 0.5);
+  color: #eafff6;
+  font-weight: 600;
+}

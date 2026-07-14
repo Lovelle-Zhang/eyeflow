@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta
+      http-equiv="Content-Security-Policy"
+      content="default-src 'self'; script-src 'self'; style-src 'self'"
+    />
+    <title>EyeFlow Next</title>
+    <link rel="stylesheet" href="panel.css" />
+  </head>
+  <body>
+    <main class="panel" id="panel">
+      <div class="head">
+        <span class="head__t">今天</span>
+        <button class="gear" id="gear" aria-label="设置">
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.6">
+            <circle cx="12" cy="12" r="3.2" />
+            <path d="M12 2.5v2.2M12 19.3v2.2M4.2 4.2l1.6 1.6M18.2 18.2l1.6 1.6M2.5 12h2.2M19.3 12h2.2M4.2 19.8l1.6-1.6M18.2 5.8l1.6-1.6" />
+          </svg>
+        </button>
+      </div>
+
+      <div class="hero" id="hero">
+        <div class="hero__mira" id="mira"></div>
+        <div class="hero__body">
+          <div class="hero__line">
+            <span class="hero__pct" id="pct">精力 —</span>
+            <span class="hero__state" id="state"></span>
+          </div>
+          <div class="hero__track"><div class="hero__fill" id="fill"></div></div>
+        </div>
+      </div>
+
+      <div class="stats">
+        <div class="stat"><div class="stat__n" id="eyeuse">—</div><div class="stat__l">今日用眼</div></div>
+        <div class="stat__div"></div>
+        <div class="stat"><div class="stat__n" id="rests">—</div><div class="stat__l" id="rests-label">歇息</div></div>
+      </div>
+
+      <div class="rows">
+        <button class="row row--primary" id="act-short">
+          <span class="row__label">现在歇一下</span>
+          <span class="row__sub">短歇 · 20 秒</span>
+          <span class="row__go"><svg viewBox="0 0 24 24" width="13" height="13" fill="#0E1C20"><path d="M8 5v14l11-7z" /></svg></span>
+        </button>
+        <button class="row" id="act-nap">
+          <span class="dot"></span>
+          <span class="row__label">小睡一会儿</span>
+          <span class="row__sub" id="nap-sub">完整 · 3 分钟</span>
+          <span class="row__chev">›</span>
+        </button>
+      </div>
+
+      <div class="settings" id="settings" hidden>
+        <div class="settings__t">完整休息时长</div>
+        <div class="segs" id="segs"></div>
+      </div>
+    </main>
+    <script src="panel.js"></script>
+  </body>
+</html>
