@@ -14,12 +14,15 @@ const { step, initialState, DEFAULT_PARAMS } = require('../../engine/energy');
 /**
  * @param {{ getIdleSec: () => number, params?: object, onUpdate?: (u:{energy:number,events:string[]}) => void }} opts
  */
-function createEnergyDriver({ getIdleSec, params = DEFAULT_PARAMS, onUpdate } = {}) {
+function createEnergyDriver({ getIdleSec, params = DEFAULT_PARAMS, onUpdate, resume } = {}) {
   if (typeof getIdleSec !== 'function') {
     throw new Error('createEnergyDriver: getIdleSec function is required');
   }
 
-  let state = initialState(params);
+  // Resume a persisted state (#2), else start fresh at full.
+  let state = resume
+    ? { energy: resume.energy, l1Armed: resume.l1Armed, l2Armed: resume.l2Armed }
+    : initialState(params);
 
   function publish(events) {
     if (onUpdate) {

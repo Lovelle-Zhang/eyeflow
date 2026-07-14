@@ -19,6 +19,16 @@ test('starts at full energy', () => {
   assert.equal(d.state.energy, 100);
 });
 
+test('resumes from a provided state instead of full (#2)', () => {
+  const d = createEnergyDriver({
+    getIdleSec: () => 0,
+    resume: { energy: 42, l1Armed: false, l2Armed: true },
+  });
+  assert.equal(d.state.energy, 42);
+  assert.equal(d.state.l1Armed, false);
+  assert.equal(d.state.l2Armed, true);
+});
+
 test('tick reads the injected idle source and discharges when active', () => {
   const updates = [];
   const d = createEnergyDriver({ getIdleSec: () => 0, onUpdate: (u) => updates.push(u) });

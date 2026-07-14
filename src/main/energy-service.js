@@ -7,13 +7,14 @@
  * the menubar wires the UI. Pure engine/view/records functions stay separate.
  */
 
-const { powerMonitor } = require('electron');
 const { DEFAULT_PARAMS } = require('../engine/energy');
 const { createEnergyDriver } = require('./driver/energy-driver');
+const { startEnergyLoop } = require('./energy-loop');
 const { getIdleSec } = require('./driver/system-idle');
 const { createReminderController } = require('./reminder-controller');
 const { createNapController } = require('./nap-controller');
 const { createRecordsStore } = require('./records-store');
+const { createEnergyStore } = require('./energy-store');
 const { energyToColor, energyStateLabel } = require('../view/capsule/energy-color');
 const { dayKey, recordTick, recordRest, formatEyeUse } = require('../records/today');
 const { DEFAULT_NAP_MS } = require('../view/nap/nap');
@@ -21,6 +22,8 @@ const { DEFAULT_NAP_MS } = require('../view/nap/nap');
 function startEnergyService({ intervalMs = 1000, napMs: initialNapMs = DEFAULT_NAP_MS, persistNapMs } = {}) {
   const store = createRecordsStore();
   let record = store.load(); // resume today, or start fresh (§7)
+  const energyStore = createEnergyStore();
+  const savedEnergy = energyStore.load(); // resume energy across restart (#2)
   let napMs = initialNapMs;
   const subscribers = new Set();
 
@@ -36,6 +39,9 @@ function startEnergyService({ intervalMs = 1000, napMs: initialNapMs = DEFAULT_N
   let controller;
   const driver = createEnergyDriver({
     getIdleSec,
+    resume: savedEnergy
+      ? { energy: savedEnergy.energy, l1Armed: savedEnergy.l1Armed, l2Armed: savedEnergy.l2Armed }
+      : undefined,
     onUpdate: ({ energy, events }) => {
       if (controller) {
         if (events.includes('remind_nap')) controller.trigger({ level: 'nap' });
@@ -56,6 +62,11 @@ function startEnergyService({ intervalMs = 1000, napMs: initialNapMs = DEFAULT_N
     },
   });
 
+  // Offline resume (#2): credit the time the app was closed as away → recharge.
+  if (savedEnergy) {
+    driver.applyAway(Date.now() - savedEnergy.savedAt);
+  }
+
   function payload() {
     const energy = driver.state.energy;
     return {
@@ -74,35 +85,20 @@ function startEnergyService({ intervalMs = 1000, napMs: initialNapMs = DEFAULT_N
     for (const fn of subscribers) fn(p);
   }
 
-  let last = process.hrtime.bigint();
-  const timer = setInterval(() => {
-    const now = process.hrtime.bigint();
-    // Clamp: a single tick never advances more than maxTickMs. Any bigger gap
-    // (sleep / throttle / stall) is not continuous screen use (#1).
-    const dtMs = Math.min(Number(now - last) / 1e6, DEFAULT_PARAMS.maxTickMs);
-    last = now;
-    const active = getIdleSec() < DEFAULT_PARAMS.idleGraceSec;
-    record = recordTick(record, { dtMs, active, dateKey: dayKey(new Date()) });
-    store.save(record);
-    driver.tick(dtMs); // → onUpdate → push (record already updated)
-  }, intervalMs);
-
-  // System sleep: timers freeze, so the gap is credited precisely on wake as
-  // away time (= rest → recharge), and the tick clock is reset (#1).
-  let suspendedAt = null;
-  const onSuspend = () => {
-    suspendedAt = Date.now();
-  };
-  const onResume = () => {
-    if (suspendedAt != null) {
-      driver.applyAway(Date.now() - suspendedAt); // slept = away → recharge (clamps at full)
-      suspendedAt = null;
-    }
-    last = process.hrtime.bigint();
-    push();
-  };
-  powerMonitor.on('suspend', onSuspend);
-  powerMonitor.on('resume', onResume);
+  const loop = startEnergyLoop({
+    intervalMs,
+    onTick: (dtMs) => {
+      const active = getIdleSec() < DEFAULT_PARAMS.idleGraceSec;
+      record = recordTick(record, { dtMs, active, dateKey: dayKey(new Date()) });
+      store.save(record);
+      driver.tick(dtMs); // → onUpdate → push (record already updated)
+      energyStore.save(driver.state); // persist energy for restart resume (#2)
+    },
+    onAway: (ms) => {
+      driver.applyAway(ms); // slept = away → recharge (#1)
+      push();
+    },
+  });
 
   return {
     subscribe(fn) {
@@ -133,12 +129,14 @@ function startEnergyService({ intervalMs = 1000, napMs: initialNapMs = DEFAULT_N
     },
     flush() {
       store.flush();
+      energyStore.save(driver.state);
+      energyStore.flush();
     },
     destroy() {
-      clearInterval(timer);
-      powerMonitor.removeListener('suspend', onSuspend);
-      powerMonitor.removeListener('resume', onResume);
+      loop.stop();
       store.flush();
+      energyStore.save(driver.state);
+      energyStore.flush();
       controller.destroy();
       napController.destroy();
     },
