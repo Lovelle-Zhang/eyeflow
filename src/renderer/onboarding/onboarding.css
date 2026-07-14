@@ -1,24 +1,24 @@
-/* Onboarding 相遇仪式 (CHARTER §7): an INDEPENDENT, CENTERED welcome scene — a
-   frosted glass card floating centered (NOT fullscreen; that's the §6.3 nap).
-   Borrowed glass / pill language from the references, in the locked H157 palette. */
+/* Onboarding 相遇仪式 (CHARTER §7): an INDEPENDENT, CENTERED welcome scene. The
+   §3 energy capsule is the luminous hero (not an app-icon tile); light + warmth
+   + hierarchy carry it. Tokens (dark/light) live in ../shared/theme.css. */
 
 * {
   box-sizing: border-box;
+  margin: 0;
 }
 
 html,
 body {
-  margin: 0;
   height: 100%;
   overflow: hidden;
-  background: transparent; /* card floats over the desktop */
+  background: transparent;
 }
 
 body {
   font-family:
     -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial,
     sans-serif;
-  color: #f2fff9;
+  color: var(--text);
 }
 
 .ob {
@@ -26,29 +26,27 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 24px;
+  padding: 20px;
 }
 
-/* The frosted glass card (§7 welcome scene). */
+/* The welcome scene as a rounded, centered tile (bounded → not fullscreen). */
 .ob__card {
   width: 100%;
-  max-width: 440px;
-  padding: 44px 36px;
-  border-radius: 30px;
+  max-width: 520px;
+  height: 100%;
+  max-height: 640px;
+  border-radius: 36px;
+  background: var(--scene-bg);
+  box-shadow: var(--card-shadow);
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 22px;
+  justify-content: center;
+  gap: 46px;
+  padding: 48px;
   text-align: center;
-  background: linear-gradient(160deg, rgba(34, 96, 78, 0.5), rgba(14, 28, 32, 0.62));
-  border: 1px solid rgba(255, 255, 255, 0.16);
-  box-shadow:
-    0 34px 90px rgba(0, 0, 0, 0.45),
-    inset 0 1px 0 rgba(255, 255, 255, 0.2);
-  backdrop-filter: blur(42px) saturate(1.35);
-  -webkit-backdrop-filter: blur(42px) saturate(1.35);
   opacity: 0;
-  transform: scale(0.96);
+  transform: scale(0.97);
   transition:
     opacity 600ms ease,
     transform 600ms cubic-bezier(0.22, 1, 0.36, 1);
@@ -59,35 +57,77 @@ body {
   transform: scale(1);
 }
 
-.ob__mira {
-  width: 132px;
+/* Luminous energy capsule (§3) — the hero. */
+.miracap {
+  width: 300px;
   height: 132px;
+  border-radius: 66px;
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  padding: 0 26px 0 20px;
+  background: var(--cap-body);
+  box-shadow: var(--cap-glow), var(--cap-depth);
   transition:
     transform 700ms cubic-bezier(0.22, 1, 0.36, 1),
     opacity 700ms ease,
     filter 800ms ease;
 }
 
-.ob__mira svg {
-  display: block;
-  width: 100%;
-  height: 100%;
+.miracap__lens {
+  width: 112px;
+  height: 62px;
+  border-radius: 31px;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 20px;
+  background: var(--lens-bg);
+  box-shadow: var(--lens-inset);
 }
 
-.ob__mira.breathe {
-  animation: ob-breathe 5s ease-in-out infinite;
+.miracap__eye {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: var(--eye);
+  box-shadow: var(--eye-glow);
+  transition:
+    height 180ms ease,
+    border-radius 180ms ease;
 }
 
-.ob__mira.bright {
-  filter: brightness(1.12) saturate(1.08);
+.miracap.closed .miracap__eye {
+  height: 4px;
+  border-radius: 2px;
 }
 
-.ob__mira.leave {
-  transform: translateY(-52vh) scale(0.12);
+.miracap__dot {
+  position: absolute;
+  top: -7px;
+  right: -12px;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: var(--dot);
+  box-shadow: var(--dot-glow);
+}
+
+.miracap.breathe {
+  animation: mira-breathe 5s ease-in-out infinite;
+}
+
+.miracap.bright {
+  filter: brightness(1.12) saturate(1.06);
+}
+
+.miracap.leave {
+  transform: translateY(-54vh) scale(0.12);
   opacity: 0;
 }
 
-@keyframes ob-breathe {
+@keyframes mira-breathe {
   0%,
   100% {
     transform: scale(1);
@@ -98,20 +138,18 @@ body {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .ob__mira.breathe {
+  .miracap.breathe {
     animation: none;
   }
 }
 
 .ob__msg {
-  margin: 0;
-  min-height: 1.5em;
   max-width: 20ch;
-  font-size: 23px;
+  font-size: 30px;
   font-weight: 500;
-  line-height: 1.45;
-  letter-spacing: 0.01em;
-  color: #f2fff9;
+  line-height: 1.4;
+  letter-spacing: 0.02em;
+  color: var(--text);
   opacity: 0;
   transition: opacity 600ms ease;
 }
@@ -121,15 +159,15 @@ body {
 }
 
 .ob__msg.brand {
-  font-size: 25px;
+  font-size: 26px;
   font-weight: 600;
 }
 
 .ob__track {
-  width: min(280px, 70%);
+  width: min(240px, 70%);
   height: 3px;
   border-radius: 999px;
-  background: rgba(255, 255, 255, 0.16);
+  background: var(--hairline);
   overflow: hidden;
 }
 
@@ -137,7 +175,7 @@ body {
   height: 100%;
   width: 100%;
   border-radius: 999px;
-  background: #6fe7c3;
+  background: var(--mint);
 }
 
 .ob__controls {
@@ -153,7 +191,7 @@ body {
   font-size: 15px;
   font-weight: 600;
   color: #0e1c20;
-  background: #6fe7c3;
+  background: var(--mint);
   border: none;
   border-radius: 999px;
   padding: 12px 28px;
@@ -172,9 +210,9 @@ body {
 .ob__seg {
   font: inherit;
   font-size: 14px;
-  color: rgba(242, 255, 249, 0.82);
-  background: rgba(255, 255, 255, 0.08);
-  border: 1px solid rgba(255, 255, 255, 0.16);
+  color: var(--text-soft);
+  background: var(--seg-bg);
+  border: 1px solid var(--seg-border);
   border-radius: 12px;
   padding: 10px 16px;
   cursor: pointer;
@@ -183,6 +221,6 @@ body {
 .ob__seg.on {
   background: rgba(111, 231, 195, 0.22);
   border-color: rgba(111, 231, 195, 0.6);
-  color: #f2fff9;
+  color: var(--text);
   font-weight: 600;
 }

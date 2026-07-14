@@ -1,25 +1,23 @@
 'use strict';
 
 // The scripted 相遇仪式 (CHARTER §7): 登场 → 自我介绍 → 第一个短歇 loop → 引出小睡
-// + 选时长 → 收场. Copy follows MIRA_LANGUAGE §四 (draft; final字句 at prototype).
+// + 选时长 → 收场. The luminous §3 capsule is the hero (CSS, so it can glow /
+// breathe / blink). Copy per MIRA_LANGUAGE §四 (draft; final字句 at prototype).
 
 const api = window.onboarding || {};
 const el = (id) => document.getElementById(id);
 const card = el('card');
-const mira = el('mira');
+const capsule = el('miracap');
 const msg = el('msg');
 const track = el('track');
 const fill = el('fill');
 const controls = el('controls');
 
-let assets = null;
+let napOptions = [];
 let chosenNapMs = 180000;
 
 const delay = (ms) => new Promise((r) => setTimeout(r, ms));
-
-function setEyes(state) {
-  if (assets) mira.innerHTML = state === 'closed' ? assets.miraClosed : assets.miraOpen;
-}
+const setEyes = (state) => capsule.classList.toggle('closed', state === 'closed');
 
 function say(text) {
   msg.classList.remove('in');
@@ -52,7 +50,7 @@ function pickDuration() {
     controls.innerHTML = '';
     const segs = document.createElement('div');
     segs.className = 'ob__segs';
-    for (const o of assets.napOptions) {
+    for (const o of napOptions) {
       const s = document.createElement('button');
       s.className = `ob__seg${o.ms === chosenNapMs ? ' on' : ''}`;
       s.textContent = o.label;
@@ -86,8 +84,7 @@ async function shortLoop(ms) {
 }
 
 async function run() {
-  mira.classList.add('breathe');
-  setEyes('open');
+  capsule.classList.add('breathe');
   await delay(800);
 
   // 登场 + 自我介绍
@@ -102,10 +99,10 @@ async function run() {
   say('看看远处吧。');
   await shortLoop(20000);
   setEyes('open');
-  mira.classList.add('bright');
+  capsule.classList.add('bright');
   say('这样就好。是不是清楚了一点？');
   await delay(2800);
-  mira.classList.remove('bright');
+  capsule.classList.remove('bright');
 
   // 引出小睡 + 选时长
   await line('刚才那个，是短歇——像眨一次长眼，随时来一下。', 2800);
@@ -120,17 +117,16 @@ async function run() {
   msg.classList.add('brand');
   say('守护你看清世界的方式。');
   await delay(2800);
-  mira.classList.add('leave'); // capsule rises toward the menubar
-  card.classList.remove('in'); // card fades away
+  capsule.classList.add('leave'); // 缩进菜单栏
+  card.classList.remove('in');
   await delay(700);
   api.done(chosenNapMs);
 }
 
 api.onInit?.((payload) => {
-  assets = payload;
+  napOptions = payload.napOptions || [];
   chosenNapMs = payload.defaultNapMs;
-  setEyes('open');
-  requestAnimationFrame(() => card.classList.add('in')); // card fades in
+  requestAnimationFrame(() => card.classList.add('in'));
   run();
 });
 

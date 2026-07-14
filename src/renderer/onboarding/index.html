@@ -7,12 +7,19 @@
       content="default-src 'self'; script-src 'self'; style-src 'self'"
     />
     <title>EyeFlow Next</title>
+    <link rel="stylesheet" href="../shared/theme.css" />
     <link rel="stylesheet" href="onboarding.css" />
   </head>
   <body>
     <main class="ob">
       <div id="card" class="ob__card">
-        <div id="mira" class="ob__mira"></div>
+        <div id="miracap" class="miracap">
+          <div class="miracap__lens">
+            <span class="miracap__eye"></span>
+            <span class="miracap__eye"></span>
+            <span class="miracap__dot"></span>
+          </div>
+        </div>
         <p id="msg" class="ob__msg"></p>
         <div id="track" class="ob__track" hidden><div id="fill" class="ob__fill"></div></div>
         <div id="controls" class="ob__controls"></div>
