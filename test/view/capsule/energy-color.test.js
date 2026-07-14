@@ -7,7 +7,7 @@
 const { test } = require('node:test');
 const assert = require('node:assert/strict');
 
-const { energyToColor } = require('../../../src/view/capsule/energy-color');
+const { energyToColor, energyStateLabel } = require('../../../src/view/capsule/energy-color');
 
 // §8.3 anchor table: energy → { s, l, a }, hue always 157.
 const ANCHORS = [
@@ -64,4 +64,13 @@ test('as energy falls: saturation drops, lightness rises, alpha drops (§8.3 pat
 
 test('emits a directly usable CSS hsla() string', () => {
   assert.equal(energyToColor(100).css, 'hsla(157, 61%, 26%, 0.97)');
+});
+
+test('energyStateLabel maps energy to the §8.3 state words', () => {
+  assert.equal(energyStateLabel(100), '神采奕奕');
+  assert.equal(energyStateLabel(90), '神采奕奕');
+  assert.equal(energyStateLabel(62), '常态');
+  assert.equal(energyStateLabel(40), '有点淡了');
+  assert.equal(energyStateLabel(15), '蔫了');
+  assert.equal(energyStateLabel(0), '蔫了');
 });

@@ -69,4 +69,23 @@ function energyToColor(energy) {
   return { h: HUE, s, l, a, css };
 }
 
-module.exports = { energyToColor };
+// §8.3 state words, banded at the midpoints between the color anchors.
+const STATE_BANDS = [
+  { min: 83, label: '神采奕奕' },
+  { min: 53, label: '常态' },
+  { min: 28, label: '有点淡了' },
+  { min: 0, label: '蔫了' },
+];
+
+/**
+ * The 气色 state word for an energy level (§8.3) — the "one word" shown on the
+ * panel capsule. Pure, hue-independent labeling.
+ * @param {number} energy 0–100
+ * @returns {string}
+ */
+function energyStateLabel(energy) {
+  const band = STATE_BANDS.find((b) => energy >= b.min) || STATE_BANDS[STATE_BANDS.length - 1];
+  return band.label;
+}
+
+module.exports = { energyToColor, energyStateLabel };
