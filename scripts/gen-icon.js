@@ -20,16 +20,21 @@ const PNG = path.join(BUILD, 'icon-1024.png');
 const ICONSET = path.join(BUILD, 'Mira.iconset');
 const ICNS = path.join(BUILD, 'icon.icns');
 
+// Render at a size that always fits inside the display work area (a 1024px
+// window gets clamped shorter than the screen, clipping the SVG's bottom). We
+// capture a smaller square, then sips normalizes it to the true 1024 master.
+const RENDER = 700;
+
 app.whenReady().then(async () => {
   fs.mkdirSync(BUILD, { recursive: true });
   fs.writeFileSync(
     HTML,
-    `<!doctype html><meta charset="utf-8"><style>html,body{margin:0}svg{display:block;width:1024px;height:1024px}</style>${miraSvg({ variant: 'full', eyes: 'open' })}`,
+    `<!doctype html><meta charset="utf-8"><style>html,body{margin:0}svg{display:block;width:${RENDER}px;height:${RENDER}px}</style>${miraSvg({ variant: 'full', eyes: 'open' })}`,
   );
 
   const win = new BrowserWindow({
-    width: 1024,
-    height: 1024,
+    width: RENDER,
+    height: RENDER,
     show: false,
     frame: false,
     transparent: true,
@@ -40,6 +45,8 @@ app.whenReady().then(async () => {
   await win.loadFile(HTML);
   await new Promise((r) => setTimeout(r, 400));
   fs.writeFileSync(PNG, (await win.webContents.capturePage()).toPNG());
+  // Normalize to an exact 1024 square master (the capture is 2× on retina).
+  execFileSync('sips', ['-z', '1024', '1024', PNG, '--out', PNG]);
 
   fs.rmSync(ICONSET, { recursive: true, force: true });
   fs.mkdirSync(ICONSET);

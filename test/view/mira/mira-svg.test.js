@@ -25,12 +25,13 @@ test('full variant: dark lens (§8.5 geometry) + a glowing pulse core, no eyes',
   assert.doesNotMatch(svg, /cx="644"\s+cy="468"/);
 });
 
-test('full variant: glossy mint plate gradient + canvas-margin transform', () => {
+test('full variant: glossy mint plate gradient + macOS 824/100 icon-grid transform', () => {
   const svg = miraSvg({ variant: 'full' });
   assert.match(svg, /#EAFFF6/i);
   assert.match(svg, /#BDEAFF/i);
   assert.match(svg, /#F3EEC7/i);
-  assert.match(svg, /translate\(82[ ,]+82\)\s*scale\(0\.84\)/);
+  // 824×824 body centered on 1024 → 100px margin (scale 824/1024), the HIG grid.
+  assert.match(svg, /translate\(100[ ,]+100\)\s*scale\(0\.8046875\)/);
 });
 
 test('the pulse core light uses the mint pulse colors', () => {

@@ -44,9 +44,12 @@ function fullVariant() {
     '</radialGradient>' +
     '</defs>';
 
+  // macOS Big Sur+ icon grid: the body sits in an 824×824 region centered on the
+  // 1024 canvas → 100px transparent margin all around (scale 824/1024). rx 230
+  // scales to ~185px, matching the system squircle's continuous corner.
   const body =
-    `<g transform="translate(82 82) scale(0.84)">` +
-    `<rect x="0" y="0" width="${CANVAS}" height="${CANVAS}" rx="216" fill="url(#miraBg)"/>` +
+    `<g transform="translate(100 100) scale(0.8046875)">` +
+    `<rect x="0" y="0" width="${CANVAS}" height="${CANVAS}" rx="230" fill="url(#miraBg)"/>` +
     `<rect x="${LENS.x}" y="${LENS.y}" width="${LENS.w}" height="${LENS.h}" rx="${LENS.rx}" ` +
     `fill="url(#miraLens)" stroke="${C.stroke}" stroke-width="31" stroke-opacity="0.18"/>` +
     `<circle cx="${CORE.cx}" cy="${CORE.cy}" r="${CORE.r}" fill="url(#miraPulse)"/>` +
