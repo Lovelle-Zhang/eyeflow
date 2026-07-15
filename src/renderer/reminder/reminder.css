@@ -12,8 +12,8 @@ body {
   background: transparent;
   overflow: hidden;
   font-family:
-    -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial,
-    sans-serif;
+    -apple-system, "SF Pro Display", "PingFang SC", BlinkMacSystemFont,
+    "Segoe UI", sans-serif;
 }
 
 .stage {
@@ -26,6 +26,8 @@ body {
 }
 
 .rem {
+  position: relative;
+  overflow: hidden;
   display: flex;
   align-items: center;
   gap: 13px;
@@ -44,6 +46,24 @@ body {
 .rem.in {
   transform: translateY(0);
   opacity: 1;
+}
+
+/* layered green (top-left highlight + deep corner) so the 岛 matches the
+   onboarding capsule instead of reading flat. Keeps the live 气色 underneath. */
+.rem::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background:
+    radial-gradient(120% 150% at 20% -10%, rgba(190, 245, 220, 0.3) 0%, transparent 52%),
+    radial-gradient(120% 140% at 95% 130%, rgba(0, 0, 0, 0.24) 0%, transparent 55%);
+  pointer-events: none;
+}
+
+.rem > * {
+  position: relative;
+  z-index: 1;
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -67,9 +87,9 @@ body {
 
 .rem__text {
   font-size: 16px;
-  font-weight: 600;
-  line-height: 1.2;
-  letter-spacing: 0.01em;
+  font-weight: 500;
+  line-height: 1.25;
+  letter-spacing: 0;
   color: #f6f7f9;
 }
 
