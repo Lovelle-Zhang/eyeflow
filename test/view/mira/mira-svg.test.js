@@ -15,10 +15,10 @@ test('returns an SVG on the locked 1024 canvas base', () => {
   assert.match(svg, /<\/svg>\s*$/);
 });
 
-test('full variant: dark lens (§8.5 geometry) + a glowing pulse core, no eyes', () => {
+test('full variant: small dark lens + a crisp point of light, no eyes', () => {
   const svg = miraSvg({ variant: 'full' });
-  assert.match(svg, /x="177"\s+y="335"\s+width="671"\s+height="318"\s+rx="159"/); // lens
-  assert.match(svg, /radialGradient/i); // the pulse glow
+  assert.match(svg, /x="265"\s+y="335"\s+width="494"\s+height="318"\s+rx="159"/); // lens
+  assert.match(svg, /radialGradient/i); // the pulse
   assert.match(svg, /cx="512"\s+cy="494"/); // core centered in the lens
   // no two-eye pair from the retired face
   assert.doesNotMatch(svg, /cx="380"\s+cy="468"/);

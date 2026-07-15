@@ -2,8 +2,8 @@
 
 /**
  * Menubar tray icon (CHARTER §4 / §8.5): the small Mira as a monochrome
- * template glyph — dark capsule face + two eye holes + the top-right dot. Drawn
- * as a PNG in pure Node (node:zlib), so no rasterizer dependency and the pixel
+ * template glyph — a small dark lens with one central light core knocked out.
+ * Drawn as a PNG in pure Node (node:zlib), so no rasterizer dependency and the pixel
  * generation is unit-testable. Rendered at high res and downscaled by macOS for
  * crisp edges; setTemplateImage lets it adapt to light/dark menubars.
  */
@@ -57,9 +57,9 @@ const inCircle = (px, py, cx, cy, r) => (px - cx) ** 2 + (py - cy) ** 2 <= r * r
 /** The Pulse silhouette: a capsule with one central light core (§ MIRA_SYSTEM). */
 function miraTrayPng() {
   const { width: W, height: H } = TRAY_CANVAS;
-  const cap = { x1: 0.13 * W, y1: 0.24 * H, x2: 0.87 * W, y2: 0.76 * H }; // centered pill
+  const cap = { x1: 0.27 * W, y1: 0.2 * H, x2: 0.73 * W, y2: 0.8 * H }; // small centered lens (~1.55, matches the icon)
   const rad = (cap.y2 - cap.y1) / 2;
-  const core = { x: 0.5 * W, y: 0.5 * H, r: 0.115 * W }; // the pulse — knocked out as light
+  const core = { x: 0.5 * W, y: 0.5 * H, r: 0.083 * W }; // the pulse — a light core knocked out
 
   const sampler = (x, y) => {
     const px = x + 0.5;
