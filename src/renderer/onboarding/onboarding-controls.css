@@ -1,0 +1,83 @@
+/* Onboarding — interactive controls (split from onboarding.css for the §9 line
+   budget): the short-break progress bar, the buttons, and the nap-duration
+   segments. The stage / copy styles live in onboarding.css.
+   All controls share one frosted-glass language (半透明白 + pill + 白字);
+   中文按钮不加西文字距 (letter-spacing: 0). */
+
+.ob__track {
+  width: min(240px, 60%);
+  height: 3px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.22);
+  overflow: hidden;
+}
+
+.ob__fill {
+  height: 100%;
+  width: 100%;
+  border-radius: 999px;
+  background: #6fe7c3;
+}
+
+/* pinned to the bottom so the count of buttons never shifts Mira + the copy —
+   the台词 stays vertically centered no matter how many controls show */
+.ob__controls {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 9%;
+  min-height: 44px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+}
+
+.ob__btn {
+  font: inherit;
+  font-size: 15px;
+  font-weight: 500;
+  letter-spacing: 0;
+  color: #f2fff9;
+  background: rgba(255, 255, 255, 0.16);
+  border: 1px solid rgba(255, 255, 255, 0.28);
+  border-radius: 999px;
+  padding: 13px 34px;
+  cursor: pointer;
+  transition: background 160ms ease;
+}
+
+.ob__btn:hover {
+  background: rgba(255, 255, 255, 0.24);
+}
+
+.ob__segs {
+  display: flex;
+  gap: 8px;
+}
+
+.ob__seg {
+  font: inherit;
+  font-size: 14px;
+  letter-spacing: 0;
+  color: rgba(242, 255, 249, 0.8);
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-radius: 999px;
+  padding: 10px 20px;
+  cursor: pointer;
+  transition:
+    background 160ms ease,
+    border-color 160ms ease;
+}
+
+.ob__seg:hover {
+  background: rgba(255, 255, 255, 0.14);
+}
+
+.ob__seg.on {
+  background: rgba(255, 255, 255, 0.22);
+  border-color: rgba(255, 255, 255, 0.4);
+  color: #ffffff;
+  font-weight: 500;
+}

@@ -1,0 +1,54 @@
+/* Onboarding — motion & state (split from onboarding.css for the §9 budget):
+   the short-break charge overlay, the closing lockup, and Mira's transitions.
+   Static look + copy live in onboarding.css. This is the home for breathing. */
+
+/* --dim: opacity of the tired overlay, registered so it can ANIMATE. The demo
+   eases it 1→0 (tired→vivid); CSS can't transition a gradient, so we cross-fade
+   a dark layer over the vivid page instead. */
+@property --dim {
+  syntax: "<number>";
+  inherits: true;
+  initial-value: 0;
+}
+
+/* the tired 气色 layer — cross-fades out as the short break recharges */
+.ob__page::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  border-radius: inherit;
+  background: linear-gradient(150deg, #61776b 0%, #46564c 46%, #313b34 100%);
+  opacity: var(--dim);
+  pointer-events: none;
+}
+
+/* Mira + copy + controls sit above the charge overlay */
+.ob__page > * {
+  position: relative;
+  z-index: 1;
+}
+
+/* Mira eases when she resizes into the closing lockup */
+.ob .mira {
+  transition:
+    width 700ms cubic-bezier(0.22, 1, 0.36, 1),
+    height 700ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/* closing lockup: Mira shrinks to a mark and settles onto the wordmark */
+.ob__page.is-ending {
+  gap: 18px;
+}
+
+.ob__page.is-ending .mira {
+  --mf: 46px;
+}
+
+.mira.is-leaving {
+  transform: translateY(-42vh) scale(0.14);
+  opacity: 0;
+  transition:
+    transform 700ms cubic-bezier(0.22, 1, 0.36, 1),
+    opacity 700ms ease;
+}

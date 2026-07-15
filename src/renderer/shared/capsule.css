@@ -11,6 +11,15 @@
   transition: background 500ms ease;
 }
 
+/* --energy registered so it can smoothly ANIMATE (the onboarding short-break
+   demo eases 气色 tired→vivid over 20s). Elsewhere it's set discretely and only
+   the pulse's own opacity/width transitions apply — no behavior change. */
+@property --energy {
+  syntax: "<number>";
+  inherits: true;
+  initial-value: 1;
+}
+
 /* ---- Mira: The Pulse (dark lens + breathing light core) ---- */
 .mira {
   --mf: 44px; /* lens height; everything scales from it */

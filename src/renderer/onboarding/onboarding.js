@@ -17,16 +17,11 @@ let napOptions = [];
 let chosenNapMs = 180000;
 
 const delay = (ms) => new Promise((r) => setTimeout(r, ms));
-const setEyes = (state) => face.classList.toggle('is-blink', state === 'closed');
-
-// The page doubles as a charge meter for the demo (§7): tired 气色 → vivid.
-const PAGE_VIVID = 'linear-gradient(150deg, #3aa77f 0%, #1a6b52 46%, #0c3225 100%)';
-const PAGE_TIRED = 'linear-gradient(150deg, #61776b 0%, #46564c 46%, #313b34 100%)';
 
 function say(text) {
   msg.classList.remove('in');
   void msg.offsetWidth; // reflow → fade the new line in
-  msg.textContent = text;
+  msg.innerHTML = text; // 收尾品牌定格要富文本;文案皆为硬编码字符串,无注入风险
   msg.classList.add('in');
 }
 
@@ -91,42 +86,46 @@ async function run() {
   await delay(800);
 
   // 登场 + 自我介绍
-  await line('你好，我是 Mira。');
-  await line('我住在你的屏幕角落，不打扰你。');
-  await line('你看屏幕太久时，我会提醒你——歇一下，看看远处。');
-  say('现在，我们先一起试一次。');
+  await line('你好，我是 Mira');
+  await line('我住在你的屏幕角落，不打扰你');
+  await line('你看屏幕太久时，我会提醒你——歇一下，看看远处');
+  say('现在，我们先一起试一次');
   await button('好，来试试');
 
-  // 第一个短歇 loop —— 整页当充电条:气色先淡下去,休息时一点点亮回来
+  // 第一个短歇 loop —— 页面暗层(--dim)与 Mira 光核(--energy)一起 dim→bright。
+  // 渐变背景不能 CSS 过渡,所以用可淡出的暗层:交接时仍是暗的,休息里渐亮。演示压到
+  // 10s(比真实短歇短)——恢复过程更明显;真实短歇仍走引擎的 20 秒。
   face.classList.add('is-rest');
-  card.style.transition = 'background 1200ms ease';
-  card.style.background = PAGE_TIRED;
-  say('看屏幕久了，气色会一点点淡下去。');
+  card.style.transition = '--dim 1200ms ease';
+  card.style.setProperty('--dim', '1');
+  face.style.transition = '--energy 1200ms ease';
+  face.style.setProperty('--energy', '0.15');
+  say('看屏幕久了，气色会一点点淡下去');
   await delay(2600);
-  say('那就歇一下——看看远处，看着它亮回来。');
-  card.style.transition = 'background 20000ms linear';
-  card.style.background = PAGE_VIVID;
-  await shortLoop(20000);
-  card.style.transition = ''; // back to the page's default transition
-  face.classList.remove('is-rest');
-  face.classList.add('is-bright');
-  say('这样就好。是不是清楚了一点？');
+  say('那就歇一下——看看远处，等着它亮回来');
+  card.style.transition = '--dim 10000ms linear';
+  card.style.setProperty('--dim', '0');
+  face.style.transition = '--energy 10000ms linear';
+  face.style.setProperty('--energy', '1');
+  await shortLoop(10000);
+  card.style.transition = '';
+  face.style.transition = '';
+  face.classList.remove('is-rest'); // 回到明亮呼吸态,不再放大跳一下
+  say('这样就好，是不是清楚了一点');
   await delay(2800);
-  face.classList.remove('is-bright');
 
-  // 引出小睡 + 选时长
-  await line('刚才那个，是短歇——像眨一次长眼，随时来一下。', 2800);
-  setEyes('closed');
-  await line('累得深了，还可以小睡一会儿——闭眼久一点，歇得更透。', 3000);
-  setEyes('open');
-  say('小睡多久，你自己定。');
+  // 引出小睡 + 选时长 —— Mira 保持呼吸,只靠台词讲解,不再切形态
+  await line('刚才那个，是短歇——像眨一次长眼，随时来一下', 2800);
+  await line('累得深了，还可以小睡一会儿——闭眼久一点，歇得更透', 3000);
+  say('小睡多久，你自己定');
   await pickDuration();
 
   // 收场
-  await line('好了，我记住了。之后我就在上面陪着你。', 2600);
+  await line('好了，我记住了，之后我就住在屏幕顶端的岛里陪着你', 2600);
   msg.classList.add('brand');
-  say('守护你看清世界的方式。');
-  await delay(2800);
+  say('<span class="ob__brand-name">EyeFlow</span>守护你看清世界的方式');
+  card.classList.add('is-ending'); // Mira 缩小落定,与 EyeFlow 锁成品牌定格
+  await delay(3000);
   face.classList.add('is-leaving'); // 光缩进菜单栏
   card.classList.remove('in');
   await delay(700);
