@@ -12,6 +12,7 @@ contextBridge.exposeInMainWorld('panel', {
   act: (kind) => ipcRenderer.send('panel:act', kind), // 'short' | 'nap'
   setDuration: (ms) => ipcRenderer.send('panel:set-duration', ms),
   resize: (height) => ipcRenderer.send('panel:resize', height),
+  quit: () => ipcRenderer.send('panel:quit'),
 
   onInit: (cb) => ipcRenderer.on('panel:init', (_e, payload) => cb(payload)),
   onData: (cb) => ipcRenderer.on('panel:data', (_e, payload) => cb(payload)),

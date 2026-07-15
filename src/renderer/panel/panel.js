@@ -66,5 +66,6 @@ gear.addEventListener('click', () => {
 
 el('act-short').addEventListener('click', () => api.act?.('short'));
 el('act-nap').addEventListener('click', () => api.act?.('nap'));
+el('quit').addEventListener('click', () => api.quit?.());
 
 api.ready?.();

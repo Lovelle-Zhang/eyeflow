@@ -7,7 +7,7 @@
  * product panel clean.
  */
 
-const { Tray, Menu, screen, ipcMain } = require('electron');
+const { app, Tray, Menu, screen, ipcMain } = require('electron');
 const { miraTrayImage } = require('./tray/tray-icon');
 const { createPanelWindow } = require('./overlay/panel-window');
 const { miraSvg } = require('../view/mira/mira-svg');
@@ -44,18 +44,25 @@ function createMenubar(service) {
     else showPanel();
   }
 
-  const devMenu = Menu.buildFromTemplate([
-    { label: '快进 1 分钟 (dev)', click: () => service.dev('ff') },
-    { label: '测试一级提醒 (dev)', click: () => service.dev('remind') },
-    { label: '测试二级提醒 (dev)', click: () => service.dev('remindNap') },
-    { label: '小睡仪式 12s (dev)', click: () => service.dev('napRitual') },
-    { label: '重置精力 (dev)', click: () => service.dev('reset') },
+  const trayMenu = Menu.buildFromTemplate([
+    { label: '打开 EyeFlow Next', click: showPanel },
+    { type: 'separator' },
+    {
+      label: '开发者',
+      submenu: [
+        { label: '快进 1 分钟', click: () => service.dev('ff') },
+        { label: '测试一级提醒', click: () => service.dev('remind') },
+        { label: '测试二级提醒', click: () => service.dev('remindNap') },
+        { label: '小睡仪式 12s', click: () => service.dev('napRitual') },
+        { label: '重置精力', click: () => service.dev('reset') },
+      ],
+    },
     { type: 'separator' },
     { label: '退出 EyeFlow Next', role: 'quit' },
   ]);
 
   tray.on('click', toggle);
-  tray.on('right-click', () => tray.popUpContextMenu(devMenu));
+  tray.on('right-click', () => tray.popUpContextMenu(trayMenu));
 
   ipcMain.on('panel:ready', (e) => {
     e.sender.send('panel:init', { mira: miraSvg({ variant: 'full', eyes: 'open' }), napOptions });
@@ -66,6 +73,7 @@ function createMenubar(service) {
     win.hide();
   });
   ipcMain.on('panel:set-duration', (_e, ms) => service.setDuration(ms));
+  ipcMain.on('panel:quit', () => app.quit());
   ipcMain.on('panel:resize', (_e, height) => {
     const [w] = win.getSize();
     win.setSize(w, Math.max(120, Math.round(height)));
