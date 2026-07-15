@@ -32,6 +32,8 @@ test('full variant: glossy mint plate gradient + macOS 824/100 icon-grid transfo
   assert.match(svg, /#F3EEC7/i);
   // 824×824 body centered on 1024 → 100px margin (scale 824/1024), the HIG grid.
   assert.match(svg, /translate\(100[ ,]+100\)\s*scale\(0\.8046875\)/);
+  // native depth: a grounding shadow (matches OneDrive/Obsidian), not flat.
+  assert.match(svg, /filter="url\(#miraShadow\)"/);
 });
 
 test('the pulse core light uses the mint pulse colors', () => {
