@@ -26,11 +26,14 @@
 }
 
 .mira__pulse {
+  /* §3 放电体感: as energy falls, the light DIMS + CONTRACTS + breathes WEAKER
+     ("她累了 = 你累了"). All driven by --energy — the quiet, on-spec discharge. */
+  --breath-peak: calc(1.02 + 0.11 * var(--energy)); /* 呼吸变弱 when tired */
   position: absolute;
   left: 50%;
   top: 50%;
-  width: calc(var(--mf) * 0.64);
-  height: calc(var(--mf) * 0.64);
+  width: calc(var(--mf) * (0.44 + 0.2 * var(--energy))); /* 微微收缩 */
+  height: calc(var(--mf) * (0.44 + 0.2 * var(--energy)));
   transform: translate(-50%, -50%);
   border-radius: 50%;
   background: radial-gradient(
@@ -40,13 +43,13 @@
     var(--pulse-glow) 56%,
     transparent 74%
   );
-  opacity: calc(0.35 + 0.65 * var(--energy));
+  opacity: calc(0.35 + 0.6 * var(--energy)); /* 气色变淡 */
   animation: mira-breathe 5s ease-in-out infinite;
   transition:
-    width 350ms ease,
-    height 350ms ease,
+    width 600ms ease,
+    height 600ms ease,
     border-radius 350ms ease,
-    opacity 500ms ease;
+    opacity 600ms ease;
 }
 
 /* 感知 / 醒来发亮 — the field spreads */
@@ -83,7 +86,7 @@
     transform: translate(-50%, -50%) scale(1);
   }
   50% {
-    transform: translate(-50%, -50%) scale(1.14);
+    transform: translate(-50%, -50%) scale(var(--breath-peak));
   }
 }
 
