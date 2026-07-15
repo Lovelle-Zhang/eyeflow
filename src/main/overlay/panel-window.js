@@ -4,23 +4,27 @@ const path = require('node:path');
 const { BrowserWindow } = require('electron');
 
 /**
- * The menubar popover window (CHARTER §4): a small frameless, transparent panel
- * shown under the tray icon and hidden when it loses focus — the standard
- * menubar-popover behavior. Sized to its content by the renderer (panel:resize).
+ * The menubar popover window (CHARTER §4 / Apple HIG §8.1): a frameless panel on
+ * the native macOS popover MATERIAL (vibrancy) with rounded corners + the system
+ * shadow — so it reads as a real menubar popover, not a custom card. Dismisses on
+ * blur; sized to its content by the renderer (panel:resize).
  */
 function createPanelWindow() {
   const win = new BrowserWindow({
-    width: 380,
+    width: 360,
     height: 420,
     frame: false,
     transparent: true,
+    vibrancy: 'popover', // native NSVisualEffectView popover material (adapts light/dark)
+    visualEffectState: 'active',
+    roundedCorners: true,
     resizable: false,
     movable: false,
     minimizable: false,
     maximizable: false,
     skipTaskbar: true,
     show: false,
-    hasShadow: false,
+    hasShadow: true,
     fullscreenable: false,
     alwaysOnTop: true,
     webPreferences: {

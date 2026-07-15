@@ -23,9 +23,9 @@
   --scene-bg:
     radial-gradient(46% 42% at 50% 40%, rgba(243, 238, 199, 0.1) 0%, transparent 56%),
     radial-gradient(66% 62% at 50% 44%, #1f6b52 0%, #164434 40%, #0e2a22 74%, #081f1a 100%);
-  --text: #edfff7;
-  --text-soft: rgba(237, 255, 247, 0.62);
-  --hairline: rgba(255, 255, 255, 0.16);
+  --text: rgba(255, 255, 255, 0.92); /* neutral label (Apple) — green stays on the capsule */
+  --text-soft: rgba(255, 255, 255, 0.55);
+  --hairline: rgba(255, 255, 255, 0.12);
   --card-shadow: 0 40px 100px rgba(0, 0, 0, 0.5);
   --seg-bg: rgba(255, 255, 255, 0.08);
   --seg-border: rgba(255, 255, 255, 0.16);
@@ -34,23 +34,23 @@
   --panel-bg: linear-gradient(180deg, rgba(20, 40, 33, 0.72), rgba(12, 22, 18, 0.86));
   --panel-border: rgba(255, 255, 255, 0.1);
   --panel-inset: inset 0 1px 0 rgba(255, 255, 255, 0.1);
-  --row-bg: rgba(255, 255, 255, 0.05);
-  --row-hover: rgba(255, 255, 255, 0.09);
+  --row-bg: rgba(255, 255, 255, 0.06);
+  --row-hover: rgba(255, 255, 255, 0.12);
 }
 
 @media (prefers-color-scheme: light) {
   :root {
     --scene-bg: radial-gradient(52% 46% at 50% 36%, #ffffff 0%, #eaf4ee 54%, #d7e9df 100%);
-    --text: #123f30;
-    --text-soft: rgba(18, 63, 48, 0.62);
-    --hairline: rgba(18, 63, 48, 0.14);
+    --text: rgba(0, 0, 0, 0.85); /* neutral label */
+    --text-soft: rgba(0, 0, 0, 0.5);
+    --hairline: rgba(0, 0, 0, 0.1);
     --card-shadow: 0 40px 100px rgba(28, 80, 58, 0.22);
     --seg-bg: rgba(18, 63, 48, 0.06);
     --seg-border: rgba(18, 63, 48, 0.16);
     --panel-bg: linear-gradient(180deg, rgba(255, 255, 255, 0.84), rgba(233, 244, 238, 0.9));
     --panel-border: rgba(18, 63, 48, 0.1);
     --panel-inset: inset 0 1px 0 rgba(255, 255, 255, 0.6);
-    --row-bg: rgba(18, 63, 48, 0.05);
-    --row-hover: rgba(18, 63, 48, 0.09);
+    --row-bg: rgba(0, 0, 0, 0.05);
+    --row-hover: rgba(0, 0, 0, 0.09);
   }
 }

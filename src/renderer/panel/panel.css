@@ -1,5 +1,6 @@
-/* Menubar panel (CHARTER §4). Shared capsule + tokens (dark/light) → the panel
-   now matches the rest of the app instead of being its own flat card. */
+/* Menubar panel (CHARTER §4 / Apple HIG §8.1). Sits on the native popover
+   material (window vibrancy) — no custom card surface. SF type scale, 8pt grid,
+   neutral chrome with green reserved for the capsule + the primary action. */
 
 * {
   box-sizing: border-box;
@@ -8,66 +9,57 @@
 html,
 body {
   margin: 0;
+  background: transparent;
 }
 
 body {
-  background: transparent;
-  padding: 12px;
   color: var(--text);
   font-family:
-    -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial,
-    sans-serif;
+    -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", sans-serif;
+  -webkit-font-smoothing: antialiased;
 }
 
+/* content only — the window's popover material is the surface */
 .panel {
-  padding: 14px;
-  border-radius: 22px;
-  background: var(--panel-bg);
-  border: 1px solid var(--panel-border);
-  box-shadow:
-    0 24px 60px rgba(0, 0, 0, 0.4),
-    var(--panel-inset);
-  backdrop-filter: blur(30px) saturate(1.2);
+  padding: 12px;
 }
 
 .head {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 2px 4px 10px;
+  padding: 2px 4px 8px;
 }
 
 .head__t {
   color: var(--text-soft);
   font-size: 13px;
   font-weight: 600;
-  letter-spacing: 0.02em;
 }
 
 .gear {
-  width: 34px;
-  height: 34px;
+  width: 28px;
+  height: 28px;
   border-radius: 999px;
   display: grid;
   place-items: center;
   cursor: pointer;
   color: var(--text-soft);
-  background: var(--seg-bg);
-  border: 1px solid var(--seg-border);
+  background: var(--row-bg);
+  border: none;
 }
 
-.gear.on {
-  background: rgba(111, 231, 195, 0.16);
-  border-color: rgba(111, 231, 195, 0.4);
+.gear:hover {
+  background: var(--row-hover);
   color: var(--text);
 }
 
-/* hero = the live 气色 capsule (§4 主体), matte, with The Pulse core. */
+/* hero = the live 气色 capsule (§4 主体), matte, with The Pulse core */
 .hero {
   display: flex;
   align-items: center;
-  gap: 13px;
-  padding: 12px 18px 12px 13px;
+  gap: 12px;
+  padding: 12px 16px 12px 12px;
 }
 
 .hero .mira {
@@ -77,25 +69,25 @@ body {
 .hero__body {
   display: flex;
   flex-direction: column;
-  gap: 3px;
+  gap: 2px;
 }
 
 .hero__pct {
   color: #f6f7f9;
-  font-size: 18px;
+  font-size: 17px;
   font-weight: 600;
   font-variant-numeric: tabular-nums;
 }
 
 .hero__state {
-  color: rgba(246, 247, 249, 0.75);
-  font-size: 12.5px;
+  color: rgba(246, 247, 249, 0.72);
+  font-size: 13px;
 }
 
 .stats {
   display: flex;
   align-items: center;
-  margin: 16px 4px 14px;
+  margin: 16px 4px;
 }
 
 .stat {
@@ -104,41 +96,42 @@ body {
 
 .stat__n {
   color: var(--text);
-  font-size: 23px;
+  font-size: 21px;
   font-weight: 600;
   font-variant-numeric: tabular-nums;
+  letter-spacing: -0.01em;
 }
 
 .stat__l {
   color: var(--text-soft);
   font-size: 11px;
-  margin-top: 3px;
+  margin-top: 2px;
 }
 
 .stat__div {
   width: 1px;
-  height: 34px;
+  height: 32px;
   background: var(--hairline);
-  margin: 0 14px;
+  margin: 0 16px;
 }
 
 .rows {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 6px;
 }
 
 .row {
   display: flex;
   align-items: center;
-  gap: 11px;
+  gap: 10px;
   width: 100%;
   text-align: left;
   cursor: pointer;
-  padding: 13px 14px;
-  border-radius: 14px;
+  padding: 10px 12px;
+  border-radius: 10px;
   background: var(--row-bg);
-  border: 1px solid var(--seg-border);
+  border: none;
   color: var(--text);
   font-family: inherit;
 }
@@ -148,25 +141,22 @@ body {
 }
 
 .row--primary {
-  background: rgba(111, 231, 195, 0.16);
-  border-color: rgba(111, 231, 195, 0.42);
+  background: rgba(111, 231, 195, 0.18);
 }
 
 .row--primary:hover {
-  background: rgba(111, 231, 195, 0.24);
+  background: rgba(111, 231, 195, 0.26);
 }
 
-.dot {
-  width: 9px;
-  height: 9px;
-  border-radius: 999px;
-  flex: 0 0 auto;
-  background: #2e6b58;
+.row__ic {
+  display: grid;
+  place-items: center;
+  color: var(--text-soft);
 }
 
 .row__label {
-  font-size: 14px;
-  font-weight: 600;
+  font-size: 13px;
+  font-weight: 500;
 }
 
 .row__sub {
@@ -176,13 +166,15 @@ body {
 }
 
 .row__chev {
+  display: grid;
+  place-items: center;
   color: var(--text-soft);
-  font-size: 16px;
+  opacity: 0.7;
 }
 
 .row__go {
-  width: 24px;
-  height: 24px;
+  width: 22px;
+  height: 22px;
   border-radius: 999px;
   background: var(--mint);
   display: grid;
@@ -209,32 +201,35 @@ body {
 .seg {
   flex: 1;
   text-align: center;
-  padding: 9px 0;
-  border-radius: 11px;
-  font-size: 13px;
+  padding: 8px 0;
+  border-radius: 8px;
+  font-size: 12.5px;
   cursor: pointer;
   color: var(--text-soft);
-  background: var(--seg-bg);
-  border: 1px solid var(--seg-border);
+  background: var(--row-bg);
+  border: none;
+}
+
+.seg:hover {
+  background: var(--row-hover);
 }
 
 .seg.on {
-  background: rgba(111, 231, 195, 0.18);
-  border-color: rgba(111, 231, 195, 0.5);
+  background: rgba(111, 231, 195, 0.2);
   color: var(--text);
   font-weight: 600;
 }
 
 .quit {
   width: 100%;
-  margin-top: 12px;
-  padding: 10px 0;
-  border-radius: 11px;
+  margin-top: 8px;
+  padding: 9px 0;
+  border-radius: 8px;
   font: inherit;
-  font-size: 13px;
+  font-size: 12.5px;
   color: var(--text-soft);
   background: transparent;
-  border: 1px solid var(--seg-border);
+  border: none;
   cursor: pointer;
 }
 
