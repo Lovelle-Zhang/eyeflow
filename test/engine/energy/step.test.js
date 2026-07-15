@@ -6,7 +6,7 @@
 const { test } = require('node:test');
 const assert = require('node:assert/strict');
 
-const { step, initialState, DEFAULT_PARAMS } = require('../../../src/engine/energy');
+const { step, initialState, shortBreakEnergy, DEFAULT_PARAMS } = require('../../../src/engine/energy');
 
 const P = DEFAULT_PARAMS;
 
@@ -66,4 +66,28 @@ test('nap refills to full (§C3/§5.4.3)', () => {
   const start = { energy: 5, l1Armed: false, l2Armed: false };
   const { state } = step(start, { kind: 'nap' }, P);
   assert.equal(state.energy, 100);
+});
+
+// shortBreakEnergy — the ONE source of the short-break credit math (§9.2). The
+// real credit (via step's `shortBreak`) and the reminder's display-only recharge
+// preview both call it, so the brighten always matches the actual credit.
+test('shortBreakEnergy adds shortBreakGain (§C2)', () => {
+  assert.equal(shortBreakEnergy(48, P), 48 + P.shortBreakGain);
+});
+
+test('shortBreakEnergy clamps at the ceiling, never above 100 (§5.4.1)', () => {
+  assert.equal(shortBreakEnergy(90, P), 100); // 90 + 44 → clamped to energyMax
+  assert.equal(shortBreakEnergy(100, P), 100);
+});
+
+test('shortBreakEnergy clamps at the floor, never below 0 (§5.4.4)', () => {
+  const negGain = { ...P, shortBreakGain: -50 };
+  assert.equal(shortBreakEnergy(10, negGain), 0);
+});
+
+test('shortBreakEnergy is the exact credit step applies (one-fact, §9.2)', () => {
+  // step's `shortBreak` input must equal a direct shortBreakEnergy() call.
+  const start = { energy: 37, l1Armed: false, l2Armed: false };
+  const { state } = step(start, { kind: 'shortBreak' }, P);
+  assert.equal(state.energy, shortBreakEnergy(37, P));
 });

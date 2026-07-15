@@ -11,6 +11,7 @@ const { contextBridge, ipcRenderer } = require('electron');
 contextBridge.exposeInMainWorld('reminder', {
   onShow: (cb) => ipcRenderer.on('reminder:show', (_e, payload) => cb(payload)),
   onFrame: (cb) => ipcRenderer.on('reminder:frame', (_e, payload) => cb(payload)),
+  onRecharge: (cb) => ipcRenderer.on('reminder:recharge', (_e, payload) => cb(payload)),
   onTuck: (cb) => ipcRenderer.on('reminder:tuck', () => cb()),
   tucked: () => ipcRenderer.send('reminder:tucked'),
   napNow: () => ipcRenderer.send('reminder:nap-now'),

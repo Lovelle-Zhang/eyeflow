@@ -8,9 +8,11 @@
 
 const { ipcMain } = require('electron');
 const { createReminderWindow } = require('./overlay/reminder-window');
+const { bufferUntilGap } = require('./reminder-buffer');
 const { energyToColor } = require('../view/capsule/energy-color');
-const { shortBreakFrame, SHORT_BREAK_MS } = require('../view/reminder/short-break');
-const { earnedShortBreak, shouldFloatNow, REMINDER_DEFAULTS } = require('../view/reminder/gating');
+const { rechargePreview } = require('../view/reminder/recharge');
+const { shortBreakFrame, SHORT_BREAK_MS, RECHARGE_HOLD_MS } = require('../view/reminder/short-break');
+const { earnedShortBreak, REMINDER_DEFAULTS } = require('../view/reminder/gating');
 const { SHORT_BREAK_PROMPTS, NAP_SUGGEST_PROMPTS } = require('../view/reminder/copy');
 
 function createReminderController({ getIdleSec, getEnergy, onShortBreakComplete, onNapNow } = {}) {
@@ -18,7 +20,7 @@ function createReminderController({ getIdleSec, getEnergy, onShortBreakComplete,
   let win = null;
   let busy = false;
   let timer = null;
-  let bufferTimer = null;
+  let cancelBuffer = null;
   let shortIndex = 0;
   let napIndex = 0;
   let earned = false; // D2: was this (short) break actually rested?
@@ -38,13 +40,12 @@ function createReminderController({ getIdleSec, getEnergy, onShortBreakComplete,
     }
     if (busy) {
       busy = false;
-      // D2: only credit the recharge if the user actually rested (歇完就安静).
-      // Kept typing through it → no credit → energy keeps falling toward Y.
+      // D2: credit the recharge only if actually rested (kept typing → no credit).
       if (earned && onShortBreakComplete) onShortBreakComplete();
     }
   }
 
-  // §5.1 二级: the user accepted the nap suggestion → start the ritual + tuck.
+  // §5.1 二级: nap suggestion accepted → start the ritual + tuck.
   const onNapAccepted = () => {
     if (busy && onNapNow) onNapNow();
     send('reminder:tuck');
@@ -59,6 +60,7 @@ function createReminderController({ getIdleSec, getEnergy, onShortBreakComplete,
     send('reminder:show', {
       kind: level, // renderer blinks (short) or opens eyes (nap) on the shared capsule
       capsuleCss: energyToColor(energy).css,
+      energy, // 0–100; the pulse (--energy) shows the honest 气色, ready to brighten
       text: isNap
         ? NAP_SUGGEST_PROMPTS[napIndex % NAP_SUGGEST_PROMPTS.length]
         : SHORT_BREAK_PROMPTS[shortIndex % SHORT_BREAK_PROMPTS.length],
@@ -66,8 +68,7 @@ function createReminderController({ getIdleSec, getEnergy, onShortBreakComplete,
     });
 
     if (isNap) {
-      // §5.1 二级: a suggestion that dwells then tucks. Clickable (a "小睡" button
-      // → nap ritual); no eye-rest countdown, no auto-credit.
+      // §5.1 二级: a clickable "小睡" suggestion that dwells then tucks (no credit).
       if (win && !win.isDestroyed()) win.setIgnoreMouseEvents(false);
       napIndex += 1;
       timer = setTimeout(() => {
@@ -88,13 +89,23 @@ function createReminderController({ getIdleSec, getEnergy, onShortBreakComplete,
         clearInterval(timer);
         timer = null;
         earned = earnedShortBreak(idleSec()); // D2: sample rest as the break ends
-        send('reminder:tuck');
+        if (earned) {
+          // 休息=回充: preview POST-credit 气色 (display-only; real credit fires once in finish(), §9.2 no double-credit).
+          const base = typeof getEnergy === 'function' ? getEnergy() : energy;
+          send('reminder:recharge', rechargePreview(base));
+          timer = setTimeout(() => {
+            timer = null;
+            send('reminder:tuck');
+          }, RECHARGE_HOLD_MS);
+        } else {
+          send('reminder:tuck'); // not rested → no charge, no charge animation (honest)
+        }
       }
     }, 200);
   }
 
   function floatOut(level, fallbackEnergy) {
-    // energy may have drifted during buffering → prefer a fresh read (§8.3).
+    // energy may drift during buffering → prefer a fresh read (§8.3).
     const energy = typeof getEnergy === 'function' ? getEnergy() : fallbackEnergy;
     if (!win || win.isDestroyed()) win = createReminderWindow();
     win.showInactive();
@@ -121,22 +132,12 @@ function createReminderController({ getIdleSec, getEnergy, onShortBreakComplete,
         return;
       }
 
-      // §6.2 smart buffer: wait for a natural gap, but no longer than the cap.
-      const bufferStart = process.hrtime.bigint();
-      const attempt = () => {
-        const waitedMs = Number(process.hrtime.bigint() - bufferStart) / 1e6;
-        if (shouldFloatNow(idleSec(), waitedMs)) {
-          bufferTimer = null;
-          floatOut(level, energy);
-        } else {
-          bufferTimer = setTimeout(attempt, REMINDER_DEFAULTS.bufferPollMs);
-        }
-      };
-      attempt();
+      // §6.2 smart buffer: float on the next natural gap, or at the cap.
+      cancelBuffer = bufferUntilGap(idleSec, () => floatOut(level, energy));
     },
     destroy() {
       if (timer) clearInterval(timer);
-      if (bufferTimer) clearTimeout(bufferTimer);
+      if (cancelBuffer) cancelBuffer();
       ipcMain.removeListener('reminder:tucked', finish);
       ipcMain.removeListener('reminder:nap-now', onNapAccepted);
       if (win && !win.isDestroyed()) win.destroy();

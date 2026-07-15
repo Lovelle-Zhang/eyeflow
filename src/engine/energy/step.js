@@ -10,6 +10,19 @@ function clamp(value, min, max) {
 }
 
 /**
+ * Post-short-break energy (§C2) — the ONE source of the short-break credit math
+ * (§9.2 一个事实一个函数). Both the real credit (step's `shortBreak` input, via
+ * the driver) and the display-only recharge preview in the reminder controller
+ * call this, so the brighten always matches what the engine will actually credit.
+ * @param {number} energy current energy (0–100)
+ * @param {object} params engine params (uses shortBreakGain + energy bounds)
+ * @returns {number} clamped post-credit energy
+ */
+function shortBreakEnergy(energy, params) {
+  return clamp(energy + params.shortBreakGain, params.energyMin, params.energyMax);
+}
+
+/**
  * Apply one input to `energy` and return the clamped next energy.
  * @param {number} energy
  * @param {{kind:string, dtMs?:number, idleSec?:number}} input
@@ -33,7 +46,7 @@ function nextEnergy(energy, input, params) {
       break;
     }
     case 'shortBreak':
-      energy += params.shortBreakGain;
+      energy = shortBreakEnergy(energy, params);
       break;
     case 'nap':
       energy = energyMax;
@@ -45,4 +58,4 @@ function nextEnergy(energy, input, params) {
   return clamp(energy, energyMin, energyMax);
 }
 
-module.exports = { nextEnergy };
+module.exports = { nextEnergy, shortBreakEnergy };

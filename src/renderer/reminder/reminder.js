@@ -17,8 +17,11 @@ const napbtn = el('napbtn');
 
 napbtn.addEventListener('click', () => api.napNow?.());
 
-api.onShow?.(({ kind, capsuleCss, text: prompt, durationSec }) => {
+const setEnergy = (energy) => face.style.setProperty('--energy', Math.max(0, Math.min(1, energy / 100)));
+
+api.onShow?.(({ kind, capsuleCss, energy, text: prompt, durationSec }) => {
   capsule.style.setProperty('--cap-color', capsuleCss); // 气色 at reminder time (§8.3)
+  setEnergy(energy); // the pulse's brightness = honest 气色, ready to brighten on recharge
   face.classList.toggle('is-blink', kind !== 'nap'); // 短歇=闭眼眨眼; 二级建议=睁眼
   text.textContent = prompt;
 
@@ -39,6 +42,14 @@ api.onShow?.(({ kind, capsuleCss, text: prompt, durationSec }) => {
 api.onFrame?.(({ remainingSec, remainingFraction }) => {
   count.textContent = String(remainingSec);
   fill.style.width = `${remainingFraction * 100}%`;
+});
+
+// 休息=回充: rested short break brightens the capsule + Pulse to the post-credit
+// 气色 before tucking. Pure cross-fade via the existing CSS transitions (§8.4,
+// prefers-reduced-motion safe — no new keyframes).
+api.onRecharge?.(({ capsuleCss, energy }) => {
+  capsule.style.setProperty('--cap-color', capsuleCss);
+  setEnergy(energy);
 });
 
 api.onTuck?.(() => {

@@ -9,7 +9,7 @@
 
 const { DEFAULT_PARAMS } = require('./params');
 const { initialState } = require('./state');
-const { nextEnergy } = require('./step');
+const { nextEnergy, shortBreakEnergy } = require('./step');
 const { evaluateReminders } = require('./reminders');
 
 /**
@@ -32,4 +32,4 @@ function step(state, input, params = DEFAULT_PARAMS) {
   return { state: { energy, l1Armed, l2Armed }, events };
 }
 
-module.exports = { step, initialState, DEFAULT_PARAMS };
+module.exports = { step, initialState, shortBreakEnergy, DEFAULT_PARAMS };

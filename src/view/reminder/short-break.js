@@ -10,6 +10,11 @@
 
 const SHORT_BREAK_MS = 20000; // 20s, fixed and not user-tunable (§6.3/§6.4)
 
+// After a rested short break, hold the post-credit 气色 brighten this long before
+// tucking, so the user SEES the recharge (休息=回充), matching the nap/onboarding.
+// §9.7 tunable feel value; display-only, does not affect the real credit.
+const RECHARGE_HOLD_MS = 900;
+
 /**
  * @param {number} elapsedMs time since the break floated out
  * @param {number} [durationMs] total break length
@@ -27,4 +32,4 @@ function shortBreakFrame(elapsedMs, durationMs = SHORT_BREAK_MS) {
   };
 }
 
-module.exports = { shortBreakFrame, SHORT_BREAK_MS };
+module.exports = { shortBreakFrame, SHORT_BREAK_MS, RECHARGE_HOLD_MS };
