@@ -1,6 +1,7 @@
 /* Menubar panel (CHARTER §4 / Apple HIG §8.1). Sits on the native popover
-   material (window vibrancy) — no custom card surface. SF type scale, 8pt grid,
-   neutral chrome with green reserved for the capsule + the primary action. */
+   material (window vibrancy). The hero is the live 气色 capsule carrying the
+   app-icon squircle mark (顶岛 / Dock 一套). Stats + controls →
+   panel-controls.css. */
 
 * {
   box-sizing: border-box;
@@ -15,11 +16,11 @@ body {
 body {
   color: var(--text);
   font-family:
-    -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", sans-serif;
+    -apple-system, "SF Pro Display", "PingFang SC", BlinkMacSystemFont,
+    "Segoe UI", sans-serif;
   -webkit-font-smoothing: antialiased;
 }
 
-/* content only — the window's popover material is the surface */
 .panel {
   padding: 12px;
 }
@@ -54,16 +55,28 @@ body {
   color: var(--text);
 }
 
-/* hero = the live 气色 capsule (§4 主体), matte, with The Pulse core */
+/* hero = the live 气色 capsule (§4 主体): fuller green + the app-icon squircle */
 .hero {
+  position: relative;
+  overflow: hidden;
   display: flex;
   align-items: center;
   gap: 12px;
-  padding: 12px 16px 12px 12px;
+  padding: 12px 14px;
 }
 
-.hero .mira {
-  --mf: 34px;
+.hero::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: radial-gradient(130% 165% at 24% -18%, rgba(195, 248, 222, 0.32) 0%, transparent 58%);
+  pointer-events: none;
+}
+
+.hero > * {
+  position: relative;
+  z-index: 1;
 }
 
 .hero__body {
@@ -113,127 +126,4 @@ body {
   height: 32px;
   background: var(--hairline);
   margin: 0 16px;
-}
-
-.rows {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-}
-
-.row {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  width: 100%;
-  text-align: left;
-  cursor: pointer;
-  padding: 10px 12px;
-  border-radius: 10px;
-  background: var(--row-bg);
-  border: none;
-  color: var(--text);
-  font-family: inherit;
-}
-
-.row:hover {
-  background: var(--row-hover);
-}
-
-.row--primary {
-  background: rgba(111, 231, 195, 0.18);
-}
-
-.row--primary:hover {
-  background: rgba(111, 231, 195, 0.26);
-}
-
-.row__ic {
-  display: grid;
-  place-items: center;
-  color: var(--text-soft);
-}
-
-.row__label {
-  font-size: 13px;
-  font-weight: 500;
-}
-
-.row__sub {
-  margin-left: auto;
-  font-size: 12px;
-  color: var(--text-soft);
-}
-
-.row__chev {
-  display: grid;
-  place-items: center;
-  color: var(--text-soft);
-  opacity: 0.7;
-}
-
-.row__go {
-  width: 22px;
-  height: 22px;
-  border-radius: 999px;
-  background: var(--mint);
-  display: grid;
-  place-items: center;
-}
-
-.settings {
-  margin-top: 12px;
-  padding-top: 12px;
-  border-top: 1px solid var(--hairline);
-}
-
-.settings__t {
-  color: var(--text-soft);
-  font-size: 12px;
-  margin-bottom: 8px;
-}
-
-.segs {
-  display: flex;
-  gap: 8px;
-}
-
-.seg {
-  flex: 1;
-  text-align: center;
-  padding: 8px 0;
-  border-radius: 8px;
-  font-size: 12.5px;
-  cursor: pointer;
-  color: var(--text-soft);
-  background: var(--row-bg);
-  border: none;
-}
-
-.seg:hover {
-  background: var(--row-hover);
-}
-
-.seg.on {
-  background: rgba(111, 231, 195, 0.2);
-  color: var(--text);
-  font-weight: 600;
-}
-
-.quit {
-  width: 100%;
-  margin-top: 8px;
-  padding: 9px 0;
-  border-radius: 8px;
-  font: inherit;
-  font-size: 12.5px;
-  color: var(--text-soft);
-  background: transparent;
-  border: none;
-  cursor: pointer;
-}
-
-.quit:hover {
-  background: var(--row-bg);
-  color: var(--text);
 }

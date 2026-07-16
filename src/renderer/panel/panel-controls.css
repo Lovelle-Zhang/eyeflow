@@ -1,0 +1,131 @@
+/* Menubar panel — data + controls (split from panel.css for the §9 budget):
+   today's stats, the action rows, and settings (nap duration + quit). All
+   buttons share the frosted-glass language (顶岛 / 引导页 一套). */
+
+.rows {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  text-align: left;
+  cursor: pointer;
+  padding: 11px 14px;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: var(--text);
+  font-family: inherit;
+  transition: background 160ms ease;
+}
+
+.row:hover {
+  background: rgba(255, 255, 255, 0.12);
+}
+
+.row--primary {
+  background: rgba(139, 240, 174, 0.16);
+  border-color: rgba(139, 240, 174, 0.28);
+}
+
+.row--primary:hover {
+  background: rgba(139, 240, 174, 0.24);
+}
+
+.row__ic {
+  display: grid;
+  place-items: center;
+  color: var(--text-soft);
+}
+
+.row__label {
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.row__sub {
+  margin-left: auto;
+  font-size: 12px;
+  color: var(--text-soft);
+}
+
+.row__chev {
+  display: grid;
+  place-items: center;
+  color: var(--text-soft);
+  opacity: 0.7;
+}
+
+.row__go {
+  width: 22px;
+  height: 22px;
+  border-radius: 999px;
+  background: var(--mint);
+  display: grid;
+  place-items: center;
+}
+
+.settings {
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid var(--hairline);
+}
+
+.settings__t {
+  color: var(--text-soft);
+  font-size: 12px;
+  margin-bottom: 8px;
+}
+
+.segs {
+  display: flex;
+  gap: 8px;
+}
+
+.seg {
+  flex: 1;
+  text-align: center;
+  padding: 9px 0;
+  border-radius: 999px;
+  font-size: 12.5px;
+  cursor: pointer;
+  color: var(--text-soft);
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  transition: background 160ms ease;
+}
+
+.seg:hover {
+  background: rgba(255, 255, 255, 0.12);
+}
+
+.seg.on {
+  background: rgba(139, 240, 174, 0.2);
+  border-color: rgba(139, 240, 174, 0.4);
+  color: var(--text);
+  font-weight: 600;
+}
+
+.quit {
+  width: 100%;
+  margin-top: 8px;
+  padding: 9px 0;
+  border-radius: 999px;
+  font: inherit;
+  font-size: 12.5px;
+  color: var(--text-soft);
+  background: transparent;
+  border: 1px solid transparent;
+  cursor: pointer;
+  transition: background 160ms ease;
+}
+
+.quit:hover {
+  background: rgba(255, 255, 255, 0.06);
+  color: var(--text);
+}
