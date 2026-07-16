@@ -12,14 +12,15 @@ const { miraSvg } = require('../view/mira/mira-svg');
 const { NAP_DURATION_OPTIONS_MS, DEFAULT_NAP_MS } = require('../view/nap/nap');
 
 function runOnboarding({ onDone } = {}) {
-  const win = createOnboardingWindow();
-  win.show();
-
   const napOptions = NAP_DURATION_OPTIONS_MS.map((ms) => ({
     ms,
     label: `${Math.round(ms / 60000)} 分钟`,
   }));
 
+  // Register the handshake listener BEFORE the window loads: the renderer fires
+  // 'onboarding:ready' the moment its script runs, and an ipcRenderer.send with
+  // no listener yet is dropped — losing the init reply leaves the card stuck at
+  // opacity:0 (invisible). Wiring the listener first closes that race.
   const onReady = (e) =>
     e.sender.send('onboarding:init', {
       miraOpen: miraSvg({ variant: 'full', eyes: 'open' }),
@@ -27,8 +28,11 @@ function runOnboarding({ onDone } = {}) {
       napOptions,
       defaultNapMs: DEFAULT_NAP_MS,
     });
-
   ipcMain.on('onboarding:ready', onReady);
+
+  const win = createOnboardingWindow();
+  win.show();
+
   ipcMain.once('onboarding:done', (_e, napMs) => {
     ipcMain.removeListener('onboarding:ready', onReady);
     if (!win.isDestroyed()) {
