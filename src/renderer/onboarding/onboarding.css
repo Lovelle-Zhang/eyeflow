@@ -43,10 +43,14 @@ body {
   box-shadow:
     0 30px 70px -18px rgba(12, 40, 30, 0.5),
     inset 0 0 0 1px rgba(255, 255, 255, 0.12);
-  /* three-row grid: copy anchored to center, Mira + controls settle into the
-     symmetric flexible rows above/below — button count never shifts the copy */
+  /* content-sized rows, whole block vertically centered (align-content): the
+     empty controls row COLLAPSES on copy-only pages, so Mira+copy stay balanced
+     instead of floating up over a reserved bottom void. On button pages the row
+     grows and the block re-centers (copy drifts a little, masked by the fade). */
   display: grid;
-  grid-template-rows: 1fr auto 1.3fr; /* 下区略大 → 台词落在光学中心(几何中心上方 ~7px) */
+  grid-template-rows: auto auto; /* row 3 (controls/track) is IMPLICIT — when
+     empty/hidden it isn't generated at all, so no trailing gap floats the copy */
+  align-content: center;
   align-items: center;
   justify-items: center;
   row-gap: 22px;

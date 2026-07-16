@@ -25,6 +25,13 @@
 
 /* grid row 3, pinned just under the copy — the flexible row absorbs however many
    buttons show, so the copy above never moves */
+/* on copy-only pages controls is emptied — collapse the whole row (and its gap)
+   so align-content centers just Mira+copy, instead of a dead reserved band that
+   nudges the block ~11px high */
+.ob__controls:empty {
+  display: none;
+}
+
 .ob__controls {
   grid-row: 3;
   grid-column: 1; /* same cell as .ob__track (see note above) — keeps the single
