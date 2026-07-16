@@ -5,6 +5,8 @@
    中文按钮不加西文字距 (letter-spacing: 0). */
 
 .ob__track {
+  grid-row: 3;
+  align-self: start;
   width: min(240px, 60%);
   height: 3px;
   border-radius: 999px;
@@ -19,14 +21,11 @@
   background: #6fe7c3;
 }
 
-/* pinned to the bottom so the count of buttons never shifts Mira + the copy —
-   the台词 stays vertically centered no matter how many controls show */
+/* grid row 3, pinned just under the copy — the flexible row absorbs however many
+   buttons show, so the copy above never moves */
 .ob__controls {
-  position: absolute;
-  left: 0;
-  right: 0;
-  bottom: 9%;
-  min-height: 44px;
+  grid-row: 3;
+  align-self: start;
   display: flex;
   flex-direction: column;
   align-items: center;

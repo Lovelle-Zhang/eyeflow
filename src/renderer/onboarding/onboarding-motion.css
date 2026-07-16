@@ -52,3 +52,41 @@
     transform 700ms cubic-bezier(0.22, 1, 0.36, 1),
     opacity 700ms ease;
 }
+
+/* the scene breathes — a very slow, subtle swell so the page feels alive, not a
+   static green board. Starts after the entrance settles (delay). */
+.ob__page.in {
+  animation: ob-breathe 6.5s ease-in-out 900ms infinite;
+}
+
+@keyframes ob-breathe {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.022);
+  }
+}
+
+/* copy drifts up as it fades in — life, not just opacity */
+.ob__msg {
+  transform: translateY(10px);
+  transition:
+    opacity 600ms ease,
+    transform 600ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.ob__msg.in {
+  transform: translateY(0);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ob__page.in {
+    animation: none;
+  }
+  .ob__msg {
+    transform: none;
+    transition: opacity 600ms ease;
+  }
+}
