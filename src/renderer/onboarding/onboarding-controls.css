@@ -6,6 +6,8 @@
 
 .ob__track {
   grid-row: 3;
+  grid-column: 1; /* share one cell with .ob__controls — else auto-placement
+                     spawns a phantom 2nd column that shoves the copy left (~50px) */
   align-self: start;
   width: min(240px, 60%);
   height: 3px;
@@ -25,6 +27,8 @@
    buttons show, so the copy above never moves */
 .ob__controls {
   grid-row: 3;
+  grid-column: 1; /* same cell as .ob__track (see note above) — keeps the single
+                     centered column so the copy never drifts when the bar shows */
   align-self: start;
   display: flex;
   flex-direction: column;
