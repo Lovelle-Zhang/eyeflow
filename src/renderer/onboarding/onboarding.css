@@ -81,7 +81,8 @@ body {
   justify-content: center;
   min-height: 3.2em; /* 台词区定高 → Mira 不随每句行数上下跳 */
   width: 100%; /* 占满,别被父级 align-items:center 压成窄块 */
-  max-width: 20ch;
+  max-width: 26ch; /* ceiling only — real line lengths come from the <br> breaks
+                      in the copy; wide enough that a semantic line never re-wraps */
   text-align: center; /* 多行台词水平居中;不收缩成窄竖条 */
   font-size: 28px;
   font-weight: 400;

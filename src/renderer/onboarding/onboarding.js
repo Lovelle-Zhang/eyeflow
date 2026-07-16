@@ -87,8 +87,8 @@ async function run() {
 
   // 登场 + 自我介绍
   await line('你好，我是 Mira');
-  await line('我住在你的屏幕角落，不打扰你');
-  await line('你看屏幕太久时，我会提醒你——歇一下，看看远处');
+  await line('我住在你的屏幕角落，<br>不打扰你');
+  await line('你看屏幕太久时，我会提醒你<br>——歇一下，看看远处');
   say('现在，我们先一起试一次');
   await button('好，来试试');
 
@@ -100,9 +100,9 @@ async function run() {
   card.style.setProperty('--dim', '1');
   face.style.transition = '--energy 1200ms ease';
   face.style.setProperty('--energy', '0.15');
-  say('看屏幕久了，气色会一点点淡下去');
+  say('看屏幕久了，<br>气色会一点点淡下去');
   await delay(2600);
-  say('那就歇一下——看看远处，等着它亮回来');
+  say('那就歇一下——<br>看看远处，等着它亮回来');
   card.style.transition = '--dim 10000ms linear';
   card.style.setProperty('--dim', '0');
   face.style.transition = '--energy 10000ms linear';
@@ -111,17 +111,17 @@ async function run() {
   card.style.transition = '';
   face.style.transition = '';
   face.classList.remove('is-rest'); // 回到明亮呼吸态,不再放大跳一下
-  say('这样就好，是不是清楚了一点');
+  say('这样就好，<br>是不是清楚了一点');
   await delay(2800);
 
   // 引出小睡 + 选时长 —— Mira 保持呼吸,只靠台词讲解,不再切形态
-  await line('刚才那个，是短歇——像眨一次长眼，随时来一下', 2800);
-  await line('累得深了，还可以小睡一会儿——闭眼久一点，歇得更透', 3000);
+  await line('刚才那个，是短歇——<br>像眨一次长眼，随时来一下', 2800);
+  await line('累得深了，还可以小睡一会儿<br>——闭眼久一点，歇得更透', 3000);
   say('小睡多久，你自己定');
   await pickDuration();
 
   // 收场
-  await line('好了，我记住了，之后我就住在屏幕顶端的岛里陪着你', 2600);
+  await line('好了，我记住了，之后我就<br>住在屏幕顶端的岛里陪着你', 2600);
   msg.classList.add('brand');
   say('<span class="ob__brand-name">EyeFlow</span>守护你看清世界的方式');
   card.classList.add('is-ending'); // Mira 缩小落定,与 EyeFlow 锁成品牌定格
