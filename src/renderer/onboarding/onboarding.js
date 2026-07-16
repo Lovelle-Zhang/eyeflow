@@ -95,7 +95,7 @@ async function run() {
   // 第一个短歇 loop —— 页面暗层(--dim)与 Mira 光核(--energy)一起 dim→bright。
   // 渐变背景不能 CSS 过渡,所以用可淡出的暗层:交接时仍是暗的,休息里渐亮。演示压到
   // 10s(比真实短歇短)——恢复过程更明显;真实短歇仍走引擎的 20 秒。
-  face.classList.add('is-rest');
+  // 短歇里 Mira 只随 --energy 变暗+微缩、仍是圆光点(不压成一线——那是小睡 §6.3)。
   card.style.transition = '--dim 1200ms ease';
   card.style.setProperty('--dim', '1');
   face.style.transition = '--energy 1200ms ease';
@@ -110,7 +110,6 @@ async function run() {
   await shortLoop(10000);
   card.style.transition = '';
   face.style.transition = '';
-  face.classList.remove('is-rest'); // 回到明亮呼吸态,不再放大跳一下
   say('这样就好，<br>是不是清楚了一点');
   await delay(2800);
 
