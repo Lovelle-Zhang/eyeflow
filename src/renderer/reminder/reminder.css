@@ -1,5 +1,6 @@
-/* Top reminder capsule (CHARTER §6.1/§8.4). Shared 气色 capsule; floats out from
-   the screen top. Text sits on the green capsule, so it stays light in both themes. */
+/* Top reminder capsule (CHARTER §6.1/§8.4). The 岛: a shared 气色 capsule that
+   floats from the screen top, with the app-icon squircle as its left mark.
+   Content/controls (text, progress, count, nap button) → reminder-controls.css. */
 
 * {
   box-sizing: border-box;
@@ -31,7 +32,7 @@ body {
   display: flex;
   align-items: center;
   gap: 13px;
-  padding: 12px 22px 12px 14px;
+  padding: 12px 22px 12px 12px;
   max-width: 92vw;
 
   /* float-out / tuck (§8.4) */
@@ -48,16 +49,14 @@ body {
   opacity: 1;
 }
 
-/* layered green (top-left highlight + deep corner) so the 岛 matches the
-   onboarding capsule instead of reading flat. Keeps the live 气色 underneath. */
+/* even, full green over the live 气色 — a soft top-left highlight only, no dark
+   corner (the corner made it read dark / flat). Keeps the 气色 underneath. */
 .rem::before {
   content: "";
   position: absolute;
   inset: 0;
   border-radius: inherit;
-  background:
-    radial-gradient(120% 150% at 20% -10%, rgba(190, 245, 220, 0.3) 0%, transparent 52%),
-    radial-gradient(120% 140% at 95% 130%, rgba(0, 0, 0, 0.24) 0%, transparent 55%);
+  background: radial-gradient(130% 165% at 26% -18%, rgba(195, 248, 222, 0.34) 0%, transparent 58%);
   pointer-events: none;
 }
 
@@ -74,63 +73,4 @@ body {
   }
 }
 
-.rem .mira {
-  --mf: 30px;
-}
-
-.rem__body {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-  min-width: 168px;
-}
-
-.rem__text {
-  font-size: 16px;
-  font-weight: 500;
-  line-height: 1.25;
-  letter-spacing: 0;
-  color: #f6f7f9;
-}
-
-.rem__track {
-  height: 3px;
-  border-radius: 999px;
-  background: rgba(255, 255, 255, 0.16);
-  overflow: hidden;
-}
-
-.rem__fill {
-  height: 100%;
-  width: 100%;
-  border-radius: 999px;
-  background: var(--mint);
-  transition: width 1s linear;
-}
-
-.rem__count {
-  font-size: 15px;
-  font-weight: 600;
-  color: var(--mint);
-  font-variant-numeric: tabular-nums;
-  min-width: 1.6em;
-  text-align: right;
-}
-
-.rem__nap {
-  font: inherit;
-  font-size: 13px;
-  font-weight: 600;
-  color: #0e1c20;
-  background: var(--mint);
-  border: none;
-  border-radius: 999px;
-  padding: 7px 15px;
-  margin-left: 2px;
-  cursor: pointer;
-  white-space: nowrap;
-}
-
-.rem__nap:hover {
-  filter: brightness(1.05);
-}
+/* left mark = the shared .app-mark squircle (see ../shared/app-mark.css) */

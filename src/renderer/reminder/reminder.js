@@ -1,14 +1,13 @@
 'use strict';
 
-// Reminder overlay painter. Drives the shared 气色 capsule: sets its color from
-// the live energy, blinks (short) or opens eyes (nap suggestion), floats out,
-// runs the countdown, tucks away.
+// Reminder overlay painter. Drives the shared 气色 capsule: sets its green from
+// the live energy, floats out, runs the countdown, tucks away. The left mark is
+// a steady app-icon squircle; state reads from the capsule 气色 + the countdown.
 
 const api = window.reminder || {};
 
 const el = (id) => document.getElementById(id);
 const capsule = el('capsule');
-const face = el('face');
 const text = el('text');
 const track = el('track');
 const fill = el('fill');
@@ -17,12 +16,8 @@ const napbtn = el('napbtn');
 
 napbtn.addEventListener('click', () => api.napNow?.());
 
-const setEnergy = (energy) => face.style.setProperty('--energy', Math.max(0, Math.min(1, energy / 100)));
-
-api.onShow?.(({ kind, capsuleCss, energy, text: prompt, durationSec }) => {
+api.onShow?.(({ kind, capsuleCss, text: prompt, durationSec }) => {
   capsule.style.setProperty('--cap-color', capsuleCss); // 气色 at reminder time (§8.3)
-  setEnergy(energy); // the pulse's brightness = honest 气色, ready to brighten on recharge
-  face.classList.toggle('is-blink', kind !== 'nap'); // 短歇=闭眼眨眼; 二级建议=睁眼
   text.textContent = prompt;
 
   const isNap = kind === 'nap';
@@ -44,12 +39,11 @@ api.onFrame?.(({ remainingSec, remainingFraction }) => {
   fill.style.width = `${remainingFraction * 100}%`;
 });
 
-// 休息=回充: rested short break brightens the capsule + Pulse to the post-credit
-// 气色 before tucking. Pure cross-fade via the existing CSS transitions (§8.4,
-// prefers-reduced-motion safe — no new keyframes).
-api.onRecharge?.(({ capsuleCss, energy }) => {
+// 休息=回充: a rested short break brightens the capsule's 气色 to the post-credit
+// green before tucking. Pure cross-fade via the existing background transition
+// (§8.4, prefers-reduced-motion safe — no new keyframes).
+api.onRecharge?.(({ capsuleCss }) => {
   capsule.style.setProperty('--cap-color', capsuleCss);
-  setEnergy(energy);
 });
 
 api.onTuck?.(() => {
