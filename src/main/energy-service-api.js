@@ -4,8 +4,8 @@
  * Public control surface for the energy service (split from the composition root
  * for the §9.1 line budget). Pure wiring: given the service's internal handles +
  * a shared mutable `state` object, returns the object the menubar / onboarding
- * drive. The facade WRITES state.{napMs,onboardingActive}; the service body READS
- * the same object, so both stay in sync.
+ * drive. The facade WRITES state.{napMs,reminderTier,onboardingActive}; the
+ * service body READS the same object, so both stay in sync.
  */
 
 function createServiceApi({
@@ -19,6 +19,7 @@ function createServiceApi({
   loop,
   state,
   persistNapMs,
+  persistTier,
 }) {
   return {
     subscribe(fn) {
@@ -39,6 +40,14 @@ function createServiceApi({
       if (persistNapMs) persistNapMs(ms); // §6.4 setting persists
       push();
     },
+    /** §6.4 reminder presentation tier ('light' | 'strong') — persists + re-paints. */
+    setReminderTier(tier) {
+      state.reminderTier = tier;
+      if (persistTier) persistTier(tier);
+      push();
+    },
+    /** Current tier; the reminder controller reads this to pick island vs big capsule. */
+    getReminderTier: () => state.reminderTier,
     /** Suppress auto reminders while the onboarding ritual is on screen (#4). */
     setOnboardingActive(active) {
       state.onboardingActive = active;

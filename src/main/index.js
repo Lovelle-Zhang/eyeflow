@@ -36,6 +36,8 @@ if (!isPrimary) {
     const service = startEnergyService({
       napMs: saved.napMs, // §6.4 duration setting persists
       persistNapMs: (ms) => settings.save({ napMs: ms }),
+      reminderTier: saved.reminderTier, // §6.4 presentation tier persists
+      persistTier: (tier) => settings.save({ reminderTier: tier }),
     });
     menubar = createMenubar(service);
     app.on('before-quit', () => service.flush()); // persist today's ledger (§7)

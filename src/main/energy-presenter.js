@@ -9,7 +9,7 @@
 const { energyToColor, energyStateLabel } = require('../view/capsule/energy-color');
 const { formatEyeUse } = require('../records/today');
 
-function buildPanelPayload({ energy, record, napMs }) {
+function buildPanelPayload({ energy, record, napMs, reminderTier }) {
   return {
     energy,
     capsuleCss: energyToColor(energy).css,
@@ -18,6 +18,7 @@ function buildPanelPayload({ energy, record, napMs }) {
     shortBreaks: record.shortBreaks,
     naps: record.naps,
     napMs,
+    reminderTier,
   };
 }
 

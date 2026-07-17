@@ -19,8 +19,15 @@ const { buildPanelPayload } = require('./energy-presenter');
 const { createServiceApi } = require('./energy-service-api');
 const { dayKey, recordTick, recordRest } = require('../records/today');
 const { DEFAULT_NAP_MS } = require('../view/nap/nap');
+const { DEFAULT_REMINDER_TIER } = require('../view/reminder/tier');
 
-function startEnergyService({ intervalMs = 1000, napMs: initialNapMs = DEFAULT_NAP_MS, persistNapMs } = {}) {
+function startEnergyService({
+  intervalMs = 1000,
+  napMs: initialNapMs = DEFAULT_NAP_MS,
+  persistNapMs,
+  reminderTier: initialTier = DEFAULT_REMINDER_TIER,
+  persistTier,
+} = {}) {
   const store = createRecordsStore();
   let record = store.load(); // resume today, or start fresh (§7)
   const energyStore = createEnergyStore();
@@ -29,6 +36,7 @@ function startEnergyService({ intervalMs = 1000, napMs: initialNapMs = DEFAULT_N
   // below reads them — same object, so both stay in sync (§6.4 / #4).
   const state = {
     napMs: initialNapMs,
+    reminderTier: initialTier, // §6.1/§6.4 presentation tier (light / strong)
     onboardingActive: false, // suppress reminders during the intro ritual (#4)
   };
   const subscribers = new Set();
@@ -77,7 +85,12 @@ function startEnergyService({ intervalMs = 1000, napMs: initialNapMs = DEFAULT_N
   }
 
   function push() {
-    const p = buildPanelPayload({ energy: driver.state.energy, record, napMs: state.napMs });
+    const p = buildPanelPayload({
+      energy: driver.state.energy,
+      record,
+      napMs: state.napMs,
+      reminderTier: state.reminderTier,
+    });
     for (const fn of subscribers) fn(p);
   }
 
@@ -107,6 +120,7 @@ function startEnergyService({ intervalMs = 1000, napMs: initialNapMs = DEFAULT_N
     loop,
     state,
     persistNapMs,
+    persistTier,
   });
 }
 

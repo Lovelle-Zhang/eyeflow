@@ -16,15 +16,18 @@ const napSub = el('nap-sub');
 const gear = el('gear');
 const settings = el('settings');
 const segs = el('segs');
+const tierSegs = el('tier-segs');
 
 let napOptions = [];
+let tierOptions = [];
 
 function reportHeight() {
   api.resize?.(el('panel').offsetHeight + 24);
 }
 
-api.onInit?.(({ napOptions: options }) => {
+api.onInit?.(({ napOptions: options, tierOptions: tiers }) => {
   napOptions = options || [];
+  tierOptions = tiers || [];
   reportHeight();
 });
 
@@ -40,6 +43,7 @@ api.onData?.((d) => {
 
   napSub.textContent = `完整 · ${Math.round(d.napMs / 60000)} 分钟`;
   renderSegs(d.napMs);
+  renderTierSegs(d.reminderTier);
   reportHeight();
 });
 
@@ -51,6 +55,17 @@ function renderSegs(currentMs) {
     b.textContent = opt.label;
     b.addEventListener('click', () => api.setDuration?.(opt.ms));
     segs.appendChild(b);
+  }
+}
+
+function renderTierSegs(currentTier) {
+  tierSegs.innerHTML = '';
+  for (const opt of tierOptions) {
+    const b = document.createElement('button');
+    b.className = `seg${opt.tier === currentTier ? ' on' : ''}`;
+    b.textContent = opt.label;
+    b.addEventListener('click', () => api.setTier?.(opt.tier));
+    tierSegs.appendChild(b);
   }
 }
 
