@@ -16,6 +16,7 @@ const { createNapController } = require('./nap-controller');
 const { createRecordsStore } = require('./records-store');
 const { createEnergyStore } = require('./energy-store');
 const { buildPanelPayload } = require('./energy-presenter');
+const { createServiceApi } = require('./energy-service-api');
 const { dayKey, recordTick, recordRest } = require('../records/today');
 const { DEFAULT_NAP_MS } = require('../view/nap/nap');
 
@@ -24,8 +25,12 @@ function startEnergyService({ intervalMs = 1000, napMs: initialNapMs = DEFAULT_N
   let record = store.load(); // resume today, or start fresh (§7)
   const energyStore = createEnergyStore();
   const savedEnergy = energyStore.load(); // resume energy across restart (#2)
-  let napMs = initialNapMs;
-  let onboardingActive = false; // suppress reminders during the intro ritual (#4)
+  // Shared mutable settings/flags: the API facade writes these, the service body
+  // below reads them — same object, so both stay in sync (§6.4 / #4).
+  const state = {
+    napMs: initialNapMs,
+    onboardingActive: false, // suppress reminders during the intro ritual (#4)
+  };
   const subscribers = new Set();
 
   const napController = createNapController({
@@ -46,7 +51,7 @@ function startEnergyService({ intervalMs = 1000, napMs: initialNapMs = DEFAULT_N
       : undefined,
     onUpdate: ({ energy, events }) => {
       // Not during a nap ritual or onboarding — don't stack rituals (#4).
-      if (controller && !napController.isBusy() && !onboardingActive) {
+      if (controller && !napController.isBusy() && !state.onboardingActive) {
         if (events.includes('remind_nap')) controller.trigger({ level: 'nap' });
         else if (events.includes('remind_short')) controller.trigger({ level: 'short', energy });
       }
@@ -63,7 +68,7 @@ function startEnergyService({ intervalMs = 1000, napMs: initialNapMs = DEFAULT_N
       store.save(record);
       push();
     },
-    onNapNow: () => napController.start(napMs), // §5.1 二级建议被接受 → 小睡 (#3)
+    onNapNow: () => napController.start(state.napMs), // §5.1 二级建议被接受 → 小睡 (#3)
   });
 
   // Offline resume (#2): credit the time the app was closed as away → recharge.
@@ -72,7 +77,7 @@ function startEnergyService({ intervalMs = 1000, napMs: initialNapMs = DEFAULT_N
   }
 
   function push() {
-    const p = buildPanelPayload({ energy: driver.state.energy, record, napMs });
+    const p = buildPanelPayload({ energy: driver.state.energy, record, napMs: state.napMs });
     for (const fn of subscribers) fn(p);
   }
 
@@ -91,51 +96,18 @@ function startEnergyService({ intervalMs = 1000, napMs: initialNapMs = DEFAULT_N
     },
   });
 
-  return {
-    subscribe(fn) {
-      subscribers.add(fn);
-      return () => subscribers.delete(fn);
-    },
+  return createServiceApi({
+    subscribers,
     push,
-    act(kind) {
-      // User-initiated → immediate (bypass the §6.2 auto-reminder buffer).
-      if (kind === 'short') {
-        controller.trigger({ level: 'short', energy: driver.state.energy, immediate: true });
-      } else if (kind === 'nap') {
-        napController.start(napMs);
-      }
-    },
-    setDuration(ms) {
-      napMs = ms;
-      if (persistNapMs) persistNapMs(ms); // §6.4 setting persists
-      push();
-    },
-    /** Suppress auto reminders while the onboarding ritual is on screen (#4). */
-    setOnboardingActive(active) {
-      onboardingActive = active;
-    },
-    dev(action) {
-      if (action === 'ff') driver.tick(60000);
-      else if (action === 'remind') {
-        controller.trigger({ level: 'short', energy: driver.state.energy, immediate: true });
-      } else if (action === 'remindNap') controller.trigger({ level: 'nap', immediate: true });
-      else if (action === 'napRitual') napController.start(12000);
-      else if (action === 'reset') driver.reset();
-    },
-    flush() {
-      store.flush();
-      energyStore.save(driver.state);
-      energyStore.flush();
-    },
-    destroy() {
-      loop.stop();
-      store.flush();
-      energyStore.save(driver.state);
-      energyStore.flush();
-      controller.destroy();
-      napController.destroy();
-    },
-  };
+    driver,
+    controller,
+    napController,
+    store,
+    energyStore,
+    loop,
+    state,
+    persistNapMs,
+  });
 }
 
 module.exports = { startEnergyService };
