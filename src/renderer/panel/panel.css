@@ -70,7 +70,7 @@ body {
   position: absolute;
   inset: 0;
   border-radius: inherit;
-  background: radial-gradient(120% 150% at 50% -25%, rgba(195, 248, 222, 0.18) 0%, transparent 60%);
+  background: radial-gradient(130% 165% at 24% -18%, rgba(195, 248, 222, 0.32) 0%, transparent 58%);
   pointer-events: none;
 }
 
