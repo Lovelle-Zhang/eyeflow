@@ -211,23 +211,73 @@
     /* ── Reminder island — Mira's lightest touch, rebuilt from app tokens ─ */
     /* Pixel-matched to the app's island.html — same padding, radius, green, shadow, type. */
     .island { display: inline-flex; align-items: center; gap: 13px; max-width: 100%; padding: 14px 26px 14px 16px; border-radius: 999px; background: rgba(26, 107, 82, 0.97); color: #f6f7f9; font-size: 16.5px; font-weight: 600; line-height: 1.25; letter-spacing: 0.01em; box-shadow: 0 14px 32px -12px rgba(20,20,19,0.24), inset 0 0 0 1px rgba(255,255,255,0.14); }
-    .island .ic { width: 54px; height: 54px; flex: 0 0 auto; display: block; border-radius: 15px; }
+    .island .lens { --lf: 30px; }
+    .island .isl-body { display: grid; gap: 7px; min-width: 168px; }
+    .island .isl-track { height: 3px; border-radius: 999px; background: rgba(255,255,255,0.18); overflow: hidden; }
+    .island .isl-fill { height: 100%; width: 100%; border-radius: 999px; background: #6FE7C3; }
+    .island .isl-count { flex: 0 0 auto; font-size: 20px; font-weight: 600; color: #6fe7c3; font-variant-numeric: tabular-nums; margin-left: 4px; }
     /* Live island — loops its real self-closing rest: 看远处 → the bar drains → 已记录 ✓.
-       Slow (8s) and gentle (a draining bar + a crossfade, no flash). It's the island
-       actually working, not a still image. reduced-motion freezes it on the rest state. */
+       Slow (8s), gentle. reduced-motion freezes it on the rest state. */
     .island.live { align-items: center; }
-    .island.live .isl-body { display: grid; gap: 7px; min-width: 168px; }
     .island.live .isl-msg { position: relative; height: 21px; }
     .island.live .isl-msg span { position: absolute; inset: 0; white-space: nowrap; }
     .island.live .isl-msg .done { color: #d7f5ea; }
-    .island.live .isl-track { height: 3px; border-radius: 999px; background: rgba(255,255,255,0.18); overflow: hidden; }
-    .island.live .isl-fill { height: 100%; width: 100%; border-radius: 999px; background: #6FE7C3; }
     .island.live .isl-msg .rest { animation: islMsgRest 8s var(--ease) infinite; }
     .island.live .isl-msg .done { opacity: 0; animation: islMsgDone 8s var(--ease) infinite; }
     .island.live .isl-fill { animation: islFillLoop 8s var(--ease) infinite; }
     @keyframes islFillLoop { 0%,6% { width: 100%; } 60% { width: 0%; } 65%,100% { width: 100%; } }
     @keyframes islMsgRest { 0%,58% { opacity: 1; } 64%,96% { opacity: 0; } 100% { opacity: 1; } }
     @keyframes islMsgDone { 0%,58% { opacity: 0; } 64%,96% { opacity: 1; } 100% { opacity: 0; } }
+
+    /* ── Mira embedded lens — a dark lens holding the green pulse, sitting directly
+       on the green vessel (no light plate). ONE Mira across reminders + rest scenes.
+       Size via --lf (lens height); pulse ~0.6×, quietly breathing. */
+    .lens { position: relative; flex: 0 0 auto; width: calc(var(--lf) * 1.55); height: var(--lf); border-radius: 999px; overflow: hidden; background: radial-gradient(130% 150% at 34% 22%, #123029, #07140f 80%); box-shadow: inset 0 1px 2px rgba(140,240,210,0.14); }
+    .lens i { position: absolute; left: 50%; top: 50%; transform: translate(-50%,-50%); width: calc(var(--lf) * 0.6); height: calc(var(--lf) * 0.6); border-radius: 50%; background: radial-gradient(circle, #f4fff9 0%, #8fe6c0 36%, rgba(111,231,195,0.4) 56%, transparent 74%); animation: lensBreath 5s var(--ease) infinite; }
+    @keyframes lensBreath { 0%,100% { transform: translate(-50%,-50%) scale(1); } 50% { transform: translate(-50%,-50%) scale(1.1); } }
+
+    /* ── 小睡 · 全屏回充 (§6.3) — a deep-green rest scene; Mira's light settles to a
+       line that BRIGHTENS as the charge bar fills. Loops so the 回充 is visible. */
+    .rest-scene { position: relative; container-type: inline-size; aspect-ratio: 1.6; display: grid; justify-items: center; align-content: center; gap: 5cqi; overflow: hidden; text-align: center; color: rgba(255,255,255,0.94); background: radial-gradient(46% 42% at 50% 38%, rgba(243,238,199,0.10) 0%, transparent 56%), radial-gradient(78% 74% at 50% 42%, #1e6650 0%, #16483a 38%, #0e3229 72%, #0a241d 100%); }
+    .rest-scene .lens { --lf: 13cqi; }
+    .rest-scene .lens i { width: calc(var(--lf) * 0.58); height: calc(var(--lf) * 0.14); border-radius: 999px; animation: napBright 6s var(--ease) infinite; }
+    @keyframes napBright { 0% { opacity: 0.32; transform: translate(-50%,-50%) scaleX(1); } 46% { opacity: 0.96; transform: translate(-50%,-50%) scaleX(1.16); } 74% { opacity: 0.9; transform: translate(-50%,-50%) scaleX(1.14); } 82% { opacity: 0.32; transform: translate(-50%,-50%) scaleX(1); } 100% { opacity: 0.32; transform: translate(-50%,-50%) scaleX(1); } }
+    .rest-scene .rs-clock { font-size: 12cqi; font-weight: 200; letter-spacing: 0.02em; font-variant-numeric: tabular-nums; line-height: 1; }
+    .rest-scene .rs-track { width: 46cqi; height: 0.8cqi; border-radius: 999px; background: rgba(255,255,255,0.16); overflow: hidden; }
+    .rest-scene .rs-fill { height: 100%; width: 18%; border-radius: 999px; background: #6fe7c3; animation: napFill 6s var(--ease) infinite; }
+    @keyframes napFill { 0% { width: 18%; } 46% { width: 100%; } 78% { width: 100%; } 82% { width: 18%; } 100% { width: 18%; } }
+    .rest-scene .rs-msg { margin: 0; font-size: 3.6cqi; font-weight: 500; }
+
+    /* ── 轻量 · 顶端岛 (§6.1) — the small island shown WHERE it lives: pinned to the
+       top of a plain desktop, at its true small proportion (parallels 加强 below). */
+    /* shared desktop backdrop — both screens sit on the SAME desktop; 加强 just adds
+       a warm wash on top of it (below), so the two frames read as one place. */
+    .top-screen, .strong-wash { background: linear-gradient(165deg, #eef1ea 0%, #e3e8df 100%); }
+    .top-screen { container-type: inline-size; aspect-ratio: 1.7; display: grid; justify-items: center; align-content: start; padding-top: 4.5cqi; }
+    .top-screen .island { gap: 1.5cqi; padding: 1.6cqi 3.4cqi 1.6cqi 1.6cqi; font-size: 2.6cqi; }
+    .top-screen .island .lens { --lf: 4.9cqi; }
+    .top-screen .island .isl-body { min-width: 0; gap: 1.1cqi; }
+    .top-screen .island .isl-track { height: 0.5cqi; }
+    .top-screen .island .isl-count { font-size: 3cqi; margin-left: 1.2cqi; }
+
+    /* ── 加强 · 居中大胶囊 (§6.1) — a bigger capsule (≈2× the island) floating on a
+       faint warm wash: more present, never a takeover. */
+    /* the warm wash is a WHISPER (matches the app's faint §6.1 值): a hint of warmth
+       at the center, the shared grey desktop still reads everywhere. */
+    .strong-wash { container-type: inline-size; aspect-ratio: 1.7; display: grid; place-items: center; padding: 8cqi; background: radial-gradient(96% 92% at 50% 48%, rgba(255,239,214,0.24) 0%, rgba(252,227,188,0.12) 46%, transparent 72%), linear-gradient(165deg, #eef1ea 0%, #e3e8df 100%); }
+    /* cqi-sized so it floats centered (not filling) and the count never clips */
+    .island.big { gap: 3cqi; padding: 3cqi 5cqi 3cqi 3cqi; font-size: 4.2cqi; max-width: 100%; }
+    .island.big .lens { --lf: 7.6cqi; }
+    .island.big .isl-body { min-width: 0; gap: 2cqi; }
+    .island.big .isl-body > div:first-child { white-space: nowrap; }
+    .island.big .isl-track { height: 0.9cqi; }
+    .island.big .isl-count { font-size: 5.6cqi; margin-left: 1.6cqi; }
+
+    /* ── 相遇 · 第一次见面 (§7) — the onboarding page IS one big green capsule;
+       Mira (The Pulse) + one line of 台词 sit inside it, generously sized. */
+    .meet-scene { container-type: inline-size; aspect-ratio: 1.55; display: grid; justify-items: center; align-content: center; gap: 6cqi; border-radius: 999px; overflow: hidden; text-align: center; color: #f4fff9; background: radial-gradient(135% 105% at 20% 6%, rgba(128,228,178,0.5) 0%, rgba(128,228,178,0) 46%), radial-gradient(125% 115% at 88% 104%, rgba(4,22,14,0.62) 0%, rgba(4,22,14,0) 52%), linear-gradient(150deg, #34a883 0%, #1a6b52 45%, #0b2f22 100%); box-shadow: 0 30px 70px -18px rgba(12,40,30,0.5), inset 0 0 0 1px rgba(255,255,255,0.12); }
+    .meet-scene .lens { --lf: 15cqi; }
+    .meet-scene .meet-msg { margin: 0; font-size: 6.4cqi; font-weight: 500; }
 
     /* desktop companion — Mira's expanded bubble (from companion.html) */
     .companion-card { display: inline-flex; align-items: center; gap: 16px; max-width: 100%; padding: 13px 18px 13px 22px; border-radius: 22px; background: var(--panel); border: 1px solid var(--line); box-shadow: var(--shadow-lift); text-align: left; }
@@ -269,7 +319,7 @@
       radial-gradient(circle 4.5px at 61px 17px, rgba(20,20,19,0.14) 99%, transparent),
       var(--panel-strong); }
     .screen-card img { display: block; width: 100%; height: auto; }
-    .screen-card :is(.mock-app, .mock-break, .mock-share) { width: 100%; }
+    .screen-card :is(.mock-app, .mock-share) { width: 100%; }
     /* real product shot (transparent PNG, self-shadowed) — no card frame around it */
     .screen-card.app-shot-cell { border: none; background: transparent; box-shadow: none; overflow: visible; }
     .app-shot { display: block; width: 100%; height: auto; }
@@ -312,33 +362,6 @@
     .ma-list i::before { content: ""; display: block; width: var(--w); height: 100%; border-radius: inherit; background: var(--mira); }
     .ma-list b { font-size: max(2.1cqi, 10px); font-weight: 500; color: var(--ink-soft); white-space: nowrap; }
 
-    /* break-lock (L4 全屏恢复) — same surface, now shown in the daytime theme. */
-    .mock-break { position: relative; aspect-ratio: 1.6; display: grid; justify-items: center; align-content: center; gap: 8px; gap: 1.7cqi; padding: 16px; padding: 3.2cqi; text-align: center; color: var(--ink);
-      background: linear-gradient(180deg, rgba(31,122,94,0.07), transparent 42%), linear-gradient(180deg, var(--panel-strong) 0%, #F0EEE6 100%); }
-    .mock-break .mira { width: auto; height: auto; animation: none; }
-    .mock-break .mira::before { display: none; }
-    .mock-break .pet { --rest: 0.92; --peak: 0.99; }
-    .mb-title { font-size: 18px; font-size: max(4cqi, 15px); font-weight: 650; letter-spacing: 0.02em; }
-    .mb-copy { margin: -4px 0 0; margin: -0.8cqi 0 0; font-size: 12px; font-size: max(2.5cqi, 11px); color: var(--muted); }
-    .mb-steps { display: flex; gap: 1.6cqi; }
-    .mb-steps span { padding: 1cqi 2.4cqi; border-radius: 999px; border: 1px solid var(--line); font-size: 11px; font-size: max(2.3cqi, 10px); color: var(--muted); white-space: nowrap; }
-    .mb-steps .on { border-color: var(--mira-line); color: var(--mira-strong); background: var(--mira-soft); }
-    /* live ring: conic drains through the mock's 12s rest loop (like the island). */
-    .mb-ring { width: 96px; width: max(19cqi, 88px); aspect-ratio: 1; border-radius: 50%; display: grid; place-items: center; margin-top: 0.4cqi;
-      background: conic-gradient(var(--mira) var(--mbp), rgba(31,122,94,0.13) 0);
-      box-shadow: inset 0 0 0 1px var(--line); animation: mbDrain 12s linear infinite; }
-    .mb-timer { width: 76%; aspect-ratio: 1; border-radius: 50%; background: rgba(255,255,255,0.72); border: 1px solid var(--line); display: grid; place-content: center; gap: 0.4cqi; text-align: center; }
-    .mb-tlabel { font-size: 9px; font-size: max(1.9cqi, 9px); letter-spacing: 0.12em; color: var(--muted-soft); }
-    .mb-tvals { position: relative; display: block; width: 44px; width: max(9cqi, 42px); height: 1.25em; font-size: 15px; font-size: max(3.4cqi, 13px); font-weight: 700; font-variant-numeric: tabular-nums; }
-    .mb-tvals i { position: absolute; inset: 0; font-style: normal; opacity: 0; animation: mbTick 12s linear infinite; }
-    .mb-tvals i:nth-child(2) { animation-delay: 4s; }
-    .mb-tvals i:nth-child(3) { animation-delay: 8s; }
-    .mb-escape { margin-top: 2px; margin-top: 0.5cqi; padding: 5px 14px; padding: 1.1cqi 3cqi; border-radius: 10px; border: 1px solid var(--mira-line); font-size: 11px; font-size: max(2.2cqi, 10px); color: var(--mira-strong); background: rgba(255,255,255,0.36); }
-    @keyframes mbDrain { 0% { --mbp: 96%; } 100% { --mbp: 3%; } }
-    /* Registered so the conic angle interpolates smoothly; without @property
-       support the keyframe still applies discretely — alive, just steppier. */
-    @property --mbp { syntax: "<percentage>"; inherits: false; initial-value: 62%; }
-    @keyframes mbTick { 0%, 30% { opacity: 1; } 33%, 100% { opacity: 0; } }
 
     /* daily share card — structure verbatim from the app's share-art-card:
        date · eyebrow · serif insight · three metrics · hairline · brand footer. */
@@ -457,7 +480,7 @@
       .stake + .stake { border-left: 0; border-top: 1px solid var(--line); }
       /* Phones: release the mock aspect lock — with legibility floors the content
          outgrows the ratio box and screen-card overflow:hidden clips it (Safari). */
-      .mock-app, .mock-break, .mock-share { aspect-ratio: auto; }
+      .mock-app, .mock-share { aspect-ratio: auto; }
       .mock-app { grid-template-columns: 1fr; }
       .ma-side { grid-template-columns: auto 1fr; align-items: start; padding: var(--s4); gap: var(--s3); border-right: 0; border-bottom: 1px solid var(--line); }
       .ma-brand { font-size: 11px; gap: 6px; }
@@ -620,12 +643,6 @@
       /* Act 3: no slide-in — the nudges are simply present; the live island freezes on
          its rest state (full bar, "看看远方"), no looping countdown. */
       .mock-stack .companion-card, .mock-stack .island { opacity: 1 !important; transform: none !important; }
-      /* Act 5 mock: freeze the break-lock ring mid-rest with a readable timer —
-         the animation kill would otherwise land both on their end states (empty). */
-      .mb-ring { --mbp: 62% !important; animation: none !important; }
-      .mb-tvals i { opacity: 0 !important; }
-      .mb-tvals i:first-child { opacity: 1 !important; }
-
       .island.live .isl-fill { width: 100% !important; }
       .island.live .isl-msg .rest { opacity: 1 !important; }
       .island.live .isl-msg .done { opacity: 0 !important; }
@@ -718,10 +735,10 @@
         <p class="body" data-en="The first time you open EyeFlow, she introduces herself and walks you through one short break together — never a settings screen, just a small hello."><span class="copy-line">第一次打开 EyeFlow，</span><span class="copy-line">她会自我介绍，陪你先试一次短歇。</span><span class="copy-line">不像设置页，更像一次轻轻的打招呼。</span></p>
       </div>
       <div class="screen-card app-shot-cell reveal">
-        <img class="app-shot" src="shots/onboarding-zh.png" data-en-src="shots/onboarding-en.png"
-             width="470" height="300" loading="lazy" decoding="async"
-             alt="EyeFlow 相遇仪式：一片安静的绿，中央 Mira 的光点，一句「你好，我是 Mira」"
-             data-en-alt="EyeFlow's first-meeting ritual — a calm field of green with Mira's point of light and one line: Hi, I'm Mira" />
+        <div class="meet-scene" role="img" aria-label="EyeFlow 相遇仪式：一片安静的绿，中央 Mira 的光点，一句「你好，我是 Mira」" data-en-label="EyeFlow's first-meeting ritual — a calm field of green with Mira's point of light and one line: Hi, I'm Mira">
+          <div class="lens" aria-hidden="true"><i></i></div>
+          <p class="meet-msg" data-en="Hi, I'm Mira">你好，我是 Mira</p>
+        </div>
       </div>
     </div>
   </section>
@@ -753,36 +770,30 @@
       <div class="mock-stack reveal">
         <div class="mock-cell">
         <p class="mock-tag" data-en="Light · top island">轻量 · 顶端岛</p>
-        <div class="island live" role="img" aria-label="EyeFlow 顶部提醒岛：看看远方休息一下，看完自动记录" data-en-label="EyeFlow's reminder island at the top of the screen: look into the distance to rest, logged automatically when you're done">
-          <svg class="ic" viewBox="0 0 1024 1024" aria-hidden="true">
-            <defs>
-              <linearGradient id="isl-bg" x1="216" y1="156" x2="826" y2="874" gradientUnits="userSpaceOnUse"><stop offset="0" stop-color="#EAFFF6"/><stop offset=".58" stop-color="#BDEAFF"/><stop offset="1" stop-color="#F3EEC7"/></linearGradient>
-              <linearGradient id="isl-lens" x1="265" y1="335" x2="759" y2="653" gradientUnits="userSpaceOnUse"><stop offset="0" stop-color="#0E1C20"/><stop offset="1" stop-color="#10272A"/></linearGradient>
-              <radialGradient id="isl-pulse" cx="512" cy="494" r="90" gradientUnits="userSpaceOnUse"><stop offset="0" stop-color="#f4fff9"/><stop offset=".45" stop-color="#8fe6c0"/><stop offset=".72" stop-color="#8fe6c0" stop-opacity=".22"/><stop offset="1" stop-color="#8fe6c0" stop-opacity="0"/></radialGradient>
-            </defs>
-            <rect width="1024" height="1024" rx="230" fill="url(#isl-bg)"/>
-            <!-- new Mira (§8.5 / MIRA_SYSTEM): a small dark lens holding ONE point of light, not two eyes -->
-            <rect x="265" y="335" width="494" height="318" rx="159" fill="url(#isl-lens)"/>
-            <circle cx="512" cy="494" r="90" fill="url(#isl-pulse)"/>
-            <circle cx="803" cy="344" r="82" fill="#6FE7C3"/>
-          </svg>
+        <div class="screen-card"><div class="top-screen">
+        <div class="island" role="img" aria-label="EyeFlow 顶部提醒岛：看看远方休息一下，看完自动记录" data-en-label="EyeFlow's reminder island at the top of the screen: look into the distance to rest, logged automatically when you're done">
+          <div class="lens" aria-hidden="true"><i></i></div>
           <div class="isl-body">
-            <div class="isl-msg">
-              <span class="rest" data-en="Look into the distance.">看看远方，休息一下。</span>
-              <span class="done" data-en="Rested · logged ✓">休息完成 · 已记录 ✓</span>
-            </div>
-            <div class="isl-track"><div class="isl-fill"></div></div>
+            <div data-en="Look into the distance.">看看远方，休息一下。</div>
+            <div class="isl-track"><div class="isl-fill" style="width:64%"></div></div>
           </div>
         </div>
+        </div></div>
         <p class="mock-note" data-en="Rests at the very top; tucks itself away when you're done.">贴在屏幕顶端，看完自己收起。</p>
         </div>
         <div class="mock-cell">
         <p class="mock-tag" data-en="Strong · centered">加强 · 居中大胶囊</p>
-        <div class="screen-card app-shot-cell reveal">
-          <img class="app-shot" src="shots/strong-zh.png" data-en-src="shots/strong-en.png"
-               width="474" height="300" loading="lazy" decoding="async"
-               alt="EyeFlow 加强档提醒：屏幕中央一枚大气色胶囊，配一层柔和暖背景"
-               data-en-alt="EyeFlow's strong reminder — a big 气色 capsule centered on a soft warm wash" />
+        <div class="screen-card reveal">
+          <div class="strong-wash">
+            <div class="island big" role="img" aria-label="EyeFlow 加强档提醒：屏幕中央一枚更大的气色胶囊，配一层柔和暖背景" data-en-label="EyeFlow's strong reminder — a bigger 气色 capsule centered on a soft warm wash">
+              <div class="lens" aria-hidden="true"><i></i></div>
+              <div class="isl-body">
+                <div data-en="Rest your eyes — look far">眼睛歇歇，看看远处</div>
+                <div class="isl-track"><div class="isl-fill" style="width:100%"></div></div>
+              </div>
+              <div class="isl-count">18</div>
+            </div>
+          </div>
         </div>
         <p class="mock-note" data-en="More present, with a warm wash — still not a takeover.">更在场、带一层暖背景，仍不夺屏。</p>
         </div>
@@ -800,38 +811,27 @@
       <div class="mock-stack reveal">
         <div class="mock-cell">
         <p class="mock-tag" data-en="Short break · 20s">短歇 · 20 秒</p>
-        <div class="screen-card is-window">
-        <div class="mock-break" role="img" aria-label="EyeFlow 短歇：Mira 陪你看向远处，环形倒计时走完自动回来" data-en-label="EyeFlow's short break: Mira looks into the distance with you while the ring counts down">
-          <div class="mira" aria-hidden="true">
-            <div class="pet">
-            </div>
+        <div class="screen-card"><div class="top-screen">
+        <div class="island" role="img" aria-label="EyeFlow 短歇：看向远处 20 秒，进度条走完自动记录" data-en-label="EyeFlow's short break: look into the distance for 20 seconds; logged when the bar runs out">
+          <div class="lens" aria-hidden="true"><i></i></div>
+          <div class="isl-body">
+            <div data-en="Look into the distance">看向远处</div>
+            <div class="isl-track"><div class="isl-fill" style="width:58%"></div></div>
           </div>
-          <strong class="mb-title" data-en="Look into the distance">看向远处</strong>
-          <p class="mb-copy" data-en="No need to stare at the screen — look far away for 20 seconds, then come back.">不用盯着屏幕，看远处 20 秒再回来。</p>
-          <div class="mb-steps" aria-hidden="true">
-            <span class="on" data-en="Gaze far">远眺</span>
-            <span data-en="Slow blinks">慢眨眼</span>
-            <span data-en="Slow breaths">慢呼吸</span>
-            <span data-en="Eyes closed">闭眼</span>
-          </div>
-          <div class="mb-ring" aria-hidden="true">
-            <div class="mb-timer">
-              <span class="mb-tlabel" data-en="Left">剩余</span>
-              <b class="mb-tvals"><i>00:18</i><i>00:12</i><i>00:06</i></b>
-            </div>
-          </div>
-          <span class="mb-escape" data-en="Emergency exit">紧急退出</span>
+          <div class="isl-count">12</div>
         </div>
-        </div>
+        </div></div>
         <p class="mock-note" data-en="Look far for 20 seconds — logged when you're back.">看远处 20 秒，看完自动记录。</p>
         </div>
         <div class="mock-cell">
         <p class="mock-tag" data-en="Nap · full recharge">小睡 · 全屏回充</p>
         <div class="screen-card">
-          <img class="app-shot" src="shots/nap-zh.png" data-en-src="shots/nap-en.png"
-               width="474" height="300" loading="lazy" decoding="async"
-               alt="EyeFlow 小睡仪式：全屏变暗，光点收成一线，气色随回充慢慢变亮"
-               data-en-alt="EyeFlow's nap ritual — the screen dims, the light settles to a line, 气色 slowly brightens as you recharge" />
+          <div class="rest-scene" role="img" aria-label="EyeFlow 小睡：全屏变暗，Mira 的光点收成一线，气色随充电条一点点亮回来" data-en-label="EyeFlow's nap — the screen dims, Mira's light settles to a line and brightens as the charge bar fills">
+            <div class="lens" aria-hidden="true"><i></i></div>
+            <div class="rs-clock">0:42</div>
+            <div class="rs-track"><div class="rs-fill"></div></div>
+            <p class="rs-msg" data-en="Close your eyes, and settle.">闭上眼，缓一缓。</p>
+          </div>
         </div>
         <p class="mock-note" data-en="Eyes closed longer — watch your 气色 brighten back up.">闭眼久一点，看着气色亮回来。</p>
         </div>
