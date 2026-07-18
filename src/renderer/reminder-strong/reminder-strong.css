@@ -57,8 +57,8 @@ body.awake .rs-stage::before {
   display: flex;
   align-items: center;
   gap: 26px;
-  min-width: 440px;
-  max-width: 600px;
+  max-width: 760px; /* wide enough that a normal prompt stays ONE line — a 2-line
+                       wrap would inflate height + starve width, breaking the 2× */
   padding: 24px 44px 24px 24px;
   color: #f6f7f9;
   opacity: 0;
@@ -91,8 +91,7 @@ body.awake .rs-stage::before {
 
 .rs .app-mark {
   flex: 0 0 auto;
-  margin: 0 22px; /* reserve the scaled mark's overflow so gap/edge match ×2 */
-  transform: scale(2);
+  --ms: 2; /* real 88px mark (layout, not transform) — drives height like the island */
 }
 
 /* content & controls (.rs__*) → reminder-strong-controls.css */

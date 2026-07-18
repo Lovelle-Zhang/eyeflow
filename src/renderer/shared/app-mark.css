@@ -4,13 +4,17 @@
    capsule, so this stays a steady mark. One definition → one symbol everywhere. */
 
 .app-mark {
+  /* --ms: mark scale. island/panel keep 1 (values below are unchanged at ×1);
+     the 加强档 big capsule sets 2 so the mark grows in LAYOUT — driving the
+     capsule height the same way the ×1 mark does on the island. */
+  --ms: 1;
   position: relative;
   flex: none;
-  width: 44px;
-  height: 44px;
-  border-radius: 12px;
+  width: calc(44px * var(--ms));
+  height: calc(44px * var(--ms));
+  border-radius: calc(12px * var(--ms));
   background: linear-gradient(150deg, #eafff6 0%, #bdeaff 56%, #f3eec7 100%);
-  box-shadow: 0 3px 8px -2px rgba(8, 30, 20, 0.35);
+  box-shadow: 0 calc(3px * var(--ms)) calc(8px * var(--ms)) calc(-2px * var(--ms)) rgba(8, 30, 20, 0.35);
 }
 
 .app-mark__lens {
@@ -18,9 +22,9 @@
   left: 50%;
   top: 50%;
   transform: translate(-50%, -50%);
-  width: 27px;
-  height: 17px;
-  border-radius: 9px;
+  width: calc(27px * var(--ms));
+  height: calc(17px * var(--ms));
+  border-radius: calc(9px * var(--ms));
   background: radial-gradient(130% 150% at 34% 22%, #123029, #07140f 80%);
 }
 
@@ -29,8 +33,8 @@
   left: 50%;
   top: 50%;
   transform: translate(-50%, -50%);
-  width: 9px;
-  height: 9px;
+  width: calc(9px * var(--ms));
+  height: calc(9px * var(--ms));
   border-radius: 50%;
   background: radial-gradient(circle, #f4fff9 0%, #8fe6c0 45%, transparent 78%);
 }
