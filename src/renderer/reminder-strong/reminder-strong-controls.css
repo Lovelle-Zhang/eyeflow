@@ -1,0 +1,62 @@
+/* 加强档 — content & controls (split from reminder-strong.css for the §9 budget):
+   the same fields as the island (../reminder/reminder-controls.css) at 2× — prompt
+   text, short-break progress bar, countdown, L2 nap button. The capsule shell +
+   left mark visual live in reminder-strong.css. */
+
+.rs__body {
+  flex: 1 1 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  min-width: 0;
+}
+
+.rs__text {
+  font-size: 32px;
+  font-weight: 500;
+  line-height: 1.25;
+  letter-spacing: 0;
+}
+
+.rs__track {
+  height: 6px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.16);
+  overflow: hidden;
+}
+
+.rs__fill {
+  height: 100%;
+  width: 100%;
+  border-radius: 999px;
+  background: var(--mint);
+  transition: width 1s linear;
+}
+
+.rs__count {
+  flex: 0 0 auto;
+  font-size: 30px;
+  font-weight: 600;
+  color: var(--mint);
+  font-variant-numeric: tabular-nums;
+  min-width: 1.6em;
+  text-align: right;
+}
+
+.rs__nap {
+  flex: 0 0 auto;
+  font: inherit;
+  font-size: 26px;
+  font-weight: 500;
+  color: #f2fff9;
+  background: rgba(255, 255, 255, 0.16);
+  border: 1px solid rgba(255, 255, 255, 0.28);
+  border-radius: 999px;
+  padding: 14px 30px;
+  cursor: pointer;
+  transition: background 160ms ease;
+}
+
+.rs__nap:hover {
+  background: rgba(255, 255, 255, 0.24);
+}
