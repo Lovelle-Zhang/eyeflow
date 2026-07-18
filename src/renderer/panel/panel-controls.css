@@ -73,10 +73,12 @@
   border-top: 1px solid var(--hairline);
 }
 
+/* each label hugs ITS control (6px below) and is separated from the group above
+   by the segs' 12px margin — so label+control read as one group, evenly spaced */
 .settings__t {
   color: var(--text-soft);
   font-size: 12px;
-  margin-bottom: 8px;
+  margin-bottom: 6px;
 }
 
 /* joined segmented control (native macOS): one track + a raised, neutral selected
@@ -85,6 +87,7 @@
   display: flex;
   gap: 2px;
   padding: 2px;
+  margin-bottom: 12px;
   border-radius: 9px;
   background: var(--seg-bg);
   border: 1px solid var(--ctl-border);
