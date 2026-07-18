@@ -1,7 +1,8 @@
 'use strict';
 
 /**
- * Menubar (CHARTER §4): the tray icon (constant monochrome Mira, §8.5) + the
+ * Menubar (CHARTER §4): the tray icon (Mira, her core breathing green while
+ * alive — see tray-pulse.js) + the
  * popover panel. Binds the panel's IPC to the core energy service and streams
  * live data to it. Dev triggers live in the tray's right-click menu, keeping the
  * product panel clean.
@@ -9,6 +10,7 @@
 
 const { app, Tray, Menu, screen, ipcMain } = require('electron');
 const { miraTrayImage } = require('./tray/tray-icon');
+const { startTrayPulse } = require('./tray/tray-pulse');
 const { createPanelWindow } = require('./overlay/panel-window');
 const { miraSvg } = require('../view/mira/mira-svg');
 const { trayStrings } = require('../view/i18n/tray-strings');
@@ -16,6 +18,8 @@ const { trayStrings } = require('../view/i18n/tray-strings');
 function createMenubar(service, hooks = {}) {
   const tray = new Tray(miraTrayImage());
   tray.setToolTip('EyeFlow');
+  const stopPulse = startTrayPulse(tray); // core breathes green while she's alive
+  app.on('before-quit', stopPulse);
   const win = createPanelWindow();
 
   function positionUnderTray() {
