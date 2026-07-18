@@ -187,17 +187,8 @@
       display: grid; place-items: center; overflow: hidden;
       transform: scale(var(--rest)); transform-origin: center; animation: breathe var(--breath) var(--ease) infinite;
     }
-    .pet::before { content: ""; position: absolute; top: var(--vt); left: var(--vl); width: var(--vw); height: var(--vh); border-radius: 999px; background: linear-gradient(90deg, rgba(127,232,207,0.22), rgba(104,166,232,0.16)), rgba(20,34,36,0.88); box-shadow: inset 0 0 0 1px rgba(255,255,255,0.12); }
-    .pet::after { content: ""; position: absolute; top: var(--st); right: var(--sr); width: var(--ss); height: var(--ss); border-radius: 50%; background: #80d7bd; box-shadow: 0 0 10px rgba(128,215,189,0.45); animation: signal var(--breath) var(--ease) infinite; }
-    .face { position: absolute; top: var(--ft); left: var(--fl); width: var(--fw); height: var(--fh); z-index: 1; }
-    .face::before, .face::after { content: ""; position: absolute; top: 0; width: var(--eye); height: var(--eye); border-radius: 50%; background: #cdd6d1; }
-    .face::before { left: 1px; } .face::after { right: 1px; }
-    body[data-blink="single"] .face::before, body[data-blink="single"] .face::after { animation: blink1 var(--blink) var(--ease) 1; }
-    body[data-blink="double"] .face::before, body[data-blink="double"] .face::after { animation: blink2 var(--dblink) var(--ease) 1; }
-    .mouth { position: absolute; top: var(--mt); left: 50%; width: var(--mw); height: var(--mh); transform: translateX(-50%); border-bottom: var(--mstroke) solid rgba(31,122,94,0.55); border-radius: 0 0 999px 999px; z-index: 1; }
-    .cheek { position: absolute; top: var(--ct); width: var(--cw); height: var(--ch); border-radius: 999px; background: rgba(255,139,176,0.2); z-index: 1; }
-    .cheek.l { left: var(--coff); } .cheek.r { right: var(--coff); }
-    .ant { position: absolute; top: var(--at); left: var(--al); width: var(--aw); height: var(--ah); border-top: var(--astroke) solid rgba(180,222,208,0.22); border-radius: 50%; z-index: 0; transform-origin: 50% 100%; animation: sway var(--sway) var(--ease) infinite; }
+    .pet::before { content: ""; position: absolute; top: var(--vt); left: var(--vl); width: var(--vw); height: var(--vh); border-radius: 999px; background: radial-gradient(circle closest-side at 50% 50%, #f4fff9 0%, #8fe6c0 40%, rgba(143,230,192,0) 80%), linear-gradient(90deg, rgba(127,232,207,0.22), rgba(104,166,232,0.16)), rgba(20,34,36,0.88); box-shadow: inset 0 0 0 1px rgba(255,255,255,0.12); }
+    /* Mira (MIRA_SYSTEM): the lens holds ONE point of light — no eyes/mouth/cheeks/antenna (retired) */
 
     /* EyeFlow brand mark — browser favicon, nav mark and app-mock marks share
        the source app icon. Mira's character avatar remains separate. */
@@ -209,10 +200,6 @@
 
     @keyframes float { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-5px); } }
     @keyframes breathe { 0%,100% { transform: scale(var(--rest)) translateY(0); } 40%,52% { transform: scale(var(--peak)) translateY(var(--lift)); } 88% { transform: scale(var(--rest)) translateY(0); } }
-    @keyframes signal { 0%,100% { transform: scale(0.98); } 46% { transform: scale(1.05); } }
-    @keyframes sway { 0%,100% { transform: rotate(-0.3deg); } 50% { transform: rotate(0.3deg); } }
-    @keyframes blink1 { 0%,100% { transform: scaleY(1); } 50% { transform: translateY(1px) scaleY(0.2); } }
-    @keyframes blink2 { 0%,100% { transform: scaleY(1); } 22%,30%,64%,72% { transform: translateY(1px) scaleY(0.2); } 45%,86% { transform: scaleY(1); } }
 
     /* character portrait Mira — sits between eyebrow and lede */
     .portrait { margin: var(--s6) 0 var(--flow-title); display: grid; place-items: center; }
@@ -224,23 +211,73 @@
     /* ── Reminder island — Mira's lightest touch, rebuilt from app tokens ─ */
     /* Pixel-matched to the app's island.html — same padding, radius, green, shadow, type. */
     .island { display: inline-flex; align-items: center; gap: 13px; max-width: 100%; padding: 14px 26px 14px 16px; border-radius: 999px; background: rgba(26, 107, 82, 0.97); color: #f6f7f9; font-size: 16.5px; font-weight: 600; line-height: 1.25; letter-spacing: 0.01em; box-shadow: 0 14px 32px -12px rgba(20,20,19,0.24), inset 0 0 0 1px rgba(255,255,255,0.14); }
-    .island .ic { width: 54px; height: 54px; flex: 0 0 auto; display: block; border-radius: 15px; }
+    .island .lens { --lf: 30px; }
+    .island .isl-body { display: grid; gap: 7px; min-width: 168px; }
+    .island .isl-track { height: 3px; border-radius: 999px; background: rgba(255,255,255,0.18); overflow: hidden; }
+    .island .isl-fill { height: 100%; width: 100%; border-radius: 999px; background: #6FE7C3; }
+    .island .isl-count { flex: 0 0 auto; font-size: 20px; font-weight: 600; color: #6fe7c3; font-variant-numeric: tabular-nums; margin-left: 4px; }
     /* Live island — loops its real self-closing rest: 看远处 → the bar drains → 已记录 ✓.
-       Slow (8s) and gentle (a draining bar + a crossfade, no flash). It's the island
-       actually working, not a still image. reduced-motion freezes it on the rest state. */
+       Slow (8s), gentle. reduced-motion freezes it on the rest state. */
     .island.live { align-items: center; }
-    .island.live .isl-body { display: grid; gap: 7px; min-width: 168px; }
     .island.live .isl-msg { position: relative; height: 21px; }
     .island.live .isl-msg span { position: absolute; inset: 0; white-space: nowrap; }
     .island.live .isl-msg .done { color: #d7f5ea; }
-    .island.live .isl-track { height: 3px; border-radius: 999px; background: rgba(255,255,255,0.18); overflow: hidden; }
-    .island.live .isl-fill { height: 100%; width: 100%; border-radius: 999px; background: #6FE7C3; }
     .island.live .isl-msg .rest { animation: islMsgRest 8s var(--ease) infinite; }
     .island.live .isl-msg .done { opacity: 0; animation: islMsgDone 8s var(--ease) infinite; }
     .island.live .isl-fill { animation: islFillLoop 8s var(--ease) infinite; }
     @keyframes islFillLoop { 0%,6% { width: 100%; } 60% { width: 0%; } 65%,100% { width: 100%; } }
     @keyframes islMsgRest { 0%,58% { opacity: 1; } 64%,96% { opacity: 0; } 100% { opacity: 1; } }
     @keyframes islMsgDone { 0%,58% { opacity: 0; } 64%,96% { opacity: 1; } 100% { opacity: 0; } }
+
+    /* ── Mira embedded lens — a dark lens holding the green pulse, sitting directly
+       on the green vessel (no light plate). ONE Mira across reminders + rest scenes.
+       Size via --lf (lens height); pulse ~0.6×, quietly breathing. */
+    .lens { position: relative; flex: 0 0 auto; width: calc(var(--lf) * 1.55); height: var(--lf); border-radius: 999px; overflow: hidden; background: radial-gradient(130% 150% at 34% 22%, #123029, #07140f 80%); box-shadow: inset 0 1px 2px rgba(140,240,210,0.14); }
+    .lens i { position: absolute; left: 50%; top: 50%; transform: translate(-50%,-50%); width: calc(var(--lf) * 0.6); height: calc(var(--lf) * 0.6); border-radius: 50%; background: radial-gradient(circle, #f4fff9 0%, #8fe6c0 36%, rgba(111,231,195,0.4) 56%, transparent 74%); animation: lensBreath 5s var(--ease) infinite; }
+    @keyframes lensBreath { 0%,100% { transform: translate(-50%,-50%) scale(1); } 50% { transform: translate(-50%,-50%) scale(1.1); } }
+
+    /* ── 小睡 · 全屏回充 (§6.3) — a deep-green rest scene; Mira's light settles to a
+       line that BRIGHTENS as the charge bar fills. Loops so the 回充 is visible. */
+    .rest-scene { position: relative; container-type: inline-size; aspect-ratio: 1.6; display: grid; justify-items: center; align-content: center; gap: 5cqi; overflow: hidden; text-align: center; color: rgba(255,255,255,0.94); background: radial-gradient(46% 42% at 50% 38%, rgba(243,238,199,0.10) 0%, transparent 56%), radial-gradient(78% 74% at 50% 42%, #1e6650 0%, #16483a 38%, #0e3229 72%, #0a241d 100%); }
+    .rest-scene .lens { --lf: 13cqi; }
+    .rest-scene .lens i { width: calc(var(--lf) * 0.58); height: calc(var(--lf) * 0.14); border-radius: 999px; animation: napBright 6s var(--ease) infinite; }
+    @keyframes napBright { 0% { opacity: 0.32; transform: translate(-50%,-50%) scaleX(1); } 46% { opacity: 0.96; transform: translate(-50%,-50%) scaleX(1.16); } 74% { opacity: 0.9; transform: translate(-50%,-50%) scaleX(1.14); } 82% { opacity: 0.32; transform: translate(-50%,-50%) scaleX(1); } 100% { opacity: 0.32; transform: translate(-50%,-50%) scaleX(1); } }
+    .rest-scene .rs-clock { font-size: 12cqi; font-weight: 200; letter-spacing: 0.02em; font-variant-numeric: tabular-nums; line-height: 1; }
+    .rest-scene .rs-track { width: 46cqi; height: 0.8cqi; border-radius: 999px; background: rgba(255,255,255,0.16); overflow: hidden; }
+    .rest-scene .rs-fill { height: 100%; width: 18%; border-radius: 999px; background: #6fe7c3; animation: napFill 6s var(--ease) infinite; }
+    @keyframes napFill { 0% { width: 18%; } 46% { width: 100%; } 78% { width: 100%; } 82% { width: 18%; } 100% { width: 18%; } }
+    .rest-scene .rs-msg { margin: 0; font-size: 3.6cqi; font-weight: 500; }
+
+    /* ── 轻量 · 顶端岛 (§6.1) — the small island shown WHERE it lives: pinned to the
+       top of a plain desktop, at its true small proportion (parallels 加强 below). */
+    /* shared desktop backdrop — both screens sit on the SAME desktop; 加强 just adds
+       a warm wash on top of it (below), so the two frames read as one place. */
+    .top-screen, .strong-wash { background: linear-gradient(165deg, #eef1ea 0%, #e3e8df 100%); }
+    .top-screen { container-type: inline-size; aspect-ratio: 1.7; display: grid; justify-items: center; align-content: start; padding-top: 4.5cqi; }
+    .top-screen .island { gap: 1.5cqi; padding: 1.6cqi 3.4cqi 1.6cqi 1.6cqi; font-size: 2.6cqi; }
+    .top-screen .island .lens { --lf: 4.9cqi; }
+    .top-screen .island .isl-body { min-width: 0; gap: 1.1cqi; }
+    .top-screen .island .isl-track { height: 0.5cqi; }
+    .top-screen .island .isl-count { font-size: 3cqi; margin-left: 1.2cqi; }
+
+    /* ── 加强 · 居中大胶囊 (§6.1) — a bigger capsule (≈2× the island) floating on a
+       faint warm wash: more present, never a takeover. */
+    /* the warm wash is a WHISPER (matches the app's faint §6.1 值): a hint of warmth
+       at the center, the shared grey desktop still reads everywhere. */
+    .strong-wash { container-type: inline-size; aspect-ratio: 1.7; display: grid; place-items: center; padding: 8cqi; background: radial-gradient(96% 92% at 50% 48%, rgba(255,239,214,0.24) 0%, rgba(252,227,188,0.12) 46%, transparent 72%), linear-gradient(165deg, #eef1ea 0%, #e3e8df 100%); }
+    /* cqi-sized so it floats centered (not filling) and the count never clips */
+    .island.big { gap: 3cqi; padding: 3cqi 5cqi 3cqi 3cqi; font-size: 4.2cqi; max-width: 100%; }
+    .island.big .lens { --lf: 7.6cqi; }
+    .island.big .isl-body { min-width: 0; gap: 2cqi; }
+    .island.big .isl-body > div:first-child { white-space: nowrap; }
+    .island.big .isl-track { height: 0.9cqi; }
+    .island.big .isl-count { font-size: 5.6cqi; margin-left: 1.6cqi; }
+
+    /* ── 相遇 · 第一次见面 (§7) — the onboarding page IS one big green capsule;
+       Mira (The Pulse) + one line of 台词 sit inside it, generously sized. */
+    .meet-scene { container-type: inline-size; aspect-ratio: 1.55; display: grid; justify-items: center; align-content: center; gap: 6cqi; border-radius: 999px; overflow: hidden; text-align: center; color: #f4fff9; background: radial-gradient(135% 105% at 20% 6%, rgba(128,228,178,0.5) 0%, rgba(128,228,178,0) 46%), radial-gradient(125% 115% at 88% 104%, rgba(4,22,14,0.62) 0%, rgba(4,22,14,0) 52%), linear-gradient(150deg, #34a883 0%, #1a6b52 45%, #0b2f22 100%); box-shadow: 0 30px 70px -18px rgba(12,40,30,0.5), inset 0 0 0 1px rgba(255,255,255,0.12); }
+    .meet-scene .lens { --lf: 15cqi; }
+    .meet-scene .meet-msg { margin: 0; font-size: 6.4cqi; font-weight: 500; }
 
     /* desktop companion — Mira's expanded bubble (from companion.html) */
     .companion-card { display: inline-flex; align-items: center; gap: 16px; max-width: 100%; padding: 13px 18px 13px 22px; border-radius: 22px; background: var(--panel); border: 1px solid var(--line); box-shadow: var(--shadow-lift); text-align: left; }
@@ -282,7 +319,10 @@
       radial-gradient(circle 4.5px at 61px 17px, rgba(20,20,19,0.14) 99%, transparent),
       var(--panel-strong); }
     .screen-card img { display: block; width: 100%; height: auto; }
-    .screen-card :is(.mock-app, .mock-break, .mock-share) { width: 100%; }
+    .screen-card :is(.mock-app, .mock-share) { width: 100%; }
+    /* real product shot (transparent PNG, self-shadowed) — no card frame around it */
+    .screen-card.app-shot-cell { border: none; background: transparent; box-shadow: none; overflow: visible; }
+    .app-shot { display: block; width: 100%; height: auto; }
 
     /* ── Act 5/6 live mocks — the real surfaces rebuilt from app tokens,
        like the island/companion: interfaces at work, not screenshots.
@@ -322,33 +362,6 @@
     .ma-list i::before { content: ""; display: block; width: var(--w); height: 100%; border-radius: inherit; background: var(--mira); }
     .ma-list b { font-size: max(2.1cqi, 10px); font-weight: 500; color: var(--ink-soft); white-space: nowrap; }
 
-    /* break-lock (L4 全屏恢复) — same surface, now shown in the daytime theme. */
-    .mock-break { position: relative; aspect-ratio: 1.6; display: grid; justify-items: center; align-content: center; gap: 8px; gap: 1.7cqi; padding: 16px; padding: 3.2cqi; text-align: center; color: var(--ink);
-      background: linear-gradient(180deg, rgba(31,122,94,0.07), transparent 42%), linear-gradient(180deg, var(--panel-strong) 0%, #F0EEE6 100%); }
-    .mock-break .mira { width: auto; height: auto; animation: none; }
-    .mock-break .mira::before { display: none; }
-    .mock-break .pet { --rest: 0.92; --peak: 0.99; }
-    .mb-title { font-size: 18px; font-size: max(4cqi, 15px); font-weight: 650; letter-spacing: 0.02em; }
-    .mb-copy { margin: -4px 0 0; margin: -0.8cqi 0 0; font-size: 12px; font-size: max(2.5cqi, 11px); color: var(--muted); }
-    .mb-steps { display: flex; gap: 1.6cqi; }
-    .mb-steps span { padding: 1cqi 2.4cqi; border-radius: 999px; border: 1px solid var(--line); font-size: 11px; font-size: max(2.3cqi, 10px); color: var(--muted); white-space: nowrap; }
-    .mb-steps .on { border-color: var(--mira-line); color: var(--mira-strong); background: var(--mira-soft); }
-    /* live ring: conic drains through the mock's 12s rest loop (like the island). */
-    .mb-ring { width: 96px; width: max(19cqi, 88px); aspect-ratio: 1; border-radius: 50%; display: grid; place-items: center; margin-top: 0.4cqi;
-      background: conic-gradient(var(--mira) var(--mbp), rgba(31,122,94,0.13) 0);
-      box-shadow: inset 0 0 0 1px var(--line); animation: mbDrain 12s linear infinite; }
-    .mb-timer { width: 76%; aspect-ratio: 1; border-radius: 50%; background: rgba(255,255,255,0.72); border: 1px solid var(--line); display: grid; place-content: center; gap: 0.4cqi; text-align: center; }
-    .mb-tlabel { font-size: 9px; font-size: max(1.9cqi, 9px); letter-spacing: 0.12em; color: var(--muted-soft); }
-    .mb-tvals { position: relative; display: block; width: 44px; width: max(9cqi, 42px); height: 1.25em; font-size: 15px; font-size: max(3.4cqi, 13px); font-weight: 700; font-variant-numeric: tabular-nums; }
-    .mb-tvals i { position: absolute; inset: 0; font-style: normal; opacity: 0; animation: mbTick 12s linear infinite; }
-    .mb-tvals i:nth-child(2) { animation-delay: 4s; }
-    .mb-tvals i:nth-child(3) { animation-delay: 8s; }
-    .mb-escape { margin-top: 2px; margin-top: 0.5cqi; padding: 5px 14px; padding: 1.1cqi 3cqi; border-radius: 10px; border: 1px solid var(--mira-line); font-size: 11px; font-size: max(2.2cqi, 10px); color: var(--mira-strong); background: rgba(255,255,255,0.36); }
-    @keyframes mbDrain { 0% { --mbp: 96%; } 100% { --mbp: 3%; } }
-    /* Registered so the conic angle interpolates smoothly; without @property
-       support the keyframe still applies discretely — alive, just steppier. */
-    @property --mbp { syntax: "<percentage>"; inherits: false; initial-value: 62%; }
-    @keyframes mbTick { 0%, 30% { opacity: 1; } 33%, 100% { opacity: 0; } }
 
     /* daily share card — structure verbatim from the app's share-art-card:
        date · eyebrow · serif insight · three metrics · hairline · brand footer. */
@@ -467,7 +480,7 @@
       .stake + .stake { border-left: 0; border-top: 1px solid var(--line); }
       /* Phones: release the mock aspect lock — with legibility floors the content
          outgrows the ratio box and screen-card overflow:hidden clips it (Safari). */
-      .mock-app, .mock-break, .mock-share { aspect-ratio: auto; }
+      .mock-app, .mock-share { aspect-ratio: auto; }
       .mock-app { grid-template-columns: 1fr; }
       .ma-side { grid-template-columns: auto 1fr; align-items: start; padding: var(--s4); gap: var(--s3); border-right: 0; border-bottom: 1px solid var(--line); }
       .ma-brand { font-size: 11px; gap: 6px; }
@@ -630,12 +643,6 @@
       /* Act 3: no slide-in — the nudges are simply present; the live island freezes on
          its rest state (full bar, "看看远方"), no looping countdown. */
       .mock-stack .companion-card, .mock-stack .island { opacity: 1 !important; transform: none !important; }
-      /* Act 5 mock: freeze the break-lock ring mid-rest with a readable timer —
-         the animation kill would otherwise land both on their end states (empty). */
-      .mb-ring { --mbp: 62% !important; animation: none !important; }
-      .mb-tvals i { opacity: 0 !important; }
-      .mb-tvals i:first-child { opacity: 1 !important; }
-
       .island.live .isl-fill { width: 100% !important; }
       .island.live .isl-msg .rest { opacity: 1 !important; }
       .island.live .isl-msg .done { opacity: 0 !important; }
@@ -665,10 +672,8 @@
     </h1>
 
     <div class="stage">
-      <div class="mira" role="img" aria-label="Mira，安静呼吸着的小生物" data-en-label="Mira, a small creature quietly breathing">
+      <div class="mira" role="img" aria-label="Mira，一颗安静呼吸的光点" data-en-label="Mira, a point of light quietly breathing">
         <div class="pet" aria-hidden="true">
-          <div class="ant"></div><div class="face"></div>
-          <div class="cheek l"></div><div class="cheek r"></div><div class="mouth"></div>
         </div>
       </div>
     </div>
@@ -712,8 +717,6 @@
       <div class="portrait">
         <div class="mira" aria-hidden="true">
           <div class="pet">
-            <div class="ant"></div><div class="face"></div>
-            <div class="cheek l"></div><div class="cheek r"></div><div class="mouth"></div>
           </div>
         </div>
       </div>
@@ -723,7 +726,24 @@
     </div>
   </section>
 
-  <!-- ── 一天的弧线 · 五拍 ─────────────────────────────────── -->
+  <!-- ── 相遇仪式 · 第一次见面 ─────────────────────────────── -->
+  <section class="block feature-block col col-wide">
+    <div class="daily-row is-reverse">
+      <div class="daily-copy reveal">
+        <p class="eyebrow" data-en="First meeting">相遇仪式</p>
+        <h2 data-en="&quot;Hi, I'm Mira.&quot;"><span class="cl">「你好，</span><span class="cl">我是 Mira。」</span></h2>
+        <p class="body" data-en="The first time you open EyeFlow, she introduces herself and walks you through one short break together — never a settings screen, just a small hello."><span class="copy-line">第一次打开 EyeFlow，</span><span class="copy-line">她会自我介绍，陪你先试一次短歇。</span><span class="copy-line">不像设置页，更像一次轻轻的打招呼。</span></p>
+      </div>
+      <div class="screen-card app-shot-cell reveal">
+        <div class="meet-scene" role="img" aria-label="EyeFlow 相遇仪式：一片安静的绿，中央 Mira 的光点，一句「你好，我是 Mira」" data-en-label="EyeFlow's first-meeting ritual — a calm field of green with Mira's point of light and one line: Hi, I'm Mira">
+          <div class="lens" aria-hidden="true"><i></i></div>
+          <p class="meet-msg" data-en="Hi, I'm Mira">你好，我是 Mira</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── 一天的弧线 ─────────────────────────────────────────── -->
   <section class="block feature-block col col-wide">
     <div class="daily-row">
       <div class="daily-copy reveal">
@@ -731,45 +751,11 @@
         <h2 data-en="&quot;I'm right here.&quot;">「我在旁边。」</h2>
         <p class="body" data-en="She never rushes you. Timing starts softly only when the screen is active — until then, she just waits."><span class="copy-line">她不催你开始。</span><span class="copy-line">有屏幕活动时，才轻轻开始计时。</span><span class="copy-line">在那之前，她就安静待着。</span></p>
       </div>
-      <div class="screen-card is-window reveal">
-        <article class="mock-app mock-app-today" role="img" aria-label="EyeFlow 白天版今天页：Mira 说「我在旁边」，默认外观为自动" data-en-label="EyeFlow's daytime Today view: Mira says 'I'm right here', with appearance set to Auto">
-          <aside class="ma-side" aria-hidden="true">
-            <div class="ma-brand"><span class="ma-mark"></span><b>EyeFlow</b></div>
-            <nav class="ma-nav" aria-label="mock navigation">
-              <span class="is-active" data-en="Today">今天</span>
-              <span data-en="These Days">这几天</span>
-              <span data-en="Settings">设置</span>
-            </nav>
-            <div class="ma-theme">
-              <small data-en="Appearance">外观</small>
-              <div class="ma-switch">
-                <span class="is-active" data-en="Auto">自动</span>
-                <span data-en="Day">白天</span>
-                <span data-en="Night">晚上</span>
-              </div>
-              <small data-en="Auto · by timezone">自动 · 按时区</small>
-            </div>
-          </aside>
-          <div class="ma-main">
-            <div class="ma-top">
-              <div>
-                <span class="ma-kicker" data-en="Mira is here">Mira 在这里</span>
-                <strong class="ma-title" data-en="Today">今天</strong>
-              </div>
-              <span class="ma-status" data-en="Daytime">白天版</span>
-            </div>
-            <div class="ma-card">
-              <strong data-en="I'm right here.">我在旁边。</strong>
-              <p data-en="No need to start anything. When the screen is active, I will quietly keep time.">不用特意开始。有屏幕活动时，我会轻轻记着。</p>
-              <div class="ma-meter" aria-hidden="true"><i></i></div>
-            </div>
-            <div class="ma-row" aria-hidden="true">
-              <div class="ma-mini"><span data-en="Focus">专注</span><b data-en="0 min">0 分钟</b></div>
-              <div class="ma-mini"><span data-en="Rest">歇眼</span><b data-en="0 min">0 分钟</b></div>
-              <div class="ma-mini"><span data-en="Rhythm">节奏</span><b data-en="Ready">待开始</b></div>
-            </div>
-          </div>
-        </article>
+      <div class="screen-card app-shot-cell reveal">
+        <img class="app-shot" src="shots/panel-zh.png" data-en-src="shots/panel-en.png"
+             width="436" height="384" loading="lazy" decoding="async"
+             alt="EyeFlow 的菜单栏面板：Mira 的气色、今日用眼时长和两个歇息动作"
+             data-en-alt="EyeFlow's menubar panel — Mira's 气色, today's screen time, and two gentle rest actions" />
       </div>
     </div>
   </section>
@@ -777,47 +763,39 @@
   <section class="block feature-block col col-wide">
     <div class="daily-row is-reverse">
       <div class="daily-copy reveal">
-        <p class="eyebrow step-eyebrow" data-en="02 · A quiet word">02 · 盯久了，说一句</p>
-        <h2 data-en="Not a takeover — a word."><span class="cl">不抢屏，</span><span class="cl">只轻轻说一句。</span></h2>
-        <p class="body" data-en="A peek from the desktop corner, or a small island at the top. Keep working and she just says it a little more clearly, never louder."><span class="copy-line">桌面一角冒个头，或顶部一座小岛。</span><span class="copy-line">你要是继续，她才慢慢把话说清楚一点。</span><span class="copy-line">从不提高音量。</span></p>
+        <p class="eyebrow step-eyebrow" data-en="02 · How firmly to nudge">02 · 提醒的分寸</p>
+        <h2 data-en="Light, or more present — your call."><span class="cl">轻一点，</span><span class="cl">还是更在场？</span></h2>
+        <p class="body" data-en="Two levels, your choice. Light is a small island at the top that tucks itself away. Strong is a bigger capsule in the center with a soft warm wash — more present, but never a takeover."><span class="copy-line">两档，你定。</span><span class="copy-line">轻量：顶端一座小岛，看完自己收起。</span><span class="copy-line">加强：居中大胶囊 + 一层暖背景，更在场，但从不夺屏。</span></p>
       </div>
       <div class="mock-stack reveal">
         <div class="mock-cell">
-        <p class="mock-tag" data-en="At the top">顶部提醒岛</p>
-        <div class="island live" role="img" aria-label="EyeFlow 顶部提醒岛：看看远方休息一下，看完自动记录" data-en-label="EyeFlow's reminder island at the top of the screen: look into the distance to rest, logged automatically when you're done">
-          <svg class="ic" viewBox="0 0 1024 1024" aria-hidden="true">
-            <defs><linearGradient id="isl-bg" x1="216" y1="156" x2="826" y2="874" gradientUnits="userSpaceOnUse"><stop offset="0" stop-color="#EAFFF6"/><stop offset=".58" stop-color="#BDEAFF"/><stop offset="1" stop-color="#F3EEC7"/></linearGradient></defs>
-            <rect width="1024" height="1024" rx="230" fill="url(#isl-bg)"/>
-            <rect x="177" y="335" width="671" height="318" rx="159" fill="#0E1C20"/>
-            <circle cx="380" cy="468" r="46" fill="#F8FFFC"/>
-            <circle cx="644" cy="468" r="46" fill="#F8FFFC"/>
-            <circle cx="803" cy="344" r="82" fill="#6FE7C3"/>
-          </svg>
+        <p class="mock-tag" data-en="Light · top island">轻量 · 顶端岛</p>
+        <div class="screen-card"><div class="top-screen">
+        <div class="island" role="img" aria-label="EyeFlow 顶部提醒岛：看看远方休息一下，看完自动记录" data-en-label="EyeFlow's reminder island at the top of the screen: look into the distance to rest, logged automatically when you're done">
+          <div class="lens" aria-hidden="true"><i></i></div>
           <div class="isl-body">
-            <div class="isl-msg">
-              <span class="rest" data-en="Look into the distance.">看看远方，休息一下。</span>
-              <span class="done" data-en="Rested · logged ✓">休息完成 · 已记录 ✓</span>
-            </div>
-            <div class="isl-track"><div class="isl-fill"></div></div>
+            <div data-en="Look into the distance.">看看远方，休息一下。</div>
+            <div class="isl-track"><div class="isl-fill" style="width:64%"></div></div>
           </div>
         </div>
+        </div></div>
         <p class="mock-note" data-en="Rests at the very top; tucks itself away when you're done.">贴在屏幕顶端，看完自己收起。</p>
         </div>
         <div class="mock-cell">
-        <p class="mock-tag" data-en="In the corner">桌面一角</p>
-        <div class="companion-card reveal" role="img" aria-label="桌面角落的 Mira 展开气泡：该歇会儿了，我在。跟我看看远方，20 秒就好" data-en-label="Mira's bubble in the desktop corner: Time for a little break — I'm right here. Let's look into the distance. 20 seconds is all it takes.">
-          <div class="txt">
-            <strong data-en="Time for a little break — I'm right here.">该歇会儿了，我在。</strong>
-            <span data-en="Let's look into the distance. 20 seconds is all it takes.">跟我看看远方，20 秒就好。</span>
-          </div>
-          <div class="mira" aria-hidden="true">
-            <div class="pet">
-              <div class="ant"></div><div class="face"></div>
-              <div class="cheek l"></div><div class="cheek r"></div><div class="mouth"></div>
+        <p class="mock-tag" data-en="Strong · centered">加强 · 居中大胶囊</p>
+        <div class="screen-card reveal">
+          <div class="strong-wash">
+            <div class="island big" role="img" aria-label="EyeFlow 加强档提醒：屏幕中央一枚更大的气色胶囊，配一层柔和暖背景" data-en-label="EyeFlow's strong reminder — a bigger 气色 capsule centered on a soft warm wash">
+              <div class="lens" aria-hidden="true"><i></i></div>
+              <div class="isl-body">
+                <div data-en="Rest your eyes — look far">眼睛歇歇，看看远处</div>
+                <div class="isl-track"><div class="isl-fill" style="width:100%"></div></div>
+              </div>
+              <div class="isl-count">18</div>
             </div>
           </div>
         </div>
-        <p class="mock-note" data-en="Peeks out when needed, then slips back.">需要时冒个头，说完退回去。</p>
+        <p class="mock-note" data-en="More present, with a warm wash — still not a takeover.">更在场、带一层暖背景，仍不夺屏。</p>
         </div>
       </div>
     </div>
@@ -826,110 +804,37 @@
   <section class="block feature-block col col-wide">
     <div class="daily-row">
       <div class="daily-copy reveal">
-        <p class="eyebrow step-eyebrow" data-en="03 · A look into the distance">03 · 带你看看远处</p>
-        <h2 data-en="She walks you through it."><span class="cl">离开屏幕一下，</span><span class="cl">她带着。</span></h2>
-        <p class="body" data-en="Gaze far, slow blinks, slow breaths — step by step, no need to watch the screen. And when you're back, just one line: welcome back."><span class="copy-line">远眺、慢眨眼、慢呼吸。</span><span class="copy-line">一步步带，不用盯着屏幕。</span><span class="copy-line">回来时，她只说一句：欢迎回来。</span></p>
+        <p class="eyebrow step-eyebrow" data-en="03 · Two depths of rest">03 · 休息，两种深度</p>
+        <h2 data-en="A quick breather, or a real nap."><span class="cl">喘口气，</span><span class="cl">还是好好睡一下。</span></h2>
+        <p class="body" data-en="Short break: look 20 seconds into the distance, then back to work. Nap: a fuller pause — eyes closed longer while your 气色 slowly brightens back up. Either way, she walks you through it."><span class="copy-line">短歇：看远处 20 秒，就回来。</span><span class="copy-line">小睡：闭眼久一点，看着气色一点点亮回来。</span><span class="copy-line">哪一种，她都陪你走完。</span></p>
       </div>
-      <div class="screen-card is-window reveal">
-        <div class="mock-break" role="img" aria-label="EyeFlow 全屏恢复：Mira 陪你看向远处，环形倒计时走完自动回来" data-en-label="EyeFlow's full-screen break: Mira looks into the distance with you while the ring counts down">
-          <div class="mira" aria-hidden="true">
-            <div class="pet">
-              <div class="ant"></div><div class="face"></div>
-              <div class="cheek l"></div><div class="cheek r"></div><div class="mouth"></div>
-            </div>
+      <div class="mock-stack reveal">
+        <div class="mock-cell">
+        <p class="mock-tag" data-en="Short break · 20s">短歇 · 20 秒</p>
+        <div class="screen-card"><div class="top-screen">
+        <div class="island" role="img" aria-label="EyeFlow 短歇：看向远处 20 秒，进度条走完自动记录" data-en-label="EyeFlow's short break: look into the distance for 20 seconds; logged when the bar runs out">
+          <div class="lens" aria-hidden="true"><i></i></div>
+          <div class="isl-body">
+            <div data-en="Look into the distance">看向远处</div>
+            <div class="isl-track"><div class="isl-fill" style="width:58%"></div></div>
           </div>
-          <strong class="mb-title" data-en="Look into the distance">看向远处</strong>
-          <p class="mb-copy" data-en="No need to stare at the screen — look far away for 20 seconds, then come back.">不用盯着屏幕，看远处 20 秒再回来。</p>
-          <div class="mb-steps" aria-hidden="true">
-            <span class="on" data-en="Gaze far">远眺</span>
-            <span data-en="Slow blinks">慢眨眼</span>
-            <span data-en="Slow breaths">慢呼吸</span>
-            <span data-en="Eyes closed">闭眼</span>
-          </div>
-          <div class="mb-ring" aria-hidden="true">
-            <div class="mb-timer">
-              <span class="mb-tlabel" data-en="Left">剩余</span>
-              <b class="mb-tvals"><i>00:18</i><i>00:12</i><i>00:06</i></b>
-            </div>
-          </div>
-          <span class="mb-escape" data-en="Emergency exit">紧急退出</span>
+          <div class="isl-count">12</div>
         </div>
-      </div>
-    </div>
-  </section>
-
-  <section class="block feature-block col col-wide">
-    <div class="daily-row is-reverse">
-      <div class="daily-copy reveal">
-        <p class="eyebrow step-eyebrow" data-en="04 · Honest notes">04 · 如实记下</p>
-        <h2 data-en="She writes down what she saw."><span class="cl">看到什么，</span><span class="cl">就记什么。</span></h2>
-        <p class="body" data-en="When the record is thin, she says so — &quot;no rush to judge yet.&quot; Blanks over invented numbers."><span class="copy-line">记录还少时，她会说「先不急着下判断」。</span><span class="copy-line">宁可留白，也不编一个好看的数字。</span></p>
-      </div>
-      <div class="screen-card is-window reveal">
-        <article class="mock-app mock-app-days" role="img" aria-label="EyeFlow 白天版这几天页：记录还少，Mira 先不急着下判断" data-en-label="EyeFlow's daytime These Days view: record still thin, so Mira doesn't rush to judge">
-          <aside class="ma-side" aria-hidden="true">
-            <div class="ma-brand"><span class="ma-mark"></span><b>EyeFlow</b></div>
-            <nav class="ma-nav" aria-label="mock navigation">
-              <span data-en="Today">今天</span>
-              <span class="is-active" data-en="These Days">这几天</span>
-              <span data-en="Settings">设置</span>
-            </nav>
-            <div class="ma-theme">
-              <small data-en="Appearance">外观</small>
-              <div class="ma-switch">
-                <span class="is-active" data-en="Auto">自动</span>
-                <span data-en="Day">白天</span>
-                <span data-en="Night">晚上</span>
-              </div>
-              <small data-en="Auto · by timezone">自动 · 按时区</small>
-            </div>
-          </aside>
-          <div class="ma-main">
-            <div class="ma-top">
-              <div>
-                <span class="ma-kicker" data-en="Mira's notes">Mira 的观察</span>
-                <strong class="ma-title" data-en="These Days">这几天</strong>
-              </div>
-              <span class="ma-status" data-en="Daytime">白天版</span>
-            </div>
-            <div class="ma-card">
-              <strong data-en="No rush to judge yet.">先不急着下判断。</strong>
-              <p data-en="The record is still thin. I will leave blanks before making up pretty numbers.">记录还少。宁可先留白，也不编一个好看的数字。</p>
-            </div>
-            <div class="ma-list" aria-hidden="true">
-              <span><b data-en="Mon">周一</b><i style="--w: 68%"></i><b data-en="6 h">6 小时</b></span>
-              <span><b data-en="Tue">周二</b><i style="--w: 42%"></i><b data-en="4 h">4 小时</b></span>
-              <span><b data-en="Today">今天</b><i style="--w: 23%"></i><b data-en="thin">偏少</b></span>
-            </div>
+        </div></div>
+        <p class="mock-note" data-en="Look far for 20 seconds — logged when you're back.">看远处 20 秒，看完自动记录。</p>
+        </div>
+        <div class="mock-cell">
+        <p class="mock-tag" data-en="Nap · full recharge">小睡 · 全屏回充</p>
+        <div class="screen-card">
+          <div class="rest-scene" role="img" aria-label="EyeFlow 小睡：全屏变暗，Mira 的光点收成一线，气色随充电条一点点亮回来" data-en-label="EyeFlow's nap — the screen dims, Mira's light settles to a line and brightens as the charge bar fills">
+            <div class="lens" aria-hidden="true"><i></i></div>
+            <div class="rs-clock">0:42</div>
+            <div class="rs-track"><div class="rs-fill"></div></div>
+            <p class="rs-msg" data-en="Close your eyes, and settle.">闭上眼，缓一缓。</p>
           </div>
-        </article>
-      </div>
-    </div>
-  </section>
-
-  <section class="block feature-block col col-wide">
-    <div class="daily-row">
-      <div class="daily-copy reveal">
-        <p class="eyebrow step-eyebrow" data-en="05 · Yours to keep">05 · 带走</p>
-        <h2 data-en="At day's end, a small card."><span class="cl">每天结束，</span><span class="cl">一张小卡。</span></h2>
-        <p class="body" data-en="Today's focus, the rest you took, and one line she noticed. Generated locally, never uploaded."><span class="copy-line">今天的专注、歇下来的时间，</span><span class="copy-line">一句她看到的观察。</span><span class="copy-line">本地生成，不上传。</span></p>
-      </div>
-      <div class="screen-card reveal">
-        <article class="mock-share" role="img" aria-label="EyeFlow 今日分享卡：Mira 今天看到的一句观察，加上今日专注、歇眼与节奏，本地生成可带走" data-en-label="EyeFlow's daily share card: Mira's one-line observation with today's focus, recovery and rhythm — generated locally, yours to keep">
-          <span class="ms-date" data-en="Jul 9, 2026 · Thu">2026年7月9日 · 周四</span>
-          <span class="ms-eyebrow" data-en="What Mira saw today">Mira 今天看到的</span>
-          <strong class="ms-insight" data-en="A steady day for your eyes. Pause at the break points, and let the rhythm loosen a little.">今天在稳稳地用眼。到断点时停一下，让节奏松一点。</strong>
-          <div class="ms-metrics" aria-hidden="true">
-            <div><span data-en="Focus today">今日专注</span><b data-en="6 h 58 m">6 小时 58 分</b></div>
-            <div><span data-en="Eyes rested">歇眼</span><b data-en="14 min">14 分钟</b></div>
-            <div><span data-en="Rhythm">节奏</span><b data-en="Steady">保持平稳</b></div>
-          </div>
-          <div class="ms-divider" aria-hidden="true"></div>
-          <div class="ms-footer">
-            <span class="ms-brand"><span class="ms-mark" aria-hidden="true"></span><span><b>EyeFlow</b><i data-en="Mira's desktop companion space">Mira 的桌面陪伴空间</i></span></span>
-            <span class="ms-domain">eyeflow.app</span>
-          </div>
-        </article>
+        </div>
+        <p class="mock-note" data-en="Eyes closed longer — watch your 气色 brighten back up.">闭眼久一点，看着气色亮回来。</p>
+        </div>
       </div>
     </div>
   </section>
@@ -948,64 +853,6 @@
     </ul>
   </section>
 
-  <section class="block narrow theme-block col reveal">
-    <div class="head">
-      <p class="eyebrow" data-en="Day / Night">白天 / 夜晚</p>
-      <h2 data-en="Auto by default — quiet in both light and dark."><span class="cl">默认自动切换，</span><span class="cl">白天夜晚都安静。</span></h2>
-      <p class="body" data-en="<span class='copy-line'>EyeFlow uses your Mac's timezone and the day's sunrise and sunset to choose Day or Night.</span><span class='copy-line'>Day stays clean and clear; Night lowers brightness.</span><span class='copy-line'>If you prefer, you can also pin either mode manually.</span>"><span class="copy-line"><span class="cl">EyeFlow 会按这台 Mac 的时区、</span><span class="cl">当天日出和日落，</span><span class="cl">自动判断白天或夜晚。</span></span><span class="copy-line">白天保持清爽，夜晚自动压低亮度。</span><span class="copy-line">你也可以手动固定在白天或晚上。</span></p>
-    </div>
-    <div class="theme-strip">
-      <ul class="theme-list">
-        <li data-en="No extra setup: keep Auto on and EyeFlow changes with the day.">不需要额外设置：保持「自动」，EyeFlow 会跟着一天自己切换。</li>
-        <li data-en="The view below is live — flip the appearance switch in its sidebar to see Night.">下面这块界面是真的——点侧栏里的外观开关，看看晚上的样子。</li>
-        <li data-en="Night mode still exists for late hours, with lower contrast and a softer reading feel.">夜晚版本仍然保留，适合晚间使用，亮度和对比会更轻。</li>
-      </ul>
-    </div>
-    <!-- 活体演示:mock 侧栏里 app 自己的外观开关就是真开关——点它,
-         这块今天页在白天/夜晚两套 app 真实 token 间交叉淡入;
-         「自动」按访客本地时间真实决定。 -->
-    <div class="screen-card is-window theme-demo reveal">
-      <article class="mock-app mock-app-demo" role="group" aria-label="EyeFlow 今天页的外观演示：用侧栏的外观开关，在白天与夜晚之间切换" data-en-label="A live preview of EyeFlow's Today view — use the appearance switch in the sidebar to move between Day and Night">
-        <aside class="ma-side">
-          <div class="ma-brand" aria-hidden="true"><span class="ma-mark"></span><b>EyeFlow</b></div>
-          <nav class="ma-nav" aria-hidden="true">
-            <span class="is-active" data-en="Today">今天</span>
-            <span data-en="These Days">这几天</span>
-            <span data-en="Settings">设置</span>
-          </nav>
-          <div class="ma-theme">
-            <small data-en="Appearance">外观</small>
-            <div class="ma-switch" role="group" aria-label="外观" data-en-label="Appearance">
-              <button type="button" class="is-active" data-mode="auto" aria-pressed="true" data-en="Auto">自动</button>
-              <button type="button" data-mode="day" aria-pressed="false" data-en="Day">白天</button>
-              <button type="button" data-mode="night" aria-pressed="false" data-en="Night">晚上</button>
-            </div>
-            <small data-en="Auto · by timezone">自动 · 按时区</small>
-          </div>
-        </aside>
-        <div class="ma-main">
-          <div class="ma-top">
-            <div>
-              <span class="ma-kicker" data-en="Mira is here">Mira 在这里</span>
-              <strong class="ma-title" data-en="Today">今天</strong>
-            </div>
-            <span class="ma-status ma-status-demo" data-en="Daytime">白天版</span>
-          </div>
-          <div class="ma-card">
-            <strong data-en="I'm right here.">我在旁边。</strong>
-            <p data-en="No need to start anything. When the screen is active, I will quietly keep time.">不用特意开始。有屏幕活动时，我会轻轻记着。</p>
-            <div class="ma-meter" aria-hidden="true"><i></i></div>
-          </div>
-          <div class="ma-row" aria-hidden="true">
-            <div class="ma-mini"><span data-en="Focus">专注</span><b data-en="0 min">0 分钟</b></div>
-            <div class="ma-mini"><span data-en="Rest">歇眼</span><b data-en="0 min">0 分钟</b></div>
-            <div class="ma-mini"><span data-en="Rhythm">节奏</span><b data-en="Ready">待开始</b></div>
-          </div>
-        </div>
-      </article>
-    </div>
-  </section>
-
   <!-- ── Act 4 · 跟 Mira 歇一下（参与式护眼一刻） ─────────────── -->
   <section id="rest" class="rest-act col" data-state="invite" aria-label="跟 Mira 歇一下" data-en-label="Rest with Mira">
     <div class="rest-stage">
@@ -1015,8 +862,6 @@
           <svg class="ring" viewBox="0 0 200 200"><circle cx="100" cy="100" r="94"></circle></svg>
           <div class="mira">
             <div class="pet">
-              <div class="ant"></div><div class="face"></div>
-              <div class="cheek l"></div><div class="cheek r"></div><div class="mouth"></div>
             </div>
           </div>
         </div>
@@ -1031,8 +876,6 @@
           <div class="dot" aria-hidden="true"></div>
           <div class="mira" aria-hidden="true">
             <div class="pet">
-              <div class="ant"></div><div class="face"></div>
-              <div class="cheek l"></div><div class="cheek r"></div><div class="mouth"></div>
             </div>
           </div>
         </div>
@@ -1052,8 +895,6 @@
     <div class="final-panel">
       <div class="mira" aria-hidden="true">
         <div class="pet">
-          <div class="ant"></div><div class="face"></div>
-          <div class="cheek l"></div><div class="cheek r"></div><div class="mouth"></div>
         </div>
       </div>
       <h2 class="brand-line" data-en="<span class='cl'>EyeFlow —</span><span class='cl'>guarding the way you see the world.</span>"><span class="cl">EyeFlow ——</span><span class="cl">守护你看清世界的方式。</span></h2>
@@ -1074,26 +915,6 @@
   </footer>
 
   <script>
-    (function () { // Mira idle blink — the one signature, slow and quiet
-      const reduce = window.matchMedia("(prefers-reduced-motion: reduce)");
-      let next = 0, clear = 0; const rand = (a, b) => a + Math.random() * (b - a);
-      function schedule(now) { next = now + rand(3000, 7000); }
-      function trigger(now) {
-        const dbl = Math.random() < 0.16;
-        document.body.style.setProperty("--blink", Math.round(rand(180, 260)) + "ms");
-        document.body.style.setProperty("--dblink", Math.round(rand(480, 640)) + "ms");
-        document.body.dataset.blink = dbl ? "double" : "single";
-        clear = now + (dbl ? 720 : 340); schedule(now);
-      }
-      function tick(now) {
-        if (clear && now >= clear) { document.body.removeAttribute("data-blink"); clear = 0; }
-        if (!next) schedule(now);
-        if (!document.hidden && now >= next) trigger(now);
-        requestAnimationFrame(tick);
-      }
-      if (!reduce.matches) requestAnimationFrame(tick);
-    })();
-
     (function () { // reveal — fade + tiny shift, once
       const items = document.querySelectorAll(".reveal");
       if (!("IntersectionObserver" in window)) { items.forEach((el) => el.classList.add("in")); return; }
@@ -1148,12 +969,15 @@
       labeled.forEach((el) => (el.dataset.zhLabel = el.getAttribute("aria-label")));
       const alts = [...document.querySelectorAll("img[data-en-alt]")];
       alts.forEach((el) => (el.dataset.zhAlt = el.getAttribute("alt")));
+      const shots = [...document.querySelectorAll("img[data-en-src]")];
+      shots.forEach((el) => (el.dataset.zhSrc = el.getAttribute("src")));
       const btns = [...document.querySelectorAll(".lang button")];
       function apply(lang) {
         document.documentElement.lang = lang === "en" ? "en" : "zh-CN";
         els.forEach((el) => (el.innerHTML = lang === "en" ? el.dataset.en : el.dataset.zh));
         labeled.forEach((el) => el.setAttribute("aria-label", lang === "en" ? el.dataset.enLabel : el.dataset.zhLabel));
         alts.forEach((el) => el.setAttribute("alt", lang === "en" ? el.dataset.enAlt : el.dataset.zhAlt));
+        shots.forEach((el) => el.setAttribute("src", lang === "en" ? el.dataset.enSrc : el.dataset.zhSrc));
         btns.forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.lang === lang)));
         try { localStorage.setItem("ef-lang", lang); } catch (e) {}
       }
@@ -1169,34 +993,6 @@
       apply(init);
     })();
 
-    (function () { // 白天/夜晚活体演示 — mock 里 app 自己的外观开关是真开关
-      const demo = document.querySelector(".theme-demo");
-      if (!demo) return;
-      const btns = [...demo.querySelectorAll(".ma-switch button[data-mode]")];
-      const status = demo.querySelector(".ma-status-demo");
-      // App 的自动档按时区日出日落;页面演示用 7:00–19:00 近似本地昼夜。
-      const resolve = (mode) => mode !== "auto" ? mode : ((new Date().getHours() >= 7 && new Date().getHours() < 19) ? "day" : "night");
-      function apply(mode) {
-        const night = resolve(mode) === "night";
-        demo.classList.toggle("is-night", night);
-        btns.forEach((b) => {
-          const on = b.dataset.mode === mode;
-          b.classList.toggle("is-active", on);
-          b.setAttribute("aria-pressed", String(on));
-        });
-        // 状态徽标跟主题走,且双语快照同步更新,语言切换后不回跳。
-        status.dataset.en = night ? "Night" : "Daytime";
-        status.dataset.zh = night ? "晚上版" : "白天版";
-        status.textContent = document.documentElement.lang === "en" ? status.dataset.en : status.dataset.zh;
-      }
-      demo.addEventListener("click", (e) => {
-        const b = e.target.closest("button[data-mode]");
-        if (b) apply(b.dataset.mode);
-      });
-      demo.classList.add("no-fade"); // 初始落位不播过渡,交互后才交叉淡入
-      apply("auto");
-      requestAnimationFrame(() => requestAnimationFrame(() => demo.classList.remove("no-fade")));
-    })();
   </script>
 </body>
 </html>
