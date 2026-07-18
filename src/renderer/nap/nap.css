@@ -16,11 +16,41 @@ body {
   font-family:
     -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial,
     sans-serif;
-  background: var(--scene-bg);
-  color: var(--text);
+  background: transparent; /* the mist is CSS; the desktop shows through the clear center */
+  color: rgba(255, 255, 255, 0.94); /* fog scene is always deep-green → text stays light */
+}
+
+/* 边缘柔和雾化 (§6.3): a deep-green mist dense at the edges, clear in the center —
+   the world softly recedes while you rest. Fades in with the ritual, out on wake. */
+.nap__fog {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(46% 42% at 50% 40%, rgba(243, 238, 199, 0.06) 0%, transparent 56%),
+    radial-gradient(
+      78% 74% at 50% 44%,
+      rgba(8, 31, 26, 0.3) 0%,
+      rgba(9, 33, 27, 0.34) 30%,
+      rgba(11, 34, 28, 0.68) 68%,
+      rgba(7, 24, 20, 0.92) 100%
+    );
+  opacity: 0;
+  transition: opacity 900ms ease;
+}
+
+body.resting .nap__fog {
+  opacity: 1;
+}
+
+body.awake .nap__fog {
+  opacity: 0; /* world returns as Mira wakes */
 }
 
 .nap {
+  position: relative;
+  z-index: 1; /* content above the mist */
   height: 100%;
   display: flex;
   flex-direction: column;
@@ -48,14 +78,14 @@ body {
   font-weight: 200;
   letter-spacing: 0.02em;
   font-variant-numeric: tabular-nums;
-  color: var(--text);
+  color: inherit;
 }
 
 .nap__track {
   width: min(360px, 60vw);
   height: 3px;
   border-radius: 999px;
-  background: var(--hairline);
+  background: rgba(255, 255, 255, 0.16);
   overflow: hidden;
 }
 
@@ -71,15 +101,38 @@ body {
   margin: 0;
   font-size: 20px;
   font-weight: 500;
-  color: var(--text);
+  color: inherit;
 }
 
 .nap__hint {
   margin: 0;
   font-size: 13px;
-  color: var(--text-soft);
+  color: rgba(255, 255, 255, 0.55);
 }
 
 .nap.is-awake .nap__hint {
   visibility: hidden;
+}
+
+/* 加强档 (§6.4): a bigger central capsule + clock/copy — a more immersive rest.
+   The edge mist is unchanged; strong just gives Mira more presence. */
+body.strong .nap {
+  gap: 3rem;
+}
+
+body.strong .nap-hero {
+  width: 340px;
+  height: 158px;
+}
+
+body.strong .nap-hero .mira {
+  --mf: 124px;
+}
+
+body.strong .nap__clock {
+  font-size: 84px;
+}
+
+body.strong .nap__message {
+  font-size: 24px;
 }

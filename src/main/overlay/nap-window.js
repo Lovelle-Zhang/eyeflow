@@ -4,10 +4,11 @@ const path = require('node:path');
 const { BrowserWindow, screen } = require('electron');
 
 /**
- * The fullscreen nap window (CHARTER §6.3): a full-screen takeover for the
- * complete rest — "接管屏幕、真正离开". Opaque, always-on-top, focusable (so Esc
- * can end it early). Uses simple-fullscreen to cover the menubar/dock without
- * switching macOS spaces.
+ * The nap window (CHARTER §6.3): a full-screen but TRANSPARENT overlay for the
+ * complete rest — 边缘柔和雾化 + 柔性阻挡. The renderer draws a deep-green mist that
+ * thickens at the edges and stays clear in the center (§6.3 "把世界柔柔推远"),
+ * NOT an opaque takeover. Full display bounds + screen-saver level covers the
+ * menubar/dock; focusable + captures clicks so Esc/click ends the rest early.
  */
 function createNapWindow() {
   const { bounds } = screen.getPrimaryDisplay();
@@ -17,6 +18,7 @@ function createNapWindow() {
     width: bounds.width,
     height: bounds.height,
     frame: false,
+    transparent: true, // clear center — the mist is CSS, the world shows through
     resizable: false,
     movable: false,
     minimizable: false,
@@ -24,7 +26,6 @@ function createNapWindow() {
     skipTaskbar: true,
     show: false,
     hasShadow: false,
-    backgroundColor: '#0E1C20', // opaque takeover (deep Mira dark, §8.5)
     alwaysOnTop: true,
     fullscreenable: false,
     webPreferences: {

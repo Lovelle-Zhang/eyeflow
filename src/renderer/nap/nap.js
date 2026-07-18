@@ -19,12 +19,15 @@ const setCharge = (energy, capsuleCss) => {
   face.style.setProperty('--energy', Math.max(0, Math.min(1, energy / 100)));
 };
 
-api.onStart?.(({ durationSec, energy, capsuleCss }) => {
+api.onStart?.(({ durationSec, energy, capsuleCss, tier }) => {
   face.classList.add('is-rest'); // 深睡：光收成缓慢的一线 (§6.3)
   face.classList.remove('is-bright');
   root.classList.remove('is-awake');
+  document.body.classList.add('resting'); // fade the edge mist in (§6.3)
+  document.body.classList.remove('awake');
+  document.body.classList.toggle('strong', tier === 'strong'); // §6.4 加强档 → bigger capsule
   clock.textContent = formatStart(durationSec);
-  fill.style.width = '0%';
+  fill.style.width = '0%'; // starts empty, fills as energy recharges over the nap
   message.textContent = '闭上眼，缓一缓。';
   setCharge(energy, capsuleCss); // start at the tired 气色
 });
@@ -39,6 +42,7 @@ api.onDone?.(() => {
   face.classList.remove('is-rest'); // 醒来：光溢成场
   face.classList.add('is-bright');
   root.classList.add('is-awake');
+  document.body.classList.add('awake'); // mist lifts as Mira wakes
   clock.textContent = '';
   fill.style.width = '100%';
   // MIRA_LANGUAGE §四: 休息完成 + 品牌魂话术（仪式时刻点睛）

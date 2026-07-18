@@ -14,7 +14,8 @@ const { energyToColor } = require('../view/capsule/energy-color');
 const { shortBreakFrame } = require('../view/reminder/short-break');
 const { formatClock, DEFAULT_NAP_MS } = require('../view/nap/nap');
 
-function createNapController({ getEnergy, onNapComplete } = {}) {
+function createNapController({ getEnergy, getReminderTier, onNapComplete } = {}) {
+  const tierOf = () => (typeof getReminderTier === 'function' && getReminderTier() === 'strong' ? 'strong' : 'light');
   let win = null;
   let timer = null;
   let busy = false;
@@ -31,7 +32,6 @@ function createNapController({ getEnergy, onNapComplete } = {}) {
     }
     busy = false;
     if (win && !win.isDestroyed()) {
-      win.setSimpleFullScreen(false);
       win.close();
     }
     win = null;
@@ -50,6 +50,7 @@ function createNapController({ getEnergy, onNapComplete } = {}) {
       durationSec: Math.round(durationMs / 1000),
       energy: startEnergy,
       capsuleCss: energyToColor(startEnergy).css, // starts at the tired 气色
+      tier: tierOf(), // §6.4 加强档 → bigger central capsule (more immersive rest)
     });
 
     const start = process.hrtime.bigint();
@@ -60,7 +61,7 @@ function createNapController({ getEnergy, onNapComplete } = {}) {
       const charging = startEnergy + (100 - startEnergy) * f.elapsedFraction;
       send('nap:frame', {
         clock: formatClock(f.remainingSec),
-        fraction: f.elapsedFraction,
+        fraction: f.elapsedFraction, // bar FILLS as you recharge (charge meter, not time-left)
         energy: charging,
         capsuleCss: energyToColor(charging).css,
       });
@@ -81,7 +82,6 @@ function createNapController({ getEnergy, onNapComplete } = {}) {
       if (busy) return;
       busy = true;
       if (!win || win.isDestroyed()) win = createNapWindow();
-      win.setSimpleFullScreen(true);
       win.show();
       if (win.webContents.isLoading()) {
         win.webContents.once('did-finish-load', () => run(durationMs));
