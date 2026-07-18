@@ -1,8 +1,8 @@
 'use strict';
 
 // RED-first: pure defaults/validation for persisted settings — the onboarding
-// flag (§7) and the two §6.4 settings (nap duration + reminder tier). File I/O
-// is a thin adapter.
+// flag (§7), the two §6.4 settings (nap duration + reminder tier), and the §4 UI
+// language. File I/O is a thin adapter.
 
 const { test } = require('node:test');
 const assert = require('node:assert/strict');
@@ -10,8 +10,14 @@ const assert = require('node:assert/strict');
 const { hydrateSettings } = require('../../src/settings/settings');
 const { DEFAULT_NAP_MS, NAP_DURATION_OPTIONS_MS } = require('../../src/view/nap/nap');
 const { DEFAULT_REMINDER_TIER } = require('../../src/view/reminder/tier');
+const { DEFAULT_LOCALE } = require('../../src/view/i18n/panel-strings');
 
-const DEFAULTS = { onboardingDone: false, napMs: DEFAULT_NAP_MS, reminderTier: DEFAULT_REMINDER_TIER };
+const DEFAULTS = {
+  onboardingDone: false,
+  napMs: DEFAULT_NAP_MS,
+  reminderTier: DEFAULT_REMINDER_TIER,
+  locale: DEFAULT_LOCALE,
+};
 
 test('defaults: onboarding not done, default nap length, default tier', () => {
   assert.deepEqual(hydrateSettings(null), DEFAULTS);
@@ -23,6 +29,13 @@ test('keeps a valid persisted reminder tier; rejects unknown → default', () =>
   assert.equal(hydrateSettings({ reminderTier: 'light' }).reminderTier, 'light');
   assert.equal(hydrateSettings({ reminderTier: 'nope' }).reminderTier, DEFAULT_REMINDER_TIER);
   assert.equal(hydrateSettings({ reminderTier: 2 }).reminderTier, DEFAULT_REMINDER_TIER);
+});
+
+test('keeps a valid persisted locale; rejects unknown → default', () => {
+  assert.equal(hydrateSettings({ locale: 'en' }).locale, 'en');
+  assert.equal(hydrateSettings({ locale: 'zh' }).locale, 'zh');
+  assert.equal(hydrateSettings({ locale: 'fr' }).locale, DEFAULT_LOCALE);
+  assert.equal(hydrateSettings({ locale: 3 }).locale, DEFAULT_LOCALE);
 });
 
 test('keeps a valid persisted duration (one of the §6.4 options)', () => {

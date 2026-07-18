@@ -11,18 +11,11 @@ const { app, Tray, Menu, screen, ipcMain } = require('electron');
 const { miraTrayImage } = require('./tray/tray-icon');
 const { createPanelWindow } = require('./overlay/panel-window');
 const { miraSvg } = require('../view/mira/mira-svg');
-const { NAP_DURATION_OPTIONS_MS } = require('../view/nap/nap');
-const { REMINDER_TIER_OPTIONS } = require('../view/reminder/tier');
 
 function createMenubar(service) {
   const tray = new Tray(miraTrayImage());
   tray.setToolTip('EyeFlow Next');
   const win = createPanelWindow();
-
-  const napOptions = NAP_DURATION_OPTIONS_MS.map((ms) => ({
-    ms,
-    label: `${Math.round(ms / 60000)} 分钟`,
-  }));
 
   function positionUnderTray() {
     const b = tray.getBounds();
@@ -66,11 +59,8 @@ function createMenubar(service) {
   tray.on('right-click', () => tray.popUpContextMenu(trayMenu));
 
   ipcMain.on('panel:ready', (e) => {
-    e.sender.send('panel:init', {
-      mira: miraSvg({ variant: 'full', eyes: 'open' }),
-      napOptions,
-      tierOptions: REMINDER_TIER_OPTIONS,
-    });
+    // options + all strings arrive localized in panel:data (built per locale)
+    e.sender.send('panel:init', { mira: miraSvg({ variant: 'full', eyes: 'open' }) });
     service.push();
   });
   ipcMain.on('panel:act', (_e, kind) => {
@@ -79,6 +69,7 @@ function createMenubar(service) {
   });
   ipcMain.on('panel:set-duration', (_e, ms) => service.setDuration(ms));
   ipcMain.on('panel:set-tier', (_e, tier) => service.setReminderTier(tier));
+  ipcMain.on('panel:set-locale', (_e, locale) => service.setLocale(locale));
   ipcMain.on('panel:quit', () => app.quit());
   ipcMain.on('panel:resize', (_e, height) => {
     const [w] = win.getSize();

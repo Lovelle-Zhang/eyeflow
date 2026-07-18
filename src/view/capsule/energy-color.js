@@ -69,13 +69,18 @@ function energyToColor(energy) {
   return { h: HUE, s, l, a, css };
 }
 
-// §8.3 state words, banded at the midpoints between the color anchors.
+// §8.3 state words, banded at the midpoints between the color anchors. `key` is
+// the locale-independent id (panel i18n maps it to zh/en words).
 const STATE_BANDS = [
-  { min: 83, label: '神采奕奕' },
-  { min: 53, label: '常态' },
-  { min: 28, label: '有点淡了' },
-  { min: 0, label: '蔫了' },
+  { min: 83, key: 'bright', label: '神采奕奕' },
+  { min: 53, key: 'steady', label: '常态' },
+  { min: 28, key: 'dimmed', label: '有点淡了' },
+  { min: 0, key: 'faded', label: '蔫了' },
 ];
+
+function energyStateBand(energy) {
+  return STATE_BANDS.find((b) => energy >= b.min) || STATE_BANDS[STATE_BANDS.length - 1];
+}
 
 /**
  * The 气色 state word for an energy level (§8.3) — the "one word" shown on the
@@ -84,8 +89,16 @@ const STATE_BANDS = [
  * @returns {string}
  */
 function energyStateLabel(energy) {
-  const band = STATE_BANDS.find((b) => energy >= b.min) || STATE_BANDS[STATE_BANDS.length - 1];
-  return band.label;
+  return energyStateBand(energy).label;
 }
 
-module.exports = { energyToColor, energyStateLabel };
+/**
+ * Locale-independent state id (bright | steady | dimmed | faded) for panel i18n.
+ * @param {number} energy 0–100
+ * @returns {string}
+ */
+function energyStateKey(energy) {
+  return energyStateBand(energy).key;
+}
+
+module.exports = { energyToColor, energyStateLabel, energyStateKey };

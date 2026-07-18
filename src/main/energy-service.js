@@ -20,6 +20,7 @@ const { createServiceApi } = require('./energy-service-api');
 const { dayKey, recordTick, recordRest } = require('../records/today');
 const { DEFAULT_NAP_MS } = require('../view/nap/nap');
 const { DEFAULT_REMINDER_TIER } = require('../view/reminder/tier');
+const { DEFAULT_LOCALE } = require('../view/i18n/panel-strings');
 
 function startEnergyService({
   intervalMs = 1000,
@@ -27,6 +28,8 @@ function startEnergyService({
   persistNapMs,
   reminderTier: initialTier = DEFAULT_REMINDER_TIER,
   persistTier,
+  locale: initialLocale = DEFAULT_LOCALE,
+  persistLocale,
 } = {}) {
   const store = createRecordsStore();
   let record = store.load(); // resume today, or start fresh (§7)
@@ -37,6 +40,7 @@ function startEnergyService({
   const state = {
     napMs: initialNapMs,
     reminderTier: initialTier, // §6.1/§6.4 presentation tier (light / strong)
+    locale: initialLocale, // §4 panel UI language (zh / en)
     onboardingActive: false, // suppress reminders during the intro ritual (#4)
   };
   const subscribers = new Set();
@@ -92,6 +96,7 @@ function startEnergyService({
       record,
       napMs: state.napMs,
       reminderTier: state.reminderTier,
+      locale: state.locale,
     });
     for (const fn of subscribers) fn(p);
   }
@@ -123,6 +128,7 @@ function startEnergyService({
     state,
     persistNapMs,
     persistTier,
+    persistLocale,
   });
 }
 

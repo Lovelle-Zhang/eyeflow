@@ -38,6 +38,8 @@ if (!isPrimary) {
       persistNapMs: (ms) => settings.save({ napMs: ms }),
       reminderTier: saved.reminderTier, // §6.4 presentation tier persists
       persistTier: (tier) => settings.save({ reminderTier: tier }),
+      locale: saved.locale, // §4 UI language persists
+      persistLocale: (locale) => settings.save({ locale }),
     });
     menubar = createMenubar(service);
     app.on('before-quit', () => service.flush()); // persist today's ledger (§7)

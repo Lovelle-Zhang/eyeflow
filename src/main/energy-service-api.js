@@ -20,6 +20,7 @@ function createServiceApi({
   state,
   persistNapMs,
   persistTier,
+  persistLocale,
 }) {
   return {
     subscribe(fn) {
@@ -48,6 +49,12 @@ function createServiceApi({
     },
     /** Current tier; the reminder controller reads this to pick island vs big capsule. */
     getReminderTier: () => state.reminderTier,
+    /** §4 panel UI language ('zh' | 'en') — persists + re-paints. */
+    setLocale(locale) {
+      state.locale = locale;
+      if (persistLocale) persistLocale(locale);
+      push();
+    },
     /** Suppress auto reminders while the onboarding ritual is on screen (#4). */
     setOnboardingActive(active) {
       state.onboardingActive = active;

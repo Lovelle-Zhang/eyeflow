@@ -12,6 +12,7 @@ contextBridge.exposeInMainWorld('panel', {
   act: (kind) => ipcRenderer.send('panel:act', kind), // 'short' | 'nap'
   setDuration: (ms) => ipcRenderer.send('panel:set-duration', ms),
   setTier: (tier) => ipcRenderer.send('panel:set-tier', tier), // 'light' | 'strong'
+  setLocale: (locale) => ipcRenderer.send('panel:set-locale', locale), // 'zh' | 'en'
   resize: (height) => ipcRenderer.send('panel:resize', height),
   quit: () => ipcRenderer.send('panel:quit'),
 

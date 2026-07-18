@@ -1,73 +1,53 @@
 'use strict';
 
-// Menubar panel painter (§4). Pure view: consumes engine/records data pushed
-// from main, drives the shared 气色 capsule + today stats, reports actions.
+// Menubar panel painter (§4). Pure view: consumes the localized payload pushed
+// from main (every string is built there per the current locale, §4 zh/en),
+// drives the shared 气色 capsule + today stats, and reports user actions.
 
 const api = window.panel || {};
 
 const el = (id) => document.getElementById(id);
 const hero = el('hero');
-const pct = el('pct');
-const state = el('state');
-const eyeuse = el('eyeuse');
-const rests = el('rests');
-const restsLabel = el('rests-label');
-const napSub = el('nap-sub');
 const gear = el('gear');
 const settings = el('settings');
-const segs = el('segs');
-const tierSegs = el('tier-segs');
-
-let napOptions = [];
-let tierOptions = [];
 
 function reportHeight() {
   api.resize?.(el('panel').offsetHeight + 24);
 }
 
-api.onInit?.(({ napOptions: options, tierOptions: tiers }) => {
-  napOptions = options || [];
-  tierOptions = tiers || [];
-  reportHeight();
-});
+// one segmented control for all three switches (nap duration / tier / language)
+function renderSegs(host, options, isOn, onPick) {
+  host.innerHTML = '';
+  for (const opt of options) {
+    const b = document.createElement('button');
+    b.className = `seg${isOn(opt) ? ' on' : ''}`;
+    b.textContent = opt.label;
+    b.addEventListener('click', () => onPick(opt));
+    host.appendChild(b);
+  }
+}
+
+api.onInit?.(() => reportHeight());
 
 api.onData?.((d) => {
   hero.style.setProperty('--cap-color', d.capsuleCss); // live 气色 (§8.3)
-  pct.textContent = `精力 ${Math.round(d.energy)}%`;
-  state.textContent = d.state;
+  el('state').textContent = d.state;
+  el('eyeuse').textContent = d.eyeUseText;
 
-  eyeuse.textContent = d.eyeUseText;
-  const total = d.shortBreaks + d.naps;
-  rests.textContent = `${total} 次`;
-  restsLabel.textContent = `歇息（短歇 ${d.shortBreaks} · 小睡 ${d.naps}）`;
+  const t = d.texts;
+  for (const node of document.querySelectorAll('[data-t]')) node.textContent = t[node.dataset.t];
+  el('pct').textContent = t.energy;
+  el('rests').textContent = t.restsCount;
+  el('rests-label').textContent = t.restsLabel;
+  el('nap-sub').textContent = t.napSub;
+  gear.setAttribute('aria-label', t.settings);
 
-  napSub.textContent = `完整 · ${Math.round(d.napMs / 60000)} 分钟`;
-  renderSegs(d.napMs);
-  renderTierSegs(d.reminderTier);
+  renderSegs(el('segs'), d.napOptions, (o) => o.ms === d.napMs, (o) => api.setDuration?.(o.ms));
+  renderSegs(el('tier-segs'), d.tierOptions, (o) => o.tier === d.reminderTier, (o) => api.setTier?.(o.tier));
+  renderSegs(el('lang-segs'), d.languageOptions, (o) => o.locale === d.locale, (o) => api.setLocale?.(o.locale));
+
   reportHeight();
 });
-
-function renderSegs(currentMs) {
-  segs.innerHTML = '';
-  for (const opt of napOptions) {
-    const b = document.createElement('button');
-    b.className = `seg${opt.ms === currentMs ? ' on' : ''}`;
-    b.textContent = opt.label;
-    b.addEventListener('click', () => api.setDuration?.(opt.ms));
-    segs.appendChild(b);
-  }
-}
-
-function renderTierSegs(currentTier) {
-  tierSegs.innerHTML = '';
-  for (const opt of tierOptions) {
-    const b = document.createElement('button');
-    b.className = `seg${opt.tier === currentTier ? ' on' : ''}`;
-    b.textContent = opt.label;
-    b.addEventListener('click', () => api.setTier?.(opt.tier));
-    tierSegs.appendChild(b);
-  }
-}
 
 gear.addEventListener('click', () => {
   const open = settings.hasAttribute('hidden');
