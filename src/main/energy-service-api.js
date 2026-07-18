@@ -55,6 +55,8 @@ function createServiceApi({
       if (persistLocale) persistLocale(locale);
       push();
     },
+    /** Current UI language; the tray builds its menu in this locale. */
+    getLocale: () => state.locale,
     /** Suppress auto reminders while the onboarding ritual is on screen (#4). */
     setOnboardingActive(active) {
       state.onboardingActive = active;

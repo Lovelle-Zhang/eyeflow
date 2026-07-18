@@ -11,6 +11,7 @@ const { app, Tray, Menu, screen, ipcMain } = require('electron');
 const { miraTrayImage } = require('./tray/tray-icon');
 const { createPanelWindow } = require('./overlay/panel-window');
 const { miraSvg } = require('../view/mira/mira-svg');
+const { trayStrings } = require('../view/i18n/tray-strings');
 
 function createMenubar(service) {
   const tray = new Tray(miraTrayImage());
@@ -38,25 +39,29 @@ function createMenubar(service) {
     else showPanel();
   }
 
-  const trayMenu = Menu.buildFromTemplate([
-    { label: '打开 EyeFlow Next', click: showPanel },
-    { type: 'separator' },
-    {
-      label: '开发者',
-      submenu: [
-        { label: '快进 1 分钟', click: () => service.dev('ff') },
-        { label: '测试一级提醒', click: () => service.dev('remind') },
-        { label: '测试二级提醒', click: () => service.dev('remindNap') },
-        { label: '小睡仪式 12s', click: () => service.dev('napRitual') },
-        { label: '重置精力', click: () => service.dev('reset') },
-      ],
-    },
-    { type: 'separator' },
-    { label: '退出 EyeFlow Next', role: 'quit' },
-  ]);
+  // built fresh each open so it matches the current UI language (§4)
+  function buildTrayMenu() {
+    const t = trayStrings(service.getLocale?.());
+    return Menu.buildFromTemplate([
+      { label: t.open, click: showPanel },
+      { type: 'separator' },
+      {
+        label: t.dev,
+        submenu: [
+          { label: t.ff, click: () => service.dev('ff') },
+          { label: t.remind, click: () => service.dev('remind') },
+          { label: t.remindNap, click: () => service.dev('remindNap') },
+          { label: t.napRitual, click: () => service.dev('napRitual') },
+          { label: t.reset, click: () => service.dev('reset') },
+        ],
+      },
+      { type: 'separator' },
+      { label: t.quit, role: 'quit' },
+    ]);
+  }
 
   tray.on('click', toggle);
-  tray.on('right-click', () => tray.popUpContextMenu(trayMenu));
+  tray.on('right-click', () => tray.popUpContextMenu(buildTrayMenu()));
 
   ipcMain.on('panel:ready', (e) => {
     // options + all strings arrive localized in panel:data (built per locale)
