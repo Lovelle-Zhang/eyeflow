@@ -25,17 +25,12 @@ body {
   padding: 12px;
 }
 
+/* slim top strip — just the settings gear as a trailing control (native popover) */
 .head {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  padding: 2px 4px 8px;
-}
-
-.head__t {
-  color: var(--text-soft);
-  font-size: 13px;
-  font-weight: 600;
+  justify-content: flex-end;
+  padding: 2px 2px 6px;
 }
 
 .gear {
@@ -99,10 +94,19 @@ body {
   font-size: 13px;
 }
 
+/* section caption for the day's stats — the "今天" now labels what it belongs to
+   (the stats), not the hero above it */
+.today {
+  color: var(--text-soft);
+  font-size: 12px;
+  font-weight: 500;
+  margin: 10px 4px 6px;
+}
+
 .stats {
   display: flex;
   align-items: center;
-  margin: 16px 4px;
+  margin: 0 4px 16px;
 }
 
 .stat {

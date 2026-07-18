@@ -28,8 +28,7 @@
   background: var(--row-hover);
 }
 
-/* the default action — a restrained accent (green lives on the capsule; here it's
-   just a light tint + accent leading icon, not a saturated fill) */
+/* default action — restrained accent (green lives on the capsule, a light tint here) */
 .row--primary {
   background: var(--accent-soft);
   border-color: var(--accent-border);
@@ -119,21 +118,32 @@
     inset 0 0 0 0.5px var(--hairline);
 }
 
+/* quit — a plain left-aligned menu row (aligns with the rows above), hover only */
 .quit {
+  display: flex;
+  align-items: center;
+  gap: 10px;
   width: 100%;
-  margin-top: 8px;
-  padding: 9px 0;
-  border-radius: 999px;
+  margin-top: 6px;
+  padding: 9px 12px;
+  border-radius: 11px;
   font: inherit;
-  font-size: 12.5px;
+  font-size: 13px;
+  text-align: left;
   color: var(--text-soft);
   background: transparent;
-  border: 1px solid transparent;
+  border: none;
   cursor: pointer;
-  transition: background 160ms ease;
+  transition: background 140ms ease;
 }
 
 .quit:hover {
   background: var(--row-bg);
   color: var(--text);
+}
+
+.quit__ic {
+  display: grid;
+  place-items: center;
+  width: 20px;
 }
