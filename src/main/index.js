@@ -41,14 +41,15 @@ if (!isPrimary) {
       locale: saved.locale, // §4 UI language persists
       persistLocale: (locale) => settings.save({ locale }),
     });
-    menubar = createMenubar(service);
+    menubar = createMenubar(service, { replayOnboarding: launchOnboarding });
     app.on('before-quit', () => service.flush()); // persist today's ledger (§7)
 
-    // First run: the one-time onboarding 相遇仪式 (§7). Never shown again.
-    if (!saved.onboardingDone) {
+    // The 相遇仪式 (§7): auto on first run, and re-playable from the dev tray menu
+    // (handy for eyeballing the localized 台词). Uses the current UI language.
+    function launchOnboarding() {
       service.setOnboardingActive(true); // no reminders during the ritual (#4)
       runOnboarding({
-        locale: saved.locale, // §4 first-run 台词 follows the system language
+        locale: service.getLocale(), // §4 台词 follow the current language
         onDone: (napMs) => {
           service.setOnboardingActive(false);
           settings.save({ onboardingDone: true, napMs });
@@ -57,6 +58,8 @@ if (!isPrimary) {
         },
       });
     }
+
+    if (!saved.onboardingDone) launchOnboarding(); // first run only
   });
 
   // Menubar app: stay alive with no windows open (the tray keeps it running).

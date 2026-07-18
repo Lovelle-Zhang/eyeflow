@@ -13,7 +13,7 @@ const { createPanelWindow } = require('./overlay/panel-window');
 const { miraSvg } = require('../view/mira/mira-svg');
 const { trayStrings } = require('../view/i18n/tray-strings');
 
-function createMenubar(service) {
+function createMenubar(service, hooks = {}) {
   const tray = new Tray(miraTrayImage());
   tray.setToolTip('EyeFlow Next');
   const win = createPanelWindow();
@@ -52,6 +52,7 @@ function createMenubar(service) {
           { label: t.remind, click: () => service.dev('remind') },
           { label: t.remindNap, click: () => service.dev('remindNap') },
           { label: t.napRitual, click: () => service.dev('napRitual') },
+          { label: t.replayOnboarding, click: () => hooks.replayOnboarding?.() },
           { label: t.reset, click: () => service.dev('reset') },
         ],
       },
