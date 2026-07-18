@@ -187,17 +187,8 @@
       display: grid; place-items: center; overflow: hidden;
       transform: scale(var(--rest)); transform-origin: center; animation: breathe var(--breath) var(--ease) infinite;
     }
-    .pet::before { content: ""; position: absolute; top: var(--vt); left: var(--vl); width: var(--vw); height: var(--vh); border-radius: 999px; background: linear-gradient(90deg, rgba(127,232,207,0.22), rgba(104,166,232,0.16)), rgba(20,34,36,0.88); box-shadow: inset 0 0 0 1px rgba(255,255,255,0.12); }
-    .pet::after { content: ""; position: absolute; top: var(--st); right: var(--sr); width: var(--ss); height: var(--ss); border-radius: 50%; background: #80d7bd; box-shadow: 0 0 10px rgba(128,215,189,0.45); animation: signal var(--breath) var(--ease) infinite; }
-    .face { position: absolute; top: var(--ft); left: var(--fl); width: var(--fw); height: var(--fh); z-index: 1; }
-    .face::before, .face::after { content: ""; position: absolute; top: 0; width: var(--eye); height: var(--eye); border-radius: 50%; background: #cdd6d1; }
-    .face::before { left: 1px; } .face::after { right: 1px; }
-    body[data-blink="single"] .face::before, body[data-blink="single"] .face::after { animation: blink1 var(--blink) var(--ease) 1; }
-    body[data-blink="double"] .face::before, body[data-blink="double"] .face::after { animation: blink2 var(--dblink) var(--ease) 1; }
-    .mouth { position: absolute; top: var(--mt); left: 50%; width: var(--mw); height: var(--mh); transform: translateX(-50%); border-bottom: var(--mstroke) solid rgba(31,122,94,0.55); border-radius: 0 0 999px 999px; z-index: 1; }
-    .cheek { position: absolute; top: var(--ct); width: var(--cw); height: var(--ch); border-radius: 999px; background: rgba(255,139,176,0.2); z-index: 1; }
-    .cheek.l { left: var(--coff); } .cheek.r { right: var(--coff); }
-    .ant { position: absolute; top: var(--at); left: var(--al); width: var(--aw); height: var(--ah); border-top: var(--astroke) solid rgba(180,222,208,0.22); border-radius: 50%; z-index: 0; transform-origin: 50% 100%; animation: sway var(--sway) var(--ease) infinite; }
+    .pet::before { content: ""; position: absolute; top: var(--vt); left: var(--vl); width: var(--vw); height: var(--vh); border-radius: 999px; background: radial-gradient(circle closest-side at 50% 50%, #f4fff9 0%, #8fe6c0 40%, rgba(143,230,192,0) 80%), linear-gradient(90deg, rgba(127,232,207,0.22), rgba(104,166,232,0.16)), rgba(20,34,36,0.88); box-shadow: inset 0 0 0 1px rgba(255,255,255,0.12); }
+    /* Mira (MIRA_SYSTEM): the lens holds ONE point of light — no eyes/mouth/cheeks/antenna (retired) */
 
     /* EyeFlow brand mark — browser favicon, nav mark and app-mock marks share
        the source app icon. Mira's character avatar remains separate. */
@@ -209,10 +200,6 @@
 
     @keyframes float { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-5px); } }
     @keyframes breathe { 0%,100% { transform: scale(var(--rest)) translateY(0); } 40%,52% { transform: scale(var(--peak)) translateY(var(--lift)); } 88% { transform: scale(var(--rest)) translateY(0); } }
-    @keyframes signal { 0%,100% { transform: scale(0.98); } 46% { transform: scale(1.05); } }
-    @keyframes sway { 0%,100% { transform: rotate(-0.3deg); } 50% { transform: rotate(0.3deg); } }
-    @keyframes blink1 { 0%,100% { transform: scaleY(1); } 50% { transform: translateY(1px) scaleY(0.2); } }
-    @keyframes blink2 { 0%,100% { transform: scaleY(1); } 22%,30%,64%,72% { transform: translateY(1px) scaleY(0.2); } 45%,86% { transform: scaleY(1); } }
 
     /* character portrait Mira — sits between eyebrow and lede */
     .portrait { margin: var(--s6) 0 var(--flow-title); display: grid; place-items: center; }
@@ -283,6 +270,9 @@
       var(--panel-strong); }
     .screen-card img { display: block; width: 100%; height: auto; }
     .screen-card :is(.mock-app, .mock-break, .mock-share) { width: 100%; }
+    /* real product shot (transparent PNG, self-shadowed) — no card frame around it */
+    .screen-card.app-shot-cell { border: none; background: transparent; box-shadow: none; overflow: visible; }
+    .app-shot { display: block; width: 100%; height: auto; }
 
     /* ── Act 5/6 live mocks — the real surfaces rebuilt from app tokens,
        like the island/companion: interfaces at work, not screenshots.
@@ -665,10 +655,8 @@
     </h1>
 
     <div class="stage">
-      <div class="mira" role="img" aria-label="Mira，安静呼吸着的小生物" data-en-label="Mira, a small creature quietly breathing">
+      <div class="mira" role="img" aria-label="Mira，一颗安静呼吸的光点" data-en-label="Mira, a point of light quietly breathing">
         <div class="pet" aria-hidden="true">
-          <div class="ant"></div><div class="face"></div>
-          <div class="cheek l"></div><div class="cheek r"></div><div class="mouth"></div>
         </div>
       </div>
     </div>
@@ -712,8 +700,6 @@
       <div class="portrait">
         <div class="mira" aria-hidden="true">
           <div class="pet">
-            <div class="ant"></div><div class="face"></div>
-            <div class="cheek l"></div><div class="cheek r"></div><div class="mouth"></div>
           </div>
         </div>
       </div>
@@ -723,7 +709,24 @@
     </div>
   </section>
 
-  <!-- ── 一天的弧线 · 五拍 ─────────────────────────────────── -->
+  <!-- ── 相遇仪式 · 第一次见面 ─────────────────────────────── -->
+  <section class="block feature-block col col-wide">
+    <div class="daily-row is-reverse">
+      <div class="daily-copy reveal">
+        <p class="eyebrow" data-en="First meeting">相遇仪式</p>
+        <h2 data-en="&quot;Hi, I'm Mira.&quot;"><span class="cl">「你好，</span><span class="cl">我是 Mira。」</span></h2>
+        <p class="body" data-en="The first time you open EyeFlow, she introduces herself and walks you through one short break together — never a settings screen, just a small hello."><span class="copy-line">第一次打开 EyeFlow，</span><span class="copy-line">她会自我介绍，陪你先试一次短歇。</span><span class="copy-line">不像设置页，更像一次轻轻的打招呼。</span></p>
+      </div>
+      <div class="screen-card app-shot-cell reveal">
+        <img class="app-shot" src="shots/onboarding-zh.png" data-en-src="shots/onboarding-en.png"
+             width="470" height="300" loading="lazy" decoding="async"
+             alt="EyeFlow 相遇仪式：一片安静的绿，中央 Mira 的光点，一句「你好，我是 Mira」"
+             data-en-alt="EyeFlow's first-meeting ritual — a calm field of green with Mira's point of light and one line: Hi, I'm Mira" />
+      </div>
+    </div>
+  </section>
+
+  <!-- ── 一天的弧线 ─────────────────────────────────────────── -->
   <section class="block feature-block col col-wide">
     <div class="daily-row">
       <div class="daily-copy reveal">
@@ -731,45 +734,11 @@
         <h2 data-en="&quot;I'm right here.&quot;">「我在旁边。」</h2>
         <p class="body" data-en="She never rushes you. Timing starts softly only when the screen is active — until then, she just waits."><span class="copy-line">她不催你开始。</span><span class="copy-line">有屏幕活动时，才轻轻开始计时。</span><span class="copy-line">在那之前，她就安静待着。</span></p>
       </div>
-      <div class="screen-card is-window reveal">
-        <article class="mock-app mock-app-today" role="img" aria-label="EyeFlow 白天版今天页：Mira 说「我在旁边」，默认外观为自动" data-en-label="EyeFlow's daytime Today view: Mira says 'I'm right here', with appearance set to Auto">
-          <aside class="ma-side" aria-hidden="true">
-            <div class="ma-brand"><span class="ma-mark"></span><b>EyeFlow</b></div>
-            <nav class="ma-nav" aria-label="mock navigation">
-              <span class="is-active" data-en="Today">今天</span>
-              <span data-en="These Days">这几天</span>
-              <span data-en="Settings">设置</span>
-            </nav>
-            <div class="ma-theme">
-              <small data-en="Appearance">外观</small>
-              <div class="ma-switch">
-                <span class="is-active" data-en="Auto">自动</span>
-                <span data-en="Day">白天</span>
-                <span data-en="Night">晚上</span>
-              </div>
-              <small data-en="Auto · by timezone">自动 · 按时区</small>
-            </div>
-          </aside>
-          <div class="ma-main">
-            <div class="ma-top">
-              <div>
-                <span class="ma-kicker" data-en="Mira is here">Mira 在这里</span>
-                <strong class="ma-title" data-en="Today">今天</strong>
-              </div>
-              <span class="ma-status" data-en="Daytime">白天版</span>
-            </div>
-            <div class="ma-card">
-              <strong data-en="I'm right here.">我在旁边。</strong>
-              <p data-en="No need to start anything. When the screen is active, I will quietly keep time.">不用特意开始。有屏幕活动时，我会轻轻记着。</p>
-              <div class="ma-meter" aria-hidden="true"><i></i></div>
-            </div>
-            <div class="ma-row" aria-hidden="true">
-              <div class="ma-mini"><span data-en="Focus">专注</span><b data-en="0 min">0 分钟</b></div>
-              <div class="ma-mini"><span data-en="Rest">歇眼</span><b data-en="0 min">0 分钟</b></div>
-              <div class="ma-mini"><span data-en="Rhythm">节奏</span><b data-en="Ready">待开始</b></div>
-            </div>
-          </div>
-        </article>
+      <div class="screen-card app-shot-cell reveal">
+        <img class="app-shot" src="shots/panel-zh.png" data-en-src="shots/panel-en.png"
+             width="436" height="384" loading="lazy" decoding="async"
+             alt="EyeFlow 的菜单栏面板：Mira 的气色、今日用眼时长和两个歇息动作"
+             data-en-alt="EyeFlow's menubar panel — Mira's 气色, today's screen time, and two gentle rest actions" />
       </div>
     </div>
   </section>
@@ -777,13 +746,13 @@
   <section class="block feature-block col col-wide">
     <div class="daily-row is-reverse">
       <div class="daily-copy reveal">
-        <p class="eyebrow step-eyebrow" data-en="02 · A quiet word">02 · 盯久了，说一句</p>
-        <h2 data-en="Not a takeover — a word."><span class="cl">不抢屏，</span><span class="cl">只轻轻说一句。</span></h2>
-        <p class="body" data-en="A peek from the desktop corner, or a small island at the top. Keep working and she just says it a little more clearly, never louder."><span class="copy-line">桌面一角冒个头，或顶部一座小岛。</span><span class="copy-line">你要是继续，她才慢慢把话说清楚一点。</span><span class="copy-line">从不提高音量。</span></p>
+        <p class="eyebrow step-eyebrow" data-en="02 · How firmly to nudge">02 · 提醒的分寸</p>
+        <h2 data-en="Light, or more present — your call."><span class="cl">轻一点，</span><span class="cl">还是更在场？</span></h2>
+        <p class="body" data-en="Two levels, your choice. Light is a small island at the top that tucks itself away. Strong is a bigger capsule in the center with a soft warm wash — more present, but never a takeover."><span class="copy-line">两档，你定。</span><span class="copy-line">轻量：顶端一座小岛，看完自己收起。</span><span class="copy-line">加强：居中大胶囊 + 一层暖背景，更在场，但从不夺屏。</span></p>
       </div>
       <div class="mock-stack reveal">
         <div class="mock-cell">
-        <p class="mock-tag" data-en="At the top">顶部提醒岛</p>
+        <p class="mock-tag" data-en="Light · top island">轻量 · 顶端岛</p>
         <div class="island live" role="img" aria-label="EyeFlow 顶部提醒岛：看看远方休息一下，看完自动记录" data-en-label="EyeFlow's reminder island at the top of the screen: look into the distance to rest, logged automatically when you're done">
           <svg class="ic" viewBox="0 0 1024 1024" aria-hidden="true">
             <defs>
@@ -808,20 +777,14 @@
         <p class="mock-note" data-en="Rests at the very top; tucks itself away when you're done.">贴在屏幕顶端，看完自己收起。</p>
         </div>
         <div class="mock-cell">
-        <p class="mock-tag" data-en="In the corner">桌面一角</p>
-        <div class="companion-card reveal" role="img" aria-label="桌面角落的 Mira 展开气泡：该歇会儿了，我在。跟我看看远方，20 秒就好" data-en-label="Mira's bubble in the desktop corner: Time for a little break — I'm right here. Let's look into the distance. 20 seconds is all it takes.">
-          <div class="txt">
-            <strong data-en="Time for a little break — I'm right here.">该歇会儿了，我在。</strong>
-            <span data-en="Let's look into the distance. 20 seconds is all it takes.">跟我看看远方，20 秒就好。</span>
-          </div>
-          <div class="mira" aria-hidden="true">
-            <div class="pet">
-              <div class="ant"></div><div class="face"></div>
-              <div class="cheek l"></div><div class="cheek r"></div><div class="mouth"></div>
-            </div>
-          </div>
+        <p class="mock-tag" data-en="Strong · centered">加强 · 居中大胶囊</p>
+        <div class="screen-card app-shot-cell reveal">
+          <img class="app-shot" src="shots/strong-zh.png" data-en-src="shots/strong-en.png"
+               width="474" height="300" loading="lazy" decoding="async"
+               alt="EyeFlow 加强档提醒：屏幕中央一枚大气色胶囊，配一层柔和暖背景"
+               data-en-alt="EyeFlow's strong reminder — a big 气色 capsule centered on a soft warm wash" />
         </div>
-        <p class="mock-note" data-en="Peeks out when needed, then slips back.">需要时冒个头，说完退回去。</p>
+        <p class="mock-note" data-en="More present, with a warm wash — still not a takeover.">更在场、带一层暖背景，仍不夺屏。</p>
         </div>
       </div>
     </div>
@@ -830,16 +793,17 @@
   <section class="block feature-block col col-wide">
     <div class="daily-row">
       <div class="daily-copy reveal">
-        <p class="eyebrow step-eyebrow" data-en="03 · A look into the distance">03 · 带你看看远处</p>
-        <h2 data-en="She walks you through it."><span class="cl">离开屏幕一下，</span><span class="cl">她带着。</span></h2>
-        <p class="body" data-en="Gaze far, slow blinks, slow breaths — step by step, no need to watch the screen. And when you're back, just one line: welcome back."><span class="copy-line">远眺、慢眨眼、慢呼吸。</span><span class="copy-line">一步步带，不用盯着屏幕。</span><span class="copy-line">回来时，她只说一句：欢迎回来。</span></p>
+        <p class="eyebrow step-eyebrow" data-en="03 · Two depths of rest">03 · 休息，两种深度</p>
+        <h2 data-en="A quick breather, or a real nap."><span class="cl">喘口气，</span><span class="cl">还是好好睡一下。</span></h2>
+        <p class="body" data-en="Short break: look 20 seconds into the distance, then back to work. Nap: a fuller pause — eyes closed longer while your 气色 slowly brightens back up. Either way, she walks you through it."><span class="copy-line">短歇：看远处 20 秒，就回来。</span><span class="copy-line">小睡：闭眼久一点，看着气色一点点亮回来。</span><span class="copy-line">哪一种，她都陪你走完。</span></p>
       </div>
-      <div class="screen-card is-window reveal">
-        <div class="mock-break" role="img" aria-label="EyeFlow 全屏恢复：Mira 陪你看向远处，环形倒计时走完自动回来" data-en-label="EyeFlow's full-screen break: Mira looks into the distance with you while the ring counts down">
+      <div class="mock-stack reveal">
+        <div class="mock-cell">
+        <p class="mock-tag" data-en="Short break · 20s">短歇 · 20 秒</p>
+        <div class="screen-card is-window">
+        <div class="mock-break" role="img" aria-label="EyeFlow 短歇：Mira 陪你看向远处，环形倒计时走完自动回来" data-en-label="EyeFlow's short break: Mira looks into the distance with you while the ring counts down">
           <div class="mira" aria-hidden="true">
             <div class="pet">
-              <div class="ant"></div><div class="face"></div>
-              <div class="cheek l"></div><div class="cheek r"></div><div class="mouth"></div>
             </div>
           </div>
           <strong class="mb-title" data-en="Look into the distance">看向远处</strong>
@@ -858,82 +822,19 @@
           </div>
           <span class="mb-escape" data-en="Emergency exit">紧急退出</span>
         </div>
-      </div>
-    </div>
-  </section>
-
-  <section class="block feature-block col col-wide">
-    <div class="daily-row is-reverse">
-      <div class="daily-copy reveal">
-        <p class="eyebrow step-eyebrow" data-en="04 · Honest notes">04 · 如实记下</p>
-        <h2 data-en="She writes down what she saw."><span class="cl">看到什么，</span><span class="cl">就记什么。</span></h2>
-        <p class="body" data-en="When the record is thin, she says so — &quot;no rush to judge yet.&quot; Blanks over invented numbers."><span class="copy-line">记录还少时，她会说「先不急着下判断」。</span><span class="copy-line">宁可留白，也不编一个好看的数字。</span></p>
-      </div>
-      <div class="screen-card is-window reveal">
-        <article class="mock-app mock-app-days" role="img" aria-label="EyeFlow 白天版这几天页：记录还少，Mira 先不急着下判断" data-en-label="EyeFlow's daytime These Days view: record still thin, so Mira doesn't rush to judge">
-          <aside class="ma-side" aria-hidden="true">
-            <div class="ma-brand"><span class="ma-mark"></span><b>EyeFlow</b></div>
-            <nav class="ma-nav" aria-label="mock navigation">
-              <span data-en="Today">今天</span>
-              <span class="is-active" data-en="These Days">这几天</span>
-              <span data-en="Settings">设置</span>
-            </nav>
-            <div class="ma-theme">
-              <small data-en="Appearance">外观</small>
-              <div class="ma-switch">
-                <span class="is-active" data-en="Auto">自动</span>
-                <span data-en="Day">白天</span>
-                <span data-en="Night">晚上</span>
-              </div>
-              <small data-en="Auto · by timezone">自动 · 按时区</small>
-            </div>
-          </aside>
-          <div class="ma-main">
-            <div class="ma-top">
-              <div>
-                <span class="ma-kicker" data-en="Mira's notes">Mira 的观察</span>
-                <strong class="ma-title" data-en="These Days">这几天</strong>
-              </div>
-              <span class="ma-status" data-en="Daytime">白天版</span>
-            </div>
-            <div class="ma-card">
-              <strong data-en="No rush to judge yet.">先不急着下判断。</strong>
-              <p data-en="The record is still thin. I will leave blanks before making up pretty numbers.">记录还少。宁可先留白，也不编一个好看的数字。</p>
-            </div>
-            <div class="ma-list" aria-hidden="true">
-              <span><b data-en="Mon">周一</b><i style="--w: 68%"></i><b data-en="6 h">6 小时</b></span>
-              <span><b data-en="Tue">周二</b><i style="--w: 42%"></i><b data-en="4 h">4 小时</b></span>
-              <span><b data-en="Today">今天</b><i style="--w: 23%"></i><b data-en="thin">偏少</b></span>
-            </div>
-          </div>
-        </article>
-      </div>
-    </div>
-  </section>
-
-  <section class="block feature-block col col-wide">
-    <div class="daily-row">
-      <div class="daily-copy reveal">
-        <p class="eyebrow step-eyebrow" data-en="05 · Yours to keep">05 · 带走</p>
-        <h2 data-en="At day's end, a small card."><span class="cl">每天结束，</span><span class="cl">一张小卡。</span></h2>
-        <p class="body" data-en="Today's focus, the rest you took, and one line she noticed. Generated locally, never uploaded."><span class="copy-line">今天的专注、歇下来的时间，</span><span class="copy-line">一句她看到的观察。</span><span class="copy-line">本地生成，不上传。</span></p>
-      </div>
-      <div class="screen-card reveal">
-        <article class="mock-share" role="img" aria-label="EyeFlow 今日分享卡：Mira 今天看到的一句观察，加上今日专注、歇眼与节奏，本地生成可带走" data-en-label="EyeFlow's daily share card: Mira's one-line observation with today's focus, recovery and rhythm — generated locally, yours to keep">
-          <span class="ms-date" data-en="Jul 9, 2026 · Thu">2026年7月9日 · 周四</span>
-          <span class="ms-eyebrow" data-en="What Mira saw today">Mira 今天看到的</span>
-          <strong class="ms-insight" data-en="A steady day for your eyes. Pause at the break points, and let the rhythm loosen a little.">今天在稳稳地用眼。到断点时停一下，让节奏松一点。</strong>
-          <div class="ms-metrics" aria-hidden="true">
-            <div><span data-en="Focus today">今日专注</span><b data-en="6 h 58 m">6 小时 58 分</b></div>
-            <div><span data-en="Eyes rested">歇眼</span><b data-en="14 min">14 分钟</b></div>
-            <div><span data-en="Rhythm">节奏</span><b data-en="Steady">保持平稳</b></div>
-          </div>
-          <div class="ms-divider" aria-hidden="true"></div>
-          <div class="ms-footer">
-            <span class="ms-brand"><span class="ms-mark" aria-hidden="true"></span><span><b>EyeFlow</b><i data-en="Mira's desktop companion space">Mira 的桌面陪伴空间</i></span></span>
-            <span class="ms-domain">eyeflow.app</span>
-          </div>
-        </article>
+        </div>
+        <p class="mock-note" data-en="Look far for 20 seconds — logged when you're back.">看远处 20 秒，看完自动记录。</p>
+        </div>
+        <div class="mock-cell">
+        <p class="mock-tag" data-en="Nap · full recharge">小睡 · 全屏回充</p>
+        <div class="screen-card">
+          <img class="app-shot" src="shots/nap-zh.png" data-en-src="shots/nap-en.png"
+               width="474" height="300" loading="lazy" decoding="async"
+               alt="EyeFlow 小睡仪式：全屏变暗，光点收成一线，气色随回充慢慢变亮"
+               data-en-alt="EyeFlow's nap ritual — the screen dims, the light settles to a line, 气色 slowly brightens as you recharge" />
+        </div>
+        <p class="mock-note" data-en="Eyes closed longer — watch your 气色 brighten back up.">闭眼久一点，看着气色亮回来。</p>
+        </div>
       </div>
     </div>
   </section>
@@ -952,64 +853,6 @@
     </ul>
   </section>
 
-  <section class="block narrow theme-block col reveal">
-    <div class="head">
-      <p class="eyebrow" data-en="Day / Night">白天 / 夜晚</p>
-      <h2 data-en="Auto by default — quiet in both light and dark."><span class="cl">默认自动切换，</span><span class="cl">白天夜晚都安静。</span></h2>
-      <p class="body" data-en="<span class='copy-line'>EyeFlow uses your Mac's timezone and the day's sunrise and sunset to choose Day or Night.</span><span class='copy-line'>Day stays clean and clear; Night lowers brightness.</span><span class='copy-line'>If you prefer, you can also pin either mode manually.</span>"><span class="copy-line"><span class="cl">EyeFlow 会按这台 Mac 的时区、</span><span class="cl">当天日出和日落，</span><span class="cl">自动判断白天或夜晚。</span></span><span class="copy-line">白天保持清爽，夜晚自动压低亮度。</span><span class="copy-line">你也可以手动固定在白天或晚上。</span></p>
-    </div>
-    <div class="theme-strip">
-      <ul class="theme-list">
-        <li data-en="No extra setup: keep Auto on and EyeFlow changes with the day.">不需要额外设置：保持「自动」，EyeFlow 会跟着一天自己切换。</li>
-        <li data-en="The view below is live — flip the appearance switch in its sidebar to see Night.">下面这块界面是真的——点侧栏里的外观开关，看看晚上的样子。</li>
-        <li data-en="Night mode still exists for late hours, with lower contrast and a softer reading feel.">夜晚版本仍然保留，适合晚间使用，亮度和对比会更轻。</li>
-      </ul>
-    </div>
-    <!-- 活体演示:mock 侧栏里 app 自己的外观开关就是真开关——点它,
-         这块今天页在白天/夜晚两套 app 真实 token 间交叉淡入;
-         「自动」按访客本地时间真实决定。 -->
-    <div class="screen-card is-window theme-demo reveal">
-      <article class="mock-app mock-app-demo" role="group" aria-label="EyeFlow 今天页的外观演示：用侧栏的外观开关，在白天与夜晚之间切换" data-en-label="A live preview of EyeFlow's Today view — use the appearance switch in the sidebar to move between Day and Night">
-        <aside class="ma-side">
-          <div class="ma-brand" aria-hidden="true"><span class="ma-mark"></span><b>EyeFlow</b></div>
-          <nav class="ma-nav" aria-hidden="true">
-            <span class="is-active" data-en="Today">今天</span>
-            <span data-en="These Days">这几天</span>
-            <span data-en="Settings">设置</span>
-          </nav>
-          <div class="ma-theme">
-            <small data-en="Appearance">外观</small>
-            <div class="ma-switch" role="group" aria-label="外观" data-en-label="Appearance">
-              <button type="button" class="is-active" data-mode="auto" aria-pressed="true" data-en="Auto">自动</button>
-              <button type="button" data-mode="day" aria-pressed="false" data-en="Day">白天</button>
-              <button type="button" data-mode="night" aria-pressed="false" data-en="Night">晚上</button>
-            </div>
-            <small data-en="Auto · by timezone">自动 · 按时区</small>
-          </div>
-        </aside>
-        <div class="ma-main">
-          <div class="ma-top">
-            <div>
-              <span class="ma-kicker" data-en="Mira is here">Mira 在这里</span>
-              <strong class="ma-title" data-en="Today">今天</strong>
-            </div>
-            <span class="ma-status ma-status-demo" data-en="Daytime">白天版</span>
-          </div>
-          <div class="ma-card">
-            <strong data-en="I'm right here.">我在旁边。</strong>
-            <p data-en="No need to start anything. When the screen is active, I will quietly keep time.">不用特意开始。有屏幕活动时，我会轻轻记着。</p>
-            <div class="ma-meter" aria-hidden="true"><i></i></div>
-          </div>
-          <div class="ma-row" aria-hidden="true">
-            <div class="ma-mini"><span data-en="Focus">专注</span><b data-en="0 min">0 分钟</b></div>
-            <div class="ma-mini"><span data-en="Rest">歇眼</span><b data-en="0 min">0 分钟</b></div>
-            <div class="ma-mini"><span data-en="Rhythm">节奏</span><b data-en="Ready">待开始</b></div>
-          </div>
-        </div>
-      </article>
-    </div>
-  </section>
-
   <!-- ── Act 4 · 跟 Mira 歇一下（参与式护眼一刻） ─────────────── -->
   <section id="rest" class="rest-act col" data-state="invite" aria-label="跟 Mira 歇一下" data-en-label="Rest with Mira">
     <div class="rest-stage">
@@ -1019,8 +862,6 @@
           <svg class="ring" viewBox="0 0 200 200"><circle cx="100" cy="100" r="94"></circle></svg>
           <div class="mira">
             <div class="pet">
-              <div class="ant"></div><div class="face"></div>
-              <div class="cheek l"></div><div class="cheek r"></div><div class="mouth"></div>
             </div>
           </div>
         </div>
@@ -1035,8 +876,6 @@
           <div class="dot" aria-hidden="true"></div>
           <div class="mira" aria-hidden="true">
             <div class="pet">
-              <div class="ant"></div><div class="face"></div>
-              <div class="cheek l"></div><div class="cheek r"></div><div class="mouth"></div>
             </div>
           </div>
         </div>
@@ -1056,8 +895,6 @@
     <div class="final-panel">
       <div class="mira" aria-hidden="true">
         <div class="pet">
-          <div class="ant"></div><div class="face"></div>
-          <div class="cheek l"></div><div class="cheek r"></div><div class="mouth"></div>
         </div>
       </div>
       <h2 class="brand-line" data-en="<span class='cl'>EyeFlow —</span><span class='cl'>guarding the way you see the world.</span>"><span class="cl">EyeFlow ——</span><span class="cl">守护你看清世界的方式。</span></h2>
@@ -1078,26 +915,6 @@
   </footer>
 
   <script>
-    (function () { // Mira idle blink — the one signature, slow and quiet
-      const reduce = window.matchMedia("(prefers-reduced-motion: reduce)");
-      let next = 0, clear = 0; const rand = (a, b) => a + Math.random() * (b - a);
-      function schedule(now) { next = now + rand(3000, 7000); }
-      function trigger(now) {
-        const dbl = Math.random() < 0.16;
-        document.body.style.setProperty("--blink", Math.round(rand(180, 260)) + "ms");
-        document.body.style.setProperty("--dblink", Math.round(rand(480, 640)) + "ms");
-        document.body.dataset.blink = dbl ? "double" : "single";
-        clear = now + (dbl ? 720 : 340); schedule(now);
-      }
-      function tick(now) {
-        if (clear && now >= clear) { document.body.removeAttribute("data-blink"); clear = 0; }
-        if (!next) schedule(now);
-        if (!document.hidden && now >= next) trigger(now);
-        requestAnimationFrame(tick);
-      }
-      if (!reduce.matches) requestAnimationFrame(tick);
-    })();
-
     (function () { // reveal — fade + tiny shift, once
       const items = document.querySelectorAll(".reveal");
       if (!("IntersectionObserver" in window)) { items.forEach((el) => el.classList.add("in")); return; }
@@ -1152,12 +969,15 @@
       labeled.forEach((el) => (el.dataset.zhLabel = el.getAttribute("aria-label")));
       const alts = [...document.querySelectorAll("img[data-en-alt]")];
       alts.forEach((el) => (el.dataset.zhAlt = el.getAttribute("alt")));
+      const shots = [...document.querySelectorAll("img[data-en-src]")];
+      shots.forEach((el) => (el.dataset.zhSrc = el.getAttribute("src")));
       const btns = [...document.querySelectorAll(".lang button")];
       function apply(lang) {
         document.documentElement.lang = lang === "en" ? "en" : "zh-CN";
         els.forEach((el) => (el.innerHTML = lang === "en" ? el.dataset.en : el.dataset.zh));
         labeled.forEach((el) => el.setAttribute("aria-label", lang === "en" ? el.dataset.enLabel : el.dataset.zhLabel));
         alts.forEach((el) => el.setAttribute("alt", lang === "en" ? el.dataset.enAlt : el.dataset.zhAlt));
+        shots.forEach((el) => el.setAttribute("src", lang === "en" ? el.dataset.enSrc : el.dataset.zhSrc));
         btns.forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.lang === lang)));
         try { localStorage.setItem("ef-lang", lang); } catch (e) {}
       }
@@ -1173,34 +993,6 @@
       apply(init);
     })();
 
-    (function () { // 白天/夜晚活体演示 — mock 里 app 自己的外观开关是真开关
-      const demo = document.querySelector(".theme-demo");
-      if (!demo) return;
-      const btns = [...demo.querySelectorAll(".ma-switch button[data-mode]")];
-      const status = demo.querySelector(".ma-status-demo");
-      // App 的自动档按时区日出日落;页面演示用 7:00–19:00 近似本地昼夜。
-      const resolve = (mode) => mode !== "auto" ? mode : ((new Date().getHours() >= 7 && new Date().getHours() < 19) ? "day" : "night");
-      function apply(mode) {
-        const night = resolve(mode) === "night";
-        demo.classList.toggle("is-night", night);
-        btns.forEach((b) => {
-          const on = b.dataset.mode === mode;
-          b.classList.toggle("is-active", on);
-          b.setAttribute("aria-pressed", String(on));
-        });
-        // 状态徽标跟主题走,且双语快照同步更新,语言切换后不回跳。
-        status.dataset.en = night ? "Night" : "Daytime";
-        status.dataset.zh = night ? "晚上版" : "白天版";
-        status.textContent = document.documentElement.lang === "en" ? status.dataset.en : status.dataset.zh;
-      }
-      demo.addEventListener("click", (e) => {
-        const b = e.target.closest("button[data-mode]");
-        if (b) apply(b.dataset.mode);
-      });
-      demo.classList.add("no-fade"); // 初始落位不播过渡,交互后才交叉淡入
-      apply("auto");
-      requestAnimationFrame(() => requestAnimationFrame(() => demo.classList.remove("no-fade")));
-    })();
   </script>
 </body>
 </html>
