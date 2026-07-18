@@ -1,7 +1,7 @@
 {
   "name": "eyeflow-next",
   "productName": "EyeFlow",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "private": true,
   "description": "EyeFlow — a calm menubar companion that watches your eye-use energy (Mira) and invites you to rest.",
   "author": "EyeFlow",
@@ -22,6 +22,7 @@
     "appId": "app.eyeflow.next",
     "productName": "EyeFlow",
     "artifactName": "EyeFlow-${version}.${ext}",
+    "afterSign": "build/notarize.js",
     "directories": {
       "output": "release"
     },
@@ -33,6 +34,10 @@
     "mac": {
       "category": "public.app-category.productivity",
       "icon": "build/icon.icns",
+      "hardenedRuntime": true,
+      "gatekeeperAssess": false,
+      "entitlements": "build/entitlements.mac.plist",
+      "entitlementsInherit": "build/entitlements.mac.inherit.plist",
       "target": ["dmg", "zip"]
     },
     "win": {
