@@ -1,0 +1,141 @@
+/* 加强档提醒 (CHARTER §6.1): a FULLSCREEN faint warm wash + centered big capsule.
+   The wash is the lightest member of the "把世界柔柔推远" family (§6.3) — pure
+   低透明暖色, never darkening the screen. The capsule reuses ../shared/capsule.css
+   (green vessel) + app-mark.css (Mira). Click-through except the capsule; the JS
+   reports hover so the 小睡 button stays clickable. */
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+}
+
+html,
+body {
+  height: 100%;
+  overflow: hidden;
+  background: transparent;
+  font-family: -apple-system, "SF Pro Display", "PingFang SC", sans-serif;
+}
+
+/* the warm wash — cross-fades in with the capsule, out on tuck */
+.rs-stage {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  /* optical center: the geometric middle reads low (the Dock pulls the eye down),
+     so lift the capsule ~5vh above it — same principle as the onboarding (§7) */
+  padding-bottom: 10vh;
+}
+
+.rs-stage::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: radial-gradient(
+    130% 130% at 50% 42%,
+    rgba(255, 244, 228, 0.08) 0%,
+    rgba(252, 224, 186, 0.2) 58%,
+    rgba(246, 208, 160, 0.34) 100%
+  );
+  opacity: 0;
+  transition: opacity 520ms ease;
+}
+
+body.awake .rs-stage::before {
+  opacity: 1;
+}
+
+/* the big centered capsule */
+.rs {
+  display: flex;
+  align-items: center;
+  gap: 22px;
+  min-width: 440px;
+  max-width: 600px;
+  padding: 24px 34px;
+  color: #f2fff9;
+  opacity: 0;
+  transform: translateY(10px) scale(0.96);
+  transition:
+    opacity 460ms ease,
+    transform 460ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.rs.in {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+}
+
+.rs .app-mark {
+  flex: 0 0 auto;
+  transform: scale(1.25); /* a touch larger than the island mark for the big capsule */
+}
+
+.rs__body {
+  flex: 1 1 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  min-width: 0;
+}
+
+.rs__text {
+  font-size: 21px;
+  font-weight: 500;
+  line-height: 1.4;
+  letter-spacing: 0;
+}
+
+.rs__track {
+  height: 4px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.22);
+  overflow: hidden;
+}
+
+.rs__fill {
+  height: 100%;
+  width: 100%;
+  border-radius: 999px;
+  background: #6fe7c3;
+}
+
+.rs__count {
+  flex: 0 0 auto;
+  font-size: 34px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  min-width: 1.6em;
+  text-align: center;
+}
+
+.rs__nap {
+  flex: 0 0 auto;
+  font: inherit;
+  font-size: 16px;
+  font-weight: 500;
+  color: #f2fff9;
+  background: rgba(255, 255, 255, 0.16);
+  border: 1px solid rgba(255, 255, 255, 0.28);
+  border-radius: 999px;
+  padding: 12px 24px;
+  cursor: pointer;
+  transition: background 160ms ease;
+}
+
+.rs__nap:hover {
+  background: rgba(255, 255, 255, 0.24);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .rs-stage::before,
+  .rs {
+    transition: opacity 300ms ease;
+  }
+  .rs {
+    transform: none;
+  }
+}

@@ -7,7 +7,7 @@
  */
 
 const { ipcMain } = require('electron');
-const { createReminderWindow } = require('./overlay/reminder-window');
+const { createReminderPresenter } = require('./reminder-presenter');
 const { bufferUntilGap } = require('./reminder-buffer');
 const { energyToColor } = require('../view/capsule/energy-color');
 const { rechargePreview } = require('../view/reminder/recharge');
@@ -15,9 +15,15 @@ const { shortBreakFrame, SHORT_BREAK_MS, RECHARGE_HOLD_MS } = require('../view/r
 const { earnedShortBreak, REMINDER_DEFAULTS } = require('../view/reminder/gating');
 const { SHORT_BREAK_PROMPTS, NAP_SUGGEST_PROMPTS } = require('../view/reminder/copy');
 
-function createReminderController({ getIdleSec, getEnergy, onShortBreakComplete, onNapNow } = {}) {
+function createReminderController({
+  getIdleSec,
+  getEnergy,
+  getReminderTier,
+  onShortBreakComplete,
+  onNapNow,
+} = {}) {
   const idleSec = typeof getIdleSec === 'function' ? getIdleSec : () => 0;
-  let win = null;
+  const presenter = createReminderPresenter({ getReminderTier }); // §6.4 island vs strong window
   let busy = false;
   let timer = null;
   let cancelBuffer = null;
@@ -25,19 +31,14 @@ function createReminderController({ getIdleSec, getEnergy, onShortBreakComplete,
   let napIndex = 0;
   let earned = false; // D2: was this (short) break actually rested?
 
-  const send = (channel, payload) => {
-    if (win && !win.isDestroyed()) win.webContents.send(channel, payload);
-  };
+  const send = (channel, payload) => presenter.send(channel, payload);
 
   function finish() {
     if (timer) {
       clearInterval(timer);
       timer = null;
     }
-    if (win && !win.isDestroyed()) {
-      win.setIgnoreMouseEvents(true); // back to click-through for the next float
-      win.hide();
-    }
+    presenter.hide();
     if (busy) {
       busy = false;
       // D2: credit the recharge only if actually rested (kept typing → no credit).
@@ -69,7 +70,7 @@ function createReminderController({ getIdleSec, getEnergy, onShortBreakComplete,
 
     if (isNap) {
       // §5.1 二级: a clickable "小睡" suggestion that dwells then tucks (no credit).
-      if (win && !win.isDestroyed()) win.setIgnoreMouseEvents(false);
+      presenter.setInteractive(true);
       napIndex += 1;
       timer = setTimeout(() => {
         timer = null;
@@ -107,13 +108,8 @@ function createReminderController({ getIdleSec, getEnergy, onShortBreakComplete,
   function floatOut(level, fallbackEnergy) {
     // energy may drift during buffering → prefer a fresh read (§8.3).
     const energy = typeof getEnergy === 'function' ? getEnergy() : fallbackEnergy;
-    if (!win || win.isDestroyed()) win = createReminderWindow();
-    win.showInactive();
-    if (win.webContents.isLoading()) {
-      win.webContents.once('did-finish-load', () => runSession(level, energy));
-    } else {
-      runSession(level, energy);
-    }
+    presenter.show(); // ensure the tier-appropriate window (island / strong) + float it out
+    presenter.whenReady(() => runSession(level, energy));
   }
 
   return {
@@ -140,8 +136,7 @@ function createReminderController({ getIdleSec, getEnergy, onShortBreakComplete,
       if (cancelBuffer) cancelBuffer();
       ipcMain.removeListener('reminder:tucked', finish);
       ipcMain.removeListener('reminder:nap-now', onNapAccepted);
-      if (win && !win.isDestroyed()) win.destroy();
-      win = null;
+      presenter.destroy();
     },
   };
 }

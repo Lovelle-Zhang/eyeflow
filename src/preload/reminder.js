@@ -15,4 +15,7 @@ contextBridge.exposeInMainWorld('reminder', {
   onTuck: (cb) => ipcRenderer.on('reminder:tuck', () => cb()),
   tucked: () => ipcRenderer.send('reminder:tucked'),
   napNow: () => ipcRenderer.send('reminder:nap-now'),
+  // strong window only: report cursor-over-capsule so clicks can land on the
+  // 小睡 button while the fullscreen wash stays click-through (§6.1 点穿除按钮).
+  hover: (over) => ipcRenderer.send('reminder:hover', over),
 });
