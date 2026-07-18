@@ -786,11 +786,15 @@
         <p class="mock-tag" data-en="At the top">顶部提醒岛</p>
         <div class="island live" role="img" aria-label="EyeFlow 顶部提醒岛：看看远方休息一下，看完自动记录" data-en-label="EyeFlow's reminder island at the top of the screen: look into the distance to rest, logged automatically when you're done">
           <svg class="ic" viewBox="0 0 1024 1024" aria-hidden="true">
-            <defs><linearGradient id="isl-bg" x1="216" y1="156" x2="826" y2="874" gradientUnits="userSpaceOnUse"><stop offset="0" stop-color="#EAFFF6"/><stop offset=".58" stop-color="#BDEAFF"/><stop offset="1" stop-color="#F3EEC7"/></linearGradient></defs>
+            <defs>
+              <linearGradient id="isl-bg" x1="216" y1="156" x2="826" y2="874" gradientUnits="userSpaceOnUse"><stop offset="0" stop-color="#EAFFF6"/><stop offset=".58" stop-color="#BDEAFF"/><stop offset="1" stop-color="#F3EEC7"/></linearGradient>
+              <linearGradient id="isl-lens" x1="265" y1="335" x2="759" y2="653" gradientUnits="userSpaceOnUse"><stop offset="0" stop-color="#0E1C20"/><stop offset="1" stop-color="#10272A"/></linearGradient>
+              <radialGradient id="isl-pulse" cx="512" cy="494" r="90" gradientUnits="userSpaceOnUse"><stop offset="0" stop-color="#f4fff9"/><stop offset=".45" stop-color="#8fe6c0"/><stop offset=".72" stop-color="#8fe6c0" stop-opacity=".22"/><stop offset="1" stop-color="#8fe6c0" stop-opacity="0"/></radialGradient>
+            </defs>
             <rect width="1024" height="1024" rx="230" fill="url(#isl-bg)"/>
-            <rect x="177" y="335" width="671" height="318" rx="159" fill="#0E1C20"/>
-            <circle cx="380" cy="468" r="46" fill="#F8FFFC"/>
-            <circle cx="644" cy="468" r="46" fill="#F8FFFC"/>
+            <!-- new Mira (§8.5 / MIRA_SYSTEM): a small dark lens holding ONE point of light, not two eyes -->
+            <rect x="265" y="335" width="494" height="318" rx="159" fill="url(#isl-lens)"/>
+            <circle cx="512" cy="494" r="90" fill="url(#isl-pulse)"/>
             <circle cx="803" cy="344" r="82" fill="#6FE7C3"/>
           </svg>
           <div class="isl-body">
