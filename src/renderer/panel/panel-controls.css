@@ -17,26 +17,26 @@
   cursor: pointer;
   padding: 10px 12px;
   border-radius: 11px;
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(255, 255, 255, 0.09);
+  background: var(--row-bg);
+  border: 1px solid var(--ctl-border);
   color: var(--text);
   font-family: inherit;
   transition: background 140ms ease;
 }
 
 .row:hover {
-  background: rgba(255, 255, 255, 0.1);
+  background: var(--row-hover);
 }
 
 /* the default action — a restrained accent (green lives on the capsule; here it's
    just a light tint + accent leading icon, not a saturated fill) */
 .row--primary {
-  background: rgba(139, 240, 174, 0.11);
-  border-color: rgba(139, 240, 174, 0.2);
+  background: var(--accent-soft);
+  border-color: var(--accent-border);
 }
 
 .row--primary:hover {
-  background: rgba(139, 240, 174, 0.17);
+  background: var(--accent-soft-hover);
 }
 
 .row__ic {
@@ -47,7 +47,7 @@
 }
 
 .row--primary .row__ic {
-  color: var(--mint);
+  color: var(--accent-ink);
 }
 
 .row__label {
@@ -87,8 +87,8 @@
   gap: 2px;
   padding: 2px;
   border-radius: 9px;
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: var(--seg-bg);
+  border: 1px solid var(--ctl-border);
 }
 
 .seg {
@@ -107,16 +107,16 @@
 }
 
 .seg:hover:not(.on) {
-  background: rgba(255, 255, 255, 0.06);
+  background: var(--row-hover);
 }
 
 .seg.on {
-  background: rgba(255, 255, 255, 0.16);
+  background: var(--seg-thumb);
   color: var(--text);
   font-weight: 600;
   box-shadow:
     0 1px 2px rgba(0, 0, 0, 0.22),
-    inset 0 0 0 0.5px rgba(255, 255, 255, 0.12);
+    inset 0 0 0 0.5px var(--hairline);
 }
 
 .quit {
@@ -134,6 +134,6 @@
 }
 
 .quit:hover {
-  background: rgba(255, 255, 255, 0.06);
+  background: var(--row-bg);
   color: var(--text);
 }

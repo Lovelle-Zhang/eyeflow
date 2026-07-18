@@ -36,6 +36,16 @@
   --panel-inset: inset 0 1px 0 rgba(255, 255, 255, 0.1);
   --row-bg: rgba(255, 255, 255, 0.06);
   --row-hover: rgba(255, 255, 255, 0.12);
+
+  /* menubar panel controls (rows + segmented) — mode-aware so light stays legible.
+     Dark: light overlays. Light (below): dark/deep-green so it reads on the pale
+     popover material (the earlier hardcoded white washed out in light). */
+  --ctl-border: rgba(255, 255, 255, 0.09);
+  --seg-thumb: rgba(255, 255, 255, 0.16);
+  --accent-soft: rgba(139, 240, 174, 0.12);
+  --accent-soft-hover: rgba(139, 240, 174, 0.18);
+  --accent-border: rgba(139, 240, 174, 0.22);
+  --accent-ink: #6fe7c3;
 }
 
 @media (prefers-color-scheme: light) {
@@ -52,5 +62,11 @@
     --panel-inset: inset 0 1px 0 rgba(255, 255, 255, 0.6);
     --row-bg: rgba(0, 0, 0, 0.05);
     --row-hover: rgba(0, 0, 0, 0.09);
+    --ctl-border: rgba(0, 0, 0, 0.1);
+    --seg-thumb: #ffffff;
+    --accent-soft: rgba(20, 107, 82, 0.1);
+    --accent-soft-hover: rgba(20, 107, 82, 0.16);
+    --accent-border: rgba(20, 107, 82, 0.26);
+    --accent-ink: #157a5c;
   }
 }
