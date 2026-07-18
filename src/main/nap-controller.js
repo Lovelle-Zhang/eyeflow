@@ -13,9 +13,11 @@ const { miraSvg } = require('../view/mira/mira-svg');
 const { energyToColor } = require('../view/capsule/energy-color');
 const { shortBreakFrame } = require('../view/reminder/short-break');
 const { formatClock, DEFAULT_NAP_MS } = require('../view/nap/nap');
+const { napStrings } = require('../view/i18n/nap-strings');
 
-function createNapController({ getEnergy, getReminderTier, onNapComplete } = {}) {
+function createNapController({ getEnergy, getReminderTier, getLocale, onNapComplete } = {}) {
   const tierOf = () => (typeof getReminderTier === 'function' && getReminderTier() === 'strong' ? 'strong' : 'light');
+  const localeOf = () => (typeof getLocale === 'function' ? getLocale() : 'zh');
   let win = null;
   let timer = null;
   let busy = false;
@@ -46,11 +48,14 @@ function createNapController({ getEnergy, getReminderTier, onNapComplete } = {})
 
   function run(durationMs) {
     startEnergy = typeof getEnergy === 'function' ? getEnergy() : 0;
+    const copy = napStrings(localeOf()); // §4 localized rest / wake / hint
     send('nap:start', {
       durationSec: Math.round(durationMs / 1000),
       energy: startEnergy,
       capsuleCss: energyToColor(startEnergy).css, // starts at the tired 气色
       tier: tierOf(), // §6.4 加强档 → bigger central capsule (more immersive rest)
+      restText: copy.rest,
+      hint: copy.hint,
     });
 
     const start = process.hrtime.bigint();
@@ -69,7 +74,7 @@ function createNapController({ getEnergy, getReminderTier, onNapComplete } = {})
         clearInterval(timer);
         timer = null;
         if (onNapComplete) onNapComplete(); // 回满 (§5.4.3)
-        send('nap:done', {});
+        send('nap:done', { wakeText: napStrings(localeOf()).wake });
       }
     }, 250);
   }

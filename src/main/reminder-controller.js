@@ -13,16 +13,18 @@ const { energyToColor } = require('../view/capsule/energy-color');
 const { rechargePreview } = require('../view/reminder/recharge');
 const { shortBreakFrame, SHORT_BREAK_MS, RECHARGE_HOLD_MS } = require('../view/reminder/short-break');
 const { earnedShortBreak, REMINDER_DEFAULTS } = require('../view/reminder/gating');
-const { SHORT_BREAK_PROMPTS, NAP_SUGGEST_PROMPTS } = require('../view/reminder/copy');
+const { reminderCopy } = require('../view/reminder/copy');
 
 function createReminderController({
   getIdleSec,
   getEnergy,
   getReminderTier,
+  getLocale,
   onShortBreakComplete,
   onNapNow,
 } = {}) {
   const idleSec = typeof getIdleSec === 'function' ? getIdleSec : () => 0;
+  const localeOf = () => (typeof getLocale === 'function' ? getLocale() : 'zh');
   const presenter = createReminderPresenter({ getReminderTier }); // §6.4 island vs strong window
   let busy = false;
   let timer = null;
@@ -57,14 +59,16 @@ function createReminderController({
 
   function runSession(level, energy) {
     const isNap = level === 'nap';
+    const copy = reminderCopy(localeOf()); // §4 localized prompt + nap button
 
     send('reminder:show', {
       kind: level, // renderer blinks (short) or opens eyes (nap) on the shared capsule
       capsuleCss: energyToColor(energy).css,
       energy, // 0–100; the pulse (--energy) shows the honest 气色, ready to brighten
       text: isNap
-        ? NAP_SUGGEST_PROMPTS[napIndex % NAP_SUGGEST_PROMPTS.length]
-        : SHORT_BREAK_PROMPTS[shortIndex % SHORT_BREAK_PROMPTS.length],
+        ? copy.nap[napIndex % copy.nap.length]
+        : copy.short[shortIndex % copy.short.length],
+      napLabel: copy.napButton,
       durationSec: Math.round(SHORT_BREAK_MS / 1000),
     });
 

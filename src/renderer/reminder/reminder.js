@@ -16,14 +16,15 @@ const napbtn = el('napbtn');
 
 napbtn.addEventListener('click', () => api.napNow?.());
 
-api.onShow?.(({ kind, capsuleCss, text: prompt, durationSec }) => {
+api.onShow?.(({ kind, capsuleCss, text: prompt, napLabel, durationSec }) => {
   capsule.style.setProperty('--cap-color', capsuleCss); // 气色 at reminder time (§8.3)
   text.textContent = prompt;
+  if (napLabel) napbtn.textContent = napLabel; // §4 localized nap button
 
   const isNap = kind === 'nap';
   track.style.display = isNap ? 'none' : '';
   count.style.display = isNap ? 'none' : '';
-  napbtn.hidden = !isNap; // §5.1 二级: actionable "小睡" button
+  napbtn.hidden = !isNap; // §5.1 二级: actionable nap button
   if (!isNap) {
     count.textContent = String(durationSec);
     fill.style.width = '100%';

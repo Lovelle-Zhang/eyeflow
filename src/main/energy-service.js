@@ -48,6 +48,7 @@ function startEnergyService({
   const napController = createNapController({
     getEnergy: () => driver.state.energy, // animate the charge-up (气色 brightening) during the nap
     getReminderTier: () => state.reminderTier, // §6.4 加强档 → bigger nap capsule
+    getLocale: () => state.locale, // §4 localized nap copy
     onNapComplete: () => {
       driver.nap();
       record = recordRest(record, 'nap');
@@ -76,6 +77,7 @@ function startEnergyService({
     getIdleSec,
     getEnergy: () => driver.state.energy,
     getReminderTier: () => state.reminderTier, // §6.4 island vs strong presentation
+    getLocale: () => state.locale, // §4 localized reminder prompt + nap button
     onShortBreakComplete: () => {
       driver.shortBreak();
       record = recordRest(record, 'short'); // D2: only genuine rests reach here

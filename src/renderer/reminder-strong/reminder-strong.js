@@ -22,9 +22,10 @@ capsule.addEventListener('mouseenter', () => {
 });
 capsule.addEventListener('mouseleave', () => api.hover?.(false));
 
-api.onShow?.(({ kind, capsuleCss, text: prompt, durationSec }) => {
+api.onShow?.(({ kind, capsuleCss, text: prompt, napLabel, durationSec }) => {
   capsule.style.setProperty('--cap-color', capsuleCss); // 气色 at reminder time (§8.3)
   text.textContent = prompt;
+  if (napLabel) napbtn.textContent = napLabel; // §4 localized nap button
 
   const isNap = kind === 'nap';
   track.style.display = isNap ? 'none' : '';
