@@ -13,6 +13,21 @@
   box-shadow: 0 3px 8px -2px rgba(8, 30, 20, 0.35);
 }
 
+/* the small green "alive" dot at the top-right corner (§8.5 饱满版 mark) */
+.app-mark::after {
+  content: "";
+  position: absolute;
+  top: 5px;
+  right: 5px;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #54cf7a;
+  box-shadow:
+    0 0 0 1.5px rgba(255, 255, 255, 0.9),
+    0 0 6px rgba(84, 207, 122, 0.55);
+}
+
 .app-mark__lens {
   position: absolute;
   left: 50%;

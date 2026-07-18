@@ -31,8 +31,8 @@ body {
   overflow: hidden;
   display: flex;
   align-items: center;
-  gap: 13px;
-  padding: 12px 22px 12px 12px;
+  gap: 16px;
+  padding: 13px 34px 13px 26px;
   max-width: 92vw;
 
   /* float-out / tuck (§8.4) */
@@ -56,7 +56,7 @@ body {
   position: absolute;
   inset: 0;
   border-radius: inherit;
-  background: radial-gradient(130% 165% at 26% -18%, rgba(195, 248, 222, 0.34) 0%, transparent 58%);
+  background: radial-gradient(120% 150% at 50% -25%, rgba(195, 248, 222, 0.18) 0%, transparent 60%);
   pointer-events: none;
 }
 
