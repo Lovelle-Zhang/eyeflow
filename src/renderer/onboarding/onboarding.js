@@ -15,6 +15,7 @@ const controls = el('controls');
 
 let napOptions = [];
 let chosenNapMs = 180000;
+let S = window.OB_STRINGS.zh; // §4 台词 set from the resolved locale on init
 
 const delay = (ms) => new Promise((r) => setTimeout(r, ms));
 
@@ -62,7 +63,7 @@ function pickDuration() {
     controls.appendChild(segs);
     const done = document.createElement('button');
     done.className = 'ob__btn';
-    done.textContent = '好了';
+    done.textContent = S.pickDone;
     done.onclick = () => {
       controls.innerHTML = '';
       resolve();
@@ -86,11 +87,11 @@ async function run() {
   await delay(800);
 
   // 登场 + 自我介绍
-  await line('你好，我是 Mira');
-  await line('我住在你的屏幕角落，<br>不打扰你');
-  await line('你看屏幕太久时，我会提醒你<br>——歇一下，看看远处');
-  say('现在，我们先一起试一次');
-  await button('好，来试试');
+  await line(S.hello);
+  await line(S.intro1);
+  await line(S.intro2);
+  say(S.tryIntro);
+  await button(S.tryBtn);
 
   // 第一个短歇 loop —— 页面暗层(--dim)与 Mira 光核(--energy)一起 dim→bright。
   // 渐变背景不能 CSS 过渡,所以用可淡出的暗层:交接时仍是暗的,休息里渐亮。演示压到
@@ -100,9 +101,9 @@ async function run() {
   card.style.setProperty('--dim', '1');
   face.style.transition = '--energy 1200ms ease';
   face.style.setProperty('--energy', '0.15');
-  say('看屏幕久了，<br>气色会一点点淡下去');
+  say(S.fade);
   await delay(2600);
-  say('那就歇一下——<br>看看远处，等着它亮回来');
+  say(S.restNow);
   card.style.transition = '--dim 10000ms linear';
   card.style.setProperty('--dim', '0');
   face.style.transition = '--energy 10000ms linear';
@@ -110,19 +111,19 @@ async function run() {
   await shortLoop(10000);
   card.style.transition = '';
   face.style.transition = '';
-  say('这样就好，<br>是不是清楚了一点');
+  say(S.afterRest);
   await delay(2800);
 
   // 引出小睡 + 选时长 —— Mira 保持呼吸,只靠台词讲解,不再切形态
-  await line('刚才那个，是短歇——<br>像眨一次长眼，随时来一下', 2800);
-  await line('累得深了，还可以小睡一会儿<br>——闭眼久一点，歇得更透', 3000);
-  say('小睡多久，你自己定');
+  await line(S.explainShort, 2800);
+  await line(S.explainNap, 3000);
+  say(S.pickPrompt);
   await pickDuration();
 
   // 收场
-  await line('好了，我记住了，之后我就<br>住在屏幕顶端的岛里陪着你', 2600);
+  await line(S.outro, 2600);
   msg.classList.add('brand');
-  say('<span class="ob__brand-name">EyeFlow</span>守护你看清世界的方式');
+  say(S.brand);
   card.classList.add('is-ending'); // Mira 缩小落定,与 EyeFlow 锁成品牌定格
   await delay(3000);
   face.classList.add('is-leaving'); // 光缩进菜单栏
@@ -134,6 +135,7 @@ async function run() {
 api.onInit?.((payload) => {
   napOptions = payload.napOptions || [];
   chosenNapMs = payload.defaultNapMs;
+  S = (window.OB_STRINGS && window.OB_STRINGS[payload.locale]) || window.OB_STRINGS.zh;
   requestAnimationFrame(() => card.classList.add('in'));
   run();
 });

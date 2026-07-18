@@ -10,10 +10,12 @@ const fs = require('node:fs');
 const path = require('node:path');
 const { app } = require('electron');
 const { hydrateSettings } = require('../settings/settings');
+const { systemLocale } = require('../view/i18n/panel-strings');
 
 function createSettingsStore() {
   const file = path.join(app.getPath('userData'), 'settings.json');
-  let current = hydrateSettings(null);
+  const sysLocale = systemLocale(app.getLocale()); // §4 first-run default follows the OS language
+  let current = hydrateSettings(null, sysLocale);
 
   return {
     file,
@@ -24,12 +26,12 @@ function createSettingsStore() {
       } catch {
         /* no file yet / corrupt → defaults */
       }
-      current = hydrateSettings(raw);
+      current = hydrateSettings(raw, sysLocale);
       return current;
     },
     /** Merge a patch, validate, and write. @returns the new settings */
     save(patch) {
-      current = hydrateSettings({ ...current, ...patch });
+      current = hydrateSettings({ ...current, ...patch }, sysLocale);
       try {
         fs.writeFileSync(file, JSON.stringify(current));
       } catch {

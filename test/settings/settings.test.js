@@ -38,6 +38,13 @@ test('keeps a valid persisted locale; rejects unknown → default', () => {
   assert.equal(hydrateSettings({ locale: 3 }).locale, DEFAULT_LOCALE);
 });
 
+test('first-run locale follows the fallback (system); a persisted choice wins', () => {
+  assert.equal(hydrateSettings(null, 'en').locale, 'en'); // no persisted → system
+  assert.equal(hydrateSettings({}, 'en').locale, 'en');
+  assert.equal(hydrateSettings({ locale: 'zh' }, 'en').locale, 'zh'); // persisted overrides system
+  assert.equal(hydrateSettings(null, 'bogus').locale, DEFAULT_LOCALE); // bad fallback → default
+});
+
 test('keeps a valid persisted duration (one of the §6.4 options)', () => {
   const ms = NAP_DURATION_OPTIONS_MS[2];
   assert.equal(hydrateSettings({ napMs: ms }).napMs, ms);

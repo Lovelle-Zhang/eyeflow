@@ -62,8 +62,19 @@ function isLocale(x) {
   return LOCALES.includes(x);
 }
 
+/**
+ * Map a system locale string (e.g. app.getLocale() → 'zh-CN' / 'en-US' / 'fr') to
+ * one of our locales: Chinese systems → zh, everyone else (incl. unknown) → en.
+ * Used only as the first-run default; a manual choice persists and always wins.
+ * @param {*} sys
+ * @returns {'zh'|'en'}
+ */
+function systemLocale(sys) {
+  return typeof sys === 'string' && sys.toLowerCase().startsWith('zh') ? 'zh' : 'en';
+}
+
 function panelStrings(locale) {
   return STRINGS[isLocale(locale) ? locale : DEFAULT_LOCALE];
 }
 
-module.exports = { panelStrings, LOCALES, DEFAULT_LOCALE, LANGUAGE_OPTIONS, isLocale };
+module.exports = { panelStrings, LOCALES, DEFAULT_LOCALE, LANGUAGE_OPTIONS, isLocale, systemLocale };

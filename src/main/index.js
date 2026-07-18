@@ -48,6 +48,7 @@ if (!isPrimary) {
     if (!saved.onboardingDone) {
       service.setOnboardingActive(true); // no reminders during the ritual (#4)
       runOnboarding({
+        locale: saved.locale, // §4 first-run 台词 follows the system language
         onDone: (napMs) => {
           service.setOnboardingActive(false);
           settings.save({ onboardingDone: true, napMs });
