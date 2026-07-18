@@ -10,8 +10,10 @@ const { APP_CONFIG } = require('../config/app.config');
 const LEGACY_APP_ID = 'com.eyeflow.app';
 const LEGACY_DATA_DIRS = ['eyeflow', 'eyeflow-mira', 'Codex'];
 
-test('product name is the distinct "EyeFlow Next"', () => {
-  assert.equal(APP_CONFIG.productName, 'EyeFlow Next');
+// The public brand is "EyeFlow". Distinctness from the (removed) legacy app is
+// enforced by the appId + userDataDirName below, NOT the display name.
+test('product name is the public brand "EyeFlow"', () => {
+  assert.equal(APP_CONFIG.productName, 'EyeFlow');
 });
 
 test('bundle id is app.eyeflow.next and differs from legacy', () => {

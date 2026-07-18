@@ -1,9 +1,9 @@
 {
   "name": "eyeflow-next",
-  "productName": "EyeFlow Next",
-  "version": "0.0.0",
+  "productName": "EyeFlow",
+  "version": "0.1.0",
   "private": true,
-  "description": "EyeFlow Next — a brand-new, independent desktop app. Not related to and does not share code, identity, or data with the frozen legacy codex-project / EyeFlow app.",
+  "description": "EyeFlow — a calm menubar companion that watches your eye-use energy (Mira) and invites you to rest.",
   "author": "EyeFlow",
   "license": "UNLICENSED",
   "main": "src/main/index.js",
@@ -20,8 +20,8 @@
   },
   "build": {
     "appId": "app.eyeflow.next",
-    "productName": "EyeFlow Next",
-    "artifactName": "EyeFlow-Next-${version}.${ext}",
+    "productName": "EyeFlow",
+    "artifactName": "EyeFlow-${version}.${ext}",
     "directories": {
       "output": "release"
     },

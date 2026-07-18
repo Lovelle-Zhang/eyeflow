@@ -31,6 +31,9 @@ if (!isPrimary) {
 } else {
   app.whenReady().then(() => {
     if (app.dock) app.dock.hide(); // menubar app: no dock icon
+    // Menubar utility: come back after every login. (A user-facing toggle to opt
+    // out can live in the panel later; for now it's on so the app persists.)
+    if (app.isPackaged) app.setLoginItemSettings({ openAtLogin: true });
     const settings = createSettingsStore();
     const saved = settings.load();
     const service = startEnergyService({

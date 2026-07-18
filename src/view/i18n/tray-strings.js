@@ -8,7 +8,7 @@
 
 const TRAY_STRINGS = {
   zh: {
-    open: '打开 EyeFlow Next',
+    open: '打开 EyeFlow',
     dev: '开发者',
     ff: '快进 1 分钟',
     remind: '测试一级提醒',
@@ -16,10 +16,10 @@ const TRAY_STRINGS = {
     napRitual: '小睡仪式 12s',
     replayOnboarding: '重放引导',
     reset: '重置精力',
-    quit: '退出 EyeFlow Next',
+    quit: '退出 EyeFlow',
   },
   en: {
-    open: 'Open EyeFlow Next',
+    open: 'Open EyeFlow',
     dev: 'Developer',
     ff: 'Fast-forward 1 min',
     remind: 'Test level-1 reminder',
@@ -27,7 +27,7 @@ const TRAY_STRINGS = {
     napRitual: 'Nap ritual · 12s',
     replayOnboarding: 'Replay onboarding',
     reset: 'Reset energy',
-    quit: 'Quit EyeFlow Next',
+    quit: 'Quit EyeFlow',
   },
 };
 

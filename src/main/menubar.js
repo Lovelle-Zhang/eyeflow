@@ -15,7 +15,7 @@ const { trayStrings } = require('../view/i18n/tray-strings');
 
 function createMenubar(service, hooks = {}) {
   const tray = new Tray(miraTrayImage());
-  tray.setToolTip('EyeFlow Next');
+  tray.setToolTip('EyeFlow');
   const win = createPanelWindow();
 
   function positionUnderTray() {
@@ -39,26 +39,29 @@ function createMenubar(service, hooks = {}) {
     else showPanel();
   }
 
-  // built fresh each open so it matches the current UI language (§4)
+  // built fresh each open so it matches the current UI language (§4). The 开发者
+  // submenu (test triggers) ships ONLY in dev — never in the packaged app.
   function buildTrayMenu() {
     const t = trayStrings(service.getLocale?.());
-    return Menu.buildFromTemplate([
-      { label: t.open, click: showPanel },
-      { type: 'separator' },
-      {
-        label: t.dev,
-        submenu: [
-          { label: t.ff, click: () => service.dev('ff') },
-          { label: t.remind, click: () => service.dev('remind') },
-          { label: t.remindNap, click: () => service.dev('remindNap') },
-          { label: t.napRitual, click: () => service.dev('napRitual') },
-          { label: t.replayOnboarding, click: () => hooks.replayOnboarding?.() },
-          { label: t.reset, click: () => service.dev('reset') },
-        ],
-      },
-      { type: 'separator' },
-      { label: t.quit, role: 'quit' },
-    ]);
+    const items = [{ label: t.open, click: showPanel }];
+    if (!app.isPackaged) {
+      items.push(
+        { type: 'separator' },
+        {
+          label: t.dev,
+          submenu: [
+            { label: t.ff, click: () => service.dev('ff') },
+            { label: t.remind, click: () => service.dev('remind') },
+            { label: t.remindNap, click: () => service.dev('remindNap') },
+            { label: t.napRitual, click: () => service.dev('napRitual') },
+            { label: t.replayOnboarding, click: () => hooks.replayOnboarding?.() },
+            { label: t.reset, click: () => service.dev('reset') },
+          ],
+        },
+      );
+    }
+    items.push({ type: 'separator' }, { label: t.quit, role: 'quit' });
+    return Menu.buildFromTemplate(items);
   }
 
   tray.on('click', toggle);

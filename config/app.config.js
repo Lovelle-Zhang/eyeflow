@@ -9,18 +9,20 @@
  */
 
 const APP_CONFIG = Object.freeze({
-  // Human-facing product name. Shown in the title bar and used by Electron
-  // to derive the default userData directory. Deliberately different from the
-  // legacy "EyeFlow" so both apps can be installed and run side by side.
-  productName: 'EyeFlow Next',
+  // Human-facing product name (public brand). NOTE: userData does NOT derive from
+  // this — paths.js sets it explicitly to userDataDirName below, so renaming the
+  // brand never moves existing data.
+  productName: 'EyeFlow',
 
   // Reverse-DNS bundle identifier. MUST differ from legacy "com.eyeflow.app"
   // so macOS treats this as a distinct application (own data container,
   // own Launch Services registration).
   appId: 'app.eyeflow.next',
 
-  // Name of the isolated user-data directory under the OS app-data root.
-  // MUST NOT collide with legacy dirs: "eyeflow", "eyeflow-mira", "Codex".
+  // Name of the isolated user-data directory under the OS app-data root. Kept as
+  // "EyeFlow Next" ON PURPOSE even though the brand is now "EyeFlow": renaming it
+  // would orphan existing data AND collide with the (removed) legacy app's
+  // "EyeFlow" dir. Internal only — users never see it.
   userDataDirName: 'EyeFlow Next',
 
   // Single-instance lock key. Namespaced to this app so the dev/prod instance
