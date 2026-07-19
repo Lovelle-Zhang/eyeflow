@@ -55,7 +55,7 @@ function startEnergyService({
     getLocale: () => state.locale, // §4 localized nap copy
     onNapComplete: () => {
       driver.nap();
-      record = recordRest(record, 'nap');
+      record = recordRest(record, 'nap', dayKey(new Date()));
       store.save(record);
       push();
     },
@@ -84,7 +84,7 @@ function startEnergyService({
     getLocale: () => state.locale, // §4 localized reminder prompt + nap button
     onShortBreakComplete: () => {
       driver.shortBreak();
-      record = recordRest(record, 'short'); // D2: only genuine rests reach here
+      record = recordRest(record, 'short', dayKey(new Date())); // D2: only genuine rests reach here
       store.save(record);
       push();
     },

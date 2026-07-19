@@ -30,11 +30,19 @@ function recordTick(rec, { dtMs, active, dateKey }) {
   return { ...base, eyeUseMs: base.eyeUseMs + dtMs };
 }
 
-/** Count a completed rest. @param {'short'|'nap'} kind */
-function recordRest(rec, kind) {
+/**
+ * Count a completed rest. Rolls the day over first (symmetric with recordTick) so
+ * a rest finishing in the sub-second window right after midnight — before the next
+ * tick observes the new day — lands on today's fresh ledger, never lost.
+ * @param {object} rec
+ * @param {'short'|'nap'} kind
+ * @param {string} dateKey current local day
+ */
+function recordRest(rec, kind, dateKey) {
+  const base = rec.dateKey === dateKey ? rec : emptyRecord(dateKey);
   return kind === 'nap'
-    ? { ...rec, naps: rec.naps + 1 }
-    : { ...rec, shortBreaks: rec.shortBreaks + 1 };
+    ? { ...base, naps: base.naps + 1 }
+    : { ...base, shortBreaks: base.shortBreaks + 1 };
 }
 
 /**

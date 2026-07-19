@@ -50,9 +50,11 @@ function createEnergyDriver({ getIdleSec, params = DEFAULT_PARAMS, onUpdate, res
      * Credit a KNOWN time gap (system sleep / app was closed) as away time →
      * recharge. Reuses the engine's AWAY band; energy clamps at full. Bypasses
      * the live idle reading (after wake, idle is unreliable). (#1/#2)
+     * A negative gap is meaningless (clock moved back / savedAt in the future) and
+     * clamps to 0 — never let it flip the AWAY recharge into a drain.
      */
     applyAway(awayMs) {
-      return run({ kind: 'tick', dtMs: awayMs, idleSec: params.awaySec });
+      return run({ kind: 'tick', dtMs: Math.max(0, awayMs), idleSec: params.awaySec });
     },
     /** A completed full rest → refill to full. */
     nap() {

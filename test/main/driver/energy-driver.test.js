@@ -105,6 +105,14 @@ test('applyAway clamps at full for a long gap', () => {
   assert.equal(d.state.energy, 100);
 });
 
+test('applyAway ignores a negative gap (clock moved back / future savedAt)', () => {
+  const d = createEnergyDriver({ getIdleSec: () => 0 });
+  d.tick(30 * 60000); // drain partway
+  const before = d.state.energy;
+  d.applyAway(-60 * 60000); // savedAt 1h in the future → must NOT drain to 0
+  assert.equal(d.state.energy, before);
+});
+
 test('applyAway re-arms both reminder lines as energy rises back up', () => {
   const d = createEnergyDriver({ getIdleSec: () => 0 });
   d.tick(60 * 60000); // fired both lines → disarmed

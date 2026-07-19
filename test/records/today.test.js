@@ -29,7 +29,7 @@ test('active ticks accumulate eye-use time; idle ticks do not', () => {
 test('a new day resets the ledger (只做今天)', () => {
   let r = emptyRecord('2026-07-14');
   r = recordTick(r, { dtMs: 5000, active: true, dateKey: '2026-07-14' });
-  r = recordRest(r, 'short');
+  r = recordRest(r, 'short', '2026-07-14');
   r = recordTick(r, { dtMs: 1000, active: true, dateKey: '2026-07-15' }); // rollover
   assert.equal(r.dateKey, '2026-07-15');
   assert.equal(r.eyeUseMs, 1000);
@@ -38,11 +38,21 @@ test('a new day resets the ledger (只做今天)', () => {
 
 test('rests are counted by kind', () => {
   let r = emptyRecord('2026-07-14');
-  r = recordRest(r, 'short');
-  r = recordRest(r, 'short');
-  r = recordRest(r, 'nap');
+  r = recordRest(r, 'short', '2026-07-14');
+  r = recordRest(r, 'short', '2026-07-14');
+  r = recordRest(r, 'nap', '2026-07-14');
   assert.equal(r.shortBreaks, 2);
   assert.equal(r.naps, 1);
+});
+
+test('a rest just after midnight rolls the ledger to today, not lost', () => {
+  // Rest completes in the sub-second window before the next tick sees the new day.
+  let r = emptyRecord('2026-07-14');
+  r = recordRest(r, 'short', '2026-07-14'); // yesterday's break
+  r = recordRest(r, 'short', '2026-07-15'); // crosses midnight before any tick
+  assert.equal(r.dateKey, '2026-07-15');
+  assert.equal(r.shortBreaks, 1); // counted for the new day, not wiped
+  assert.equal(r.eyeUseMs, 0);
 });
 
 test('non-positive dt is ignored', () => {
