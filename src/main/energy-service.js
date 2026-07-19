@@ -30,6 +30,9 @@ function startEnergyService({
   persistTier,
   locale: initialLocale = DEFAULT_LOCALE,
   persistLocale,
+  openAtLogin: initialOpenAtLogin = true,
+  persistOpenAtLogin,
+  applyLoginItem, // impure: register/unregister the OS login item (main-only)
 } = {}) {
   const store = createRecordsStore();
   let record = store.load(); // resume today, or start fresh (§7)
@@ -41,6 +44,7 @@ function startEnergyService({
     napMs: initialNapMs,
     reminderTier: initialTier, // §6.1/§6.4 presentation tier (light / strong)
     locale: initialLocale, // §4 panel UI language (zh / en)
+    openAtLogin: initialOpenAtLogin, // §7 come back after login (user-toggleable)
     onboardingActive: false, // suppress reminders during the intro ritual (#4)
   };
   const subscribers = new Set();
@@ -99,6 +103,7 @@ function startEnergyService({
       napMs: state.napMs,
       reminderTier: state.reminderTier,
       locale: state.locale,
+      openAtLogin: state.openAtLogin,
     });
     for (const fn of subscribers) fn(p);
   }
@@ -131,6 +136,8 @@ function startEnergyService({
     persistNapMs,
     persistTier,
     persistLocale,
+    persistOpenAtLogin,
+    applyLoginItem,
   });
 }
 

@@ -83,6 +83,7 @@ function createMenubar(service, hooks = {}) {
   ipcMain.on('panel:set-duration', (_e, ms) => service.setDuration(ms));
   ipcMain.on('panel:set-tier', (_e, tier) => service.setReminderTier(tier));
   ipcMain.on('panel:set-locale', (_e, locale) => service.setLocale(locale));
+  ipcMain.on('panel:set-login', (_e, on) => service.setOpenAtLogin(on));
   ipcMain.on('panel:quit', () => app.quit());
   ipcMain.on('panel:resize', (_e, height) => {
     const [w] = win.getSize();

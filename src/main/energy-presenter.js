@@ -13,7 +13,7 @@ const { panelStrings, LANGUAGE_OPTIONS } = require('../view/i18n/panel-strings')
 const { NAP_DURATION_OPTIONS_MS } = require('../view/nap/nap');
 const { REMINDER_TIERS } = require('../view/reminder/tier');
 
-function buildPanelPayload({ energy, record, napMs, reminderTier, locale }) {
+function buildPanelPayload({ energy, record, napMs, reminderTier, locale, openAtLogin }) {
   const t = panelStrings(locale);
   const mins = (ms) => Math.round(ms / 60000);
   return {
@@ -24,6 +24,7 @@ function buildPanelPayload({ energy, record, napMs, reminderTier, locale }) {
     eyeUseText: formatEyeUse(record.eyeUseMs).text, // "43m" / "4h 12m" — locale-neutral
     napMs,
     reminderTier,
+    openAtLogin,
     texts: {
       today: t.today,
       screenTime: t.screenTime,
@@ -35,6 +36,7 @@ function buildPanelPayload({ energy, record, napMs, reminderTier, locale }) {
       quit: t.quit,
       settings: t.settings,
       language: t.language,
+      launchAtLogin: t.launchAtLogin,
       energy: t.energy(Math.round(energy)),
       restsCount: t.restsCount(record.shortBreaks + record.naps),
       restsLabel: t.restsLabel(record.shortBreaks, record.naps),
@@ -43,6 +45,10 @@ function buildPanelPayload({ energy, record, napMs, reminderTier, locale }) {
     napOptions: NAP_DURATION_OPTIONS_MS.map((ms) => ({ ms, label: t.napOpt(mins(ms)) })),
     tierOptions: REMINDER_TIERS.map((tier) => ({ tier, label: t.tier[tier] })),
     languageOptions: LANGUAGE_OPTIONS,
+    loginOptions: [
+      { on: true, label: t.loginOpt.on },
+      { on: false, label: t.loginOpt.off },
+    ],
   };
 }
 

@@ -45,6 +45,7 @@ api.onData?.((d) => {
   renderSegs(el('segs'), d.napOptions, (o) => o.ms === d.napMs, (o) => api.setDuration?.(o.ms));
   renderSegs(el('tier-segs'), d.tierOptions, (o) => o.tier === d.reminderTier, (o) => api.setTier?.(o.tier));
   renderSegs(el('lang-segs'), d.languageOptions, (o) => o.locale === d.locale, (o) => api.setLocale?.(o.locale));
+  renderSegs(el('login-segs'), d.loginOptions, (o) => o.on === d.openAtLogin, (o) => api.setLogin?.(o.on));
 
   reportHeight();
 });

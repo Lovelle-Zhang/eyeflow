@@ -31,11 +31,14 @@ if (!isPrimary) {
 } else {
   app.whenReady().then(() => {
     if (app.dock) app.dock.hide(); // menubar app: no dock icon
-    // Menubar utility: come back after every login. (A user-facing toggle to opt
-    // out can live in the panel later; for now it's on so the app persists.)
-    if (app.isPackaged) app.setLoginItemSettings({ openAtLogin: true });
     const settings = createSettingsStore();
     const saved = settings.load();
+    // Menubar utility: come back after login. On by default (§7), user-toggleable
+    // in the panel. Only the packaged app registers a login item — never dev electron.
+    const applyLoginItem = (on) => {
+      if (app.isPackaged) app.setLoginItemSettings({ openAtLogin: on });
+    };
+    applyLoginItem(saved.openAtLogin);
     const service = startEnergyService({
       napMs: saved.napMs, // §6.4 duration setting persists
       persistNapMs: (ms) => settings.save({ napMs: ms }),
@@ -43,6 +46,9 @@ if (!isPrimary) {
       persistTier: (tier) => settings.save({ reminderTier: tier }),
       locale: saved.locale, // §4 UI language persists
       persistLocale: (locale) => settings.save({ locale }),
+      openAtLogin: saved.openAtLogin, // §7 launch-at-login persists
+      persistOpenAtLogin: (on) => settings.save({ openAtLogin: on }),
+      applyLoginItem,
     });
     menubar = createMenubar(service, { replayOnboarding: launchOnboarding });
     app.on('before-quit', () => service.flush()); // persist today's ledger (§7)

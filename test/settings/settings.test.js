@@ -17,6 +17,7 @@ const DEFAULTS = {
   napMs: DEFAULT_NAP_MS,
   reminderTier: DEFAULT_REMINDER_TIER,
   locale: DEFAULT_LOCALE,
+  openAtLogin: true,
 };
 
 test('defaults: onboarding not done, default nap length, default tier', () => {
@@ -59,6 +60,13 @@ test('onboardingDone must be strictly true', () => {
   assert.equal(hydrateSettings({ onboardingDone: true }).onboardingDone, true);
   assert.equal(hydrateSettings({ onboardingDone: 'yes' }).onboardingDone, false);
   assert.equal(hydrateSettings({ onboardingDone: 1 }).onboardingDone, false);
+});
+
+test('openAtLogin defaults on; only an explicit false opts out', () => {
+  assert.equal(hydrateSettings(null).openAtLogin, true);
+  assert.equal(hydrateSettings({ openAtLogin: false }).openAtLogin, false);
+  assert.equal(hydrateSettings({ openAtLogin: true }).openAtLogin, true);
+  assert.equal(hydrateSettings({ openAtLogin: 0 }).openAtLogin, true); // garbage → default on
 });
 
 test('ignores garbage input', () => {

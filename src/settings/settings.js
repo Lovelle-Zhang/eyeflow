@@ -14,7 +14,7 @@ const { DEFAULT_LOCALE, isLocale } = require('../view/i18n/panel-strings');
  * @param {*} raw parsed persisted value (or null / garbage)
  * @param {string} [fallbackLocale] locale to use on first run (no persisted value);
  *   the impure store resolves it from the system language. A persisted choice wins.
- * @returns {{ onboardingDone: boolean, napMs: number, reminderTier: string, locale: string }}
+ * @returns {{ onboardingDone: boolean, napMs: number, reminderTier: string, locale: string, openAtLogin: boolean }}
  */
 function hydrateSettings(raw, fallbackLocale = DEFAULT_LOCALE) {
   const r = raw && typeof raw === 'object' ? raw : {};
@@ -24,6 +24,7 @@ function hydrateSettings(raw, fallbackLocale = DEFAULT_LOCALE) {
     napMs: NAP_DURATION_OPTIONS_MS.includes(r.napMs) ? r.napMs : DEFAULT_NAP_MS,
     reminderTier: isReminderTier(r.reminderTier) ? r.reminderTier : DEFAULT_REMINDER_TIER,
     locale: isLocale(r.locale) ? r.locale : fallback, // §4 UI language (persisted wins over system)
+    openAtLogin: r.openAtLogin !== false, // §7 come back after login; default on, user can opt out
   };
 }
 

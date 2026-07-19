@@ -21,6 +21,8 @@ function createServiceApi({
   persistNapMs,
   persistTier,
   persistLocale,
+  persistOpenAtLogin,
+  applyLoginItem,
 }) {
   return {
     subscribe(fn) {
@@ -57,6 +59,13 @@ function createServiceApi({
     },
     /** Current UI language; the tray builds its menu in this locale. */
     getLocale: () => state.locale,
+    /** §7 launch-at-login toggle — persists, applies the OS login item, re-paints. */
+    setOpenAtLogin(on) {
+      state.openAtLogin = on;
+      if (persistOpenAtLogin) persistOpenAtLogin(on);
+      if (applyLoginItem) applyLoginItem(on);
+      push();
+    },
     /** Suppress auto reminders while the onboarding ritual is on screen (#4). */
     setOnboardingActive(active) {
       state.onboardingActive = active;
