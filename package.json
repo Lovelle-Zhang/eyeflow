@@ -26,6 +26,13 @@
     "directories": {
       "output": "release"
     },
+    "publish": [
+      {
+        "provider": "github",
+        "owner": "zynono",
+        "repo": "eyeflow"
+      }
+    ],
     "files": [
       "config/**/*",
       "src/**/*",
@@ -38,13 +45,23 @@
       "gatekeeperAssess": false,
       "entitlements": "build/entitlements.mac.plist",
       "entitlementsInherit": "build/entitlements.mac.inherit.plist",
-      "target": ["dmg", "zip"]
+      "target": [
+        "dmg",
+        "zip"
+      ]
     },
     "win": {
-      "target": ["nsis"]
+      "target": [
+        "nsis"
+      ]
     },
     "linux": {
-      "target": ["AppImage"]
+      "target": [
+        "AppImage"
+      ]
     }
+  },
+  "dependencies": {
+    "electron-updater": "^6.8.9"
   }
 }

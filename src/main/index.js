@@ -16,6 +16,7 @@ const { startEnergyService } = require('./energy-service');
 const { createMenubar } = require('./menubar');
 const { createSettingsStore } = require('./settings-store');
 const { runOnboarding } = require('./onboarding-controller');
+const { startAutoUpdate } = require('./updater');
 
 // 1. Isolate identity + user-data before anything touches disk.
 const userDataPath = configureIsolatedPaths(app);
@@ -52,6 +53,9 @@ if (!isPrimary) {
     });
     menubar = createMenubar(service, { replayOnboarding: launchOnboarding });
     app.on('before-quit', () => service.flush()); // persist today's ledger (§7)
+
+    // Quiet auto-update (§8.5): packaged app only, silent, installs on next quit.
+    startAutoUpdate({ isPackaged: app.isPackaged });
 
     // The 相遇仪式 (§7): auto on first run, and re-playable from the dev tray menu
     // (handy for eyeballing the localized 台词). Uses the current UI language.
