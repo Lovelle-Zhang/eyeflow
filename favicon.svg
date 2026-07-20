@@ -2,7 +2,7 @@
   <defs>
     <linearGradient id="bg" x1="216" y1="156" x2="826" y2="874" gradientUnits="userSpaceOnUse">
       <stop offset="0" stop-color="#EAFFF6"/>
-      <stop offset="0.58" stop-color="#BDEAFF"/>
+      <stop offset="0.58" stop-color="#AEEDE0"/>
       <stop offset="1" stop-color="#F3EEC7"/>
     </linearGradient>
     <linearGradient id="lens" x1="265" y1="335" x2="759" y2="653" gradientUnits="userSpaceOnUse">
