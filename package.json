@@ -29,7 +29,7 @@
     "publish": [
       {
         "provider": "github",
-        "owner": "zynono",
+        "owner": "Lovelle-Zhang",
         "repo": "eyeflow"
       }
     ],

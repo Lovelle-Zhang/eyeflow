@@ -2,7 +2,7 @@
 
 /**
  * Auto-update (§8.5) — quiet by design; Mira never nags. electron-updater checks
- * GitHub Releases (zynono/eyeflow), downloads a newer signed build in the
+ * GitHub Releases (Lovelle-Zhang/eyeflow), downloads a newer signed build in the
  * background, and lets it install on the next quit (autoInstallOnAppQuit). No
  * prompts, no dialogs, no error popups: a new version just quietly arrives.
  *
