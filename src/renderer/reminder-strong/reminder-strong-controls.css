@@ -16,6 +16,9 @@
   font-weight: 500;
   line-height: 1.25;
   letter-spacing: 0;
+  /* zh prompts fit one line; a long en L2 prompt must wrap — balance it so the
+     two lines are even instead of orphaning a trailing word (§6.1). */
+  text-wrap: balance;
 }
 
 .rs__track {
@@ -45,6 +48,8 @@
 
 .rs__nap {
   flex: 0 0 auto;
+  align-self: flex-start; /* stacked below the full-width prompt, hug its left edge (§6.1 L2) */
+  margin-top: 4px;
   font: inherit;
   font-size: 26px;
   font-weight: 500;
