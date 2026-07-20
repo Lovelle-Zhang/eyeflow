@@ -1,7 +1,7 @@
 {
   "name": "eyeflow-next",
   "productName": "EyeFlow",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "private": true,
   "description": "EyeFlow — a calm menubar companion that watches your eye-use energy (Mira) and invites you to rest.",
   "author": "EyeFlow",
