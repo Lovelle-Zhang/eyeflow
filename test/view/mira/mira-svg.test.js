@@ -28,7 +28,7 @@ test('full variant: small dark lens + a crisp point of light, no eyes', () => {
 test('full variant: glossy mint plate gradient + macOS 824/100 icon-grid transform', () => {
   const svg = miraSvg({ variant: 'full' });
   assert.match(svg, /#EAFFF6/i);
-  assert.match(svg, /#BDEAFF/i);
+  assert.match(svg, /#AEEDE0/i); // aqua-mint backplate mid-tone (§8.5; was sky-blue #BDEAFF)
   assert.match(svg, /#F3EEC7/i);
   // 824×824 body centered on 1024 → 100px margin (scale 824/1024), the HIG grid.
   assert.match(svg, /translate\(100[ ,]+100\)\s*scale\(0\.8046875\)/);

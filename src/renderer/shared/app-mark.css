@@ -13,7 +13,7 @@
   width: calc(44px * var(--ms));
   height: calc(44px * var(--ms));
   border-radius: calc(12px * var(--ms));
-  background: linear-gradient(150deg, #eafff6 0%, #bdeaff 56%, #f3eec7 100%);
+  background: linear-gradient(150deg, #eafff6 0%, #aeede0 56%, #f3eec7 100%);
   box-shadow: 0 calc(3px * var(--ms)) calc(8px * var(--ms)) calc(-2px * var(--ms)) rgba(8, 30, 20, 0.35);
 }
 

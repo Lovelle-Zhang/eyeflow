@@ -14,7 +14,7 @@ const CORE = { cx: 512, cy: 494, r: 90 }; // crisp point of light, centered in t
 
 const C = {
   bgMintWhite: '#EAFFF6',
-  bgSky: '#BDEAFF',
+  bgAqua: '#AEEDE0', // §8.5 backplate mid-tone — aqua-mint (was sky-blue); on-brand green-family
   bgWarm: '#F3EEC7',
   lensDarkA: '#0E1C20',
   lensDarkB: '#10272A',
@@ -29,7 +29,7 @@ function fullVariant() {
     '<defs>' +
     `<linearGradient id="miraBg" gradientUnits="userSpaceOnUse" x1="216" y1="156" x2="826" y2="874">` +
     `<stop offset="0" stop-color="${C.bgMintWhite}"/>` +
-    `<stop offset="0.58" stop-color="${C.bgSky}"/>` +
+    `<stop offset="0.58" stop-color="${C.bgAqua}"/>` +
     `<stop offset="1" stop-color="${C.bgWarm}"/>` +
     '</linearGradient>' +
     `<linearGradient id="miraLens" gradientUnits="userSpaceOnUse" x1="${LENS.x}" y1="${LENS.y}" x2="${LENS.x + LENS.w}" y2="${LENS.y + LENS.h}">` +
