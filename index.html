@@ -252,7 +252,8 @@
 
     /* 面板 · 气色面板 CSS mock(替代旧真截图)——铺满原截图尺寸，面板自身即容器 */
     .mpanel { container-type: inline-size; position: relative; width: 100%; max-width: 400px; margin-inline: auto; padding: 5cqi; border-radius: 6.5cqi; text-align: left; background: var(--panel); border: 1px solid var(--line); box-shadow: 0 1px 2px rgba(20,20,19,0.04), 0 24px 48px -28px rgba(20,20,19,0.16); }
-    .mp-gear { position: absolute; top: 5cqi; right: 5cqi; width: 5.6cqi; height: 5.6cqi; color: rgba(20,20,19,0.36); }
+    .mp-head { display: flex; justify-content: flex-end; margin-bottom: 1.6cqi; }
+    .mp-gear { width: 5.2cqi; height: 5.2cqi; color: rgba(20,20,19,0.4); }
     .mp-gear svg { width: 100%; height: 100%; display: block; }
     .mp-cap { display: flex; align-items: center; gap: 3.6cqi; padding: 4cqi 5cqi; border-radius: 99px; background: linear-gradient(118deg, #2f8262 0%, #1f6b52 58%, #175a45 100%); }
     .mp-cap .lens { --lf: 10cqi; }
@@ -781,16 +782,16 @@
       <div class="daily-copy reveal">
         <p class="eyebrow step-eyebrow" data-en="01 · Open her up">01 · 点开看看</p>
         <h2 data-en="Want a look? Just open her."><span class="cl">想看看？</span><span class="cl">点开就好。</span></h2>
-        <p class="body" data-en="Tap the green dot up top and her 气色 panel slides down — energy right now, how long you've looked today, and whether to rest. All at a glance. The gear in the corner opens her settings — how firm the reminders, how often — all yours to tune."><span class="copy-line">顶端那枚绿点，点一下，</span><span class="copy-line">气色面板轻轻落下——</span><span class="copy-line">此刻的精力、今天用了多久眼、要不要歇一下，</span><span class="copy-line">一眼全在。</span><span class="copy-line">右上角一枚齿轮——提醒轻还是重、隔多久提醒，都在里头按你调。</span></p>
+        <p class="body" data-en="Tap the green dot up top and her complexion panel slides down — energy right now, how long you've looked today, and whether to rest. All at a glance. The gear in the corner opens her settings — how firm the reminders, how often — all yours to tune."><span class="copy-line">顶端那枚绿点，点一下，</span><span class="copy-line">气色面板轻轻落下——</span><span class="copy-line">此刻的精力、今天用了多久眼、要不要歇一下，</span><span class="copy-line">一眼全在。</span><span class="copy-line">右上角一枚齿轮——提醒轻还是重、隔多久提醒，都在里头按你调。</span></p>
       </div>
-      <div class="screen-card mac-screen panel-screen reveal" role="img" aria-label="EyeFlow 的菜单栏面板：Mira 的气色、今日用眼时长和两个歇息动作" data-en-label="EyeFlow's menubar panel — Mira's 气色, today's screen time, and two gentle rest actions">
+      <div class="screen-card mac-screen panel-screen reveal" role="img" aria-label="EyeFlow 的菜单栏面板：Mira 的气色、今日用眼时长和两个歇息动作" data-en-label="EyeFlow's menubar panel — Mira's complexion, today's screen time, and two gentle rest actions">
         <div class="mac-bar"><span class="lens" aria-hidden="true"><i></i></span><span class="mac-clock">14:55</span></div>
         <div class="mac-desk">
           <div class="mpanel">
-          <span class="mp-gear" role="img" aria-label="设置" data-en-label="Settings"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></span>
+          <div class="mp-head"><span class="mp-gear" role="img" aria-label="设置" data-en-label="Settings"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="12" r="3.2"/><path d="M12 2.5v2.2M12 19.3v2.2M4.2 4.2l1.6 1.6M18.2 18.2l1.6 1.6M2.5 12h2.2M19.3 12h2.2M4.2 19.8l1.6-1.6M18.2 5.8l1.6-1.6"/></svg></span></div>
           <div class="mp-cap">
             <span class="lens" aria-hidden="true"><i></i></span>
-            <span class="mp-cap-t"><b data-en="Energy 66%">精力 66%</b><span data-en="气色 · steady">气色 · 常态</span></span>
+            <span class="mp-cap-t"><b data-en="Energy 66%">精力 66%</b><span data-en="Steady">气色 · 常态</span></span>
           </div>
           <div class="mp-today">
             <div><b>1h 42m</b><span data-en="Screen time today">今日用眼</span></div>
@@ -831,7 +832,7 @@
         <div class="screen-card reveal">
           <div class="strong-wash has-bar">
             <div class="mac-bar"><span class="lens" aria-hidden="true"><i></i></span><span class="mac-clock">15:20</span></div>
-            <div class="island big" role="img" aria-label="EyeFlow 加强档提醒：屏幕中央一枚更大的气色胶囊，配一层柔和暖背景" data-en-label="EyeFlow's strong reminder — a bigger 气色 capsule centered on a soft warm wash">
+            <div class="island big" role="img" aria-label="EyeFlow 加强档提醒：屏幕中央一枚更大的气色胶囊，配一层柔和暖背景" data-en-label="EyeFlow's strong reminder — a bigger complexion capsule centered on a soft warm wash">
               <div class="lens" aria-hidden="true"><i></i></div>
               <div class="isl-body">
                 <div data-en="Rest your eyes — look far">眼睛歇歇，看看远处</div>
@@ -852,7 +853,7 @@
       <div class="daily-copy reveal">
         <p class="eyebrow step-eyebrow" data-en="03 · Two depths of rest">03 · 休息，两种深度</p>
         <h2 data-en="A quick breather, or a real nap."><span class="cl">喘口气，</span><span class="cl">还是好好睡一下。</span></h2>
-        <p class="body" data-en="Short break: look 20 seconds into the distance, then back to work. Nap: a fuller pause — eyes closed longer while your 气色 slowly brightens back up. Either way, she walks you through it."><span class="copy-line">短歇：看远处 20 秒，就回来。</span><span class="copy-line">小睡：闭眼久一点，看着气色一点点亮回来。</span><span class="copy-line">哪一种，她都陪你走完。</span></p>
+        <p class="body" data-en="Short break: look 20 seconds into the distance, then back to work. Nap: a fuller pause — eyes closed longer while her complexion slowly brightens back up. Either way, she walks you through it."><span class="copy-line">短歇：看远处 20 秒，就回来。</span><span class="copy-line">小睡：闭眼久一点，看着气色一点点亮回来。</span><span class="copy-line">哪一种，她都陪你走完。</span></p>
       </div>
       <div class="mock-stack reveal">
         <div class="mock-cell">
@@ -880,7 +881,7 @@
             <p class="rs-msg" data-en="Close your eyes, and settle.">闭上眼，缓一缓。</p>
           </div>
         </div>
-        <p class="mock-note" data-en="Eyes closed longer — watch your 气色 brighten back up.">闭眼久一点，看着气色亮回来。</p>
+        <p class="mock-note" data-en="Eyes closed longer — watch her complexion brighten back up.">闭眼久一点，看着气色亮回来。</p>
         </div>
       </div>
     </div>
