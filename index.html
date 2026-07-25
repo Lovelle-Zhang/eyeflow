@@ -119,6 +119,9 @@
     h2, .sub { text-wrap: balance; }
     .body { text-wrap: pretty; }
     .body .copy-line { display: block; }
+    /* 正文左对齐(标题仍居中)——块居中、文字左对齐、自然成段,更利落 */
+    .head .body { text-align: left; }
+    .head .body .copy-line { display: inline; }
     body { line-break: strict; }
     /* Keep each CJK clause (comma/period/colon/dash-delimited) whole, so a
        two-line heading breaks AT the punctuation, never mid-phrase. Enforced
@@ -146,7 +149,7 @@
 
     /* Act 0 · 眼睛这件事 — 理性说服层:强度 · 责任 · 不可逆(字号走 4 号系统) */
     .stakes-lead { max-width: 19em; font-size: var(--t-display); font-weight: 400; line-height: 1.42; }
-    .stakes { list-style: none; margin: var(--s16) auto 0; padding: 0; max-width: 960px; display: grid; grid-template-columns: repeat(3, 1fr); text-align: left; }
+    .stakes { list-style: none; margin: var(--s16) auto 0; padding: 0; max-width: 960px; display: grid; grid-template-columns: repeat(3, 1fr); text-align: center; }
     .stake { position: relative; padding: var(--s1) clamp(22px, 3vw, 36px); }
     .stake + .stake { border-left: 1px solid var(--line); }
     .stake-i { display: block; font-size: var(--t-small); font-variant-numeric: tabular-nums; letter-spacing: 0.14em; color: var(--muted-soft); }
@@ -236,6 +239,43 @@
     .lens i { position: absolute; left: 50%; top: 50%; transform: translate(-50%,-50%); width: calc(var(--lf) * 0.6); height: calc(var(--lf) * 0.6); border-radius: 50%; background: radial-gradient(circle, #f4fff9 0%, #8fe6c0 36%, rgba(111,231,195,0.4) 56%, transparent 74%); animation: lensBreath 5s var(--ease) infinite; }
     @keyframes lensBreath { 0%,100% { transform: translate(-50%,-50%) scale(1); } 50% { transform: translate(-50%,-50%) scale(1.1); } }
 
+    /* ── 统一屏幕外壳 · mini Mac 屏(菜单栏 + 桌面)——— 全站每一处"屏幕"都是这
+       同一块屏:平时只有菜单栏绿点，点开面板从菜单栏落下，提醒岛贴顶端，小睡时
+       整块屏变暗。cqi 让内部 UI 随屏宽等比缩放。 */
+    .mac-shot { max-width: 468px; margin: clamp(30px, 4.5vh, 46px) auto 0; }
+    .mac-screen { container-type: inline-size; aspect-ratio: 1.5; overflow: hidden; display: grid; grid-template-rows: auto 1fr; background: radial-gradient(130% 90% at 78% -12%, rgba(255,255,255,0.75), transparent 55%), radial-gradient(105% 80% at 18% 122%, rgba(31,122,94,0.08), transparent 58%), linear-gradient(158deg, #edf0ea 0%, #dbe1d6 100%); }
+    .mac-bar { display: flex; align-items: center; justify-content: flex-end; gap: 2.6cqi; height: 6.4cqi; padding: 0 3.4cqi; position: relative; z-index: 2; background: linear-gradient(180deg, rgba(255,255,255,0.94), rgba(248,249,246,0.76)); border-bottom: 1px solid rgba(20,20,19,0.09); box-shadow: 0 1px 4px -1px rgba(20,20,19,0.09); }
+    .mac-bar .lens { --lf: 3.4cqi; }
+    .mac-clock { font-size: 2.5cqi; font-weight: 500; color: rgba(20,20,19,0.5); font-variant-numeric: tabular-nums; }
+    .mac-desk { position: relative; min-height: 0; }
+    .mac-screen.idle .mac-desk::after { content: ""; position: absolute; inset: 0; }
+
+    /* 面板 · 气色面板 CSS mock(替代旧真截图)——铺满原截图尺寸，面板自身即容器 */
+    .mpanel { container-type: inline-size; position: relative; width: 100%; max-width: 400px; margin-inline: auto; padding: 5cqi; border-radius: 6.5cqi; text-align: left; background: var(--panel); border: 1px solid var(--line); box-shadow: 0 1px 2px rgba(20,20,19,0.04), 0 24px 48px -28px rgba(20,20,19,0.16); }
+    .mp-gear { position: absolute; top: 5cqi; right: 5cqi; width: 5.6cqi; height: 5.6cqi; color: rgba(20,20,19,0.36); }
+    .mp-gear svg { width: 100%; height: 100%; display: block; }
+    .mp-cap { display: flex; align-items: center; gap: 3.6cqi; padding: 4cqi 5cqi; border-radius: 99px; background: linear-gradient(118deg, #2f8262 0%, #1f6b52 58%, #175a45 100%); }
+    .mp-cap .lens { --lf: 10cqi; }
+    .mp-cap-t { display: grid; gap: 0.8cqi; }
+    .mp-cap-t b { font-size: 6cqi; font-weight: 600; color: #f4f7f5; }
+    .mp-cap-t span { font-size: 3.7cqi; color: rgba(244,247,245,0.72); }
+    .mp-today { display: flex; gap: 8cqi; padding: 5cqi 1.5cqi 3cqi; }
+    .mp-today > div { display: grid; gap: 0.6cqi; }
+    .mp-today b { font-size: 7cqi; font-weight: 600; color: var(--ink); font-variant-numeric: tabular-nums; }
+    .mp-today span { font-size: 3.5cqi; color: var(--muted); }
+    .mp-row { display: flex; align-items: center; gap: 3.4cqi; margin-top: 2.4cqi; padding: 4cqi 5cqi; border-radius: 4.5cqi; background: rgba(26,107,82,0.09); }
+    .mp-row .mp-lbl { font-size: 4.8cqi; font-weight: 600; color: var(--ink); }
+    .mp-row .mp-meta { margin-left: auto; font-size: 3.7cqi; color: var(--muted); }
+    .mp-ic { flex: 0 0 auto; }
+    .mp-ic { color: var(--mira); }
+    .mp-ic svg { display: block; width: 100%; height: 100%; }
+    .mp-ic.tri { width: 4.8cqi; height: 4.8cqi; }
+    .mp-ic.moon { width: 5cqi; height: 5cqi; }
+    /* 01 面板屏:菜单栏 + 从绿点落下的原尺寸面板(高度随内容,不留大空桌面) */
+    .panel-screen { aspect-ratio: auto; }
+    .panel-screen .mac-desk { display: flex; justify-content: flex-end; align-items: flex-start; padding: 3.5cqi 3.5cqi 5cqi; }
+    .panel-screen .mpanel { margin: 0; }
+
     /* ── 小睡 · 全屏回充 (§6.3) — a deep-green rest scene; Mira's light settles to a
        line that BRIGHTENS as the charge bar fills. Loops so the 回充 is visible. */
     .rest-scene { position: relative; container-type: inline-size; aspect-ratio: 1.6; display: grid; justify-items: center; align-content: center; gap: 5cqi; overflow: hidden; text-align: center; color: rgba(255,255,255,0.94); background: radial-gradient(46% 42% at 50% 38%, rgba(243,238,199,0.10) 0%, transparent 56%), radial-gradient(78% 74% at 50% 42%, #1e6650 0%, #16483a 38%, #0e3229 72%, #0a241d 100%); }
@@ -252,7 +292,7 @@
        top of a plain desktop, at its true small proportion (parallels 加强 below). */
     /* shared desktop backdrop — both screens sit on the SAME desktop; 加强 just adds
        a warm wash on top of it (below), so the two frames read as one place. */
-    .top-screen, .strong-wash { background: linear-gradient(165deg, #eef1ea 0%, #e3e8df 100%); }
+    .top-screen, .strong-wash { background: radial-gradient(130% 90% at 78% -12%, rgba(255,255,255,0.7), transparent 55%), radial-gradient(105% 80% at 18% 122%, rgba(31,122,94,0.06), transparent 58%), linear-gradient(158deg, #edf0ea 0%, #dbe1d6 100%); }
     .top-screen { container-type: inline-size; aspect-ratio: 1.7; display: grid; justify-items: center; align-content: start; padding-top: 4.5cqi; }
     .top-screen .island { gap: 1.5cqi; padding: 1.6cqi 3.4cqi 1.6cqi 1.6cqi; font-size: 2.6cqi; }
     .top-screen .island .lens { --lf: 4.9cqi; }
@@ -264,7 +304,7 @@
        faint warm wash: more present, never a takeover. */
     /* the warm wash is a WHISPER (matches the app's faint §6.1 值): a hint of warmth
        at the center, the shared grey desktop still reads everywhere. */
-    .strong-wash { container-type: inline-size; aspect-ratio: 1.7; display: grid; place-items: center; padding: 8cqi; background: radial-gradient(96% 92% at 50% 48%, rgba(255,239,214,0.24) 0%, rgba(252,227,188,0.12) 46%, transparent 72%), linear-gradient(165deg, #eef1ea 0%, #e3e8df 100%); }
+    .strong-wash { container-type: inline-size; aspect-ratio: 1.7; display: grid; place-items: center; padding: 8cqi; background: radial-gradient(96% 92% at 50% 48%, rgba(255,239,214,0.26) 0%, rgba(252,227,188,0.13) 46%, transparent 72%), radial-gradient(130% 90% at 78% -12%, rgba(255,255,255,0.55), transparent 55%), linear-gradient(158deg, #edf0ea 0%, #dbe1d6 100%); }
     /* cqi-sized so it floats centered (not filling) and the count never clips */
     .island.big { gap: 3cqi; padding: 3cqi 5cqi 3cqi 3cqi; font-size: 4.2cqi; max-width: 100%; }
     .island.big .lens { --lf: 7.6cqi; }
@@ -272,6 +312,11 @@
     .island.big .isl-body > div:first-child { white-space: nowrap; }
     .island.big .isl-track { height: 0.9cqi; }
     .island.big .isl-count { font-size: 5.6cqi; margin-left: 1.6cqi; }
+
+    /* 只改屏的样式:给屏加一条顶部菜单栏(Mira 绿点 + 时钟),尺寸/布局/岛全不动 */
+    .top-screen.has-bar, .strong-wash.has-bar { position: relative; }
+    .has-bar > .mac-bar { position: absolute; top: 0; left: 0; right: 0; z-index: 3; }
+    .top-screen.has-bar { padding-top: 10.5cqi; }
 
     /* ── 相遇 · 第一次见面 (§7) — the onboarding page IS one big green capsule;
        Mira (The Pulse) + one line of 台词 sit inside it, generously sized. */
@@ -310,7 +355,7 @@
        Mira keeps breathing + blinking in the bubble throughout. */
 
     .closing { text-align: center; padding-top: clamp(76px, 10vh, 116px); padding-bottom: calc(var(--section) + var(--s8)); }
-    .screen-card { min-width: 0; border-radius: var(--radius-lg); border: 1px solid var(--line); overflow: hidden; container-type: inline-size; box-shadow: 0 1px 2px rgba(20,20,19,0.04), 0 24px 48px -28px rgba(20,20,19,0.16); }
+    .screen-card { min-width: 0; border-radius: var(--radius-lg); border: 1px solid rgba(20,20,19,0.09); overflow: hidden; container-type: inline-size; box-shadow: 0 1px 1px rgba(20,20,19,0.05), 0 3px 8px -3px rgba(20,20,19,0.10), 0 34px 66px -30px rgba(20,20,19,0.24), inset 0 1px 0 rgba(255,255,255,0.55); }
     /* Anthropic 式产品截图呈现:app 界面套 macOS 窗口镀边——
        奶油 chrome 条 + 三颗中性圆点(不用红黄绿:护眼 DNA,页面无高饱和噪点)。 */
     .screen-card.is-window::before { content: ""; display: block; height: 34px; border-bottom: 1px solid var(--line-soft); background:
@@ -392,7 +437,7 @@
     .mock-stack .companion-card, .mock-stack .island { max-width: 100%; }
     /* 哲学四条:发丝线四栏,克制无边框。 */
     .trust-block { padding-block: clamp(76px, 10vh, 116px); }
-    .tenets { list-style: none; margin: var(--s12) auto 0; padding: 0; max-width: 920px; display: grid; grid-template-columns: repeat(4, 1fr); text-align: left; }
+    .tenets { list-style: none; margin: var(--s12) auto 0; padding: 0; max-width: 920px; display: grid; grid-template-columns: repeat(4, 1fr); text-align: center; }
     .tenets li { padding: var(--s1) clamp(16px, 2vw, 26px); }
     .tenets li + li { border-left: 1px solid var(--line); }
     .tenets strong { display: block; font-size: var(--t-sub); font-weight: 500; letter-spacing: 0.01em; color: var(--ink); }
@@ -455,6 +500,7 @@
     .daily-row .eyebrow { margin-bottom: var(--s4); }
     .daily-row h2 + .body { margin-top: var(--s4); }
     .daily-row .body { line-height: 1.78; }
+    .daily-row .daily-copy .body .copy-line { display: inline; }
     .daily-row .screen-card, .daily-row .mock-stack { justify-self: stretch; }
     @media (max-width: 900px) and (min-width: 561px) {
       .tenets { grid-template-columns: repeat(2, 1fr); max-width: 34em; }
@@ -710,19 +756,22 @@
     <p class="body stakes-close" data-en="The part you use most is the hardest to repair. So it deserves looking after — a little each day is enough."><span class="copy-line">用得最多，偏偏最难修复。</span><span class="copy-line">所以更该好好护着——</span><span class="copy-line">每天，分一点点就够。</span></p>
   </section>
 
-  <!-- ── 中段 · 她是谁(功能层:它是什么、怎么工作)──────── -->
+  <!-- ── 认识一下 · 她是谁 + 住哪(菜单栏一枚绿点)──────────────── -->
   <section class="block narrow col reveal">
     <div class="head">
       <p class="eyebrow" data-en="Meet her">认识一下</p>
-      <div class="portrait">
-        <div class="mira" aria-hidden="true">
-          <div class="pet">
-          </div>
+      <h2 data-en="One green dot — she speaks only when needed."><span class="cl">一枚绿点，</span><span class="cl">需要时才出声。</span></h2>
+      <p class="body" data-en="<b class='kw-mira'>Mira</b> lives inside EyeFlow — a quiet companion for screen work. Most of the time she's just a green dot at the top of your menubar: no window, no badge, surfacing only when it's time."><span class="copy-line"><span class="cl">EyeFlow 里住着 <b class="kw-mira">Mira</b>，</span><span class="cl">一位安静的屏幕工作伙伴。</span></span><span class="copy-line">平时，她只是菜单栏顶端一枚绿点——</span><span class="copy-line">不占窗口、不弹红点，需要时才轻声出现。</span></p>
+      <p class="body" data-en="What she does is small: a gentle stop before the fatigue piles up. And she watches one thing only — how long you've looked. No camera, no reading your screen, nothing uploaded."><span class="copy-line">她做的事很小：在疲劳攒起来之前，轻轻停你一下。</span><span class="copy-line">她只看一件事——你盯了多久，</span><span class="copy-line">不开摄像头、不读屏幕、不上传。</span></p>
+    </div>
+    <div class="mac-shot reveal">
+      <div class="screen-card mac-screen idle" role="img" aria-label="菜单栏顶端一枚安静呼吸的绿点，就是 Mira" data-en-label="A quiet breathing green dot at the top of the menubar — that's Mira">
+        <div class="mac-bar">
+          <span class="lens" aria-hidden="true"><i></i></span>
+          <span class="mac-clock">14:55</span>
         </div>
+        <div class="mac-desk"></div>
       </div>
-      <h2 data-en="She doesn't say much — but it lands."><span class="cl">她话很少，</span><span class="cl">但都说在点上。</span></h2>
-      <p class="body" data-en="<b class='kw-mira'>Mira</b> lives inside EyeFlow — a quiet companion for screen work. Stare too long and you slowly lose your edge; what she does is small: a gentle stop, before the fatigue piles up."><span class="copy-line"><span class="cl">EyeFlow 里住着 <b class="kw-mira">Mira</b>，</span><span class="cl">一位安静的屏幕工作伙伴。</span></span><span class="copy-line">屏幕看久了，人会慢慢没状态。</span><span class="copy-line">她做的事很小：</span><span class="copy-line">在疲劳攒起来之前，轻轻停你一下。</span></p>
-      <p class="body" data-en="She watches one thing only — how long you’ve looked. No camera, no reading your screen, nothing uploaded."><span class="copy-line">她只看一件事：你盯了多久。</span><span class="copy-line">不开摄像头、不读屏幕内容、不上传。</span></p>
     </div>
   </section>
 
@@ -730,15 +779,27 @@
   <section class="block feature-block col col-wide">
     <div class="daily-row">
       <div class="daily-copy reveal">
-        <p class="eyebrow step-eyebrow" data-en="01 · Quietly there">01 · 安静待着</p>
-        <h2 data-en="&quot;I'm right here.&quot;">「我在旁边。」</h2>
-        <p class="body" data-en="She never rushes you. Timing starts softly only when the screen is active — until then, she just waits."><span class="copy-line">她不催你开始。</span><span class="copy-line">有屏幕活动时，才轻轻开始计时。</span><span class="copy-line">在那之前，她就安静待着。</span></p>
+        <p class="eyebrow step-eyebrow" data-en="01 · Open her up">01 · 点开看看</p>
+        <h2 data-en="Want a look? Just open her."><span class="cl">想看看？</span><span class="cl">点开就好。</span></h2>
+        <p class="body" data-en="Tap the green dot up top and her 气色 panel slides down — energy right now, how long you've looked today, and whether to rest. All at a glance. The gear in the corner opens her settings — how firm the reminders, how often — all yours to tune."><span class="copy-line">顶端那枚绿点，点一下，</span><span class="copy-line">气色面板轻轻落下——</span><span class="copy-line">此刻的精力、今天用了多久眼、要不要歇一下，</span><span class="copy-line">一眼全在。</span><span class="copy-line">右上角一枚齿轮——提醒轻还是重、隔多久提醒，都在里头按你调。</span></p>
       </div>
-      <div class="screen-card app-shot-cell reveal">
-        <img class="app-shot" src="shots/panel-zh.png" data-en-src="shots/panel-en.png"
-             width="436" height="384" loading="lazy" decoding="async"
-             alt="EyeFlow 的菜单栏面板：Mira 的气色、今日用眼时长和两个歇息动作"
-             data-en-alt="EyeFlow's menubar panel — Mira's 气色, today's screen time, and two gentle rest actions" />
+      <div class="screen-card mac-screen panel-screen reveal" role="img" aria-label="EyeFlow 的菜单栏面板：Mira 的气色、今日用眼时长和两个歇息动作" data-en-label="EyeFlow's menubar panel — Mira's 气色, today's screen time, and two gentle rest actions">
+        <div class="mac-bar"><span class="lens" aria-hidden="true"><i></i></span><span class="mac-clock">14:55</span></div>
+        <div class="mac-desk">
+          <div class="mpanel">
+          <span class="mp-gear" role="img" aria-label="设置" data-en-label="Settings"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></span>
+          <div class="mp-cap">
+            <span class="lens" aria-hidden="true"><i></i></span>
+            <span class="mp-cap-t"><b data-en="Energy 66%">精力 66%</b><span data-en="气色 · steady">气色 · 常态</span></span>
+          </div>
+          <div class="mp-today">
+            <div><b>1h 42m</b><span data-en="Screen time today">今日用眼</span></div>
+            <div><b data-en="8 rests">8 次</b><span data-en="breaks 7 · naps 1">歇息 · 短歇7 小睡1</span></div>
+          </div>
+          <div class="mp-row"><span class="mp-ic tri" aria-hidden="true"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg></span><span class="mp-lbl" data-en="Rest now">现在歇一下</span><span class="mp-meta" data-en="Short break · 20s ›">短歇 · 20 秒 ›</span></div>
+          <div class="mp-row"><span class="mp-ic moon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg></span><span class="mp-lbl" data-en="Take a nap">小睡一会儿</span><span class="mp-meta" data-en="Full · 3 min ›">完整 · 3 分钟 ›</span></div>
+          </div>
+        </div>
       </div>
     </div>
   </section>
@@ -753,7 +814,8 @@
       <div class="mock-stack reveal">
         <div class="mock-cell">
         <p class="mock-tag" data-en="Light · top island">轻量 · 顶端岛</p>
-        <div class="screen-card"><div class="top-screen">
+        <div class="screen-card"><div class="top-screen has-bar">
+        <div class="mac-bar"><span class="lens" aria-hidden="true"><i></i></span><span class="mac-clock">15:20</span></div>
         <div class="island" role="img" aria-label="EyeFlow 顶部提醒岛：看看远方休息一下，看完自动记录" data-en-label="EyeFlow's reminder island at the top of the screen: look into the distance to rest, logged automatically when you're done">
           <div class="lens" aria-hidden="true"><i></i></div>
           <div class="isl-body">
@@ -767,7 +829,8 @@
         <div class="mock-cell">
         <p class="mock-tag" data-en="Strong · centered">加强 · 居中大胶囊</p>
         <div class="screen-card reveal">
-          <div class="strong-wash">
+          <div class="strong-wash has-bar">
+            <div class="mac-bar"><span class="lens" aria-hidden="true"><i></i></span><span class="mac-clock">15:20</span></div>
             <div class="island big" role="img" aria-label="EyeFlow 加强档提醒：屏幕中央一枚更大的气色胶囊，配一层柔和暖背景" data-en-label="EyeFlow's strong reminder — a bigger 气色 capsule centered on a soft warm wash">
               <div class="lens" aria-hidden="true"><i></i></div>
               <div class="isl-body">
@@ -794,7 +857,8 @@
       <div class="mock-stack reveal">
         <div class="mock-cell">
         <p class="mock-tag" data-en="Short break · 20s">短歇 · 20 秒</p>
-        <div class="screen-card"><div class="top-screen">
+        <div class="screen-card"><div class="top-screen has-bar">
+        <div class="mac-bar"><span class="lens" aria-hidden="true"><i></i></span><span class="mac-clock">15:20</span></div>
         <div class="island" role="img" aria-label="EyeFlow 短歇：看向远处 20 秒，进度条走完自动记录" data-en-label="EyeFlow's short break: look into the distance for 20 seconds; logged when the bar runs out">
           <div class="lens" aria-hidden="true"><i></i></div>
           <div class="isl-body">
