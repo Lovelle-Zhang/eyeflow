@@ -114,8 +114,8 @@ function miraTrayFramePng({ dark = false, glow = 1 } = {}) {
   const rad = (cap.y2 - cap.y1) / 2;
   const cx = 0.5 * W;
   const cy = 0.5 * H;
-  const rCore = 0.05 * W;
-  const rGlow = 0.13 * W;
+  const rCore = 0.062 * W;
+  const rGlow = 0.17 * W;
   const lens = lensTone(dark);
 
   const sampler = (x, y) => {
@@ -124,7 +124,7 @@ function miraTrayFramePng({ dark = false, glow = 1 } = {}) {
     if (!inRoundRect(px, py, cap.x1, cap.y1, cap.x2, cap.y2, rad)) return [0, 0, 0, 0];
     const d = Math.hypot(px - cx, py - cy);
     let g = d <= rCore ? 1 : d >= rGlow ? 0 : (rGlow - d) / (rGlow - rCore);
-    g = g * g * glow; // eased falloff, scaled by the breath
+    g = Math.pow(g, 1.4) * glow; // eased falloff (gentler than square → brighter mid), scaled by the breath
     if (g <= 0) return [lens[0], lens[1], lens[2], 255];
     const cm = d >= rCore ? 0 : (rCore - d) / rCore; // white hotspot at the very center
     const mix = (i) => {
