@@ -248,7 +248,11 @@
     .mac-bar .lens { --lf: 3.4cqi; }
     .mac-clock { font-size: 2.5cqi; font-weight: 500; color: rgba(20,20,19,0.5); font-variant-numeric: tabular-nums; }
     .mac-desk { position: relative; min-height: 0; }
-    .mac-screen.idle .mac-desk::after { content: ""; position: absolute; inset: 0; }
+    /* 待机屏 = 菜单栏特写(压扁 + 加厚菜单栏 + 放大绿点),让"那枚点"当主角,不留大空桌面 */
+    .mac-screen.idle { aspect-ratio: 2.8; }
+    .mac-screen.idle .mac-bar { height: 24cqi; gap: 4cqi; padding: 0 5cqi; }
+    .mac-screen.idle .mac-bar .lens { --lf: 11cqi; }
+    .mac-screen.idle .mac-clock { font-size: 7cqi; }
 
     /* 面板 · 气色面板 CSS mock(替代旧真截图)——铺满原截图尺寸，面板自身即容器 */
     .mpanel { container-type: inline-size; position: relative; width: 100%; max-width: 400px; margin-inline: auto; padding: 5cqi; border-radius: 6.5cqi; text-align: left; background: var(--panel); border: 1px solid var(--line); box-shadow: 0 1px 2px rgba(20,20,19,0.04), 0 24px 48px -28px rgba(20,20,19,0.16); }
