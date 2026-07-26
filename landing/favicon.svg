@@ -2,21 +2,43 @@
   <defs>
     <linearGradient id="bg" x1="216" y1="156" x2="826" y2="874" gradientUnits="userSpaceOnUse">
       <stop offset="0" stop-color="#EAFFF6"/>
-      <stop offset="0.58" stop-color="#AEEDE0"/>
+      <stop offset="0.58" stop-color="#A4EADC"/>
       <stop offset="1" stop-color="#F3EEC7"/>
     </linearGradient>
-    <linearGradient id="lens" x1="265" y1="335" x2="759" y2="653" gradientUnits="userSpaceOnUse">
-      <stop offset="0" stop-color="#0E1C20"/>
-      <stop offset="1" stop-color="#10272A"/>
-    </linearGradient>
+    <!-- top-left specular sheen (matches app-icon plate highlight) -->
+    <radialGradient id="sheen" cx="0.24" cy="0.15" r="0.62">
+      <stop offset="0" stop-color="#ffffff" stop-opacity="0.85"/>
+      <stop offset="0.48" stop-color="#ffffff" stop-opacity="0"/>
+    </radialGradient>
+    <!-- bottom inner green glow -->
+    <radialGradient id="innerglow" cx="0.5" cy="1.02" r="0.72">
+      <stop offset="0" stop-color="#0f9f7a" stop-opacity="0.18"/>
+      <stop offset="0.62" stop-color="#0f9f7a" stop-opacity="0"/>
+    </radialGradient>
+    <!-- lens: deep green-black, light from top-left -->
+    <radialGradient id="lens" cx="0.34" cy="0.22" r="1.1">
+      <stop offset="0" stop-color="#0f2b23"/>
+      <stop offset="0.82" stop-color="#061109"/>
+    </radialGradient>
+    <!-- the pulse: one crisp green point of light (matches app-icon v2 core) -->
+    <radialGradient id="pulse" cx="0.5" cy="0.5" r="0.5">
+      <stop offset="0" stop-color="#ffffff"/>
+      <stop offset="0.12" stop-color="#ecfff7"/>
+      <stop offset="0.26" stop-color="#a6f0cf"/>
+      <stop offset="0.40" stop-color="#79dcb0"/>
+      <stop offset="0.60" stop-color="#79dcb0" stop-opacity="0.22"/>
+      <stop offset="0.76" stop-color="#79dcb0" stop-opacity="0"/>
+    </radialGradient>
   </defs>
 
   <!-- new Mira (MIRA_SYSTEM): a small dark lens holding ONE point of light, not two eyes -->
   <g transform="translate(82 82) scale(0.84)">
     <rect width="1024" height="1024" rx="216" fill="url(#bg)"/>
+    <rect width="1024" height="1024" rx="216" fill="url(#sheen)"/>
+    <rect width="1024" height="1024" rx="216" fill="url(#innerglow)"/>
+    <rect x="3" y="3" width="1018" height="1018" rx="214" fill="none" stroke="#182120" stroke-opacity="0.05" stroke-width="6"/>
     <rect x="265" y="335" width="494" height="318" rx="159" fill="url(#lens)"/>
-    <rect x="265" y="335" width="494" height="318" rx="159" stroke="#7EEFD4" stroke-width="26" stroke-opacity="0.16"/>
-    <circle cx="512" cy="494" r="74" fill="#8fe6c0"/>
-    <circle cx="512" cy="494" r="42" fill="#f4fff9"/>
+    <rect x="265" y="335" width="494" height="318" rx="159" fill="none" stroke="#7EEFD4" stroke-width="20" stroke-opacity="0.16"/>
+    <circle cx="512" cy="494" r="118" fill="url(#pulse)"/>
   </g>
 </svg>
