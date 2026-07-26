@@ -54,8 +54,8 @@
       --section: clamp(104px, 16vh, 168px);
       --flow-title: var(--s6);   /* title → body */
 
-      /* Mira geometry (58-unit canonical). */
-      --ms: 58px; --vt: 19px; --vl: 10px; --vw: 38px; --vh: 18px;
+      /* Mira geometry (58-unit canonical). 镜片比例对齐 app 图标 v2 母版:板宽 48% / 高 30% / 居中。 */
+      --ms: 58px; --vt: 20px; --vl: 15px; --vw: 28px; --vh: 17px;
       --st: 15px; --sr: 8px; --ss: 9px;
       --ft: 24px; --fl: 18px; --fw: 22px; --fh: 8px; --eye: 5px;
       --mt: 38px; --mw: 8px; --mh: 5px; --mstroke: 1.5px;
@@ -184,13 +184,14 @@
     .mira { position: relative; display: grid; place-items: center; width: 190px; height: 190px; animation: float 8s var(--ease) infinite; }
     .mira::before { content: ""; position: absolute; width: 210px; height: 210px; border-radius: 50%; background: radial-gradient(circle, rgba(31,122,94,0.06), transparent 66%); }
     .pet {
-      position: relative; width: var(--ms); aspect-ratio: 1; border-radius: 18px 18px 16px 16px;
+      position: relative; width: var(--ms); aspect-ratio: 1; border-radius: 13px;
       background: radial-gradient(115% 120% at 22% 12%, rgba(255,255,255,0.85) 0%, rgba(255,255,255,0) 42%), linear-gradient(150deg, #eafff6 0%, #a4eadc 56%, #f3eec7 100%);
       box-shadow: inset 0 0 0 1px rgba(24,32,31,0.06), inset 0 -8px 18px rgba(15,159,122,0.12), 0 18px 40px -14px rgba(20,20,19,0.2);
       display: grid; place-items: center; overflow: hidden;
       transform: scale(var(--rest)); transform-origin: center; animation: breathe var(--breath) var(--ease) infinite;
     }
-    .pet::before { content: ""; position: absolute; top: var(--vt); left: var(--vl); width: var(--vw); height: var(--vh); border-radius: 999px; background: radial-gradient(circle closest-side at 50% 50%, #ffffff 0%, #ecfff7 14%, #a6f0cf 30%, #79dcb0 46%, rgba(121,220,176,0.22) 66%, rgba(121,220,176,0) 82%), radial-gradient(130% 150% at 34% 22%, #0f2b23 0%, #061109 82%); box-shadow: inset 0 0 0 1px rgba(255,255,255,0.12); }
+    .pet::before { content: ""; position: absolute; top: var(--vt); left: var(--vl); width: var(--vw); height: var(--vh); border-radius: 999px; background: radial-gradient(130% 150% at 34% 22%, #0f2b23 0%, #061109 82%); box-shadow: inset 0 0 0 1px rgba(255,255,255,0.12); }
+    .pet::after { content: ""; position: absolute; left: 50%; top: 50%; transform: translate(-50%,-50%); width: calc(var(--vh) * 1.02); height: calc(var(--vh) * 1.02); border-radius: 50%; background: radial-gradient(circle, #ffffff 0%, #ecfff7 12%, #a6f0cf 26%, #79dcb0 40%, rgba(121,220,176,0.22) 60%, rgba(121,220,176,0) 76%); }
     /* Mira (MIRA_SYSTEM): the lens holds ONE point of light — no eyes/mouth/cheeks/antenna (retired) */
 
     /* EyeFlow brand mark — browser favicon, nav mark and app-mock marks share
