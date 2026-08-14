@@ -163,6 +163,11 @@
     @media (min-width: 600px) { .stakes-close .copy-line { display: inline-block; } }
     .body + .body { margin-top: var(--s6); }
 
+    /* 识别 · 共同的失败 — 共情一拍:整段居中的交心列(别于左对齐的说明式 beat),
+       末句衬线体收束,当情绪落点。用留白 + 对齐区分,不铺色块。 */
+    .recognize .head .body { text-align: center; }
+    .recognize-close { max-width: 20em; margin: var(--s8) auto 0; font-family: var(--font-display); font-size: var(--t-title); font-weight: 400; line-height: 1.5; color: var(--ink); text-wrap: balance; }
+
     /* ── Hero ───────────────────────────────────────────────── */
     .hero { text-align: center; padding-top: clamp(84px, 14vh, 156px); padding-bottom: 0; }
     .hero h1 + .sub { margin-top: var(--flow-title); }
@@ -711,16 +716,16 @@
           <span class="s" aria-hidden="true"></span>
           <button type="button" data-lang="en" aria-pressed="false">EN</button>
         </span>
-        <a class="dl" href="https://github.com/Lovelle-Zhang/eyeflow/releases/download/v0.3.2/EyeFlow_0.3.2_universal.dmg">Download</a>
+        <a class="dl" href="https://github.com/Lovelle-Zhang/eyeflow/releases/download/v0.3.3/EyeFlow_0.3.3_universal.dmg">Download</a>
       </span>
     </nav>
   </div>
 
   <!-- ── Hero · 主 slogan(体感钩)────────────────────────────── -->
   <section class="hero col">
-    <h1 class="hero-slogan" data-en="<span class='hero-row'><span>Screens blur the world</span> <span>a little.</span></span><span class='hero-row'><span><b class='kw-mira'>Mira</b> helps you</span> <span>bring it back into focus.</span></span>">
-      <span class="hero-row"><span>屏幕看久了，</span><span>世界会有点糊。</span></span>
-      <span class="hero-row"><span><b class="kw-mira">Mira</b> 陪你，</span><span>一点点找回清晰。</span></span>
+    <h1 class="hero-slogan" data-en="<span class='hero-row'><span>By the time your eyes ache,</span> <span>you're usually still staring.</span></span><span class='hero-row'><span><b class='kw-mira'>Mira</b> catches it before that —</span> <span>a quiet nudge to look away.</span></span>">
+      <span class="hero-row"><span>眼睛发酸的时候，</span><span>你多半还在盯着。</span></span>
+      <span class="hero-row"><span><b class="kw-mira">Mira</b> 会赶在那之前，</span><span>轻声喊你歇一下。</span></span>
     </h1>
 
     <div class="stage">
@@ -731,9 +736,19 @@
     </div>
 
     <div>
-      <a class="cta" href="https://github.com/Lovelle-Zhang/eyeflow/releases/download/v0.3.2/EyeFlow_0.3.2_universal.dmg">Download for macOS</a>
+      <a class="cta" href="https://github.com/Lovelle-Zhang/eyeflow/releases/download/v0.3.3/EyeFlow_0.3.3_universal.dmg">Download for macOS</a>
       <div class="meta" data-en="macOS 12+ · Free · Local-first · Notarized">macOS 12+ · 免费 · 本地运行 · Apple 公证</div>
     </div>
+  </section>
+
+  <!-- ── 识别 · 共同的失败(共情钩:你试过、没撑住、不怪你)──────── -->
+  <section class="block narrow recognize col reveal">
+    <div class="head">
+      <p class="eyebrow" data-en="Honestly">说句实话</p>
+      <h2 data-en="You've tried before.">你不是没试过。</h2>
+      <p class="body" data-en="You've probably installed a break reminder. Two or three days in, you turned it off. Not your fault — they nag like an alarm, cutting in over and over until you just want them quiet."><span class="copy-line">你大概也装过护眼提醒。用了两三天，就关掉了。</span><span class="copy-line">不怪你——它们像个闹钟，一次次打断你，响一次烦一次，最后你只想清静。</span></p>
+    </div>
+    <p class="recognize-close" data-en="Resting your eyes was never meant to be a fight with yourself.">可歇眼睛，本不该是跟自己较劲的事。</p>
   </section>
 
   <!-- ── Act 0 · 眼睛这件事(理性说服层:强度 · 责任 · 不可逆)──── -->
@@ -969,7 +984,7 @@
       </div>
       <h2 class="brand-line" data-en="<span class='cl'>EyeFlow —</span><span class='cl'>guarding the way you see the world.</span>"><span class="cl">EyeFlow ——</span><span class="cl">守护你看清世界的方式。</span></h2>
       <div class="actions">
-        <a class="cta" href="https://github.com/Lovelle-Zhang/eyeflow/releases/download/v0.3.2/EyeFlow_0.3.2_universal.dmg">Download for macOS</a>
+        <a class="cta" href="https://github.com/Lovelle-Zhang/eyeflow/releases/download/v0.3.3/EyeFlow_0.3.3_universal.dmg">Download for macOS</a>
       </div>
       <p class="meta waitlist" data-en="Want a quiet ping when a new version lands? <a href='mailto:zynono@gmail.com?subject=EyeFlow%20Waitlist'>Leave an email</a>"><span class="cl">想在新版本时被轻轻叫一声？</span><a href="mailto:zynono@gmail.com?subject=EyeFlow%20Waitlist">留个邮箱</a></p>
     </div>
@@ -980,7 +995,7 @@
       <span>EyeFlow</span><span class="dot"></span>
       <a href="https://github.com/Lovelle-Zhang/eyeflow" data-en="Open source">开源</a><span class="dot"></span>
       <span data-en="Notarized">已 Apple 公证</span><span class="dot"></span>
-      <span>v0.3.2</span>
+      <span>v0.3.3</span>
     </div>
   </footer>
 
