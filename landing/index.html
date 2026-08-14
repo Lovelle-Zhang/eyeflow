@@ -168,6 +168,23 @@
     .recognize .head .body { text-align: center; }
     .recognize-close { max-width: 20em; margin: var(--s8) auto 0; font-family: var(--font-display); font-size: var(--t-title); font-weight: 400; line-height: 1.5; color: var(--ink); text-wrap: balance; }
 
+    /* 尾声 · 留住 Mira（邮件 opt-in · Buttondown）*/
+    .beyond { padding-block: clamp(72px, 11vh, 116px); text-align: center; display: flex; flex-direction: column; align-items: center; border-top: 1px solid var(--line-soft); }
+    .beyond .pet { --rest: 0.72; --peak: 0.74; }
+    .beyond-lead { margin-top: var(--s6); }
+    .beyond-copy { max-width: 24em; margin-top: var(--flow-title); }
+    .stay { display: flex; gap: var(--s3); width: 100%; max-width: 25em; margin-top: var(--s8); }
+    .stay-email { flex: 1; min-width: 0; min-height: 48px; font: inherit; font-size: var(--t-body); color: var(--ink); background: var(--panel-strong); border: 1px solid var(--line); border-radius: 12px; padding: 0 16px; outline: none; transition: border-color 0.2s var(--ease), box-shadow 0.2s var(--ease); }
+    .stay-email::placeholder { color: var(--muted-soft); }
+    .stay-email:focus-visible { border-color: var(--mira-line); box-shadow: 0 0 0 3px var(--mira-soft); }
+    .stay-btn { flex: 0 0 auto; }
+    .beyond-fine { margin-top: var(--s4); }
+    .beyond-done { display: none; max-width: 20em; margin-top: var(--s8); font-family: var(--font-display); font-size: var(--t-title); line-height: 1.5; color: var(--ink); }
+    .beyond[data-state="done"] .beyond-copy, .beyond[data-state="done"] .stay, .beyond[data-state="done"] .beyond-fine { display: none; }
+    .beyond[data-state="done"] .beyond-done { display: block; }
+    .beyond iframe { display: none; }
+    @media (max-width: 520px) { .stay { flex-direction: column; } }
+
     /* ── Hero ───────────────────────────────────────────────── */
     .hero { text-align: center; padding-top: clamp(84px, 14vh, 156px); padding-bottom: 0; }
     .hero h1 + .sub { margin-top: var(--flow-title); }
@@ -986,8 +1003,21 @@
       <div class="actions">
         <a class="cta" href="https://github.com/Lovelle-Zhang/eyeflow/releases/download/v0.3.3/EyeFlow_0.3.3_universal.dmg">Download for macOS</a>
       </div>
-      <p class="meta waitlist" data-en="Want a quiet ping when a new version lands? <a href='mailto:zynono@gmail.com?subject=EyeFlow%20Waitlist'>Leave an email</a>"><span class="cl">想在新版本时被轻轻叫一声？</span><a href="mailto:zynono@gmail.com?subject=EyeFlow%20Waitlist">留个邮箱</a></p>
     </div>
+  </section>
+
+  <!-- ── 尾声 · 留住 Mira（邮件 opt-in · Buttondown）───────────── -->
+  <section class="beyond col" data-state="invite">
+    <div class="mira" aria-hidden="true"><div class="pet"></div></div>
+    <h2 class="beyond-lead" data-en="This is only the beginning.">这只是开始。</h2>
+    <p class="body beyond-copy" data-en="EyeFlow stays free, always. One day Mira wants to step out of the screen and be beside you — leave an email if you'd like to know when that day comes, and she'll find you, quietly."><span class="copy-line">EyeFlow 会一直免费。</span><span class="copy-line">有一天，Mira 想从屏幕里，走到你身边。</span><span class="copy-line">想知道那一天，就留个邮箱——她有消息时，会轻轻找你。</span></p>
+    <form class="stay embeddable-buttondown-form" action="https://buttondown.email/api/emails/embed-subscribe/zynono" method="post" target="bd-frame">
+      <input class="stay-email" type="email" name="email" required placeholder="你的邮箱" data-en-ph="your email" aria-label="你的邮箱" data-en-label="your email" />
+      <button class="cta stay-btn" type="submit" data-en="Let Mira remember you">让 Mira 记得你</button>
+    </form>
+    <p class="meta beyond-fine" data-en="Only when it truly matters. No tracking, no noise, unsubscribe anytime.">只在真的有事时。不追踪、不打扰，随时退订。</p>
+    <p class="beyond-done" data-en="<strong>She'll remember.</strong> Mira will find you when it's time."><strong>记住了。</strong>Mira 有消息时，会来找你。</p>
+    <iframe name="bd-frame" title="subscribe" tabindex="-1" aria-hidden="true"></iframe>
   </section>
 
   <footer class="col">
@@ -1045,6 +1075,14 @@
       });
     })();
 
+    (function () { // 尾部 opt-in：提交后原地显示成功态（乐观；Buttondown 隐藏 iframe 收单 + 发确认邮件）
+      const form = document.querySelector(".stay");
+      if (form) form.addEventListener("submit", () => {
+        const sec = form.closest(".beyond");
+        if (sec) sec.dataset.state = "done";
+      });
+    })();
+
     (function () { // 中/EN
       const els = [...document.querySelectorAll("[data-en]")];
       els.forEach((el) => (el.dataset.zh = el.innerHTML));
@@ -1056,6 +1094,8 @@
       alts.forEach((el) => (el.dataset.zhAlt = el.getAttribute("alt")));
       const shots = [...document.querySelectorAll("img[data-en-src]")];
       shots.forEach((el) => (el.dataset.zhSrc = el.getAttribute("src")));
+      const phs = [...document.querySelectorAll("[data-en-ph]")];
+      phs.forEach((el) => (el.dataset.zhPh = el.getAttribute("placeholder")));
       const btns = [...document.querySelectorAll(".lang button")];
       function apply(lang) {
         document.documentElement.lang = lang === "en" ? "en" : "zh-CN";
@@ -1063,6 +1103,7 @@
         labeled.forEach((el) => el.setAttribute("aria-label", lang === "en" ? el.dataset.enLabel : el.dataset.zhLabel));
         alts.forEach((el) => el.setAttribute("alt", lang === "en" ? el.dataset.enAlt : el.dataset.zhAlt));
         shots.forEach((el) => el.setAttribute("src", lang === "en" ? el.dataset.enSrc : el.dataset.zhSrc));
+        phs.forEach((el) => el.setAttribute("placeholder", lang === "en" ? el.dataset.enPh : el.dataset.zhPh));
         btns.forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.lang === lang)));
         try { localStorage.setItem("ef-lang", lang); } catch (e) {}
       }
