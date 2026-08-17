@@ -1025,7 +1025,7 @@
       <span>EyeFlow</span><span class="dot"></span>
       <a href="https://github.com/Lovelle-Zhang/eyeflow" data-en="Open source">开源</a><span class="dot"></span>
       <span data-en="Notarized">已 Apple 公证</span><span class="dot"></span>
-      <span>v0.3.3</span>
+      <span id="footer-ver">v0.3.3</span>
     </div>
   </footer>
 
@@ -1035,6 +1035,13 @@
       if (!("IntersectionObserver" in window)) { items.forEach((el) => el.classList.add("in")); return; }
       const io = new IntersectionObserver((es) => es.forEach((e) => { if (e.isIntersecting) { e.target.classList.add("in"); io.unobserve(e.target); } }), { threshold: 0.14, rootMargin: "0px 0px -6% 0px" });
       items.forEach((el) => io.observe(el));
+    })();
+
+    (function () { // footer 版本号自动跟最新（GitHub API 发 CORS 头、可跨域读；失败保留静态兜底）
+      fetch("https://api.github.com/repos/Lovelle-Zhang/eyeflow/releases/latest")
+        .then((r) => r.json())
+        .then((d) => { if (d && d.tag_name) document.getElementById("footer-ver").textContent = d.tag_name; })
+        .catch(() => {});
     })();
 
     (function () { // Act 4 — rest WITH Mira: a real 10s look-away, opt-in and skippable
