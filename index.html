@@ -168,6 +168,30 @@
     .recognize .head .body { text-align: center; }
     .recognize-close { max-width: 20em; margin: var(--s8) auto 0; font-family: var(--font-display); font-size: var(--t-title); font-weight: 400; line-height: 1.5; color: var(--ink); text-wrap: balance; }
 
+    /* ── 20-20-20 节奏 + Mira 气色三态(App Store 送审素材融入)──────
+       两者都挂在 .stakes 三列栅格上,自动继承移动端塌成单列(见 552 行)。 */
+    .rhythm-lead { max-width: 18em; }
+    .rhythm .stake, .glow-states .stake { padding-top: var(--s2); padding-bottom: var(--s2); }
+    .rhythm-num { display: inline-block; font-family: var(--font-display); font-size: clamp(2.75rem, 7vw, 4.25rem); font-weight: 400; line-height: 0.92; color: var(--mira); font-variant-numeric: tabular-nums; }
+    .rhythm .stake-tag { margin-top: var(--s3); }
+    .rhythm-close { margin-top: var(--s12); }
+
+    /* Mira · The Pulse — 深色镜片 + 会呼吸的光核。渐变忠于 Mira.swift / 送审 shot-05,
+       不改色相(hue-157),绝不用亮色顶替(no-placeholder 纪律)。光核尺寸用 cqi 锚在
+       镜片宽上,与 shot 的 250px 比例一致、随屏流动。 */
+    .glow-lens { display: inline-flex; align-items: center; justify-content: center;
+      width: clamp(126px, 20vw, 166px); aspect-ratio: 250 / 162; border-radius: 999px;
+      background: radial-gradient(130% 150% at 34% 22%, #123029 0%, #07140f 80%);
+      box-shadow: 0 20px 40px -20px rgba(7,20,15,0.55); container-type: inline-size; }
+    .glow-pulse { border-radius: 50%; }
+    .glow-pulse.fresh { width: 41.6cqi; height: 41.6cqi; opacity: 0.96;
+      background: radial-gradient(circle, #fff 0%, #8fe6c0 36%, rgba(111,231,195,0.4) 56%, rgba(111,231,195,0) 74%); }
+    .glow-pulse.tiring { width: 31.2cqi; height: 31.2cqi; opacity: 0.6;
+      background: radial-gradient(circle, #eef2ef 0%, #a6bcb2 38%, rgba(150,175,165,0.3) 58%, rgba(150,175,165,0) 76%); }
+    .glow-pulse.resting { width: 47.2cqi; height: 6.4cqi; border-radius: 3.2cqi; opacity: 0.7;
+      background: radial-gradient(circle, #eafff7 0%, #79dcb0 42%, rgba(121,220,176,0.25) 70%, rgba(121,220,176,0) 88%); }
+    .glow-states .stake-tag { margin-top: var(--s6); }
+
     /* 尾声 · 留住 Mira（邮件 opt-in · Buttondown）*/
     .beyond { padding-block: clamp(72px, 11vh, 116px); text-align: center; display: flex; flex-direction: column; align-items: center; border-top: 1px solid var(--line-soft); }
     .beyond .pet { --rest: 0.72; --peak: 0.74; }
@@ -794,6 +818,20 @@
     <p class="body stakes-close" data-en="The part you use most is the hardest to repair. So it deserves looking after — a little each day is enough. And best make it up the same day: tiredness stacks, and putting it off only makes it heavier."><span class="copy-line">用得最多，偏偏最难修复。</span><span class="copy-line">所以更该好好护着——</span><span class="copy-line">每天，分一点点就够。</span><span class="copy-line">而这一点，最好当天就补上——</span><span class="copy-line">累是会攒的，拖着只会越攒越沉。</span></p>
   </section>
 
+  <!-- ── 护眼的老办法 · 20-20-20(App Store 送审素材 shot-03 融入)──── -->
+  <section class="block narrow col reveal">
+    <div class="head">
+      <p class="eyebrow" data-en="The rhythm">护眼的老办法</p>
+      <h2 class="rhythm-lead" data-en="20-20-20, kept for you."><span class="cl">20-20-20，</span><span class="cl">替你守着。</span></h2>
+    </div>
+    <ul class="stakes rhythm">
+      <li class="stake"><span class="rhythm-num">20</span><span class="stake-tag" data-en="minutes">分钟</span><p data-en="at the screen">盯着屏幕</p></li>
+      <li class="stake"><span class="rhythm-num">20</span><span class="stake-tag" data-en="feet away">英尺外</span><p data-en="look into the distance">望向远处</p></li>
+      <li class="stake"><span class="rhythm-num">20</span><span class="stake-tag" data-en="seconds">秒</span><p data-en="let your eyes rest">让眼睛歇歇</p></li>
+    </ul>
+    <p class="body stakes-close rhythm-close" data-en="The eye-care basic — kept without a single alarm.">眼科的老常识——不响一声闹钟。</p>
+  </section>
+
   <!-- ── 认识一下 · 她是谁 + 住哪(菜单栏一枚绿点)──────────────── -->
   <section class="block narrow col reveal">
     <div class="head">
@@ -811,6 +849,32 @@
         <div class="mac-desk"></div>
       </div>
     </div>
+  </section>
+
+  <!-- ── 她的气色 · 三态(App Store 送审素材 shot-05 融入)────────── -->
+  <section class="block narrow col reveal">
+    <div class="head">
+      <p class="eyebrow" data-en="Her complexion">她的气色</p>
+      <h2 data-en="<b class='kw-mira'>Mira</b>'s glow mirrors your eyes."><b class="kw-mira">Mira</b> 的光，映着你的眼睛。</h2>
+    </div>
+    <ul class="stakes glow-states">
+      <li class="stake">
+        <span class="glow-lens" aria-hidden="true"><span class="glow-pulse fresh"></span></span>
+        <span class="stake-tag" data-en="Fresh">明亮</span>
+        <p data-en="rested &amp; clear">神清气爽</p>
+      </li>
+      <li class="stake">
+        <span class="glow-lens" aria-hidden="true"><span class="glow-pulse tiring"></span></span>
+        <span class="stake-tag" data-en="Tiring">发累</span>
+        <p data-en="time to look away">该看看远处</p>
+      </li>
+      <li class="stake">
+        <span class="glow-lens" aria-hidden="true"><span class="glow-pulse resting"></span></span>
+        <span class="stake-tag" data-en="Resting">歇息</span>
+        <p data-en="winding down">慢慢沉下来</p>
+      </li>
+    </ul>
+    <p class="body stakes-close" data-en="She softens when you're tired — a cue, never a scold.">累了，她就柔下来——是提示，不是责备。</p>
   </section>
 
   <!-- ── 一天的弧线 ─────────────────────────────────────────── -->
@@ -1037,13 +1101,6 @@
       items.forEach((el) => io.observe(el));
     })();
 
-    (function () { // footer 版本号自动跟最新（GitHub API 发 CORS 头、可跨域读；失败保留静态兜底）
-      fetch("https://api.github.com/repos/Lovelle-Zhang/eyeflow/releases/latest")
-        .then((r) => r.json())
-        .then((d) => { if (d && d.tag_name) document.getElementById("footer-ver").textContent = d.tag_name; })
-        .catch(() => {});
-    })();
-
     (function () { // Act 4 — rest WITH Mira: a real 10s look-away, opt-in and skippable
       const act = document.querySelector(".rest-act");
       if (!act) return;
@@ -1080,6 +1137,13 @@
           else done();
         });
       });
+    })();
+
+    (function () { // footer 版本号自动跟最新（GitHub API 发 CORS 头、可跨域读；失败保留静态兜底）
+      fetch("https://api.github.com/repos/Lovelle-Zhang/eyeflow/releases/latest")
+        .then((r) => r.json())
+        .then((d) => { if (d && d.tag_name) document.getElementById("footer-ver").textContent = d.tag_name; })
+        .catch(() => {});
     })();
 
     (function () { // 尾部 opt-in：提交后原地显示成功态（乐观；Buttondown 隐藏 iframe 收单 + 发确认邮件）
