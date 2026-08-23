@@ -302,24 +302,31 @@
     .mac-screen.idle .mac-clock { font-size: 7cqi; }
 
     /* 面板 · 气色面板 CSS mock(替代旧真截图)——铺满原截图尺寸，面板自身即容器 */
-    .mpanel { container-type: inline-size; position: relative; width: 100%; max-width: 400px; margin-inline: auto; padding: 5cqi; border-radius: 6.5cqi; text-align: left; background: var(--panel); border: 1px solid var(--line); box-shadow: 0 1px 2px rgba(20,20,19,0.04), 0 24px 48px -28px rgba(20,20,19,0.16); }
+    /* 面板 mock 忠于真机(Panel.swift/PanelParts.swift):锁深色 vibrancy 毛玻璃 + 语义白字。
+       行分主/次(Rest now=绿档、Take a nap=白档),齿轮=SF gearshape、SOFT 色。 */
+    .mpanel { container-type: inline-size; position: relative; width: 100%; max-width: 400px; margin-inline: auto; padding: 5cqi; border-radius: 6.5cqi; text-align: left; color: rgba(255,255,255,0.94); background: linear-gradient(180deg, rgba(58,60,67,0.80), rgba(44,46,52,0.86)); backdrop-filter: blur(34px) saturate(1.2); -webkit-backdrop-filter: blur(34px) saturate(1.2); border: 1px solid rgba(255,255,255,0.12); box-shadow: inset 0 1px 0 rgba(255,255,255,0.07), 0 26px 52px -26px rgba(10,12,18,0.5); }
     .mp-head { display: flex; justify-content: flex-end; margin-bottom: 1.6cqi; }
-    .mp-gear { width: 5.2cqi; height: 5.2cqi; color: rgba(20,20,19,0.4); }
+    .mp-gear { width: 5.6cqi; height: 5.6cqi; color: rgba(255,255,255,0.52); }
     .mp-gear svg { width: 100%; height: 100%; display: block; }
-    .mp-cap { display: flex; align-items: center; gap: 3.6cqi; padding: 4cqi 5cqi; border-radius: 99px; background: linear-gradient(118deg, #2f8262 0%, #1f6b52 58%, #175a45 100%); }
-    .mp-cap .lens { --lf: 10cqi; }
+    .mp-cap { display: flex; align-items: center; gap: 3.6cqi; padding: 4cqi 5cqi; border-radius: 99px; background: linear-gradient(120deg, #3f9d76 0%, #2c805f 58%, #236a50 100%); border: 1px solid rgba(255,255,255,0.16); }
+    /* hero Mira 标 = 浅薄荷 squircle 图标(app 图标风),内嵌深 lens+绿光核 */
+    .mp-mark { flex: 0 0 auto; width: 11cqi; height: 11cqi; border-radius: 3.1cqi; display: flex; align-items: center; justify-content: center; background: linear-gradient(150deg, #ecfff7 0%, #a9e8d6 58%, #82d8c0 100%); box-shadow: inset 0 1px 0 rgba(255,255,255,0.55), 0 1px 3px rgba(10,30,22,0.28); }
+    .mp-mark .lens { --lf: 5.4cqi; }
     .mp-cap-t { display: grid; gap: 0.8cqi; }
-    .mp-cap-t b { font-size: 6cqi; font-weight: 600; color: #f4f7f5; }
+    .mp-cap-t b { font-size: 6cqi; font-weight: 600; color: #f6f7f9; }
     .mp-cap-t span { font-size: 3.7cqi; color: rgba(244,247,245,0.72); }
-    .mp-today { display: flex; gap: 8cqi; padding: 5cqi 1.5cqi 3cqi; }
+    .mp-today-cap { padding: 4.5cqi 1.5cqi 0; font-size: 3.6cqi; font-weight: 500; color: rgba(255,255,255,0.55); }
+    .mp-today { display: flex; align-items: center; gap: 5cqi; padding: 1.6cqi 1.5cqi 3cqi; }
     .mp-today > div { display: grid; gap: 0.6cqi; }
-    .mp-today b { font-size: 7cqi; font-weight: 600; color: var(--ink); font-variant-numeric: tabular-nums; }
-    .mp-today span { font-size: 3.5cqi; color: var(--muted); }
-    .mp-row { display: flex; align-items: center; gap: 3.4cqi; margin-top: 2.4cqi; padding: 4cqi 5cqi; border-radius: 4.5cqi; background: rgba(26,107,82,0.09); }
-    .mp-row .mp-lbl { font-size: 4.8cqi; font-weight: 600; color: var(--ink); }
-    .mp-row .mp-meta { margin-left: auto; font-size: 3.7cqi; color: var(--muted); }
-    .mp-ic { flex: 0 0 auto; }
-    .mp-ic { color: var(--mira); }
+    .mp-today .mp-div { width: 1px; align-self: stretch; margin: 1cqi 0; background: rgba(255,255,255,0.12); }
+    .mp-today b { font-size: 7cqi; font-weight: 600; color: rgba(255,255,255,0.92); font-variant-numeric: tabular-nums; }
+    .mp-today span { font-size: 3.5cqi; color: rgba(255,255,255,0.5); }
+    .mp-row { display: flex; align-items: center; gap: 3.4cqi; margin-top: 2.4cqi; padding: 4cqi 5cqi; border-radius: 4.5cqi; background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.09); }
+    .mp-row.primary { background: rgba(139,240,174,0.12); border-color: rgba(139,240,174,0.22); }
+    .mp-row .mp-lbl { font-size: 4.8cqi; font-weight: 600; color: rgba(255,255,255,0.92); }
+    .mp-row .mp-meta { margin-left: auto; font-size: 3.7cqi; color: rgba(255,255,255,0.5); }
+    .mp-ic { flex: 0 0 auto; color: rgba(255,255,255,0.5); }
+    .mp-row.primary .mp-ic { color: #6fe7c3; }
     .mp-ic svg { display: block; width: 100%; height: 100%; }
     .mp-ic.tri { width: 4.8cqi; height: 4.8cqi; }
     .mp-ic.moon { width: 5cqi; height: 5cqi; }
@@ -889,17 +896,19 @@
         <div class="mac-bar"><span class="lens" aria-hidden="true"><i></i></span><span class="mac-clock">14:55</span></div>
         <div class="mac-desk">
           <div class="mpanel">
-          <div class="mp-head"><span class="mp-gear" role="img" aria-label="设置" data-en-label="Settings"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="12" r="3.2"/><path d="M12 2.5v2.2M12 19.3v2.2M4.2 4.2l1.6 1.6M18.2 18.2l1.6 1.6M2.5 12h2.2M19.3 12h2.2M4.2 19.8l1.6-1.6M18.2 5.8l1.6-1.6"/></svg></span></div>
+          <div class="mp-head"><span class="mp-gear" role="img" aria-label="设置" data-en-label="Settings"><svg viewBox="0 0 24 24" aria-hidden="true"><defs><mask id="mpGearHole"><rect width="24" height="24" fill="#fff"/><circle cx="12" cy="12" r="3.5" fill="#000"/></mask></defs><g fill="currentColor" mask="url(#mpGearHole)"><circle cx="12" cy="12" r="6.3"/><rect x="10.7" y="1.9" width="2.6" height="5" rx="1.1"/><rect x="10.7" y="1.9" width="2.6" height="5" rx="1.1" transform="rotate(45 12 12)"/><rect x="10.7" y="1.9" width="2.6" height="5" rx="1.1" transform="rotate(90 12 12)"/><rect x="10.7" y="1.9" width="2.6" height="5" rx="1.1" transform="rotate(135 12 12)"/><rect x="10.7" y="1.9" width="2.6" height="5" rx="1.1" transform="rotate(180 12 12)"/><rect x="10.7" y="1.9" width="2.6" height="5" rx="1.1" transform="rotate(225 12 12)"/><rect x="10.7" y="1.9" width="2.6" height="5" rx="1.1" transform="rotate(270 12 12)"/><rect x="10.7" y="1.9" width="2.6" height="5" rx="1.1" transform="rotate(315 12 12)"/></g></svg></span></div>
           <div class="mp-cap">
-            <span class="lens" aria-hidden="true"><i></i></span>
+            <span class="mp-mark" aria-hidden="true"><span class="lens"><i></i></span></span>
             <span class="mp-cap-t"><b data-en="Energy 66%">精力 66%</b><span data-en="Steady">气色 · 常态</span></span>
           </div>
+          <div class="mp-today-cap" data-en="Today">今日</div>
           <div class="mp-today">
-            <div><b>1h 42m</b><span data-en="Screen time today">今日用眼</span></div>
-            <div><b data-en="8 rests">8 次</b><span data-en="breaks 7 · naps 1">歇息 · 短歇7 小睡1</span></div>
+            <div><b>1h 42m</b><span data-en="Screen time">用眼时长</span></div>
+            <div class="mp-div" aria-hidden="true"></div>
+            <div><b>8×</b><span data-en="Rests (breaks 7 · naps 1)">歇息（短歇7 · 小睡1）</span></div>
           </div>
-          <div class="mp-row"><span class="mp-ic tri" aria-hidden="true"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg></span><span class="mp-lbl" data-en="Rest now">现在歇一下</span><span class="mp-meta" data-en="Short break · 20s ›">短歇 · 20 秒 ›</span></div>
-          <div class="mp-row"><span class="mp-ic moon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg></span><span class="mp-lbl" data-en="Take a nap">小睡一会儿</span><span class="mp-meta" data-en="Full · 3 min ›">完整 · 3 分钟 ›</span></div>
+          <div class="mp-row primary"><span class="mp-ic tri" aria-hidden="true"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg></span><span class="mp-lbl" data-en="Rest now">现在歇一下</span><span class="mp-meta" data-en="Short break · 20s">短歇 · 20 秒</span></div>
+          <div class="mp-row"><span class="mp-ic moon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg></span><span class="mp-lbl" data-en="Take a nap">小睡一会儿</span><span class="mp-meta" data-en="Full · 3 min">完整 · 3 分钟</span></div>
           </div>
         </div>
       </div>
