@@ -395,10 +395,12 @@
     .rest-scene::after { content: ""; position: absolute; inset: 0; z-index: 1; pointer-events: none; background: radial-gradient(46% 42% at 50% 42%, rgba(243,238,199,0.05) 0%, transparent 56%), radial-gradient(82% 78% at 50% 46%, rgba(8,31,26,0.42) 0%, rgba(9,33,27,0.52) 28%, rgba(10,32,27,0.80) 66%, rgba(6,22,18,0.95) 100%); }
     .rest-scene > :is(.lens, .rs-clock, .rs-track, .rs-msg) { position: relative; z-index: 2; }
     .strong-wash .mac-win, .rest-scene .mac-win { left: 5cqi; top: 5.5cqi; width: 38cqi; height: 43cqi; z-index: 0; border-radius: 2cqi; }
-    .strong-wash .mac-dock, .rest-scene .mac-dock { bottom: 3cqi; height: 8.4cqi; gap: 1.6cqi; padding: 0 1.6cqi; border-radius: 2.4cqi; z-index: 0; }
-    .strong-wash .mac-dock i, .rest-scene .mac-dock i { width: 5.8cqi; height: 5.8cqi; border-radius: 1.6cqi; }
-    .strong-wash .mac-dock .di-mira::after, .rest-scene .mac-dock .di-mira::after { width: 2.9cqi; height: 1.8cqi; border-radius: 0.9cqi; }
-    .strong-wash .mac-dock .di-mira::before, .rest-scene .mac-dock .di-mira::before { width: 1.3cqi; height: 1.3cqi; }
+    .strong-wash .mac-dock, .rest-scene .mac-dock, .panel-screen .mac-dock { bottom: 3cqi; height: 8.4cqi; gap: 1.6cqi; padding: 0 1.6cqi; border-radius: 2.4cqi; z-index: 0; }
+    .strong-wash .mac-dock i, .rest-scene .mac-dock i, .panel-screen .mac-dock i { width: 5.8cqi; height: 5.8cqi; border-radius: 1.6cqi; }
+    .strong-wash .mac-dock .di-mira::after, .rest-scene .mac-dock .di-mira::after, .panel-screen .mac-dock .di-mira::after { width: 2.9cqi; height: 1.8cqi; border-radius: 0.9cqi; }
+    .strong-wash .mac-dock .di-mira::before, .rest-scene .mac-dock .di-mira::before, .panel-screen .mac-dock .di-mira::before { width: 1.3cqi; height: 1.3cqi; }
+    /* 01 面板屏是干净亮桌面,没有 02/03 的暖罩/雾罩来压 dock,故直接把彩色图标降饱和+略透明,克制感与后面看齐 */
+    .panel-screen .mac-dock { filter: saturate(0.78); opacity: 0.9; }
     .rest-scene .lens { --lf: 13cqi; }
     .rest-scene .lens i { width: calc(var(--lf) * 0.58); height: calc(var(--lf) * 0.14); border-radius: 999px; animation: napBright 6s var(--ease) infinite; }
     @keyframes napBright { 0% { opacity: 0.32; transform: translate(-50%,-50%) scaleX(1); } 46% { opacity: 0.96; transform: translate(-50%,-50%) scaleX(1.16); } 74% { opacity: 0.9; transform: translate(-50%,-50%) scaleX(1.14); } 82% { opacity: 0.32; transform: translate(-50%,-50%) scaleX(1); } 100% { opacity: 0.32; transform: translate(-50%,-50%) scaleX(1); } }
@@ -442,9 +444,6 @@
 
     /* ── 相遇 · 第一次见面 (§7) — the onboarding page IS one big green capsule;
        Mira (The Pulse) + one line of 台词 sit inside it, generously sized. */
-    .meet-scene { container-type: inline-size; aspect-ratio: 1.55; display: grid; justify-items: center; align-content: center; gap: 6cqi; border-radius: 999px; overflow: hidden; text-align: center; color: #f4fff9; background: radial-gradient(135% 105% at 20% 6%, rgba(128,228,178,0.5) 0%, rgba(128,228,178,0) 46%), radial-gradient(125% 115% at 88% 104%, rgba(4,22,14,0.62) 0%, rgba(4,22,14,0) 52%), linear-gradient(150deg, #34a883 0%, #1a6b52 45%, #0b2f22 100%); box-shadow: 0 30px 70px -18px rgba(12,40,30,0.5), inset 0 0 0 1px rgba(255,255,255,0.12); }
-    .meet-scene .lens { --lf: 15cqi; }
-    .meet-scene .meet-msg { margin: 0; font-size: 6.4cqi; font-weight: 500; }
 
     /* desktop companion — Mira's expanded bubble (from companion.html) */
     .companion-card { display: inline-flex; align-items: center; gap: 16px; max-width: 100%; padding: 13px 18px 13px 22px; border-radius: 22px; background: var(--panel); border: 1px solid var(--line); box-shadow: var(--shadow-lift); text-align: left; }
@@ -488,7 +487,6 @@
     .screen-card img { display: block; width: 100%; height: auto; }
     .screen-card :is(.mock-app, .mock-share) { width: 100%; }
     /* real product shot (transparent PNG, self-shadowed) — no card frame around it */
-    .screen-card.app-shot-cell { border: none; background: transparent; box-shadow: none; overflow: visible; }
     .app-shot { display: block; width: 100%; height: auto; }
 
     /* ── Act 5/6 live mocks — the real surfaces rebuilt from app tokens,
@@ -851,7 +849,7 @@
 
     <div>
       <a class="cta" href="https://github.com/Lovelle-Zhang/eyeflow/releases/latest/download/EyeFlow.dmg">Download for macOS</a>
-      <div class="meta" data-en="macOS 12+ · Free · Local-first · Notarized">macOS 12+ · 免费 · 本地运行 · Apple 公证</div>
+      <div class="meta" data-en="macOS 12+ · Free · Local-first">macOS 12+ · 免费 · 本地运行</div>
     </div>
   </section>
 
@@ -968,7 +966,7 @@
               <div class="win-content"><div class="w-title"></div><div class="w-ln" style="width:94%"></div><div class="w-ln" style="width:76%"></div><div class="w-ln accent" style="width:54%"></div><div class="w-ln" style="width:88%"></div><div class="w-ln" style="width:66%"></div></div>
             </div>
           </div>
-          <div class="mac-dock" aria-hidden="true"><i class="di-mira"></i><i style="background:linear-gradient(160deg,#5b9bd5,#3f6fb0)"></i><i style="background:linear-gradient(160deg,#f0a04b,#d97c2b)"></i><i style="background:linear-gradient(160deg,#e5675f,#c23f3f)"></i><i style="background:linear-gradient(160deg,#7bc47f,#3f9a52)"></i><i style="background:linear-gradient(160deg,#a98bd0,#7d5bb0)"></i></div>
+          <div class="mac-dock" aria-hidden="true"><i class="di-mira"></i><i style="background:linear-gradient(160deg,#5b9bd5,#3f6fb0)"></i><i style="background:linear-gradient(160deg,#f0a04b,#d97c2b)"></i><i style="background:linear-gradient(160deg,#e5675f,#c23f3f)"></i><i style="background:linear-gradient(160deg,#7bc47f,#3f9a52)"></i></div>
           <div class="mpanel">
           <div class="mp-head"><span class="mp-gear" role="img" aria-label="设置" data-en-label="Settings"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><circle cx="12" cy="12" r="3.2"/><path d="M12 2.5v2.2M12 19.3v2.2M4.2 4.2l1.6 1.6M18.2 18.2l1.6 1.6M2.5 12h2.2M19.3 12h2.2M4.2 19.8l1.6-1.6M18.2 5.8l1.6-1.6"/></svg></span></div>
           <div class="mp-cap">
@@ -1089,28 +1087,11 @@
     </ul>
   </section>
 
-  <!-- ── 相遇仪式 · 开局是一次打招呼（收束到 CTA，非再自我介绍）── -->
-  <section class="block feature-block col col-wide">
-    <div class="daily-row is-reverse">
-      <div class="daily-copy reveal">
-        <p class="eyebrow" data-en="First meeting">相遇仪式</p>
-        <h2 data-en="Not a setup screen — just a hello."><span class="cl">不是设置页，</span><span class="cl">是一次打招呼。</span></h2>
-        <p class="body" data-en="The very first time you open EyeFlow, she says hi and walks you through one short break together — the whole thing starts with a small hello, never a settings wizard."><span class="copy-line">第一次打开 EyeFlow，</span><span class="copy-line">她先打个招呼，陪你走一次短歇。</span><span class="copy-line">这一切，从一句轻轻的招呼开始。</span></p>
-      </div>
-      <div class="screen-card app-shot-cell reveal">
-        <div class="meet-scene" role="img" aria-label="EyeFlow 相遇仪式：一片安静的绿，中央 Mira 的光点，一句「你好，我是 Mira」" data-en-label="EyeFlow's first-meeting ritual — a calm field of green with Mira's point of light and one line: Hi, I'm Mira">
-          <div class="lens" aria-hidden="true"><i></i></div>
-          <p class="meet-msg" data-en="Hi, I'm Mira">你好，我是 Mira</p>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- ── Act 4 · 跟 Mira 歇一下（参与式护眼一刻） ─────────────── -->
+  <!-- ── Act 4 · 相遇仪式 = 跟 Mira 歇一下(参与式护眼一刻;原静态"相遇仪式"节已并入此处)── -->
   <section id="rest" class="rest-act col" data-state="invite" aria-label="跟 Mira 歇一下" data-en-label="Rest with Mira">
     <div class="rest-stage">
       <div class="rest-panel" data-when="invite">
-        <p class="eyebrow" data-en="Try it right now">现在就试一次</p>
+        <p class="eyebrow" data-en="First meeting">相遇仪式</p>
         <div class="pacer pacer-invite" aria-hidden="true">
           <svg class="ring" viewBox="0 0 200 200"><circle cx="100" cy="100" r="94"></circle></svg>
           <div class="mira">
@@ -1119,7 +1100,7 @@
           </div>
         </div>
         <h2 data-en="Look away with <b class='kw-mira'>Mira</b>.">跟 <b class="kw-mira">Mira</b> 一起，把视线放远。</h2>
-        <p class="sub" data-en="Ten seconds is enough — a window, or the farthest wall in the room."><span class="cl">10 秒就好——</span><span class="cl">看向窗外，</span><span class="cl">或屋里最远的那面墙。</span></p>
+        <p class="sub" data-en="Not a setup screen — just a hello. Ten seconds is enough: a window, or the farthest wall in the room."><span class="cl">不是设置页，是一次打招呼——</span><span class="cl">10 秒就好，看向窗外，</span><span class="cl">或屋里最远的那面墙。</span></p>
         <button class="cta rest-btn" type="button" data-rest="start" data-en="Okay, ten seconds with you">好，跟你歇 10 秒</button>
         <p class="meta" data-en="or just keep scrolling">也可以直接往下滑</p>
       </div>
