@@ -1,0 +1,3 @@
+# large regenerable video outputs — kept on disk, not committed
+dist/*.mp4
+*.wav

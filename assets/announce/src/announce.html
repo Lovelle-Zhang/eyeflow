@@ -1,0 +1,608 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>EyeFlow · Meet Mira</title>
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; }
+  html,body { width:100%; height:100%; overflow:hidden; background:#ece8e1;
+    font-family:-apple-system,"SF Pro Display","PingFang SC",sans-serif; }
+  /* fit the 1440x900 stage into any viewport, letterboxed (warm so crossfades never flash dark) */
+  #fit { position:fixed; inset:0; display:flex; align-items:center; justify-content:center; background:#ece8e1; }
+  .stage { position:relative; width:1440px; height:900px; overflow:hidden;
+    transform-origin:center center; }
+
+  /* ===== scene scaffolding ===== */
+  .scene { position:absolute; inset:0; opacity:0; visibility:hidden;
+    transition:opacity .7s ease, visibility .7s; }
+  .scene.on { opacity:1; visibility:visible; }
+  .paper { background:radial-gradient(120% 90% at 50% 34%,#f7f5f0 0%,#efece5 55%,#e9e5dd 100%); }
+  /* the wallpaper — shared by the desk scenes and the panel's frosted glass */
+  :root { --wall:
+      radial-gradient(58% 50% at 22% 16%, #bfe6d3 0%, rgba(191,230,211,0) 60%),
+      radial-gradient(64% 58% at 84% 30%, #a9d9d6 0%, rgba(169,217,214,0) 62%),
+      radial-gradient(70% 64% at 60% 96%, #e6d6b0 0%, rgba(230,214,176,0) 64%),
+      radial-gradient(90% 80% at 45% 55%, #cfe2d9 0%, rgba(207,226,217,0) 72%),
+      linear-gradient(155deg,#9dc4bb 0%,#a7c9c2 40%,#c4bda6 100%); }
+  .desk  { background:var(--wall); }
+
+  /* ===== realistic desktop furniture (soft app windows + dock) — reads as a real Mac screen ===== */
+  .dtop { position:absolute; inset:0; z-index:0; }
+  .win { position:absolute; border-radius:15px; overflow:hidden;
+    background:rgba(252,253,251,.86); box-shadow:0 34px 74px -22px rgba(18,38,28,.42), 0 3px 10px rgba(0,0,0,.08); }
+  .win__bar { height:40px; background:rgba(238,243,240,.9); display:flex; align-items:center; gap:9px; padding:0 16px; border-bottom:1px solid rgba(0,0,0,.05); }
+  .tl { width:13px; height:13px; border-radius:50%; } .tl.r{background:#ff5f57;} .tl.y{background:#febc2e;} .tl.g{background:#28c840;}
+  .win__body { padding:28px 30px; } .ln { height:13px; border-radius:6px; background:rgba(58,80,70,.12); margin-bottom:18px; }
+  .accent { background:rgba(47,125,94,.20) !important; }
+  /* a real two-pane app: sidebar list + content with a title */
+  .win__main { display:flex; height:calc(100% - 40px); }
+  .win__side { width:120px; flex:0 0 auto; background:rgba(233,240,236,.72); border-right:1px solid rgba(0,0,0,.05);
+    padding:16px 11px; display:flex; flex-direction:column; gap:11px; }
+  .side-row { height:14px; border-radius:5px; background:rgba(58,80,70,.11); }
+  .side-row.on { background:rgba(47,125,94,.24); }
+  .win__content { flex:1; padding:24px 26px; }
+  .win__title { height:19px; width:52%; border-radius:6px; background:rgba(40,55,48,.26); margin-bottom:22px; }
+  .dock { position:absolute; left:50%; bottom:22px; transform:translateX(-50%); z-index:0;
+    display:flex; align-items:flex-end; gap:16px; height:76px; padding:0 16px; border-radius:22px;
+    background:rgba(255,255,255,.24); border:1px solid rgba(255,255,255,.34); box-shadow:0 12px 34px -12px rgba(20,40,30,.3); }
+  .dock i { width:56px; height:56px; border-radius:15px; align-self:center; display:block;
+    box-shadow:0 4px 9px rgba(0,0,0,.16), inset 0 1px 0 rgba(255,255,255,.42), inset 0 -6px 12px rgba(0,0,0,.12); }
+  .dock .mira-ic { background:linear-gradient(150deg,#eafff6 0%,#a4eadc 56%,#f3eec7 100%); position:relative; }
+  .dock .mira-ic::after { content:""; position:absolute; left:50%; top:50%; transform:translate(-50%,-50%);
+    width:26px; height:16px; border-radius:8px; background:radial-gradient(130% 150% at 34% 22%,#0f2b23,#061109 82%);
+    box-shadow:0 0 0 0 #000; }
+  .dock .mira-ic::before { content:""; position:absolute; left:50%; top:50%; z-index:1; transform:translate(-50%,-50%);
+    width:11px; height:11px; border-radius:50%; background:radial-gradient(circle,#fff,#8fe6c0 45%,transparent 78%); }
+
+  /* rise-in helper: element lifts + fades when its scene turns on */
+  .rise { opacity:0; transform:translateY(26px); transition:opacity .8s ease, transform .8s cubic-bezier(.2,.7,.2,1); }
+  .on .rise { opacity:1; transform:translateY(0); }
+
+  /* ===== Mira breathing pulse (shared) ===== */
+  @keyframes breathe { 0%,100%{ transform:translate(-50%,-50%) scale(1); opacity:.92; }
+                       50%{ transform:translate(-50%,-50%) scale(1.14); opacity:1; } }
+  @keyframes breatheC { 0%,100%{ transform:scale(1); opacity:.92; } 50%{ transform:scale(1.13); opacity:1; } }
+
+  /* ===================== S1 · HERO ===================== */
+  .center { position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center; }
+  .mira-wrap { width:340px; height:340px; }
+  .mira-canvas { width:1024px; height:1024px; transform:scale(.332); transform-origin:top left; position:relative; }
+  .plate { position:absolute; left:100px; top:100px; width:824px; height:824px; border-radius:185px;
+    background:
+      radial-gradient(115% 120% at 22% 12%, rgba(255,255,255,.9) 0%, rgba(255,255,255,0) 42%),
+      linear-gradient(150deg,#eafff6 0%,#a4eadc 56%,#f3eec7 100%);
+    box-shadow:inset 0 0 0 3px rgba(24,32,31,.05),inset 0 8px 16px rgba(255,255,255,.55),
+      inset 0 -46px 100px rgba(15,159,122,.14),0 44px 84px -30px rgba(18,40,30,.42); }
+  .lens { position:absolute; left:50%; top:50%; transform:translate(-50%,-50%);
+    width:392px; height:244px; border-radius:122px; overflow:hidden;
+    background:radial-gradient(130% 150% at 34% 22%,#0f2b23 0%,#061109 82%);
+    box-shadow:inset 0 4px 7px rgba(140,240,210,.16),inset 0 -4px 8px rgba(0,0,0,.5),0 10px 24px -8px rgba(7,20,15,.6); }
+  .pulse { position:absolute; left:50%; top:50%; width:188px; height:188px; border-radius:50%;
+    background:radial-gradient(circle,#fff 0%,#ecfff7 12%,#a6f0cf 26%,#79dcb0 40%,rgba(121,220,176,.22) 60%,rgba(121,220,176,0) 76%);
+    animation:breathe 4.2s ease-in-out infinite; }
+
+  .headline { margin-top:76px; font-family:"New York",ui-serif,Georgia,"Songti SC",serif;
+    font-size:76px; line-height:1.14; color:#23302a; text-align:center; letter-spacing:-.5px; font-weight:500; }
+  .sub { margin-top:34px; font-size:33px; color:#5d6b63; text-align:center; }
+
+  /* ===================== shared chrome ===================== */
+  .menubar { position:absolute; top:0; left:0; right:0; height:34px; background:rgba(255,255,255,.42);
+    backdrop-filter:blur(20px); display:flex; align-items:center; padding:0 20px; font-size:15px; color:#1c241f; z-index:5; }
+  .menubar .apple { font-size:17px; margin-right:20px; } .menubar .mitem { margin-right:20px; opacity:.85; }
+  .menubar .mitem.b { font-weight:600; opacity:1; } .menubar .right { margin-left:auto; display:flex; align-items:center; gap:18px; }
+  .tray { width:24px; height:15px; border-radius:7.5px; overflow:hidden; position:relative; z-index:7;
+    background:radial-gradient(120% 130% at 50% 50%,#0f2620 0%,#04100c 100%); display:flex; align-items:center; justify-content:center; }
+  .tray i { width:11px; height:11px; border-radius:50%;
+    background:radial-gradient(circle,#fff 0%,#eafff7 26%,#8fe6c0 56%,rgba(143,230,192,0) 82%); display:block;
+    animation:breatheC 4.2s ease-in-out infinite; }
+
+  /* ===================== S2 · ISLAND ===================== */
+  .island { position:absolute; top:52px; left:50%; transform:translateX(-50%) translateY(-90px); z-index:6;
+    width:720px; height:136px; border-radius:68px; background:rgba(58,92,77,.94); border:2px solid rgba(255,255,255,.14);
+    box-shadow:0 28px 60px -20px rgba(16,26,20,.55); display:flex; align-items:center; padding:0 44px 0 24px; overflow:hidden;
+    opacity:0; transition:opacity .7s ease, transform .9s cubic-bezier(.2,.8,.2,1); }
+  .on .island { opacity:1; transform:translateX(-50%) translateY(0); }
+  .island::before { content:""; position:absolute; inset:0; border-radius:68px;
+    background:radial-gradient(120% 150% at 20% 120%,rgba(195,248,222,.34) 0%,rgba(195,248,222,0) 58%); }
+  .mk { position:relative; z-index:1; width:88px; height:88px; border-radius:20px; flex:0 0 auto;
+    background:linear-gradient(150deg,#eafff6 0%,#a4eadc 56%,#f3eec7 100%); box-shadow:0 3px 8px rgba(8,30,20,.35);
+    display:flex; align-items:center; justify-content:center; }
+  .mk .lens { position:static; transform:none; width:42px; height:26px; border-radius:13px; box-shadow:none;
+    display:flex; align-items:center; justify-content:center; }
+  .mk .pulse { position:static; left:auto; top:auto; width:20px; height:20px; transform:none; animation:breatheC 4.2s ease-in-out infinite; }
+  .ibody { position:relative; z-index:1; margin-left:26px; width:452px; }
+  .ibody .t { font-size:32px; font-weight:500; color:#f6f7f9; letter-spacing:.2px; white-space:nowrap; }
+  .ibody .track { margin-top:14px; height:6px; border-radius:3px; background:rgba(255,255,255,.16); overflow:hidden; }
+  .ibody .fill { height:6px; width:0; border-radius:3px; background:#6fe7c3; transition:width 1.6s ease .5s; }
+  .on .ibody .fill { width:62%; }
+  .count { position:relative; z-index:1; margin-left:26px; font-size:30px; font-weight:600; color:#6fe7c3; font-variant-numeric:tabular-nums; }
+
+  .cap { position:absolute; left:0; right:0; bottom:134px; text-align:center; font-size:34px; color:#2a352e; font-weight:500; z-index:6; }
+  .cap b { font-weight:600; }
+
+  /* ===================== S3 · RHYTHM ===================== */
+  .kicker { font-size:30px; color:#5d6b63; letter-spacing:2px; text-transform:uppercase; font-weight:600; text-align:center; }
+  .title3 { margin-top:20px; font-family:"New York",ui-serif,Georgia,"Songti SC",serif; font-size:70px; color:#23302a; font-weight:500; letter-spacing:-.5px; text-align:center; }
+  .row3 { margin-top:84px; display:flex; align-items:flex-start; justify-content:center; gap:96px; }
+  .col3 { display:flex; flex-direction:column; align-items:center; width:300px; }
+  .num { font-family:"New York",ui-serif,Georgia,serif; font-size:150px; line-height:.9; color:#2f7d5e; font-weight:500; }
+  .unit { margin-top:8px; font-size:34px; color:#3a4a42; font-weight:600; } .lab3 { margin-top:16px; font-size:28px; color:#6b7a71; text-align:center; line-height:1.35; }
+  .dot3 { align-self:center; margin-top:64px; width:10px; height:10px; border-radius:50%; background:#c4cfc8; }
+  .foot { margin-top:88px; font-size:32px; color:#5d6b63; text-align:center; }
+
+  /* ===================== S4 · PANEL ===================== */
+  .pop { position:absolute; top:48px; right:36px; width:500px; z-index:6; overflow:hidden;
+    background:rgba(28,40,34,.30); border:1px solid rgba(255,255,255,.16); border-radius:26px;
+    box-shadow:0 40px 90px -24px rgba(8,16,12,.5), inset 0 1px 0 rgba(255,255,255,.14); padding:20px 22px 24px;
+    opacity:0; transform:translateY(-24px) scale(.97); transform-origin:top right; transition:opacity .6s ease, transform .7s cubic-bezier(.2,.8,.2,1); }
+  /* faked frosted glass (offscreen can't composite backdrop-filter): a blurred copy
+     of the wallpaper, positioned so it aligns with what sits behind the panel */
+  .pop::before { content:""; position:absolute; inset:0; z-index:0; border-radius:inherit;
+    background:var(--wall); background-size:1440px 900px; background-position:-904px -48px; filter:blur(48px) saturate(1.35); transform:scale(1.08); }
+  .pop::after { content:""; position:absolute; inset:0; z-index:0; border-radius:inherit;
+    background:linear-gradient(158deg, rgba(24,38,31,.40) 0%, rgba(12,22,18,.56) 100%); }
+  .pop > * { position:relative; z-index:1; }
+  .on .pop { opacity:1; transform:translateY(0) scale(1); }
+  .phead { display:flex; justify-content:flex-end; height:22px; } .gear { color:rgba(255,255,255,.62); display:flex; }
+  .hero { height:104px; border-radius:22px; background:rgba(70,118,95,.95); border:1px solid rgba(255,255,255,.14);
+    position:relative; overflow:hidden; display:flex; align-items:center; padding:0 20px; margin-top:2px; }
+  .hero::before { content:""; position:absolute; inset:0; border-radius:22px; background:radial-gradient(120% 150% at 22% 118%,rgba(195,248,222,.32),rgba(195,248,222,0) 58%); }
+  .hero .mk { width:70px; height:70px; border-radius:16px; }
+  .hero .mk .lens { width:33px; height:21px; border-radius:10px; } .hero .mk .pulse { width:16px; height:16px; }
+  .hb { position:relative; z-index:1; margin-left:18px; } .pct { font-size:29px; font-weight:600; color:#f6f7f9; } .st { font-size:20px; color:rgba(255,255,255,.72); margin-top:3px; }
+  .today { margin:18px 4px 8px; font-size:16px; color:rgba(255,255,255,.5); }
+  .stats { display:flex; align-items:center; gap:20px; padding:2px 4px 6px; }
+  .stat .n { font-size:28px; font-weight:600; color:#f3f5f4; } .stat .l { font-size:15px; color:rgba(255,255,255,.52); margin-top:4px; }
+  .divv { width:1px; height:42px; background:rgba(255,255,255,.12); }
+  .rows { margin-top:14px; display:flex; flex-direction:column; gap:10px; }
+  .prow { display:flex; align-items:center; gap:12px; padding:15px 16px; border-radius:14px; }
+  .prow .ic { width:22px; height:22px; color:rgba(255,255,255,.6); display:flex; } .prow .lb { font-size:19px; color:#eef1ef; }
+  .prow .sub { margin-left:auto; font-size:16px; color:rgba(255,255,255,.5); } .prow .chev { color:rgba(255,255,255,.32); margin-left:12px; display:flex; }
+  .prow.primary { background:rgba(139,240,174,.12); border:1px solid rgba(139,240,174,.22); } .prow.primary .ic { color:#6fe7c3; }
+  .prow.plain { background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.09); }
+
+  /* ===================== S5 · STATES ===================== */
+  .title5 { position:absolute; top:150px; left:0; right:0; text-align:center;
+    font-family:"New York",ui-serif,Georgia,"Songti SC",serif; font-size:66px; color:#23302a; font-weight:500; letter-spacing:-.5px; }
+  .row5 { position:absolute; top:340px; left:0; right:0; display:flex; align-items:center; justify-content:center; gap:110px; }
+  .col5 { display:flex; flex-direction:column; align-items:center; }
+  .slens { width:250px; height:162px; border-radius:81px; position:relative; overflow:hidden;
+    background:radial-gradient(130% 150% at 34% 22%,#123029 0%,#07140f 80%); box-shadow:0 20px 44px -18px rgba(7,20,15,.5);
+    display:flex; align-items:center; justify-content:center; }
+  .sp { border-radius:50%; }
+  .fresh { width:104px; height:104px; background:radial-gradient(circle,#fff 0%,#8fe6c0 36%,rgba(111,231,195,.4) 56%,rgba(111,231,195,0) 74%);
+    animation:breatheC 4s ease-in-out infinite; }
+  .tiring { width:78px; height:78px; opacity:.6; background:radial-gradient(circle,#eef2ef 0%,#a6bcb2 38%,rgba(150,175,165,.3) 58%,rgba(150,175,165,0) 76%);
+    animation:breatheC 5.4s ease-in-out infinite; }
+  .rest { width:118px; height:16px; border-radius:8px; opacity:.7; background:radial-gradient(circle,#eafff7 0%,#79dcb0 42%,rgba(121,220,176,.25) 70%,rgba(121,220,176,0) 88%);
+    animation:breatheC 6s ease-in-out infinite; }
+  .lab5 { margin-top:34px; font-size:30px; font-weight:600; color:#2f3d36; } .sub5 { margin-top:8px; font-size:22px; color:#6b7a71; }
+  .foot5 { position:absolute; bottom:150px; left:0; right:0; text-align:center; font-size:32px; color:#5d6b63; }
+
+  /* ===================== S6 · CLOSE ===================== */
+  .wordmark { margin-top:64px; font-size:60px; font-weight:600; letter-spacing:-.5px; color:#23302a; }
+  .close-tag { margin-top:22px; font-family:"New York",ui-serif,Georgia,"Songti SC",serif; font-size:40px; color:#3a4a42; }
+  .url { margin-top:40px; font-size:28px; color:#5d6b63; letter-spacing:.3px; }
+  .url b { color:#2f7d5e; font-weight:600; }
+
+  /* stagger delays */
+  .d1{transition-delay:.15s;} .d2{transition-delay:.35s;} .d3{transition-delay:.55s;} .d4{transition-delay:.75s;}
+
+  /* ===================== WELCOME · 相遇仪式 (faithful to onboarding.css + capsule.css) ===================== */
+  .scene.welcome { background:radial-gradient(60% 60% at 50% 42%, #123e30 0%, #0b241c 60%, #081c16 100%); }
+  .wpage { position:absolute; left:50%; top:50%; transform:translate(-50%,-50%);
+    width:1180px; height:600px; border-radius:999px;
+    background:
+      radial-gradient(135% 105% at 20% 6%, rgba(128,228,178,.5) 0%, rgba(128,228,178,0) 46%),
+      radial-gradient(125% 115% at 88% 104%, rgba(4,22,14,.62) 0%, rgba(4,22,14,0) 52%),
+      linear-gradient(150deg,#34a883 0%,#1a6b52 45%,#0b2f22 100%);
+    box-shadow:0 30px 70px -18px rgba(12,40,30,.5), inset 0 0 0 1px rgba(255,255,255,.12);
+    display:flex; flex-direction:column; align-items:center; justify-content:center; gap:38px; }
+  .wmira { --mf:100px; --energy:1; position:relative; width:calc(var(--mf)*1.55); height:var(--mf);
+    border-radius:calc(var(--mf)/2); overflow:hidden;
+    background:radial-gradient(130% 150% at 34% 22%,#123029,#07140f 80%);
+    box-shadow:inset 0 1px 2px rgba(140,240,210,.14); }
+  .wpulse { position:absolute; left:50%; top:50%;
+    width:calc(var(--mf)*(0.44 + 0.2*var(--energy))); height:calc(var(--mf)*(0.44 + 0.2*var(--energy)));
+    transform:translate(-50%,-50%); border-radius:50%;
+    background:radial-gradient(circle,#f4fff9 0%,#8fe6c0 36%,rgba(111,231,195,.4) 56%,transparent 74%);
+    opacity:calc(0.35 + 0.6*var(--energy)); }
+  .wmsg { min-height:2.9em; max-width:22ch; text-align:center; font-size:44px; font-weight:400;
+    line-height:1.5; color:#f4fff9; text-wrap:balance; display:flex; align-items:center; justify-content:center; }
+
+  /* ===================== NAP · 小睡 (faithful to nap.css §6.3) ===================== */
+  /* nap = your real desktop with a green mist over it (nap.css §6.3): dense at the
+     edges, clearer in the centre — the world softly recedes, never a solid void */
+  .scene.nap-scene { background:var(--wall); }
+  .nfog { position:absolute; inset:0; z-index:1; pointer-events:none;
+    background:
+      radial-gradient(46% 42% at 50% 43%, rgba(243,238,199,.05) 0%, transparent 56%),
+      radial-gradient(82% 78% at 50% 46%, rgba(8,31,26,.40) 0%, rgba(9,33,27,.5) 28%, rgba(10,32,27,.78) 66%, rgba(6,22,18,.95) 100%); }
+  .ncenter { position:absolute; inset:0; z-index:2; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:44px; color:rgba(255,255,255,.94); }
+  .nmira { --mf:124px; position:relative; width:calc(var(--mf)*1.55); height:var(--mf); border-radius:calc(var(--mf)/2);
+    overflow:hidden; background:radial-gradient(130% 150% at 34% 22%,#123029,#07140f 80%); box-shadow:inset 0 1px 2px rgba(140,240,210,.14); }
+  .npulse { position:absolute; left:50%; top:50%; transform:translate(-50%,-50%);
+    background:radial-gradient(circle,#f4fff9 0%,#8fe6c0 36%,rgba(111,231,195,.4) 56%,transparent 74%); }
+  .nclock { font-size:84px; font-weight:200; letter-spacing:.02em; font-variant-numeric:tabular-nums; color:inherit; }
+  .ntrack { width:360px; height:3px; border-radius:999px; background:rgba(255,255,255,.16); overflow:hidden; }
+  .nfill { height:100%; width:0%; border-radius:999px; background:#6fe7c3; }
+  .nmsg { font-size:26px; font-weight:500; color:inherit; }
+  .nhint { font-size:15px; color:rgba(255,255,255,.55); }
+
+  /* privacy row */
+  .privrow { margin-top:66px; display:flex; gap:44px; align-items:center; font-size:31px; color:#3a4a42; font-weight:500; }
+  .privrow i { width:7px; height:7px; border-radius:50%; background:#c4cfc8; display:block; }
+
+  /* ===================== STRONG REMINDER · 加强档 (faithful to reminder-strong.css §6.1) ===================== */
+  .swash { position:absolute; inset:0; pointer-events:none; z-index:2;
+    background:radial-gradient(135% 130% at 50% 42%, rgba(255,247,235,.05) 0%, rgba(252,230,200,.11) 60%, rgba(246,214,172,.19) 100%); }
+  .scap { position:absolute; left:50%; top:44%; z-index:3; transform:translate(-50%,-50%);
+    display:flex; align-items:center; gap:48px; max-width:1180px; padding:46px 84px 46px 46px; overflow:hidden;
+    border-radius:999px; background:rgba(58,92,77,.94); border:2px solid rgba(255,255,255,.14); box-shadow:0 40px 90px -24px rgba(16,26,20,.55); }
+  .scap::before { content:""; position:absolute; inset:0; border-radius:999px;
+    background:radial-gradient(130% 165% at 26% -18%, rgba(195,248,222,.34) 0%, transparent 58%); pointer-events:none; }
+  .scap .mk { position:relative; z-index:1; width:132px; height:132px; border-radius:30px; flex:0 0 auto;
+    background:linear-gradient(150deg,#eafff6 0%,#a4eadc 56%,#f3eec7 100%); box-shadow:0 5px 12px rgba(8,30,20,.35);
+    display:flex; align-items:center; justify-content:center; }
+  .scap .mk .lens { position:static; transform:none; width:63px; height:39px; border-radius:19px; box-shadow:none; }
+  .scap .mk .pulse { position:static; left:auto; top:auto; width:30px; height:30px; transform:none; }
+  .sbody { position:relative; z-index:1; display:flex; flex-direction:column; gap:20px; width:560px; white-space:nowrap; }
+  .st2 { font-size:44px; font-weight:500; color:#f6f7f9; line-height:1.25; letter-spacing:.2px; }
+  .strack { height:8px; border-radius:4px; background:rgba(255,255,255,.16); overflow:hidden; }
+  .sfill { height:8px; border-radius:4px; background:#6fe7c3; width:100%; }
+  .scount { position:relative; z-index:1; font-size:42px; font-weight:600; color:#6fe7c3; font-variant-numeric:tabular-nums; margin-left:30px; min-width:1.4em; text-align:right; }
+
+  /* principle card + per-beat fatigue kicker (make the escalation legible) */
+  .psub { margin-top:44px; font-size:33px; color:#5d6b63; letter-spacing:.3px; font-weight:400; }
+  .psub b { color:#2f7d5e; font-weight:600; }
+  .fkick { position:absolute; top:112px; left:0; right:0; text-align:center; z-index:8;
+    font-size:25px; letter-spacing:4px; text-transform:uppercase; font-weight:700; color:#5b6a62; }
+  .fkick.mid { top:auto; bottom:300px; }   /* below the top-anchored island */
+  .nap-scene .fkick { color:rgba(255,255,255,.58); }
+
+  /* ===================== typography refinement — premium / keynote feel ===================== */
+  * { -webkit-font-smoothing:antialiased; text-rendering:optimizeLegibility; }
+  /* English serif headlines: confident, tightly tracked */
+  .headline, .title3, .title5, .close-tag { letter-spacing:-.022em; }
+  /* airier body / copy */
+  .wmsg { font-weight:350; letter-spacing:.006em; line-height:1.56; }
+  .psub { font-weight:350; letter-spacing:.012em; }
+  .sub5 { letter-spacing:.008em; }
+  /* captions & footnotes: lighter, softer, gently tracked */
+  .cap { font-weight:450; letter-spacing:.006em; color:#33413a; }
+  .foot, .foot5 { font-weight:400; letter-spacing:.012em; color:#63726a; }
+  /* kickers / labels: refined tracking */
+  .kicker { letter-spacing:.16em; font-weight:650; } .fkick { letter-spacing:.2em; }
+  .lab5 { letter-spacing:.006em; }
+  /* Chinese: modern PingFang headlines + gentle CJK air, lighter weights */
+  .zh .headline, .zh .title3, .zh .title5, .zh .close-tag { font-family:-apple-system,"PingFang SC","Songti SC",sans-serif; font-weight:600; letter-spacing:.015em; }
+  .zh .wmsg { font-weight:400; letter-spacing:.05em; }
+  .zh .cap, .zh .foot, .zh .foot5, .zh .psub, .zh .lab5, .zh .sub5 { letter-spacing:.06em; }
+  .zh .kicker { letter-spacing:.3em; } .zh .fkick { letter-spacing:.34em; }
+</style>
+<!-- toggled by seek(): media='all' freezes CSS motion so JS can drive frames deterministically -->
+<style id="freeze" media="none">.stage *{animation:none!important;transition:none!important;}</style>
+</head>
+<body>
+<div id="fit"><div class="stage" id="stage">
+
+  <!-- WELCOME (相遇仪式) -->
+  <section class="scene welcome" data-id="welcome">
+    <div class="wpage">
+      <div class="wmira"><div class="wpulse"></div></div>
+      <div class="wmsg" id="wmsg">Hi, I'm Mira</div>
+    </div>
+  </section>
+
+  <!-- PRINCIPLE (how she adapts) -->
+  <section class="scene paper" data-id="principle">
+    <div class="center">
+      <div class="kicker rise" data-k="prinKicker">How she adapts</div>
+      <div class="title3 rise d1" data-k="prinTitle">The more your eyes tire,<br>the more Mira does.</div>
+      <div class="psub rise d3" data-k="prinSub">A gentle look-away · a stronger nudge · a full nap</div>
+    </div>
+  </section>
+
+  <!-- SHORT BREAK (L1 · a little tired) -->
+  <section class="scene desk" data-id="short">
+    <div class="menubar"><span class="apple"></span><span class="mitem b">EyeFlow</span><span class="mitem">File</span><span class="mitem">Edit</span><span class="mitem">View</span>
+      <span class="right"><span class="tray"><i></i></span><span>9:41</span></span></div>
+    <div class="dtop">
+      <div class="win" style="left:58px;top:138px;width:470px;height:512px"><div class="win__bar"><i class="tl r"></i><i class="tl y"></i><i class="tl g"></i></div><div class="win__main"><div class="win__side"><div class="side-row on"></div><div class="side-row"></div><div class="side-row"></div><div class="side-row"></div><div class="side-row"></div><div class="side-row"></div></div><div class="win__content"><div class="win__title"></div><div class="ln" style="width:94%"></div><div class="ln" style="width:76%"></div><div class="ln accent" style="width:54%"></div><div class="ln" style="width:88%"></div><div class="ln" style="width:66%"></div><div class="ln" style="width:82%"></div></div></div></div>
+      <div class="dock"><i class="mira-ic"></i><i style="background:linear-gradient(160deg,#5b9bd5,#3f6fb0)"></i><i style="background:linear-gradient(160deg,#f0a04b,#d97c2b)"></i><i style="background:linear-gradient(160deg,#e5675f,#c23f3f)"></i><i style="background:linear-gradient(160deg,#7bc47f,#3f9a52)"></i><i style="background:linear-gradient(160deg,#a98bd0,#7d5bb0)"></i><i style="background:linear-gradient(160deg,#e8d17a,#c9a83a)"></i></div>
+    </div>
+    <div class="fkick rise mid" data-k="fkTired">A little tired</div>
+    <div class="island">
+      <div class="mk"><div class="lens"><div class="pulse"></div></div></div>
+      <div class="ibody"><div class="t" data-k="remText">Look up, out the window</div><div class="track"><div class="fill"></div></div></div>
+      <div class="count" id="restcount">20</div>
+    </div>
+    <div class="cap rise d3" data-k="remCap">A <b>gentle</b> nudge — look far for twenty seconds.</div>
+  </section>
+
+  <!-- PANEL (all in one place — you choose too) -->
+  <section class="scene desk" data-id="panel">
+    <div class="menubar"><span class="apple"></span><span class="mitem">Finder</span><span class="mitem">File</span>
+      <span class="right"><span class="tray"><i></i></span><span>9:41</span></span></div>
+    <div class="dtop">
+      <div class="win" style="left:58px;top:138px;width:470px;height:512px"><div class="win__bar"><i class="tl r"></i><i class="tl y"></i><i class="tl g"></i></div><div class="win__main"><div class="win__side"><div class="side-row on"></div><div class="side-row"></div><div class="side-row"></div><div class="side-row"></div><div class="side-row"></div><div class="side-row"></div></div><div class="win__content"><div class="win__title"></div><div class="ln" style="width:94%"></div><div class="ln" style="width:76%"></div><div class="ln accent" style="width:54%"></div><div class="ln" style="width:88%"></div><div class="ln" style="width:66%"></div><div class="ln" style="width:82%"></div></div></div></div>
+      <div class="dock"><i class="mira-ic"></i><i style="background:linear-gradient(160deg,#5b9bd5,#3f6fb0)"></i><i style="background:linear-gradient(160deg,#f0a04b,#d97c2b)"></i><i style="background:linear-gradient(160deg,#e5675f,#c23f3f)"></i><i style="background:linear-gradient(160deg,#7bc47f,#3f9a52)"></i><i style="background:linear-gradient(160deg,#a98bd0,#7d5bb0)"></i><i style="background:linear-gradient(160deg,#e8d17a,#c9a83a)"></i></div>
+    </div>
+    <div class="pop">
+      <div class="phead"><span class="gear"><svg viewBox="0 0 24 24" width="25" height="25" fill="currentColor"><path d="M19.14 12.94c.04-.31.06-.63.06-.94s-.02-.63-.06-.94l2.03-1.58a.49.49 0 0 0 .12-.61l-1.92-3.32a.49.49 0 0 0-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54a.49.49 0 0 0-.48-.41h-3.84a.49.49 0 0 0-.48.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96a.49.49 0 0 0-.59.22L2.74 8.87a.49.49 0 0 0 .12.61l2.03 1.58c-.04.31-.06.63-.06.94s.02.63.06.94l-2.03 1.58a.49.49 0 0 0-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.48-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32a.49.49 0 0 0-.12-.61l-2.03-1.58ZM12 15.6c-1.99 0-3.6-1.61-3.6-3.6s1.61-3.6 3.6-3.6 3.6 1.61 3.6 3.6-1.61 3.6-3.6 3.6Z"/></svg></span></div>
+      <div class="hero">
+        <div class="mk"><div class="lens"><div class="pulse"></div></div></div>
+        <div class="hb"><div class="pct" data-k="enePct">Energy 86%</div><div class="st" data-k="eneState">Bright</div></div>
+      </div>
+      <div class="today" data-k="today">Today</div>
+      <div class="stats">
+        <div class="stat"><div class="n" data-k="screenVal">2h 40m</div><div class="l" data-k="screenTime">Screen time</div></div>
+        <div class="divv"></div>
+        <div class="stat"><div class="n" data-k="restsVal">3×</div><div class="l" data-k="restsLabel">Rests (breaks 2 · naps 1)</div></div>
+      </div>
+      <div class="rows">
+        <div class="prow primary"><span class="ic"><svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor"><path d="M8 5v14l11-7z"/></svg></span>
+          <span class="lb" data-k="restNow">Rest now</span><span class="sub" data-k="restNowSub">Short break · 20s</span>
+          <span class="chev"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></span></div>
+        <div class="prow plain"><span class="ic"><svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor"><path d="M13.4 3.1a8.2 8.2 0 1 0 7.5 10.6 6.6 6.6 0 0 1-7.5-10.6z"/></svg></span>
+          <span class="lb" data-k="takeNap">Take a nap</span><span class="sub" data-k="takeNapSub">Full · 20 min</span>
+          <span class="chev"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></span></div>
+      </div>
+    </div>
+    <div class="cap rise d3" data-k="panelCap">Open the <b>menu bar</b> — energy at a glance, a nap when you need one.</div>
+  </section>
+
+  <!-- STRONG REMINDER (加强档 · L2 · more worn) -->
+  <section class="scene desk" data-id="strong">
+    <div class="menubar"><span class="apple"></span><span class="mitem b">EyeFlow</span><span class="mitem">File</span><span class="mitem">Edit</span>
+      <span class="right"><span class="tray"><i></i></span><span>9:41</span></span></div>
+    <div class="dtop">
+      <div class="win" style="left:58px;top:138px;width:470px;height:512px"><div class="win__bar"><i class="tl r"></i><i class="tl y"></i><i class="tl g"></i></div><div class="win__main"><div class="win__side"><div class="side-row on"></div><div class="side-row"></div><div class="side-row"></div><div class="side-row"></div><div class="side-row"></div><div class="side-row"></div></div><div class="win__content"><div class="win__title"></div><div class="ln" style="width:94%"></div><div class="ln" style="width:76%"></div><div class="ln accent" style="width:54%"></div><div class="ln" style="width:88%"></div><div class="ln" style="width:66%"></div><div class="ln" style="width:82%"></div></div></div></div>
+      <div class="dock"><i class="mira-ic"></i><i style="background:linear-gradient(160deg,#5b9bd5,#3f6fb0)"></i><i style="background:linear-gradient(160deg,#f0a04b,#d97c2b)"></i><i style="background:linear-gradient(160deg,#e5675f,#c23f3f)"></i><i style="background:linear-gradient(160deg,#7bc47f,#3f9a52)"></i><i style="background:linear-gradient(160deg,#a98bd0,#7d5bb0)"></i><i style="background:linear-gradient(160deg,#e8d17a,#c9a83a)"></i></div>
+    </div>
+    <div class="swash"></div>
+    <div class="fkick rise" data-k="fkWorn">More worn out</div>
+    <div class="scap">
+      <div class="mk"><div class="lens"><div class="pulse"></div></div></div>
+      <div class="sbody">
+        <div class="st2" data-k="strongText">Rest your eyes — look far</div>
+        <div class="strack"><div class="sfill"></div></div>
+      </div>
+      <div class="scount" id="strongcount">20</div>
+    </div>
+    <div class="cap rise d3" data-k="strongCap">Worn out? A <b>stronger</b> nudge — the world softly recedes.</div>
+  </section>
+
+  <!-- NAP (小睡 · deep · worn out) -->
+  <section class="scene nap-scene" data-id="nap">
+    <div class="dtop">
+      <div class="win" style="left:58px;top:138px;width:470px;height:512px"><div class="win__bar"><i class="tl r"></i><i class="tl y"></i><i class="tl g"></i></div><div class="win__main"><div class="win__side"><div class="side-row on"></div><div class="side-row"></div><div class="side-row"></div><div class="side-row"></div><div class="side-row"></div><div class="side-row"></div></div><div class="win__content"><div class="win__title"></div><div class="ln" style="width:94%"></div><div class="ln" style="width:76%"></div><div class="ln accent" style="width:54%"></div><div class="ln" style="width:88%"></div><div class="ln" style="width:66%"></div><div class="ln" style="width:82%"></div></div></div></div>
+      <div class="dock"><i class="mira-ic"></i><i style="background:linear-gradient(160deg,#5b9bd5,#3f6fb0)"></i><i style="background:linear-gradient(160deg,#f0a04b,#d97c2b)"></i><i style="background:linear-gradient(160deg,#e5675f,#c23f3f)"></i><i style="background:linear-gradient(160deg,#7bc47f,#3f9a52)"></i><i style="background:linear-gradient(160deg,#a98bd0,#7d5bb0)"></i><i style="background:linear-gradient(160deg,#e8d17a,#c9a83a)"></i></div>
+    </div>
+    <div class="nfog"></div>
+    <div class="fkick rise" data-k="fkSpent">Worn out</div>
+    <div class="ncenter">
+      <div class="nmira"><div class="npulse"></div></div>
+      <div class="nclock" id="nclock">0:20</div>
+      <div class="ntrack"><div class="nfill" id="nfill"></div></div>
+      <div class="nmsg" id="nmsg">Close your eyes, and settle.</div>
+      <div class="nhint" id="nhint" data-k="napHint">Press Esc to end</div>
+    </div>
+  </section>
+
+  <!-- RHYTHM -->
+  <section class="scene paper" data-id="rhythm">
+    <div class="center">
+      <div class="kicker rise" data-k="rhythmKicker">The rhythm</div>
+      <div class="title3 rise d1" data-k="rhythmTitle">20-20-20, kept for you.</div>
+      <div class="row3">
+        <div class="col3 rise d2"><div class="num">20</div><div class="unit" data-k="uMin">minutes</div><div class="lab3" data-k="labScreen">at the screen</div></div>
+        <div class="dot3 rise d2"></div>
+        <div class="col3 rise d3"><div class="num">20</div><div class="unit" data-k="uFeet">feet</div><div class="lab3" data-k="labFar">look into the distance</div></div>
+        <div class="dot3 rise d3"></div>
+        <div class="col3 rise d4"><div class="num">20</div><div class="unit" data-k="uSec">seconds</div><div class="lab3" data-k="labRest">let your eyes rest</div></div>
+      </div>
+      <div class="foot rise d4" data-k="rhythmFoot">The eye-care basic — kept without a single alarm.</div>
+    </div>
+  </section>
+
+  <!-- STATES -->
+  <section class="scene paper" data-id="states">
+    <div class="title5 rise" data-k="statesTitle">Mira's glow mirrors your eyes.</div>
+    <div class="row5">
+      <div class="col5 rise d1"><div class="slens"><div class="sp fresh"></div></div><div class="lab5" data-k="stFresh">Fresh</div><div class="sub5" data-k="stFreshSub">rested &amp; clear</div></div>
+      <div class="col5 rise d2"><div class="slens"><div class="sp tiring"></div></div><div class="lab5" data-k="stTiring">Tiring</div><div class="sub5" data-k="stTiringSub">time to look away</div></div>
+      <div class="col5 rise d3"><div class="slens"><div class="sp rest"></div></div><div class="lab5" data-k="stResting">Resting</div><div class="sub5" data-k="stRestingSub">winding down</div></div>
+    </div>
+    <div class="foot5 rise d4" data-k="statesFoot">She softens when you're tired — a cue, never a scold.</div>
+  </section>
+
+  <!-- PRIVACY -->
+  <section class="scene paper" data-id="privacy">
+    <div class="center">
+      <div class="title3 rise" data-k="privTitle">Private by nature.</div>
+      <div class="privrow rise d2"><span data-k="priv1">No account</span><i></i><span data-k="priv2">No camera</span><i></i><span data-k="priv3">Nothing leaves your Mac</span></div>
+      <div class="foot rise d3" data-k="privFoot">Your rhythm runs entirely on-device.</div>
+    </div>
+  </section>
+
+  <!-- CLOSE -->
+  <section class="scene paper" data-id="close">
+    <div class="center">
+      <div class="mira-wrap rise"><div class="mira-canvas">
+        <div class="plate"><div class="lens"><div class="pulse"></div></div></div>
+      </div></div>
+      <div class="wordmark rise d1">EyeFlow</div>
+      <div class="close-tag rise d2" data-k="closeTag">Rest a little, and keep going.</div>
+      <div class="url rise d3" data-k="closeUrl">Now on Mac · <b>eyeflow.app</b></div>
+    </div>
+  </section>
+
+</div></div>
+
+<script>
+  // ---- fit stage to viewport ----
+  function fit(){ const s=document.getElementById('stage');
+    const k=Math.min(innerWidth/1440, innerHeight/900);
+    s.style.transform='scale('+k+')'; }
+  addEventListener('resize',fit); fit();
+
+  // ---- explicit play order (DOM order is irrelevant) + timeline [in, out] ms ----
+  const ORDER=['welcome','principle','short','strong','nap','panel','rhythm','states','privacy','close'];
+  const scenes=ORDER.map(id=>document.querySelector('[data-id="'+id+'"]'));
+  const PLAN=[
+    {in:300,  out:11800},  // welcome (相遇仪式)
+    {in:12100,out:16300},  // principle (how she adapts)
+    {in:16600,out:22300},  // short break (L1 · a little tired)
+    {in:22600,out:27800},  // strong (加强档 L2 · more worn)
+    {in:28100,out:37100},  // nap (deep · worn out)
+    {in:37400,out:42100},  // panel (all in one place)
+    {in:42400,out:46600},  // rhythm
+    {in:46900,out:51100},  // states
+    {in:51400,out:55200},  // privacy
+    {in:55500,out:61000},  // close (holds to the end)
+  ];
+  const TOTAL=61000;
+  const WTIMES=[700,4300,8000], WEND=11400; // welcome copy sub-timeline (absolute ms)
+
+  // ---- bilingual copy (en / zh) — one source, two films ----
+  const COPY={
+    en:{
+      w:["Hi, I'm Mira","I live in the corner of your screen,<br>out of your way","When you've looked too long I'll nudge you<br>— rest, look far"],
+      prinKicker:"How she adapts", prinTitle:"The more your eyes tire,<br>the more Mira does.", prinSub:'A gentle look-away · a stronger nudge · a full nap',
+      fkTired:"A little tired", fkWorn:"More worn out", fkSpent:"Worn out",
+      remText:"Look up, out the window", remCap:'A <b>gentle</b> nudge — look far for twenty seconds.',
+      strongText:"Rest your eyes — look far", strongNap:"Take a nap", strongCap:'Harder to ignore now — a <b>stronger</b> nudge, the world softly recedes.',
+      enePct:"Energy 86%", eneState:"Bright", today:"Today", screenVal:"2h 40m", screenTime:"Screen time",
+      restsVal:"3×", restsLabel:"Rests (breaks 2 · naps 1)", restNow:"Rest now", restNowSub:"Short break · 20s",
+      takeNap:"Take a nap", takeNapSub:"Full · 20 min", panelCap:'And it’s all one glance — reach any of it from the <b>menu bar</b>.',
+      napRest:"Close your eyes, and settle.", napWake:"Welcome back. Clearer now?", napHint:"Press Esc to end",
+      rhythmKicker:"The rhythm", rhythmTitle:"20-20-20, kept for you.", uMin:"minutes", uFeet:"feet", uSec:"seconds",
+      labScreen:"at the screen", labFar:"look into the distance", labRest:"let your eyes rest", rhythmFoot:"The eye-care basic — kept without a single alarm.",
+      statesTitle:"Mira's glow mirrors your eyes.", stFresh:"Fresh", stTiring:"Tiring", stResting:"Resting",
+      stFreshSub:"rested & clear", stTiringSub:"time to look away", stRestingSub:"winding down", statesFoot:"She softens when you're tired — a cue, never a scold.",
+      privTitle:"Private by nature.", priv1:"No account", priv2:"No camera", priv3:"Nothing leaves your Mac", privFoot:"Your rhythm runs entirely on-device.",
+      closeTag:"Rest a little, and keep going.", closeUrl:'Now on Mac · <b>eyeflow.app</b>',
+    },
+    zh:{
+      w:["你好，我是 Mira","我住在你的屏幕角落，<br>不打扰你","你看屏幕太久时，我会提醒你<br>——歇一下，看看远处"],
+      prinKicker:"她怎么随你而变", prinTitle:"眼睛越累，<br>Mira 做得越多。", prinSub:'轻轻望远 · 更用力提醒 · 完整小睡',
+      fkTired:"有点累", fkWorn:"更累了", fkSpent:"累透了",
+      remText:"抬头看看窗外吧", remCap:'<b>轻轻</b>一下——看看远处，二十秒就好。',
+      strongText:"眼睛歇歇，看看远处", strongNap:"小睡一会儿", strongCap:'这一次更难忽略——<b>更用力</b>提醒，世界柔柔推远。',
+      enePct:"精力 86%", eneState:"气色明亮", today:"今天", screenVal:"2 小时 40 分", screenTime:"今日用眼",
+      restsVal:"3 次", restsLabel:"歇息（短歇 2 · 小睡 1）", restNow:"现在歇一下", restNowSub:"短歇 · 20 秒",
+      takeNap:"小睡一会儿", takeNapSub:"完整 · 20 分钟", panelCap:'而这一切，<b>菜单栏</b>一眼可及——你也随时能自己选。',
+      napRest:"闭上眼，缓一缓。", napWake:"欢迎回来。清楚一点了吧。", napHint:"按 Esc 结束",
+      rhythmKicker:"节奏", rhythmTitle:"20-20-20，替你守着。", uMin:"分钟", uFeet:"英尺", uSec:"秒",
+      labScreen:"看屏幕", labFar:"望向远处", labRest:"让眼睛歇一歇", rhythmFoot:"护眼最基本的一件事——没有一声闹铃。",
+      statesTitle:"Mira 的气色，映着你的眼睛。", stFresh:"清亮", stTiring:"微倦", stResting:"休息中",
+      stFreshSub:"歇够了，清楚", stTiringSub:"该抬头看看远处", stRestingSub:"正在缓下来", statesFoot:"你累了她就柔下来——是提示，不是责备。",
+      privTitle:"生来私密。", priv1:"不需账号", priv2:"不开摄像头", priv3:"数据不出这台 Mac", privFoot:"你的节奏，只在本机运行。",
+      closeTag:"歇一会儿，再继续。", closeUrl:'已上架 Mac · <b>eyeflow.app</b>',
+    },
+  };
+  const LANG=(location.search.match(/lang=(zh|en)/)||[])[1]||'en';
+  const T=COPY[LANG];
+  document.documentElement.lang=(LANG==='zh'?'zh-CN':'en');
+  if(LANG==='zh') document.documentElement.classList.add('zh');
+  document.querySelectorAll('[data-k]').forEach(el=>{ if(T[el.dataset.k]!=null) el.innerHTML=T[el.dataset.k]; });
+  const WLINES=WTIMES.map((t,i)=>({t,html:T.w[i]}));
+  let timers=[];
+  const freeze=document.getElementById('freeze');
+  function clearAll(){ timers.forEach(clearTimeout); timers=[]; scenes.forEach(s=>s.classList.remove('on')); }
+  function run(){
+    freeze.media='none';           // enable CSS transitions/animations for live play
+    clearAll();
+    PLAN.forEach((p,i)=>{
+      timers.push(setTimeout(()=>scenes[i].classList.add('on'), p.in));
+      timers.push(setTimeout(()=>scenes[i].classList.remove('on'), p.out));
+    });
+    timers.push(setTimeout(run, TOTAL)); // loop
+  }
+
+  // ---- deterministic renderer: seek(t) sets every animated prop for time t ----
+  const XF=700, DUR_RISE=800, DEL={d1:150,d2:350,d3:550,d4:750};
+  const clamp=p=>p<0?0:p>1?1:p, easeOut=p=>1-Math.pow(1-clamp(p),3);
+  const delayOf=el=>{ for(const k in DEL) if(el.classList.contains(k)) return DEL[k]; return 0; };
+  function env(t,inn,out){ if(t<inn)return 0; if(t<inn+XF)return (t-inn)/XF; if(t<out)return 1; if(t<out+XF)return 1-(t-out)/XF; return 0; }
+  function breathe(t,period){ const s=0.5-0.5*Math.cos(2*Math.PI*((t%period)/period)); return 1+0.13*s; }
+  function lerp(a,b,p){ return a+(b-a)*clamp(p); }
+  function subwin(t,start,end){ const IN=460,OUT=380; if(t<start||t>end)return 0; return Math.max(0,Math.min(1,(t-start)/IN,(end-t)/OUT)); }
+  function pad2(n){ return (n<10?'0':'')+n; }
+  window.seek=function(t){
+    freeze.media='all'; clearAll();       // kill CSS motion, drive by inline styles
+    scenes.forEach((sc,i)=>{
+      const inn=PLAN[i].in;
+      const o=env(t,inn,PLAN[i].out);
+      sc.style.opacity=o; sc.style.visibility=o>0.002?'visible':'hidden';
+
+      // --- WELCOME: persistent pill, copy fades between lines, Mira breathes ---
+      if(sc.classList.contains('welcome')){
+        let cur=WLINES[0], idx=0; for(let k=0;k<WLINES.length;k++) if(t>=WLINES[k].t){cur=WLINES[k];idx=k;}
+        const end=(idx+1<WLINES.length)?WLINES[idx+1].t:WEND;
+        const msg=sc.querySelector('#wmsg'); msg.innerHTML=cur.html; msg.style.opacity=subwin(t,cur.t,end);
+        sc.querySelector('.wpulse').style.transform='translate(-50%,-50%) scale('+breathe(t,4600)+')';
+        return;
+      }
+      // --- NAP: fog + Mira resting line brightening, clock counts, then wake ---
+      if(sc.classList.contains('nap-scene')){
+        const rel=t-inn, MF=124, frac=clamp((rel-900)/5400), waking=rel>=6600;
+        const p=sc.querySelector('.npulse'), msg=sc.querySelector('#nmsg'), hint=sc.querySelector('#nhint'), clk=sc.querySelector('#nclock');
+        const energy=lerp(0.2,1,frac);
+        const fk=sc.querySelector('.fkick'), fog=sc.querySelector('.nfog');
+        const fp=easeOut((rel-200)/800);
+        if(!waking){ // resting line, brightens as it recharges
+          const w=MF*0.58, h=MF*0.1;
+          p.style.width=w+'px'; p.style.height=h+'px'; p.style.borderRadius='999px';
+          p.style.opacity=(0.28+0.55*energy); p.style.transform='translate(-50%,-50%) scaleX('+breathe(t,6000)+')';
+          const sec=Math.max(0,Math.ceil(20*(1-frac))); clk.style.opacity=1; clk.textContent='0:'+pad2(sec);
+          sc.querySelector('.nfill').style.width=(frac*100)+'%';
+          msg.textContent=T.napRest; msg.style.opacity=subwin(t,inn+200,inn+7600);
+          hint.style.opacity=clamp((rel-400)/500)*0.9;
+          if(fog) fog.style.opacity=1;
+          if(fk){ fk.style.opacity=fp; fk.style.transform='translateY('+((1-fp)*26)+'px)'; }
+        } else { // wake: light spreads, the mist lifts, the world returns
+          const wp=easeOut((rel-6600)/700), d=MF*(0.5+0.42*wp);
+          p.style.width=d+'px'; p.style.height=d+'px'; p.style.borderRadius='50%';
+          p.style.opacity=0.9; p.style.transform='translate(-50%,-50%) scale('+breathe(t,4600)+')';
+          if(fog) fog.style.opacity=1-wp*0.82;  // mist lifts on wake (§6.3 world returns)
+          if(fk){ fk.style.opacity=(1-wp); fk.style.transform='translateY(0)'; }
+          clk.style.opacity=1-wp; sc.querySelector('.nfill').style.width='100%';
+          hint.style.opacity=(1-wp)*0.9;
+          msg.textContent=T.napWake; msg.style.opacity=wp;
+        }
+        return;
+      }
+
+      // --- generic scenes: rise-in children, island float, panel pop ---
+      sc.querySelectorAll('.rise').forEach(el=>{ const p=easeOut((t-inn-delayOf(el))/DUR_RISE);
+        el.style.opacity=p; el.style.transform='translateY('+((1-p)*26)+'px)'; });
+      const isl=sc.querySelector('.island'); if(isl){ const p=easeOut((t-inn)/900), pf=easeOut((t-inn)/700);
+        isl.style.opacity=pf; isl.style.transform='translateX(-50%) translateY('+((1-p)*-90)+'px)';
+        // short break in action: countdown ticks + progress drains
+        const frac=clamp((t-inn-1100)/4000);
+        const cnt=sc.querySelector('#restcount'); if(cnt) cnt.textContent=Math.max(0,Math.ceil(20*(1-frac)));
+        const fl=sc.querySelector('.fill'); if(fl) fl.style.width=((1-frac)*100)+'%';
+        const mp=sc.querySelector('.mk .pulse'); if(mp) mp.style.opacity=0.82; } // L1 气色: a little dim
+      const pop=sc.querySelector('.pop'); if(pop){ const p=easeOut((t-inn)/700);
+        pop.style.opacity=p; pop.style.transform='translateY('+((1-p)*-24)+'px) scale('+(0.97+0.03*p)+')'; }
+      const scap=sc.querySelector('.scap'); if(scap){ const p=easeOut((t-inn)/560);
+        scap.style.opacity=p; scap.style.transform='translate(-50%,-50%) translateY('+((1-p)*12)+'px) scale('+(0.96+0.04*p)+')';
+        const wash=sc.querySelector('.swash'); if(wash) wash.style.opacity=easeOut((t-inn-150)/700);
+        const mp=sc.querySelector('.mk .pulse'); if(mp) mp.style.opacity=0.45; // L2 气色: dimmer (more tired)
+        const frac=clamp((t-inn-1200)/4000); // a stronger "rest now": countdown ticks + progress drains
+        const cn=sc.querySelector('#strongcount'); if(cn) cn.textContent=Math.max(0,Math.ceil(20*(1-frac)));
+        const sf=sc.querySelector('.sfill'); if(sf) sf.style.width=((1-frac)*100)+'%'; }
+    });
+    document.querySelectorAll('.plate .pulse').forEach(el=>el.style.transform='translate(-50%,-50%) scale('+breathe(t,4200)+')');
+    document.querySelectorAll('.mk .pulse, .tray i, .sp').forEach(el=>el.style.transform='scale('+breathe(t,4200)+')');
+  };
+
+  window.showScene=function(i){ freeze.media='none'; clearAll(); scenes[i].classList.add('on'); };
+  const sm=location.search.match(/still=(\d+)/), km=location.search.match(/seek=(\d+)/);
+  if(km){ window.seek(+km[1]); } else if(sm){ window.showScene(+sm[1]); } else { run(); }
+  addEventListener('keydown',e=>{ if(e.code==='Space'){e.preventDefault(); run();} });
+</script>
+</body>
+</html>
