@@ -18,8 +18,9 @@ process.on('uncaughtException', e => log('UNCAUGHT', e && e.stack || e));
 const DUR = parseInt(process.argv[2] || '61000', 10);
 const FPS = parseInt(process.argv[3] || '30', 10);
 const LANG = process.argv[4] === 'zh' ? 'zh' : 'en';
-const PAGE = 'file://' + path.join(DIR, 'announce.html') + '?lang=' + LANG;
-const OUT = path.join(DIR, `EyeFlow-Mira-announce-${LANG}.mp4`);
+const CUT = process.argv[5] === 'cut30';
+const PAGE = 'file://' + path.join(DIR, 'announce.html') + '?lang=' + LANG + (CUT ? '&cut=30' : '');
+const OUT = path.join(DIR, `EyeFlow-Mira-announce-${LANG}${CUT ? '-30s' : ''}.mp4`);
 
 app.whenReady().then(async () => {
   const win = new BrowserWindow({ width: 1440, height: 900, show: false, webPreferences: { offscreen: true } });

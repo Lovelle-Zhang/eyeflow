@@ -5,7 +5,7 @@
 const fs = require('node:fs');
 const path = require('node:path');
 
-const SR = 44100, DUR = 61.0, N = Math.round(SR * DUR);
+const SR = 44100, DUR = parseFloat(process.argv[2]) || 61.0, N = Math.round(SR * DUR);
 const mtof = m => 440 * Math.pow(2, (m - 69) / 12);
 const L = new Float32Array(N), R = new Float32Array(N);
 

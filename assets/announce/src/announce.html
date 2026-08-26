@@ -448,9 +448,21 @@
   addEventListener('resize',fit); fit();
 
   // ---- explicit play order (DOM order is irrelevant) + timeline [in, out] ms ----
-  const ORDER=['welcome','principle','short','strong','nap','panel','rhythm','states','privacy','close'];
+  // ?cut=30 = tight 30s social cut (curated subset, product-forward)
+  const CUT=/cut=30/.test(location.search);
+  const ORDER = CUT
+    ? ['welcome','short','nap','rhythm','panel','privacy','close']
+    : ['welcome','principle','short','strong','nap','panel','rhythm','states','privacy','close'];
   const scenes=ORDER.map(id=>document.querySelector('[data-id="'+id+'"]'));
-  const PLAN=[
+  const PLAN = CUT ? [
+    {in:200,  out:3500},   // welcome — 1-line hook "Hi, I'm Mira"
+    {in:3800, out:8300},   // short break — the gentle nudge in action
+    {in:8600, out:15600},  // nap — mist over the desktop → wake (the emotional beat)
+    {in:15900,out:19600},  // 20-20-20 — the science
+    {in:19900,out:23800},  // panel — frosted glass over a real Mac desktop
+    {in:24100,out:27100},  // privacy — the trust beat
+    {in:27400,out:31000},  // close — CTA (holds)
+  ] : [
     {in:300,  out:11800},  // welcome (相遇仪式)
     {in:12100,out:16300},  // principle (how she adapts)
     {in:16600,out:22300},  // short break (L1 · a little tired)
@@ -462,7 +474,7 @@
     {in:51400,out:55200},  // privacy
     {in:55500,out:61000},  // close (holds to the end)
   ];
-  const TOTAL=61000;
+  const TOTAL = CUT ? 31000 : 61000;
   const WTIMES=[700,4300,8000], WEND=11400; // welcome copy sub-timeline (absolute ms)
 
   // ---- bilingual copy (en / zh) — one source, two films ----
@@ -547,7 +559,7 @@
       }
       // --- NAP: fog + Mira resting line brightening, clock counts, then wake ---
       if(sc.classList.contains('nap-scene')){
-        const rel=t-inn, MF=124, frac=clamp((rel-900)/5400), waking=rel>=6600;
+        const dur=PLAN[i].out-inn, rel=t-inn, MF=124, frac=clamp((rel-dur*0.11)/(dur*0.56)), waking=rel>=dur*0.72;
         const p=sc.querySelector('.npulse'), msg=sc.querySelector('#nmsg'), hint=sc.querySelector('#nhint'), clk=sc.querySelector('#nclock');
         const energy=lerp(0.2,1,frac);
         const fk=sc.querySelector('.fkick'), fog=sc.querySelector('.nfog');
@@ -558,12 +570,12 @@
           p.style.opacity=(0.28+0.55*energy); p.style.transform='translate(-50%,-50%) scaleX('+breathe(t,6000)+')';
           const sec=Math.max(0,Math.ceil(20*(1-frac))); clk.style.opacity=1; clk.textContent='0:'+pad2(sec);
           sc.querySelector('.nfill').style.width=(frac*100)+'%';
-          msg.textContent=T.napRest; msg.style.opacity=subwin(t,inn+200,inn+7600);
+          msg.textContent=T.napRest; msg.style.opacity=subwin(t,inn+dur*0.03,inn+dur*0.84);
           hint.style.opacity=clamp((rel-400)/500)*0.9;
           if(fog) fog.style.opacity=1;
           if(fk){ fk.style.opacity=fp; fk.style.transform='translateY('+((1-fp)*26)+'px)'; }
         } else { // wake: light spreads, the mist lifts, the world returns
-          const wp=easeOut((rel-6600)/700), d=MF*(0.5+0.42*wp);
+          const wp=easeOut((rel-dur*0.72)/700), d=MF*(0.5+0.42*wp);
           p.style.width=d+'px'; p.style.height=d+'px'; p.style.borderRadius='50%';
           p.style.opacity=0.9; p.style.transform='translate(-50%,-50%) scale('+breathe(t,4600)+')';
           if(fog) fog.style.opacity=1-wp*0.82;  // mist lifts on wake (§6.3 world returns)
