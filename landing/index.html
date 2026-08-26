@@ -301,42 +301,55 @@
     .mac-screen.idle .mac-bar .lens { --lf: 11cqi; }
     .mac-screen.idle .mac-clock { font-size: 7cqi; }
 
-    /* 面板 · 气色面板 CSS mock(替代旧真截图)——铺满原截图尺寸，面板自身即容器 */
-    /* 面板 mock 忠于真机(Panel.swift/PanelParts.swift):锁深色 vibrancy 毛玻璃 + 语义白字。
-       行分主/次(Rest now=绿档、Take a nap=白档),齿轮=SF gearshape、SOFT 色。 */
-    .mpanel { container-type: inline-size; position: relative; width: 100%; max-width: 400px; margin-inline: auto; padding: 5cqi; border-radius: 6.5cqi; text-align: left; color: rgba(255,255,255,0.94); background: linear-gradient(180deg, rgba(58,60,67,0.80), rgba(44,46,52,0.86)); backdrop-filter: blur(34px) saturate(1.2); -webkit-backdrop-filter: blur(34px) saturate(1.2); border: 1px solid rgba(255,255,255,0.12); box-shadow: inset 0 1px 0 rgba(255,255,255,0.07), 0 26px 52px -26px rgba(10,12,18,0.5); }
-    .mp-head { display: flex; justify-content: flex-end; margin-bottom: 1.6cqi; }
-    .mp-gear { width: 5.6cqi; height: 5.6cqi; color: rgba(255,255,255,0.52); }
+    /* 面板 mock — 忠于真机 panel.css / theme.css / app-mark.css。真机面板 360px 宽,
+       故这里以 1cqi ≈ 3.6px 换算(mpanel 自身即 container)。要点:深绿 vibrancy 面板
+       (非中性灰)、矮胶囊 hero = matte #1A6B52 + 左上柔高光、中性白字、细线齿轮、
+       每行行尾一枚雪佛龙。绿色只落在胶囊上,开关/行都是中性白。 */
+    /* NOTE: .mpanel's OWN padding/radius (cqi) resolve against the ancestor container
+       (.panel-screen ≈ card), while its children resolve against .mpanel itself. The
+       panel is a fixed 35cqi of the card, so panel-relative 3.3%/4% become 1.15cqi/1.4cqi
+       here — keeping the padding/radius in step with the content's scale. */
+    .mpanel { container-type: inline-size; position: relative; width: 100%; max-width: 400px; margin-inline: auto; padding: 1.15cqi; border-radius: 1.4cqi; text-align: left; color: rgba(255,255,255,0.92); background: linear-gradient(180deg, rgba(18,38,31,0.86), rgba(11,21,17,0.92)); backdrop-filter: blur(34px) saturate(1.2); -webkit-backdrop-filter: blur(34px) saturate(1.2); border: 1px solid rgba(255,255,255,0.10); box-shadow: inset 0 1px 0 rgba(255,255,255,0.10), 0 26px 52px -26px rgba(8,16,12,0.55); }
+    .mp-head { display: flex; justify-content: flex-end; padding: 0.6cqi 0.6cqi 1.7cqi; }
+    .mp-gear { width: 7.2cqi; height: 7.2cqi; color: rgba(255,255,255,0.55); }
     .mp-gear svg { width: 100%; height: 100%; display: block; }
-    .mp-cap { display: flex; align-items: center; gap: 3.6cqi; padding: 4cqi 5cqi; border-radius: 99px; background: linear-gradient(120deg, #3f9d76 0%, #2c805f 58%, #236a50 100%); border: 1px solid rgba(255,255,255,0.16); }
-    /* hero Mira 标 = 浅薄荷 squircle 图标(app 图标风),内嵌深 lens+绿光核 */
-    .mp-mark { flex: 0 0 auto; width: 11cqi; height: 11cqi; border-radius: 3.1cqi; display: flex; align-items: center; justify-content: center; background: linear-gradient(150deg, #ecfff7 0%, #a9e8d6 58%, #82d8c0 100%); box-shadow: inset 0 1px 0 rgba(255,255,255,0.55), 0 1px 3px rgba(10,30,22,0.28); }
-    .mp-mark .lens { --lf: 5.4cqi; }
-    .mp-cap-t { display: grid; gap: 0.8cqi; }
-    .mp-cap-t b { font-size: 6cqi; font-weight: 600; color: #f6f7f9; }
-    .mp-cap-t span { font-size: 3.7cqi; color: rgba(244,247,245,0.72); }
-    .mp-today-cap { padding: 4.5cqi 1.5cqi 0; font-size: 3.6cqi; font-weight: 500; color: rgba(255,255,255,0.55); }
-    .mp-today { display: flex; align-items: center; gap: 5cqi; padding: 1.6cqi 1.5cqi 3cqi; }
-    .mp-today > div { display: grid; gap: 0.6cqi; }
-    .mp-today .mp-div { width: 1px; align-self: stretch; margin: 1cqi 0; background: rgba(255,255,255,0.12); }
-    .mp-today b { font-size: 7cqi; font-weight: 600; color: rgba(255,255,255,0.92); font-variant-numeric: tabular-nums; }
-    .mp-today span { font-size: 3.5cqi; color: rgba(255,255,255,0.5); }
-    .mp-row { display: flex; align-items: center; gap: 3.4cqi; margin-top: 2.4cqi; padding: 4cqi 5cqi; border-radius: 4.5cqi; background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.09); }
+    /* hero = 气色 capsule: full pill, matte green + subtle top-left highlight (panel.css .hero) */
+    .mp-cap { position: relative; overflow: hidden; display: flex; align-items: center; gap: 3.3cqi; padding: 3.3cqi 3.9cqi; border-radius: 999px; background: rgba(26,107,82,0.97); box-shadow: inset 0 0 0 1px rgba(255,255,255,0.14), 0 3.9cqi 8.9cqi -3.3cqi rgba(20,20,19,0.30); }
+    .mp-cap::before { content: ""; position: absolute; inset: 0; border-radius: inherit; pointer-events: none; background: radial-gradient(130% 165% at 24% -18%, rgba(195,248,222,0.32) 0%, transparent 58%); }
+    .mp-cap > * { position: relative; z-index: 1; }
+    /* app-mark squircle: light plate + dark lens + pulse (mirrors app-mark.css at mark/44) */
+    .mp-mark { flex: 0 0 auto; position: relative; width: 12.2cqi; height: 12.2cqi; border-radius: 3.3cqi; background: linear-gradient(150deg, #eafff6 0%, #aeede0 56%, #f3eec7 100%); box-shadow: 0 0.8cqi 2.2cqi -0.6cqi rgba(8,30,20,0.35); }
+    .mp-mark::before { content: ""; position: absolute; left: 50%; top: 50%; transform: translate(-50%,-50%); width: 7.5cqi; height: 4.7cqi; border-radius: 2.5cqi; background: radial-gradient(130% 150% at 34% 22%, #123029, #07140f 80%); }
+    .mp-mark::after { content: ""; position: absolute; left: 50%; top: 50%; z-index: 1; transform: translate(-50%,-50%); width: 2.5cqi; height: 2.5cqi; border-radius: 50%; background: radial-gradient(circle, #f4fff9 0%, #8fe6c0 45%, transparent 78%); }
+    .mp-cap-t { display: grid; gap: 0.55cqi; }
+    .mp-cap-t b { font-size: 4.7cqi; font-weight: 600; color: #f6f7f9; font-variant-numeric: tabular-nums; }
+    .mp-cap-t span { font-size: 3.6cqi; color: rgba(246,247,249,0.72); }
+    .mp-today-cap { padding: 2.8cqi 1.1cqi 1.7cqi; font-size: 3.3cqi; font-weight: 500; color: rgba(255,255,255,0.55); }
+    .mp-today { display: flex; align-items: center; margin: 0 1.1cqi 4.4cqi; }
+    .mp-today > div { flex: 1; }
+    .mp-today .mp-div { flex: 0 0 auto; width: 1px; height: 8.9cqi; margin: 0 4.4cqi; background: rgba(255,255,255,0.12); }
+    .mp-today b { font-size: 5.3cqi; font-weight: 600; color: rgba(255,255,255,0.92); font-variant-numeric: tabular-nums; letter-spacing: -0.01em; }
+    .mp-today span { display: block; margin-top: 0.55cqi; font-size: 3cqi; color: rgba(255,255,255,0.55); }
+    .mp-row { display: flex; align-items: center; gap: 2.8cqi; padding: 2.8cqi 3.3cqi; border-radius: 3cqi; background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.09); }
+    .mp-row + .mp-row { margin-top: 2.2cqi; }
     .mp-row.primary { background: rgba(139,240,174,0.12); border-color: rgba(139,240,174,0.22); }
-    .mp-row .mp-lbl { font-size: 4.8cqi; font-weight: 600; color: rgba(255,255,255,0.92); }
-    .mp-row .mp-meta { margin-left: auto; font-size: 3.7cqi; color: rgba(255,255,255,0.5); }
-    .mp-ic { flex: 0 0 auto; color: rgba(255,255,255,0.5); }
+    .mp-lbl { font-size: 3.6cqi; font-weight: 500; color: rgba(255,255,255,0.92); }
+    .mp-meta { margin-left: auto; font-size: 3.3cqi; color: rgba(255,255,255,0.55); }
+    .mp-ic { flex: 0 0 auto; display: grid; place-items: center; width: 5.6cqi; color: rgba(255,255,255,0.55); }
     .mp-row.primary .mp-ic { color: #6fe7c3; }
-    .mp-ic svg { display: block; width: 100%; height: 100%; }
-    .mp-ic.tri { width: 4.8cqi; height: 4.8cqi; }
-    .mp-ic.moon { width: 5cqi; height: 5cqi; }
+    .mp-ic svg { display: block; width: 3.9cqi; height: 3.9cqi; }
+    .mp-chev { flex: 0 0 auto; display: grid; place-items: center; width: 3.3cqi; color: rgba(255,255,255,0.55); opacity: 0.55; }
+    .mp-chev svg { display: block; width: 100%; height: 100%; }
     /* 01 面板屏:菜单栏 + 从绿点落下的原尺寸面板(高度随内容,不留大空桌面) */
     /* the panel sits on a REAL desktop — a soft app window + a dock behind it, so
        the panel's backdrop-filter blurs actual content (genuine vibrancy), not a flat wash */
-    .panel-screen { aspect-ratio: 1.5; }
+    /* proportions mirror the film's panel scene (announce.html S4): a short window on
+       the left, a compact panel top-right that doesn't overlap it, dock + desktop breathing
+       around them. cqi here shares the film's basis (% of screen width, film ÷1440). */
+    .panel-screen { aspect-ratio: 1.6; }
     .panel-screen .mac-desk { display: flex; justify-content: flex-end; align-items: flex-start; padding: 4cqi; }
-    .panel-screen .mpanel { margin: 0; position: relative; z-index: 2; max-width: 54cqi; }
-    .mac-win { position: absolute; left: 4cqi; top: 4.5cqi; width: 43cqi; height: 60cqi; border-radius: 2.4cqi; overflow: hidden; z-index: 1;
+    .panel-screen .mpanel { margin: 0; position: relative; z-index: 2; max-width: 35cqi; }
+    .mac-win { position: absolute; left: 4cqi; top: 5cqi; width: 33cqi; height: 36cqi; border-radius: 2.4cqi; overflow: hidden; z-index: 1;
       background: rgba(252,253,251,0.9); box-shadow: 0 6cqi 12cqi -4cqi rgba(18,38,28,0.3), 0 0.4cqi 1.2cqi rgba(0,0,0,0.06); }
     .mac-win .win-bar { height: 5cqi; background: rgba(240,244,241,0.92); display: flex; align-items: center; gap: 1.2cqi; padding: 0 2cqi; border-bottom: 1px solid rgba(0,0,0,0.05); }
     .mac-win .tl { width: 1.7cqi; height: 1.7cqi; border-radius: 50%; } .mac-win .tl.r{background:#ff5f57;} .mac-win .tl.y{background:#febc2e;} .mac-win .tl.g{background:#28c840;}
@@ -813,8 +826,8 @@
 
     <div class="stage">
       <div class="film-frame">
-        <video class="film-video" src="assets/mira-30s-zh.mp4" data-en-src="assets/mira-30s-en.mp4"
-               poster="assets/mira-poster-zh.jpg" data-en-poster="assets/mira-poster-en.jpg"
+        <video class="film-video" src="assets/mira-30s-zh.mp4?v=2" data-en-src="assets/mira-30s-en.mp4?v=2"
+               poster="assets/mira-poster-zh.jpg?v=2" data-en-poster="assets/mira-poster-en.jpg?v=2"
                muted loop playsinline autoplay preload="metadata"
                aria-label="EyeFlow 短片：Mira 如何随你的疲劳，从轻轻提醒到全屏小睡"
                data-en-label="EyeFlow film: how Mira adapts — from a gentle nudge to a full nap"></video>
@@ -942,19 +955,19 @@
           </div>
           <div class="mac-dock" aria-hidden="true"><i class="di-mira"></i><i style="background:linear-gradient(160deg,#5b9bd5,#3f6fb0)"></i><i style="background:linear-gradient(160deg,#f0a04b,#d97c2b)"></i><i style="background:linear-gradient(160deg,#e5675f,#c23f3f)"></i><i style="background:linear-gradient(160deg,#7bc47f,#3f9a52)"></i><i style="background:linear-gradient(160deg,#a98bd0,#7d5bb0)"></i></div>
           <div class="mpanel">
-          <div class="mp-head"><span class="mp-gear" role="img" aria-label="设置" data-en-label="Settings"><svg viewBox="0 0 24 24" aria-hidden="true"><defs><mask id="mpGearHole"><rect width="24" height="24" fill="#fff"/><circle cx="12" cy="12" r="3.5" fill="#000"/></mask></defs><g fill="currentColor" mask="url(#mpGearHole)"><circle cx="12" cy="12" r="6.3"/><rect x="10.7" y="1.9" width="2.6" height="5" rx="1.1"/><rect x="10.7" y="1.9" width="2.6" height="5" rx="1.1" transform="rotate(45 12 12)"/><rect x="10.7" y="1.9" width="2.6" height="5" rx="1.1" transform="rotate(90 12 12)"/><rect x="10.7" y="1.9" width="2.6" height="5" rx="1.1" transform="rotate(135 12 12)"/><rect x="10.7" y="1.9" width="2.6" height="5" rx="1.1" transform="rotate(180 12 12)"/><rect x="10.7" y="1.9" width="2.6" height="5" rx="1.1" transform="rotate(225 12 12)"/><rect x="10.7" y="1.9" width="2.6" height="5" rx="1.1" transform="rotate(270 12 12)"/><rect x="10.7" y="1.9" width="2.6" height="5" rx="1.1" transform="rotate(315 12 12)"/></g></svg></span></div>
+          <div class="mp-head"><span class="mp-gear" role="img" aria-label="设置" data-en-label="Settings"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><circle cx="12" cy="12" r="3.2"/><path d="M12 2.5v2.2M12 19.3v2.2M4.2 4.2l1.6 1.6M18.2 18.2l1.6 1.6M2.5 12h2.2M19.3 12h2.2M4.2 19.8l1.6-1.6M18.2 5.8l1.6-1.6"/></svg></span></div>
           <div class="mp-cap">
-            <span class="mp-mark" aria-hidden="true"><span class="lens"><i></i></span></span>
-            <span class="mp-cap-t"><b data-en="Energy 66%">精力 66%</b><span data-en="Steady">气色 · 常态</span></span>
+            <span class="mp-mark" aria-hidden="true"></span>
+            <span class="mp-cap-t"><b data-en="Energy 66%">精力 66%</b><span data-en="Steady">常态</span></span>
           </div>
-          <div class="mp-today-cap" data-en="Today">今日</div>
+          <div class="mp-today-cap" data-en="Today">今天</div>
           <div class="mp-today">
-            <div><b>1h 42m</b><span data-en="Screen time">用眼时长</span></div>
+            <div><b>1h 42m</b><span data-en="Screen time">今日用眼</span></div>
             <div class="mp-div" aria-hidden="true"></div>
-            <div><b>8×</b><span data-en="Rests (breaks 7 · naps 1)">歇息（短歇7 · 小睡1）</span></div>
+            <div><b data-en="8×">8 次</b><span data-en="Rests (breaks 7 · naps 1)">歇息（短歇 7 · 小睡 1）</span></div>
           </div>
-          <div class="mp-row primary"><span class="mp-ic tri" aria-hidden="true"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg></span><span class="mp-lbl" data-en="Rest now">现在歇一下</span><span class="mp-meta" data-en="Short break · 20s">短歇 · 20 秒</span></div>
-          <div class="mp-row"><span class="mp-ic moon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg></span><span class="mp-lbl" data-en="Take a nap">小睡一会儿</span><span class="mp-meta" data-en="Full · 3 min">完整 · 3 分钟</span></div>
+          <div class="mp-row primary"><span class="mp-ic" aria-hidden="true"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg></span><span class="mp-lbl" data-en="Rest now">现在歇一下</span><span class="mp-meta" data-en="Short break · 20s">短歇 · 20 秒</span><span class="mp-chev" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></span></div>
+          <div class="mp-row"><span class="mp-ic" aria-hidden="true"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M13.4 3.1a8.2 8.2 0 1 0 7.5 10.6 6.6 6.6 0 0 1-7.5-10.6z"/></svg></span><span class="mp-lbl" data-en="Take a nap">小睡一会儿</span><span class="mp-meta" data-en="Full · 3 min">完整 · 3 分钟</span><span class="mp-chev" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></span></div>
           </div>
         </div>
       </div>
