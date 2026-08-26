@@ -189,9 +189,13 @@
   .d1{transition-delay:.15s;} .d2{transition-delay:.35s;} .d3{transition-delay:.55s;} .d4{transition-delay:.75s;}
 
   /* ===================== WELCOME · 相遇仪式 (faithful to onboarding.css + capsule.css) ===================== */
-  .scene.welcome { background:radial-gradient(60% 60% at 50% 42%, #123e30 0%, #0b241c 60%, #081c16 100%); }
+  /* pale paper ground (same as the content scenes) so the onboarding pill reads as
+     the real onboarding window floating on a desktop — it blends instead of glowing on a void */
+  .scene.welcome { background:radial-gradient(120% 90% at 50% 34%,#f7f5f0 0%,#efece5 55%,#e9e5dd 100%); }
+  /* 970×600 → the real onboarding window's 788:488 ≈ 1.615 ratio (onboarding is 820×520,
+     .ob__page fills it minus 16px padding). Contents are fixed-px, so nothing inside stretches. */
   .wpage { position:absolute; left:50%; top:50%; transform:translate(-50%,-50%);
-    width:1180px; height:600px; border-radius:999px;
+    width:970px; height:600px; border-radius:999px;
     background:
       radial-gradient(135% 105% at 20% 6%, rgba(128,228,178,.5) 0%, rgba(128,228,178,0) 46%),
       radial-gradient(125% 115% at 88% 104%, rgba(4,22,14,.62) 0%, rgba(4,22,14,0) 52%),
