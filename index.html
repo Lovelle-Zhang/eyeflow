@@ -195,18 +195,33 @@
     /* 尾声 · 留住 Mira（邮件 opt-in · Buttondown）*/
     .beyond { padding-block: clamp(72px, 11vh, 116px); text-align: center; display: flex; flex-direction: column; align-items: center; border-top: 1px solid var(--line-soft); }
     .beyond .pet { --rest: 0.72; --peak: 0.74; }
-    .beyond-lead { margin-top: var(--s6); }
+    .beyond-copy strong { color: var(--ink); font-weight: 600; }
     .beyond-copy { max-width: 24em; margin-top: var(--flow-title); }
     .stay { display: flex; gap: var(--s3); width: 100%; max-width: 25em; margin-top: var(--s8); }
     .stay-email { flex: 1; min-width: 0; min-height: 48px; font: inherit; font-size: var(--t-body); color: var(--ink); background: var(--panel-strong); border: 1px solid var(--line); border-radius: 12px; padding: 0 16px; outline: none; transition: border-color 0.2s var(--ease), box-shadow 0.2s var(--ease); }
     .stay-email::placeholder { color: var(--muted-soft); }
     .stay-email:focus-visible { border-color: var(--mira-line); box-shadow: 0 0 0 3px var(--mira-soft); }
+    /* 订阅提交=次级动作:柔灰填充按钮,与邮箱框配成一对,不再是第二枚黑药丸(Download 独占黑)。
+       静止=柔起(顶部白高光);hover 略深;按下=压进去(暗内阴影 + 下沉 1px)。
+       用 .stay-btn.cta 提高特异性,盖过后面 .cta 的黑底填充。 */
     .stay-btn { flex: 0 0 auto; }
+    .stay-btn.cta { background: var(--wash); color: var(--ink); border-color: var(--line); border-radius: 12px; font-weight: 500;
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.6);
+      transition: background 0.16s var(--ease), border-color 0.16s var(--ease), box-shadow 0.12s var(--ease), transform 0.06s var(--ease); }
+    .stay-btn.cta:hover { background: #E9E5DA; border-color: rgba(20,20,19,0.17); }
+    .stay-btn.cta:active { background: #E1DCCF; border-color: rgba(20,20,19,0.22); transform: translateY(1px); box-shadow: inset 0 1px 2px rgba(20,20,19,0.10); }
+    .stay-btn.cta:focus-visible { outline: none; border-color: var(--mira-line); box-shadow: 0 0 0 3px var(--mira-soft); }
     .beyond-fine { margin-top: var(--s4); }
     .beyond-done { display: none; max-width: 20em; margin-top: var(--s8); font-family: var(--font-display); font-size: var(--t-title); line-height: 1.5; color: var(--ink); }
     .beyond[data-state="done"] .beyond-copy, .beyond[data-state="done"] .stay, .beyond[data-state="done"] .beyond-fine { display: none; }
     .beyond[data-state="done"] .beyond-done { display: block; }
     .beyond iframe { display: none; }
+    /* 尾声 opt-in 收成品牌卡下的轻尾巴:短居中分隔线 + 窄栏 + 安静文案,品牌句作唯一高潮 */
+    .final-panel .beyond { width: 100%; max-width: 28em; margin: var(--s8) auto 0; padding: 0; border-top: none; }
+    .final-panel .beyond::before { content: ""; width: 44px; height: 1px; background: var(--line); margin: 0 auto var(--s8); }
+    .final-panel .beyond-copy { margin-top: 0; font-size: var(--t-sub); }
+    .final-panel .stay { margin-top: var(--s6); }
+    .final-panel .beyond-fine { margin-top: var(--s3); }
     @media (max-width: 520px) { .stay { flex-direction: column; } }
 
     /* ── Hero ───────────────────────────────────────────────── */
@@ -1128,7 +1143,7 @@
     </div>
   </section>
 
-  <!-- ── 收尾 · 品牌句(仪式时刻)────────────────────────────── -->
+  <!-- ── 收尾 · 品牌句 + 留住 Mira(邮件 opt-in)合并为一个仪式时刻 ────── -->
   <section class="closing col">
     <div class="final-panel">
       <div class="mira" aria-hidden="true">
@@ -1139,21 +1154,18 @@
       <div class="actions">
         <a class="cta" href="https://github.com/Lovelle-Zhang/eyeflow/releases/latest/download/EyeFlow.dmg">Download for macOS</a>
       </div>
+      <!-- 尾声 · 留住 Mira(邮件 opt-in · Buttondown);保留 .beyond 供 done 态 CSS/JS 复用 -->
+      <div class="beyond" data-state="invite">
+        <p class="body beyond-copy" data-en="<strong>This is only the beginning.</strong> EyeFlow is free, forever. One day Mira will step out of the screen — leave an email and she'll find you."><strong>这只是开始。</strong>EyeFlow 永远免费。有天 Mira 会走出屏幕——留个邮箱，她会来找你。</p>
+        <form class="stay embeddable-buttondown-form" action="https://buttondown.com/api/emails/embed-subscribe/eyeflow" method="post" target="bd-frame">
+          <input class="stay-email" type="email" name="email" required placeholder="你的邮箱" data-en-ph="your email" aria-label="你的邮箱" data-en-label="your email" />
+          <button class="cta stay-btn" type="submit" data-en="Let Mira remember you">让 Mira 记得你</button>
+        </form>
+        <p class="meta beyond-fine" data-en="Only when it truly matters. No tracking, no noise, unsubscribe anytime.">只在真的有事时。不追踪、不打扰，随时退订。</p>
+        <p class="beyond-done" data-en="<strong>She'll remember.</strong> Mira will find you when it's time."><strong>记住了。</strong>Mira 有消息时，会来找你。</p>
+        <iframe name="bd-frame" title="subscribe" tabindex="-1" aria-hidden="true"></iframe>
+      </div>
     </div>
-  </section>
-
-  <!-- ── 尾声 · 留住 Mira（邮件 opt-in · Buttondown）───────────── -->
-  <section class="beyond col" data-state="invite">
-    <div class="mira" aria-hidden="true"><div class="pet"></div></div>
-    <h2 class="beyond-lead" data-en="This is only the beginning.">这只是开始。</h2>
-    <p class="body beyond-copy" data-en="EyeFlow stays free, always. One day Mira wants to step out of the screen and be beside you — leave an email if you'd like to know when that day comes, and she'll find you, quietly."><span class="copy-line">EyeFlow 会一直免费。</span><span class="copy-line">有一天，Mira 想从屏幕里，走到你身边。</span><span class="copy-line">想知道那一天，就留个邮箱——她有消息时，会轻轻找你。</span></p>
-    <form class="stay embeddable-buttondown-form" action="https://buttondown.com/api/emails/embed-subscribe/eyeflow" method="post" target="bd-frame">
-      <input class="stay-email" type="email" name="email" required placeholder="你的邮箱" data-en-ph="your email" aria-label="你的邮箱" data-en-label="your email" />
-      <button class="cta stay-btn" type="submit" data-en="Let Mira remember you">让 Mira 记得你</button>
-    </form>
-    <p class="meta beyond-fine" data-en="Only when it truly matters. No tracking, no noise, unsubscribe anytime.">只在真的有事时。不追踪、不打扰，随时退订。</p>
-    <p class="beyond-done" data-en="<strong>She'll remember.</strong> Mira will find you when it's time."><strong>记住了。</strong>Mira 有消息时，会来找你。</p>
-    <iframe name="bd-frame" title="subscribe" tabindex="-1" aria-hidden="true"></iframe>
   </section>
 
   <footer class="col">
