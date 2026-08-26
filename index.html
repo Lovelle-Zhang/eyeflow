@@ -301,43 +301,89 @@
     .mac-screen.idle .mac-bar .lens { --lf: 11cqi; }
     .mac-screen.idle .mac-clock { font-size: 7cqi; }
 
-    /* 面板 · 气色面板 CSS mock(替代旧真截图)——铺满原截图尺寸，面板自身即容器 */
-    /* 面板 mock 忠于真机(Panel.swift/PanelParts.swift):锁深色 vibrancy 毛玻璃 + 语义白字。
-       行分主/次(Rest now=绿档、Take a nap=白档),齿轮=SF gearshape、SOFT 色。 */
-    .mpanel { container-type: inline-size; position: relative; width: 100%; max-width: 400px; margin-inline: auto; padding: 5cqi; border-radius: 6.5cqi; text-align: left; color: rgba(255,255,255,0.94); background: linear-gradient(180deg, rgba(58,60,67,0.80), rgba(44,46,52,0.86)); backdrop-filter: blur(34px) saturate(1.2); -webkit-backdrop-filter: blur(34px) saturate(1.2); border: 1px solid rgba(255,255,255,0.12); box-shadow: inset 0 1px 0 rgba(255,255,255,0.07), 0 26px 52px -26px rgba(10,12,18,0.5); }
-    .mp-head { display: flex; justify-content: flex-end; margin-bottom: 1.6cqi; }
-    .mp-gear { width: 5.6cqi; height: 5.6cqi; color: rgba(255,255,255,0.52); }
+    /* 面板 mock — 忠于真机 panel.css / theme.css / app-mark.css。真机面板 360px 宽,
+       故这里以 1cqi ≈ 3.6px 换算(mpanel 自身即 container)。要点:深绿 vibrancy 面板
+       (非中性灰)、矮胶囊 hero = matte #1A6B52 + 左上柔高光、中性白字、细线齿轮、
+       每行行尾一枚雪佛龙。绿色只落在胶囊上,开关/行都是中性白。 */
+    /* NOTE: .mpanel's OWN padding/radius (cqi) resolve against the ancestor container
+       (.panel-screen ≈ card), while its children resolve against .mpanel itself. The
+       panel is a fixed 35cqi of the card, so panel-relative 3.3%/4% become 1.15cqi/1.4cqi
+       here — keeping the padding/radius in step with the content's scale. */
+    .mpanel { container-type: inline-size; position: relative; width: 100%; max-width: 400px; margin-inline: auto; padding: 1.15cqi; border-radius: 1.4cqi; text-align: left; color: rgba(255,255,255,0.92); background: linear-gradient(180deg, rgba(18,38,31,0.86), rgba(11,21,17,0.92)); backdrop-filter: blur(34px) saturate(1.2); -webkit-backdrop-filter: blur(34px) saturate(1.2); border: 1px solid rgba(255,255,255,0.10); box-shadow: inset 0 1px 0 rgba(255,255,255,0.10), 0 26px 52px -26px rgba(8,16,12,0.55); }
+    .mp-head { display: flex; justify-content: flex-end; padding: 0.6cqi 0.6cqi 1.7cqi; }
+    .mp-gear { width: 7.2cqi; height: 7.2cqi; color: rgba(255,255,255,0.55); }
     .mp-gear svg { width: 100%; height: 100%; display: block; }
-    .mp-cap { display: flex; align-items: center; gap: 3.6cqi; padding: 4cqi 5cqi; border-radius: 99px; background: linear-gradient(120deg, #3f9d76 0%, #2c805f 58%, #236a50 100%); border: 1px solid rgba(255,255,255,0.16); }
-    /* hero Mira 标 = 浅薄荷 squircle 图标(app 图标风),内嵌深 lens+绿光核 */
-    .mp-mark { flex: 0 0 auto; width: 11cqi; height: 11cqi; border-radius: 3.1cqi; display: flex; align-items: center; justify-content: center; background: linear-gradient(150deg, #ecfff7 0%, #a9e8d6 58%, #82d8c0 100%); box-shadow: inset 0 1px 0 rgba(255,255,255,0.55), 0 1px 3px rgba(10,30,22,0.28); }
-    .mp-mark .lens { --lf: 5.4cqi; }
-    .mp-cap-t { display: grid; gap: 0.8cqi; }
-    .mp-cap-t b { font-size: 6cqi; font-weight: 600; color: #f6f7f9; }
-    .mp-cap-t span { font-size: 3.7cqi; color: rgba(244,247,245,0.72); }
-    .mp-today-cap { padding: 4.5cqi 1.5cqi 0; font-size: 3.6cqi; font-weight: 500; color: rgba(255,255,255,0.55); }
-    .mp-today { display: flex; align-items: center; gap: 5cqi; padding: 1.6cqi 1.5cqi 3cqi; }
-    .mp-today > div { display: grid; gap: 0.6cqi; }
-    .mp-today .mp-div { width: 1px; align-self: stretch; margin: 1cqi 0; background: rgba(255,255,255,0.12); }
-    .mp-today b { font-size: 7cqi; font-weight: 600; color: rgba(255,255,255,0.92); font-variant-numeric: tabular-nums; }
-    .mp-today span { font-size: 3.5cqi; color: rgba(255,255,255,0.5); }
-    .mp-row { display: flex; align-items: center; gap: 3.4cqi; margin-top: 2.4cqi; padding: 4cqi 5cqi; border-radius: 4.5cqi; background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.09); }
+    /* hero = 气色 capsule: full pill, matte green + subtle top-left highlight (panel.css .hero) */
+    .mp-cap { position: relative; overflow: hidden; display: flex; align-items: center; gap: 3.3cqi; padding: 3.3cqi 3.9cqi; border-radius: 999px; background: rgba(26,107,82,0.97); box-shadow: inset 0 0 0 1px rgba(255,255,255,0.14), 0 3.9cqi 8.9cqi -3.3cqi rgba(20,20,19,0.30); }
+    .mp-cap::before { content: ""; position: absolute; inset: 0; border-radius: inherit; pointer-events: none; background: radial-gradient(130% 165% at 24% -18%, rgba(195,248,222,0.32) 0%, transparent 58%); }
+    .mp-cap > * { position: relative; z-index: 1; }
+    /* app-mark squircle: light plate + dark lens + pulse (mirrors app-mark.css at mark/44) */
+    .mp-mark { flex: 0 0 auto; position: relative; width: 12.2cqi; height: 12.2cqi; border-radius: 3.3cqi; background: linear-gradient(150deg, #eafff6 0%, #aeede0 56%, #f3eec7 100%); box-shadow: 0 0.8cqi 2.2cqi -0.6cqi rgba(8,30,20,0.35); }
+    .mp-mark::before { content: ""; position: absolute; left: 50%; top: 50%; transform: translate(-50%,-50%); width: 7.5cqi; height: 4.7cqi; border-radius: 2.5cqi; background: radial-gradient(130% 150% at 34% 22%, #123029, #07140f 80%); }
+    .mp-mark::after { content: ""; position: absolute; left: 50%; top: 50%; z-index: 1; transform: translate(-50%,-50%); width: 2.5cqi; height: 2.5cqi; border-radius: 50%; background: radial-gradient(circle, #f4fff9 0%, #8fe6c0 45%, transparent 78%); }
+    .mp-cap-t { display: grid; gap: 0.55cqi; }
+    .mp-cap-t b { font-size: 4.7cqi; font-weight: 600; color: #f6f7f9; font-variant-numeric: tabular-nums; }
+    .mp-cap-t span { font-size: 3.6cqi; color: rgba(246,247,249,0.72); }
+    .mp-today-cap { padding: 2.8cqi 1.1cqi 1.7cqi; font-size: 3.3cqi; font-weight: 500; color: rgba(255,255,255,0.55); }
+    .mp-today { display: flex; align-items: center; margin: 0 1.1cqi 4.4cqi; }
+    .mp-today > div { flex: 1; }
+    .mp-today .mp-div { flex: 0 0 auto; width: 1px; height: 8.9cqi; margin: 0 4.4cqi; background: rgba(255,255,255,0.12); }
+    .mp-today b { font-size: 5.3cqi; font-weight: 600; color: rgba(255,255,255,0.92); font-variant-numeric: tabular-nums; letter-spacing: -0.01em; }
+    .mp-today span { display: block; margin-top: 0.55cqi; font-size: 3cqi; color: rgba(255,255,255,0.55); }
+    .mp-row { display: flex; align-items: center; gap: 2.8cqi; padding: 2.8cqi 3.3cqi; border-radius: 3cqi; background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.09); }
+    .mp-row + .mp-row { margin-top: 2.2cqi; }
     .mp-row.primary { background: rgba(139,240,174,0.12); border-color: rgba(139,240,174,0.22); }
-    .mp-row .mp-lbl { font-size: 4.8cqi; font-weight: 600; color: rgba(255,255,255,0.92); }
-    .mp-row .mp-meta { margin-left: auto; font-size: 3.7cqi; color: rgba(255,255,255,0.5); }
-    .mp-ic { flex: 0 0 auto; color: rgba(255,255,255,0.5); }
+    .mp-lbl { font-size: 3.6cqi; font-weight: 500; color: rgba(255,255,255,0.92); }
+    .mp-meta { margin-left: auto; font-size: 3.3cqi; color: rgba(255,255,255,0.55); }
+    .mp-ic { flex: 0 0 auto; display: grid; place-items: center; width: 5.6cqi; color: rgba(255,255,255,0.55); }
     .mp-row.primary .mp-ic { color: #6fe7c3; }
-    .mp-ic svg { display: block; width: 100%; height: 100%; }
-    .mp-ic.tri { width: 4.8cqi; height: 4.8cqi; }
-    .mp-ic.moon { width: 5cqi; height: 5cqi; }
+    .mp-ic svg { display: block; width: 3.9cqi; height: 3.9cqi; }
+    .mp-chev { flex: 0 0 auto; display: grid; place-items: center; width: 3.3cqi; color: rgba(255,255,255,0.55); opacity: 0.55; }
+    .mp-chev svg { display: block; width: 100%; height: 100%; }
     /* 01 面板屏:菜单栏 + 从绿点落下的原尺寸面板(高度随内容,不留大空桌面) */
-    .panel-screen { aspect-ratio: auto; }
-    .panel-screen .mac-desk { display: flex; justify-content: flex-end; align-items: flex-start; padding: 3.5cqi 3.5cqi 5cqi; }
-    .panel-screen .mpanel { margin: 0; }
+    /* the panel sits on a REAL desktop — a soft app window + a dock behind it, so
+       the panel's backdrop-filter blurs actual content (genuine vibrancy), not a flat wash */
+    /* proportions mirror the film's panel scene (announce.html S4): a short window on
+       the left, a compact panel top-right that doesn't overlap it, dock + desktop breathing
+       around them. cqi here shares the film's basis (% of screen width, film ÷1440). */
+    .panel-screen { aspect-ratio: 1.6; }
+    .panel-screen .mac-desk { display: flex; justify-content: flex-end; align-items: flex-start; padding: 4cqi; }
+    .panel-screen .mpanel { margin: 0; position: relative; z-index: 2; max-width: 35cqi; }
+    .mac-win { position: absolute; left: 4cqi; top: 5cqi; width: 33cqi; height: 36cqi; border-radius: 2.4cqi; overflow: hidden; z-index: 1;
+      background: rgba(252,253,251,0.9); box-shadow: 0 6cqi 12cqi -4cqi rgba(18,38,28,0.3), 0 0.4cqi 1.2cqi rgba(0,0,0,0.06); }
+    .mac-win .win-bar { height: 5cqi; background: rgba(240,244,241,0.92); display: flex; align-items: center; gap: 1.2cqi; padding: 0 2cqi; border-bottom: 1px solid rgba(0,0,0,0.05); }
+    .mac-win .tl { width: 1.7cqi; height: 1.7cqi; border-radius: 50%; } .mac-win .tl.r{background:#ff5f57;} .mac-win .tl.y{background:#febc2e;} .mac-win .tl.g{background:#28c840;}
+    .mac-win .win-main { display: flex; height: calc(100% - 5cqi); }
+    .mac-win .win-side { width: 13cqi; flex: 0 0 auto; background: rgba(233,240,236,0.72); border-right: 1px solid rgba(0,0,0,0.05); padding: 2.2cqi 1.5cqi; display: flex; flex-direction: column; gap: 1.5cqi; }
+    .mac-win .win-side i { height: 1.9cqi; border-radius: 0.7cqi; background: rgba(58,80,70,0.11); display: block; } .mac-win .win-side i.on { background: rgba(47,125,94,0.24); }
+    .mac-win .win-content { flex: 1; padding: 2.8cqi 3cqi; }
+    .mac-win .w-title { height: 2.6cqi; width: 52%; border-radius: 0.9cqi; background: rgba(40,55,48,0.24); margin-bottom: 2.8cqi; }
+    .mac-win .w-ln { height: 1.8cqi; border-radius: 0.7cqi; background: rgba(58,80,70,0.12); margin-bottom: 2.4cqi; } .mac-win .w-ln.accent { background: rgba(47,125,94,0.2); }
+    .mac-dock { position: absolute; left: 50%; bottom: 2.6cqi; transform: translateX(-50%); z-index: 1; display: flex; align-items: center; gap: 1.9cqi; height: 9.4cqi; padding: 0 2cqi; border-radius: 2.7cqi;
+      background: rgba(255,255,255,0.26); border: 1px solid rgba(255,255,255,0.4); box-shadow: 0 2cqi 5cqi -2cqi rgba(20,40,30,0.3); }
+    .mac-dock i { width: 6.8cqi; height: 6.8cqi; border-radius: 1.9cqi; display: block; box-shadow: 0 0.5cqi 1.1cqi rgba(0,0,0,0.15), inset 0 0.2cqi 0 rgba(255,255,255,0.42); }
+    .mac-dock .di-mira { background: linear-gradient(150deg,#eafff6,#a4eadc 56%,#f3eec7); position: relative; }
+    .mac-dock .di-mira::after { content:""; position:absolute; left:50%; top:50%; transform:translate(-50%,-50%); width:3.2cqi; height:2cqi; border-radius:1cqi; background:radial-gradient(130% 150% at 34% 22%,#123029,#061109 82%); }
+    .mac-dock .di-mira::before { content:""; position:absolute; left:50%; top:50%; z-index:1; transform:translate(-50%,-50%); width:1.4cqi; height:1.4cqi; border-radius:50%; background:radial-gradient(circle,#fff,#8fe6c0 45%,transparent 78%); }
+
+    /* 官宣短片 — the hero visual (replaces Mira icon); Download sits below it */
+    .hero .stage .film-frame { width: 100%; max-width: 620px; margin: 0 auto; border-radius: var(--radius-lg); overflow: hidden; background: #0e2a22;
+      box-shadow: 0 1px 1px rgba(20,20,19,0.05), 0 30px 60px -30px rgba(20,20,19,0.24), inset 0 1px 0 rgba(255,255,255,0.4); }
+    .film-video { display: block; width: 100%; height: auto; }
+    @media (max-width: 560px) { .hero .stage .film-frame { max-width: 100%; } }
 
     /* ── 小睡 · 全屏回充 (§6.3) — a deep-green rest scene; Mira's light settles to a
        line that BRIGHTENS as the charge bar fills. Loops so the 回充 is visible. */
-    .rest-scene { position: relative; container-type: inline-size; aspect-ratio: 1.6; display: grid; justify-items: center; align-content: center; gap: 5cqi; overflow: hidden; text-align: center; color: rgba(255,255,255,0.94); background: radial-gradient(46% 42% at 50% 38%, rgba(243,238,199,0.10) 0%, transparent 56%), radial-gradient(78% 74% at 50% 42%, #1e6650 0%, #16483a 38%, #0e3229 72%, #0a241d 100%); }
+    /* nap sits on your real desktop under a translucent green mist (like the film),
+       not a flat green void — dense at the edges, clearer in the centre */
+    .rest-scene { position: relative; container-type: inline-size; aspect-ratio: 1.6; display: grid; justify-items: center; align-content: center; gap: 5cqi; overflow: hidden; text-align: center; color: rgba(255,255,255,0.94); background: radial-gradient(130% 90% at 78% -12%, rgba(255,255,255,0.55), transparent 55%), linear-gradient(158deg, #edf0ea 0%, #dbe1d6 100%); }
+    .rest-scene::after { content: ""; position: absolute; inset: 0; z-index: 1; pointer-events: none; background: radial-gradient(46% 42% at 50% 42%, rgba(243,238,199,0.05) 0%, transparent 56%), radial-gradient(82% 78% at 50% 46%, rgba(8,31,26,0.42) 0%, rgba(9,33,27,0.52) 28%, rgba(10,32,27,0.80) 66%, rgba(6,22,18,0.95) 100%); }
+    .rest-scene > :is(.lens, .rs-clock, .rs-track, .rs-msg) { position: relative; z-index: 2; }
+    .strong-wash .mac-win, .rest-scene .mac-win { left: 5cqi; top: 5.5cqi; width: 38cqi; height: 43cqi; z-index: 0; border-radius: 2cqi; }
+    .strong-wash .mac-dock, .rest-scene .mac-dock { bottom: 3cqi; height: 8.4cqi; gap: 1.6cqi; padding: 0 1.6cqi; border-radius: 2.4cqi; z-index: 0; }
+    .strong-wash .mac-dock i, .rest-scene .mac-dock i { width: 5.8cqi; height: 5.8cqi; border-radius: 1.6cqi; }
+    .strong-wash .mac-dock .di-mira::after, .rest-scene .mac-dock .di-mira::after { width: 2.9cqi; height: 1.8cqi; border-radius: 0.9cqi; }
+    .strong-wash .mac-dock .di-mira::before, .rest-scene .mac-dock .di-mira::before { width: 1.3cqi; height: 1.3cqi; }
     .rest-scene .lens { --lf: 13cqi; }
     .rest-scene .lens i { width: calc(var(--lf) * 0.58); height: calc(var(--lf) * 0.14); border-radius: 999px; animation: napBright 6s var(--ease) infinite; }
     @keyframes napBright { 0% { opacity: 0.32; transform: translate(-50%,-50%) scaleX(1); } 46% { opacity: 0.96; transform: translate(-50%,-50%) scaleX(1.16); } 74% { opacity: 0.9; transform: translate(-50%,-50%) scaleX(1.14); } 82% { opacity: 0.32; transform: translate(-50%,-50%) scaleX(1); } 100% { opacity: 0.32; transform: translate(-50%,-50%) scaleX(1); } }
@@ -363,7 +409,9 @@
        faint warm wash: more present, never a takeover. */
     /* the warm wash is a WHISPER (matches the app's faint §6.1 值): a hint of warmth
        at the center, the shared grey desktop still reads everywhere. */
-    .strong-wash { container-type: inline-size; aspect-ratio: 1.7; display: grid; place-items: center; padding: 8cqi; background: radial-gradient(96% 92% at 50% 48%, rgba(255,239,214,0.26) 0%, rgba(252,227,188,0.13) 46%, transparent 72%), radial-gradient(130% 90% at 78% -12%, rgba(255,255,255,0.55), transparent 55%), linear-gradient(158deg, #edf0ea 0%, #dbe1d6 100%); }
+    .strong-wash { container-type: inline-size; aspect-ratio: 1.7; display: grid; place-items: center; padding: 8cqi; overflow: hidden; background: radial-gradient(130% 90% at 78% -12%, rgba(255,255,255,0.55), transparent 55%), linear-gradient(158deg, #edf0ea 0%, #dbe1d6 100%); }
+    .strong-wash::after { content: ""; position: absolute; inset: 0; z-index: 1; pointer-events: none; background: radial-gradient(96% 92% at 50% 48%, rgba(255,239,214,0.34) 0%, rgba(252,227,188,0.2) 46%, transparent 74%); }
+    .strong-wash > .island.big { position: relative; z-index: 2; }
     /* cqi-sized so it floats centered (not filling) and the count never clips */
     .island.big { gap: 3cqi; padding: 3cqi 5cqi 3cqi 3cqi; font-size: 4.2cqi; max-width: 100%; }
     .island.big .lens { --lf: 7.6cqi; }
@@ -777,9 +825,12 @@
     </h1>
 
     <div class="stage">
-      <div class="mira" role="img" aria-label="Mira，一颗安静呼吸的光点" data-en-label="Mira, a point of light quietly breathing">
-        <div class="pet" aria-hidden="true">
-        </div>
+      <div class="film-frame">
+        <video class="film-video" src="assets/mira-30s-zh.mp4?v=2" data-en-src="assets/mira-30s-en.mp4?v=2"
+               poster="assets/mira-poster-zh.jpg?v=2" data-en-poster="assets/mira-poster-en.jpg?v=2"
+               muted loop playsinline autoplay preload="metadata"
+               aria-label="EyeFlow 短片：Mira 如何随你的疲劳，从轻轻提醒到全屏小睡"
+               data-en-label="EyeFlow film: how Mira adapts — from a gentle nudge to a full nap"></video>
       </div>
     </div>
 
@@ -895,20 +946,28 @@
       <div class="screen-card mac-screen panel-screen reveal" role="img" aria-label="EyeFlow 的菜单栏面板：Mira 的气色、今日用眼时长和两个歇息动作" data-en-label="EyeFlow's menubar panel — Mira's complexion, today's screen time, and two gentle rest actions">
         <div class="mac-bar"><span class="lens" aria-hidden="true"><i></i></span><span class="mac-clock">14:55</span></div>
         <div class="mac-desk">
+          <div class="mac-win" aria-hidden="true">
+            <div class="win-bar"><span class="tl r"></span><span class="tl y"></span><span class="tl g"></span></div>
+            <div class="win-main">
+              <div class="win-side"><i class="on"></i><i></i><i></i><i></i><i></i><i></i></div>
+              <div class="win-content"><div class="w-title"></div><div class="w-ln" style="width:94%"></div><div class="w-ln" style="width:76%"></div><div class="w-ln accent" style="width:54%"></div><div class="w-ln" style="width:88%"></div><div class="w-ln" style="width:66%"></div></div>
+            </div>
+          </div>
+          <div class="mac-dock" aria-hidden="true"><i class="di-mira"></i><i style="background:linear-gradient(160deg,#5b9bd5,#3f6fb0)"></i><i style="background:linear-gradient(160deg,#f0a04b,#d97c2b)"></i><i style="background:linear-gradient(160deg,#e5675f,#c23f3f)"></i><i style="background:linear-gradient(160deg,#7bc47f,#3f9a52)"></i><i style="background:linear-gradient(160deg,#a98bd0,#7d5bb0)"></i></div>
           <div class="mpanel">
-          <div class="mp-head"><span class="mp-gear" role="img" aria-label="设置" data-en-label="Settings"><svg viewBox="0 0 24 24" aria-hidden="true"><defs><mask id="mpGearHole"><rect width="24" height="24" fill="#fff"/><circle cx="12" cy="12" r="3.5" fill="#000"/></mask></defs><g fill="currentColor" mask="url(#mpGearHole)"><circle cx="12" cy="12" r="6.3"/><rect x="10.7" y="1.9" width="2.6" height="5" rx="1.1"/><rect x="10.7" y="1.9" width="2.6" height="5" rx="1.1" transform="rotate(45 12 12)"/><rect x="10.7" y="1.9" width="2.6" height="5" rx="1.1" transform="rotate(90 12 12)"/><rect x="10.7" y="1.9" width="2.6" height="5" rx="1.1" transform="rotate(135 12 12)"/><rect x="10.7" y="1.9" width="2.6" height="5" rx="1.1" transform="rotate(180 12 12)"/><rect x="10.7" y="1.9" width="2.6" height="5" rx="1.1" transform="rotate(225 12 12)"/><rect x="10.7" y="1.9" width="2.6" height="5" rx="1.1" transform="rotate(270 12 12)"/><rect x="10.7" y="1.9" width="2.6" height="5" rx="1.1" transform="rotate(315 12 12)"/></g></svg></span></div>
+          <div class="mp-head"><span class="mp-gear" role="img" aria-label="设置" data-en-label="Settings"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><circle cx="12" cy="12" r="3.2"/><path d="M12 2.5v2.2M12 19.3v2.2M4.2 4.2l1.6 1.6M18.2 18.2l1.6 1.6M2.5 12h2.2M19.3 12h2.2M4.2 19.8l1.6-1.6M18.2 5.8l1.6-1.6"/></svg></span></div>
           <div class="mp-cap">
-            <span class="mp-mark" aria-hidden="true"><span class="lens"><i></i></span></span>
-            <span class="mp-cap-t"><b data-en="Energy 66%">精力 66%</b><span data-en="Steady">气色 · 常态</span></span>
+            <span class="mp-mark" aria-hidden="true"></span>
+            <span class="mp-cap-t"><b data-en="Energy 66%">精力 66%</b><span data-en="Steady">常态</span></span>
           </div>
-          <div class="mp-today-cap" data-en="Today">今日</div>
+          <div class="mp-today-cap" data-en="Today">今天</div>
           <div class="mp-today">
-            <div><b>1h 42m</b><span data-en="Screen time">用眼时长</span></div>
+            <div><b>1h 42m</b><span data-en="Screen time">今日用眼</span></div>
             <div class="mp-div" aria-hidden="true"></div>
-            <div><b>8×</b><span data-en="Rests (breaks 7 · naps 1)">歇息（短歇7 · 小睡1）</span></div>
+            <div><b data-en="8×">8 次</b><span data-en="Rests (breaks 7 · naps 1)">歇息（短歇 7 · 小睡 1）</span></div>
           </div>
-          <div class="mp-row primary"><span class="mp-ic tri" aria-hidden="true"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg></span><span class="mp-lbl" data-en="Rest now">现在歇一下</span><span class="mp-meta" data-en="Short break · 20s">短歇 · 20 秒</span></div>
-          <div class="mp-row"><span class="mp-ic moon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg></span><span class="mp-lbl" data-en="Take a nap">小睡一会儿</span><span class="mp-meta" data-en="Full · 3 min">完整 · 3 分钟</span></div>
+          <div class="mp-row primary"><span class="mp-ic" aria-hidden="true"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg></span><span class="mp-lbl" data-en="Rest now">现在歇一下</span><span class="mp-meta" data-en="Short break · 20s">短歇 · 20 秒</span><span class="mp-chev" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></span></div>
+          <div class="mp-row"><span class="mp-ic" aria-hidden="true"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M13.4 3.1a8.2 8.2 0 1 0 7.5 10.6 6.6 6.6 0 0 1-7.5-10.6z"/></svg></span><span class="mp-lbl" data-en="Take a nap">小睡一会儿</span><span class="mp-meta" data-en="Full · 3 min">完整 · 3 分钟</span><span class="mp-chev" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></span></div>
           </div>
         </div>
       </div>
@@ -942,6 +1001,8 @@
         <div class="screen-card reveal">
           <div class="strong-wash has-bar">
             <div class="mac-bar"><span class="lens" aria-hidden="true"><i></i></span><span class="mac-clock">15:20</span></div>
+            <div class="mac-win" aria-hidden="true"><div class="win-bar"><span class="tl r"></span><span class="tl y"></span><span class="tl g"></span></div><div class="win-main"><div class="win-side"><i class="on"></i><i></i><i></i><i></i></div><div class="win-content"><div class="w-title"></div><div class="w-ln" style="width:92%"></div><div class="w-ln" style="width:70%"></div><div class="w-ln accent" style="width:52%"></div><div class="w-ln" style="width:84%"></div></div></div></div>
+            <div class="mac-dock" aria-hidden="true"><i class="di-mira"></i><i style="background:linear-gradient(160deg,#5b9bd5,#3f6fb0)"></i><i style="background:linear-gradient(160deg,#f0a04b,#d97c2b)"></i><i style="background:linear-gradient(160deg,#e5675f,#c23f3f)"></i><i style="background:linear-gradient(160deg,#7bc47f,#3f9a52)"></i></div>
             <div class="island big" role="img" aria-label="EyeFlow 加强档提醒：屏幕中央一枚更大的气色胶囊，配一层柔和暖背景" data-en-label="EyeFlow's strong reminder — a bigger complexion capsule centered on a soft warm wash">
               <div class="lens" aria-hidden="true"><i></i></div>
               <div class="isl-body">
@@ -985,6 +1046,8 @@
         <p class="mock-tag" data-en="Nap · full recharge">小睡 · 全屏回充</p>
         <div class="screen-card">
           <div class="rest-scene" role="img" aria-label="EyeFlow 小睡：全屏变暗，Mira 的光点收成一线，气色随充电条一点点亮回来" data-en-label="EyeFlow's nap — the screen dims, Mira's light settles to a line and brightens as the charge bar fills">
+            <div class="mac-win" aria-hidden="true"><div class="win-bar"><span class="tl r"></span><span class="tl y"></span><span class="tl g"></span></div><div class="win-main"><div class="win-side"><i class="on"></i><i></i><i></i><i></i></div><div class="win-content"><div class="w-title"></div><div class="w-ln" style="width:92%"></div><div class="w-ln" style="width:70%"></div><div class="w-ln accent" style="width:52%"></div><div class="w-ln" style="width:84%"></div></div></div></div>
+            <div class="mac-dock" aria-hidden="true"><i class="di-mira"></i><i style="background:linear-gradient(160deg,#5b9bd5,#3f6fb0)"></i><i style="background:linear-gradient(160deg,#f0a04b,#d97c2b)"></i><i style="background:linear-gradient(160deg,#e5675f,#c23f3f)"></i><i style="background:linear-gradient(160deg,#7bc47f,#3f9a52)"></i></div>
             <div class="lens" aria-hidden="true"><i></i></div>
             <div class="rs-clock">0:42</div>
             <div class="rs-track"><div class="rs-fill"></div></div>
@@ -1174,6 +1237,8 @@
       alts.forEach((el) => (el.dataset.zhAlt = el.getAttribute("alt")));
       const shots = [...document.querySelectorAll("img[data-en-src]")];
       shots.forEach((el) => (el.dataset.zhSrc = el.getAttribute("src")));
+      const vids = [...document.querySelectorAll("video[data-en-src]")];
+      vids.forEach((el) => { el.dataset.zhSrc = el.getAttribute("src"); el.dataset.zhPoster = el.getAttribute("poster"); });
       const phs = [...document.querySelectorAll("[data-en-ph]")];
       phs.forEach((el) => (el.dataset.zhPh = el.getAttribute("placeholder")));
       const btns = [...document.querySelectorAll(".lang button")];
@@ -1183,6 +1248,7 @@
         labeled.forEach((el) => el.setAttribute("aria-label", lang === "en" ? el.dataset.enLabel : el.dataset.zhLabel));
         alts.forEach((el) => el.setAttribute("alt", lang === "en" ? el.dataset.enAlt : el.dataset.zhAlt));
         shots.forEach((el) => el.setAttribute("src", lang === "en" ? el.dataset.enSrc : el.dataset.zhSrc));
+        vids.forEach((el) => { const s = lang === "en" ? el.dataset.enSrc : el.dataset.zhSrc; if (el.getAttribute("src") !== s) { el.setAttribute("src", s); el.setAttribute("poster", lang === "en" ? el.dataset.enPoster : el.dataset.zhPoster); el.load(); const p = el.play(); if (p && p.catch) p.catch(() => {}); } });
         phs.forEach((el) => el.setAttribute("placeholder", lang === "en" ? el.dataset.enPh : el.dataset.zhPh));
         btns.forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.lang === lang)));
         try { localStorage.setItem("ef-lang", lang); } catch (e) {}
