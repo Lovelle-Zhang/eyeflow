@@ -426,14 +426,17 @@
     /* shared desktop backdrop — both screens sit on the SAME desktop; 加强 just adds
        a warm wash on top of it (below), so the two frames read as one place. */
     .top-screen, .strong-wash { background: radial-gradient(130% 90% at 78% -12%, rgba(255,255,255,0.7), transparent 55%), radial-gradient(105% 80% at 18% 122%, rgba(31,122,94,0.06), transparent 58%), linear-gradient(158deg, #edf0ea 0%, #dbe1d6 100%); }
-    .top-screen { container-type: inline-size; aspect-ratio: 1.7; display: grid; justify-items: center; align-content: start; padding-top: 4.5cqi; }
+    .top-screen { container-type: inline-size; aspect-ratio: 1.6; display: grid; justify-items: center; align-content: start; padding-top: 4.5cqi; }
     .top-screen .island { font-size: 2.4cqi; }
 
     /* ── 加强 · 居中大胶囊 (§6.1) — a bigger capsule (≈2× the island) floating on a
        faint warm wash: more present, never a takeover. */
     /* the warm wash is a WHISPER (matches the app's faint §6.1 值): a hint of warmth
        at the center, the shared grey desktop still reads everywhere. */
-    .strong-wash { container-type: inline-size; aspect-ratio: 1.7; display: grid; place-items: center; padding: 8cqi; overflow: hidden; background: radial-gradient(130% 90% at 78% -12%, rgba(255,255,255,0.55), transparent 55%), linear-gradient(158deg, #edf0ea 0%, #dbe1d6 100%); }
+    /* padding:0 关键:strong-wash 之前的 8cqi padding 会缩小其容器查询框,使菜单栏(6.4cqi)
+       解析成 ~29px 而非 34px、绿点也偏小 → 四屏菜单栏不一致。去掉后与其余三屏一致(34/18)。
+       大胶囊本就是内容宽居中,自带余白,不需要 padding。aspect 统一 1.6(真机 16:10)。 */
+    .strong-wash { container-type: inline-size; aspect-ratio: 1.6; display: grid; place-items: center; padding: 0; overflow: hidden; background: radial-gradient(130% 90% at 78% -12%, rgba(255,255,255,0.55), transparent 55%), linear-gradient(158deg, #edf0ea 0%, #dbe1d6 100%); }
     .strong-wash::after { content: ""; position: absolute; inset: 0; z-index: 1; pointer-events: none; background: radial-gradient(96% 92% at 50% 48%, rgba(255,239,214,0.34) 0%, rgba(252,227,188,0.2) 46%, transparent 74%); }
     .strong-wash > .island.big { position: relative; z-index: 2; }
     /* cqi-sized so it floats centered (not filling) and the count never clips */
