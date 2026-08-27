@@ -400,9 +400,9 @@
        line that BRIGHTENS as the charge bar fills. Loops so the 回充 is visible. */
     /* nap sits on your real desktop under a translucent green mist (like the film),
        not a flat green void — dense at the edges, clearer in the centre */
-    .rest-scene { position: relative; container-type: inline-size; aspect-ratio: 1.6; display: grid; justify-items: center; align-content: center; gap: 5cqi; overflow: hidden; text-align: center; color: rgba(255,255,255,0.94); background: radial-gradient(130% 90% at 78% -12%, rgba(255,255,255,0.55), transparent 55%), linear-gradient(158deg, #edf0ea 0%, #dbe1d6 100%); }
+    .rest-scene { position: relative; container-type: inline-size; aspect-ratio: 1.6; display: grid; justify-items: center; align-content: center; gap: 3.5cqi; overflow: hidden; text-align: center; color: rgba(255,255,255,0.94); background: radial-gradient(130% 90% at 78% -12%, rgba(255,255,255,0.55), transparent 55%), linear-gradient(158deg, #edf0ea 0%, #dbe1d6 100%); }
     .rest-scene::after { content: ""; position: absolute; inset: 0; z-index: 1; pointer-events: none; background: radial-gradient(46% 42% at 50% 42%, rgba(243,238,199,0.05) 0%, transparent 56%), radial-gradient(82% 78% at 50% 46%, rgba(8,31,26,0.42) 0%, rgba(9,33,27,0.52) 28%, rgba(10,32,27,0.80) 66%, rgba(6,22,18,0.95) 100%); }
-    .rest-scene > :is(.lens, .rs-clock, .rs-track, .rs-msg) { position: relative; z-index: 2; }
+    .rest-scene > :is(.rs-mira, .rs-clock, .rs-track, .rs-msg) { position: relative; z-index: 2; }
     .strong-wash .mac-win, .rest-scene .mac-win { left: 5cqi; top: 5.5cqi; width: 38cqi; height: 43cqi; z-index: 0; border-radius: 2cqi; }
     .strong-wash .mac-dock, .rest-scene .mac-dock, .panel-screen .mac-dock { bottom: 3cqi; height: 8.4cqi; gap: 1.6cqi; padding: 0 1.6cqi; border-radius: 2.4cqi; z-index: 0; }
     .strong-wash .mac-dock i, .rest-scene .mac-dock i, .panel-screen .mac-dock i { width: 5.8cqi; height: 5.8cqi; border-radius: 1.6cqi; }
@@ -410,14 +410,16 @@
     .strong-wash .mac-dock .di-mira::before, .rest-scene .mac-dock .di-mira::before, .panel-screen .mac-dock .di-mira::before { width: 1.3cqi; height: 1.3cqi; }
     /* 01 面板屏是干净亮桌面,没有 02/03 的暖罩/雾罩来压 dock,故直接把彩色图标降饱和+略透明,克制感与后面看齐 */
     .panel-screen .mac-dock { filter: saturate(0.78); opacity: 0.9; }
-    .rest-scene .lens { --lf: 13cqi; }
+    /* nap Mira = 真机 .nap-hero:绿 capsule(250×116) 内嵌深 lens(92,=0.79×capH)。按 1440 屏换算:capsule 17.4×8cqi、lens 6.4cqi */
+    .rest-scene .rs-mira { display: grid; place-items: center; width: 17.4cqi; height: 8cqi; border-radius: 999px; background: rgba(26,107,82,0.97); box-shadow: 0 3cqi 6cqi -3cqi rgba(20,20,19,0.3), inset 0 0 0 1px rgba(255,255,255,0.14); }
+    .rest-scene .lens { --lf: 6.4cqi; }
     .rest-scene .lens i { width: calc(var(--lf) * 0.58); height: calc(var(--lf) * 0.14); border-radius: 999px; animation: napBright 6s var(--ease) infinite; }
     @keyframes napBright { 0% { opacity: 0.32; transform: translate(-50%,-50%) scaleX(1); } 46% { opacity: 0.96; transform: translate(-50%,-50%) scaleX(1.16); } 74% { opacity: 0.9; transform: translate(-50%,-50%) scaleX(1.14); } 82% { opacity: 0.32; transform: translate(-50%,-50%) scaleX(1); } 100% { opacity: 0.32; transform: translate(-50%,-50%) scaleX(1); } }
-    .rest-scene .rs-clock { font-size: 12cqi; font-weight: 200; letter-spacing: 0.02em; font-variant-numeric: tabular-nums; line-height: 1; }
-    .rest-scene .rs-track { width: 46cqi; height: 0.8cqi; border-radius: 999px; background: rgba(255,255,255,0.16); overflow: hidden; }
+    .rest-scene .rs-clock { font-size: 5cqi; font-weight: 200; letter-spacing: 0.02em; font-variant-numeric: tabular-nums; line-height: 1; }
+    .rest-scene .rs-track { width: 28cqi; height: 0.8cqi; border-radius: 999px; background: rgba(255,255,255,0.16); overflow: hidden; }
     .rest-scene .rs-fill { height: 100%; width: 18%; border-radius: 999px; background: #6fe7c3; animation: napFill 6s var(--ease) infinite; }
     @keyframes napFill { 0% { width: 18%; } 46% { width: 100%; } 78% { width: 100%; } 82% { width: 18%; } 100% { width: 18%; } }
-    .rest-scene .rs-msg { margin: 0; font-size: 3.6cqi; font-weight: 500; }
+    .rest-scene .rs-msg { margin: 0; font-size: 2.2cqi; font-weight: 500; }
 
     /* ── 轻量 · 顶端岛 (§6.1) — the small island shown WHERE it lives: pinned to the
        top of a plain desktop, at its true small proportion (parallels 加强 below). */
@@ -1063,7 +1065,7 @@
           <div class="rest-scene" role="img" aria-label="EyeFlow 小睡：全屏变暗，Mira 的光点收成一线，气色随充电条一点点亮回来" data-en-label="EyeFlow's nap — the screen dims, Mira's light settles to a line and brightens as the charge bar fills">
             <div class="mac-win" aria-hidden="true"><div class="win-bar"><span class="tl r"></span><span class="tl y"></span><span class="tl g"></span></div><div class="win-main"><div class="win-side"><i class="on"></i><i></i><i></i><i></i></div><div class="win-content"><div class="w-title"></div><div class="w-ln" style="width:92%"></div><div class="w-ln" style="width:70%"></div><div class="w-ln accent" style="width:52%"></div><div class="w-ln" style="width:84%"></div></div></div></div>
             <div class="mac-dock" aria-hidden="true"><i class="di-mira"></i><i style="background:linear-gradient(160deg,#5b9bd5,#3f6fb0)"></i><i style="background:linear-gradient(160deg,#f0a04b,#d97c2b)"></i><i style="background:linear-gradient(160deg,#e5675f,#c23f3f)"></i><i style="background:linear-gradient(160deg,#7bc47f,#3f9a52)"></i></div>
-            <div class="lens" aria-hidden="true"><i></i></div>
+            <div class="rs-mira" aria-hidden="true"><div class="lens"><i></i></div></div>
             <div class="rs-clock">0:42</div>
             <div class="rs-track"><div class="rs-fill"></div></div>
             <p class="rs-msg" data-en="Close your eyes, and settle.">闭上眼，缓一缓。</p>
