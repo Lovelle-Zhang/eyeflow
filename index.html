@@ -277,12 +277,19 @@
 
     /* ── Reminder island — Mira's lightest touch, rebuilt from app tokens ─ */
     /* Pixel-matched to the app's island.html — same padding, radius, green, shadow, type. */
-    .island { display: inline-flex; align-items: center; gap: 13px; max-width: 100%; padding: 14px 26px 14px 16px; border-radius: 999px; background: rgba(26, 107, 82, 0.97); color: #f6f7f9; font-size: 16.5px; font-weight: 600; line-height: 1.25; letter-spacing: 0.01em; box-shadow: 0 14px 32px -12px rgba(20,20,19,0.24), inset 0 0 0 1px rgba(255,255,255,0.14); }
-    .island .lens { --lf: 30px; }
-    .island .isl-body { display: grid; gap: 7px; min-width: 168px; }
-    .island .isl-track { height: 3px; border-radius: 999px; background: rgba(255,255,255,0.18); overflow: hidden; }
+    /* island = 真机提醒胶囊(reminder.css/.rem):matte 绿 pill + 左侧 app 图标 squircle
+       (浅薄荷底板内嵌深 lens+光点)+ 白字 + 3px 薄荷进度 + 薄荷倒数。字重 500,不加粗。 */
+    /* island = 真机提醒胶囊(reminder.css/.rem 实测:capsule 296×68 / mark 44 / lens 27×17 /
+       text 16 / count 15 / track 3 / gap 13 / pad 12·22)。内部尺寸全部用 em 锁死到真机比例
+       (mark 2.75em·lens 1.06em·gap .81em·pad .75/1.375em·body-gap .38em·track .19em·count .94em),
+       换 context 只调 .island 的 font-size 即整体等比缩放,永不失真。 */
+    .island { display: inline-flex; align-items: center; gap: 0.81em; max-width: 100%; padding: 0.75em 1.375em 0.75em 0.75em; border-radius: 999px; background: rgba(26, 107, 82, 0.97); color: #f6f7f9; font-size: 16px; font-weight: 500; line-height: 1.25; letter-spacing: 0; box-shadow: 0 14px 32px -12px rgba(20,20,19,0.24), inset 0 0 0 1px rgba(255,255,255,0.14); }
+    .island .isl-mark { flex: 0 0 auto; display: grid; place-items: center; width: 2.75em; height: 2.75em; border-radius: 27%; background: linear-gradient(150deg,#eafff6 0%,#aeede0 56%,#f3eec7 100%); box-shadow: inset 0 1px 0 rgba(255,255,255,0.55), 0 1px 3px rgba(10,30,22,0.28); }
+    .island .lens { --lf: 1.06em; }
+    .island .isl-body { display: grid; gap: 0.38em; min-width: 0; }
+    .island .isl-track { height: 0.19em; border-radius: 999px; background: rgba(255,255,255,0.18); overflow: hidden; }
     .island .isl-fill { height: 100%; width: 100%; border-radius: 999px; background: #6FE7C3; }
-    .island .isl-count { flex: 0 0 auto; font-size: 20px; font-weight: 600; color: #6fe7c3; font-variant-numeric: tabular-nums; margin-left: 4px; }
+    .island .isl-count { flex: 0 0 auto; font-size: 0.94em; font-weight: 600; color: #6fe7c3; font-variant-numeric: tabular-nums; margin-left: 0.25em; }
     /* Live island — loops its real self-closing rest: 看远处 → the bar drains → 已记录 ✓.
        Slow (8s), gentle. reduced-motion freezes it on the rest state. */
     .island.live { align-items: center; }
@@ -418,11 +425,7 @@
        a warm wash on top of it (below), so the two frames read as one place. */
     .top-screen, .strong-wash { background: radial-gradient(130% 90% at 78% -12%, rgba(255,255,255,0.7), transparent 55%), radial-gradient(105% 80% at 18% 122%, rgba(31,122,94,0.06), transparent 58%), linear-gradient(158deg, #edf0ea 0%, #dbe1d6 100%); }
     .top-screen { container-type: inline-size; aspect-ratio: 1.7; display: grid; justify-items: center; align-content: start; padding-top: 4.5cqi; }
-    .top-screen .island { gap: 1.5cqi; padding: 1.6cqi 3.4cqi 1.6cqi 1.6cqi; font-size: 2.6cqi; }
-    .top-screen .island .lens { --lf: 4.9cqi; }
-    .top-screen .island .isl-body { min-width: 0; gap: 1.1cqi; }
-    .top-screen .island .isl-track { height: 0.5cqi; }
-    .top-screen .island .isl-count { font-size: 3cqi; margin-left: 1.2cqi; }
+    .top-screen .island { font-size: 2.4cqi; }
 
     /* ── 加强 · 居中大胶囊 (§6.1) — a bigger capsule (≈2× the island) floating on a
        faint warm wash: more present, never a takeover. */
@@ -432,12 +435,8 @@
     .strong-wash::after { content: ""; position: absolute; inset: 0; z-index: 1; pointer-events: none; background: radial-gradient(96% 92% at 50% 48%, rgba(255,239,214,0.34) 0%, rgba(252,227,188,0.2) 46%, transparent 74%); }
     .strong-wash > .island.big { position: relative; z-index: 2; }
     /* cqi-sized so it floats centered (not filling) and the count never clips */
-    .island.big { gap: 3cqi; padding: 3cqi 5cqi 3cqi 3cqi; font-size: 4.2cqi; max-width: 100%; }
-    .island.big .lens { --lf: 7.6cqi; }
-    .island.big .isl-body { min-width: 0; gap: 2cqi; }
+    .island.big { font-size: 3.7cqi; max-width: 100%; }
     .island.big .isl-body > div:first-child { white-space: nowrap; }
-    .island.big .isl-track { height: 0.9cqi; }
-    .island.big .isl-count { font-size: 5.6cqi; margin-left: 1.6cqi; }
 
     /* 只改屏的样式:给屏加一条顶部菜单栏(Mira 绿点 + 时钟),尺寸/布局/岛全不动 */
     .top-screen.has-bar, .strong-wash.has-bar { position: relative; }
@@ -1002,11 +1001,12 @@
         <div class="screen-card"><div class="top-screen has-bar">
         <div class="mac-bar"><span class="lens" aria-hidden="true"><i></i></span><span class="mac-clock">15:20</span></div>
         <div class="island" role="img" aria-label="EyeFlow 顶部提醒岛：看看远方休息一下，看完自动记录" data-en-label="EyeFlow's reminder island at the top of the screen: look into the distance to rest, logged automatically when you're done">
-          <div class="lens" aria-hidden="true"><i></i></div>
+          <div class="isl-mark" aria-hidden="true"><div class="lens"><i></i></div></div>
           <div class="isl-body">
             <div data-en="Look into the distance">看看远方，休息一下</div>
             <div class="isl-track"><div class="isl-fill" style="width:64%"></div></div>
           </div>
+          <div class="isl-count">13</div>
         </div>
         </div></div>
         <p class="mock-note" data-en="Rests at the very top; tucks itself away when you're done.">贴在屏幕顶端，看完自己收起。</p>
@@ -1019,7 +1019,7 @@
             <div class="mac-win" aria-hidden="true"><div class="win-bar"><span class="tl r"></span><span class="tl y"></span><span class="tl g"></span></div><div class="win-main"><div class="win-side"><i class="on"></i><i></i><i></i><i></i></div><div class="win-content"><div class="w-title"></div><div class="w-ln" style="width:92%"></div><div class="w-ln" style="width:70%"></div><div class="w-ln accent" style="width:52%"></div><div class="w-ln" style="width:84%"></div></div></div></div>
             <div class="mac-dock" aria-hidden="true"><i class="di-mira"></i><i style="background:linear-gradient(160deg,#5b9bd5,#3f6fb0)"></i><i style="background:linear-gradient(160deg,#f0a04b,#d97c2b)"></i><i style="background:linear-gradient(160deg,#e5675f,#c23f3f)"></i><i style="background:linear-gradient(160deg,#7bc47f,#3f9a52)"></i></div>
             <div class="island big" role="img" aria-label="EyeFlow 加强档提醒：屏幕中央一枚更大的气色胶囊，配一层柔和暖背景" data-en-label="EyeFlow's strong reminder — a bigger complexion capsule centered on a soft warm wash">
-              <div class="lens" aria-hidden="true"><i></i></div>
+              <div class="isl-mark" aria-hidden="true"><div class="lens"><i></i></div></div>
               <div class="isl-body">
                 <div data-en="Rest your eyes — look far">眼睛歇歇，看看远处</div>
                 <div class="isl-track"><div class="isl-fill" style="width:100%"></div></div>
@@ -1047,7 +1047,7 @@
         <div class="screen-card"><div class="top-screen has-bar">
         <div class="mac-bar"><span class="lens" aria-hidden="true"><i></i></span><span class="mac-clock">15:20</span></div>
         <div class="island" role="img" aria-label="EyeFlow 短歇：看向远处 20 秒，进度条走完自动记录" data-en-label="EyeFlow's short break: look into the distance for 20 seconds; logged when the bar runs out">
-          <div class="lens" aria-hidden="true"><i></i></div>
+          <div class="isl-mark" aria-hidden="true"><div class="lens"><i></i></div></div>
           <div class="isl-body">
             <div data-en="Look into the distance">看向远处</div>
             <div class="isl-track"><div class="isl-fill" style="width:58%"></div></div>
