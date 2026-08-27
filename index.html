@@ -110,7 +110,8 @@
        text, same as Mira there. Headings keep their ink. Static — no motion,
        no luminance shift. Product-mock text is excluded (those replicas must
        match the app pixel-for-pixel). */
-    .kw-mira { font-weight: inherit; text-decoration: underline; text-decoration-thickness: max(1px, 0.04em); text-underline-offset: 0.22em; text-decoration-color: var(--mira); }
+    /* 克制:去掉"Mira"绿下划线——绿色只留在光点/胶囊/按钮等真 UI 上,文字不再带下划线噪点 */
+    .kw-mira { font-weight: inherit; }
     .kw-eyes { font-weight: inherit; }
     .body :is(.kw-mira, .kw-eyes), .sub :is(.kw-mira, .kw-eyes) { color: var(--ink-soft); font-weight: 500; }
 
@@ -148,7 +149,7 @@
     .head > .eyebrow + h2 { margin-top: 0; }
 
     /* Act 0 · 眼睛这件事 — 理性说服层:强度 · 责任 · 不可逆(字号走 4 号系统) */
-    .stakes-lead { max-width: 19em; font-size: var(--t-display); font-weight: 400; line-height: 1.42; }
+    .stakes-lead { max-width: 19em; font-size: clamp(1.875rem, 4vw, 2.5rem); font-weight: 400; line-height: 1.5; }
     .stakes { list-style: none; margin: var(--s16) auto 0; padding: 0; max-width: 960px; display: grid; grid-template-columns: repeat(3, 1fr); text-align: center; }
     .stake { position: relative; padding: var(--s1) clamp(22px, 3vw, 36px); }
     .stake + .stake { border-left: 1px solid var(--line); }
@@ -228,9 +229,10 @@
     .hero { text-align: center; padding-top: clamp(84px, 14vh, 156px); padding-bottom: 0; }
     .hero h1 + .sub { margin-top: var(--flow-title); }
     /* 主 slogan:体感钩当头。语义行手工排版，避免移动端把关键词拆坏。 */
-    .hero-slogan { margin: 0 auto; max-width: 17em; font-size: var(--t-display); line-height: 1.42; font-weight: 400; letter-spacing: 0; color: var(--ink); text-wrap: auto; }
+    /* 收敛一点:略缩小 + 更松的行距/字距,大字серif 三行不再"吵" */
+    .hero-slogan { margin: 0 auto; max-width: 17em; font-size: clamp(1.875rem, 4vw, 2.5rem); line-height: 1.5; font-weight: 400; letter-spacing: 0; color: var(--ink); text-wrap: auto; }
     .hero-row { display: block; }
-    .hero-row + .hero-row { margin-top: 0.08em; }
+    .hero-row + .hero-row { margin-top: 0.18em; }
     .hero-row > span { white-space: nowrap; }
     /* 只有 CJK 需要收句读后的视觉空隙;拉丁词距是词距,不能吃掉。 */
     html[lang="zh-CN"] .hero-row > span + span { margin-left: -0.12em; }
@@ -754,8 +756,8 @@
        tracking so the page does not feel airy-but-loose. */
     html[lang="zh-CN"] { font-family: "PingFang SC", "Hiragino Sans GB", -apple-system, BlinkMacSystemFont, sans-serif; }
     /* CJK 衬线(宋体)没有细体/中间字重,一律 400 regular;行高比拉丁衬线更松。 */
-    html[lang="zh-CN"] h1 { font-weight: 400; letter-spacing: 0; line-height: 1.45; }
-    html[lang="zh-CN"] .stakes-lead { font-weight: 400; }
+    html[lang="zh-CN"] h1 { font-weight: 400; letter-spacing: 0.03em; line-height: 1.62; }
+    html[lang="zh-CN"] .stakes-lead { font-weight: 400; line-height: 1.62; letter-spacing: 0.02em; }
     html[lang="zh-CN"] h2 { font-weight: 400; letter-spacing: 0; line-height: 1.5; }
     html[lang="zh-CN"] .sub { letter-spacing: 0; line-height: 1.8; }
     html[lang="zh-CN"] .body { letter-spacing: 0; line-height: 1.85; }
@@ -858,7 +860,7 @@
     <div class="head">
       <p class="eyebrow" data-en="Honestly">说句实话</p>
       <h2 data-en="You've tried before.">你不是没试过。</h2>
-      <p class="body" data-en="You've probably installed a break reminder. Two or three days in, you turned it off. Not your fault — they nag like an alarm, cutting in over and over until you just want them quiet."><span class="copy-line">你大概也装过护眼提醒。用了两三天，就关掉了。</span><span class="copy-line">不怪你——它们像个闹钟，一次次打断你，响一次烦一次，最后你只想清静。</span></p>
+      <p class="body" data-en="You've probably installed a break reminder, then turned it off a few days in. Not your fault — they nag like an alarm."><span class="copy-line">护眼提醒你大概装过，用两三天就关了。</span><span class="copy-line">不怪你——它们像闹钟，只会打断你。</span></p>
     </div>
     <p class="recognize-close" data-en="Resting your eyes was never meant to be a fight with yourself.">可歇眼睛，本不该是跟自己较劲的事。</p>
   </section>
@@ -886,7 +888,7 @@
         <p data-en="Wear only goes one way — it won't grow back on its own.">磨损只进不退，不会自己长回来。</p>
       </li>
     </ol>
-    <p class="body stakes-close" data-en="The part you use most is the hardest to repair. So it deserves looking after — a little each day is enough. And best make it up the same day: tiredness stacks, and putting it off only makes it heavier."><span class="copy-line">用得最多，偏偏最难修复。</span><span class="copy-line">所以更该好好护着——</span><span class="copy-line">每天，分一点点就够。</span><span class="copy-line">而这一点，最好当天就补上——</span><span class="copy-line">累是会攒的，拖着只会越攒越沉。</span></p>
+    <p class="body stakes-close" data-en="The part you use most is the hardest to repair. A little care each day is enough — and don't put it off, tiredness only stacks."><span class="copy-line">用得最多，偏偏最难修复。</span><span class="copy-line">每天分一点点护着就够——累会攒，别拖到明天。</span></p>
   </section>
 
   <!-- ── 护眼的老办法 · 20-20-20(App Store 送审素材 shot-03 融入)──── -->
@@ -908,8 +910,8 @@
     <div class="head">
       <p class="eyebrow" data-en="Meet her">认识一下</p>
       <h2 data-en="One green dot — she speaks only when needed."><span class="cl">一枚绿点，</span><span class="cl">需要时才出声。</span></h2>
-      <p class="body" data-en="<b class='kw-mira'>Mira</b> lives inside EyeFlow — a quiet companion for screen work. Most of the time she's just a green dot at the top of your menubar: no window, no badge, surfacing only when it's time."><span class="copy-line"><span class="cl">EyeFlow 里住着 <b class="kw-mira">Mira</b>，</span><span class="cl">一位安静的屏幕工作伙伴。</span></span><span class="copy-line">平时，她只是菜单栏顶端一枚绿点——</span><span class="copy-line">不占窗口、不弹红点，需要时才轻声出现。</span></p>
-      <p class="body" data-en="What she does is small: a gentle stop before the fatigue piles up. And she watches one thing only — how long you've looked. No camera, no reading your screen, nothing uploaded."><span class="copy-line">她做的事很小：在疲劳攒起来之前，轻轻停你一下。</span><span class="copy-line">她只看一件事——你盯了多久，</span><span class="copy-line">不开摄像头、不读屏幕、不上传。</span></p>
+      <p class="body" data-en="<b class='kw-mira'>Mira</b> lives inside EyeFlow — most of the time just a green dot in your menubar: no window, no badge, surfacing only when it's time."><span class="copy-line">EyeFlow 里住着 <b class="kw-mira">Mira</b>——平时只是菜单栏一枚绿点，</span><span class="copy-line">不占窗口、不弹红点，需要时才出声。</span></p>
+      <p class="body" data-en="Before the fatigue piles up, she gives you a gentle stop — and watches one thing only: how long you've looked. No camera, no reading your screen, nothing uploaded."><span class="copy-line">疲劳攒起来前，她轻轻停你一下。</span><span class="copy-line">只看你盯了多久——不开摄像头、不读屏幕、不上传。</span></p>
     </div>
     <div class="mac-shot reveal">
       <div class="screen-card mac-screen idle" role="img" aria-label="菜单栏顶端一枚安静呼吸的绿点，就是 Mira" data-en-label="A quiet breathing green dot at the top of the menubar — that's Mira">
@@ -954,7 +956,7 @@
       <div class="daily-copy reveal">
         <p class="eyebrow step-eyebrow" data-en="01 · Open her up">01 · 点开看看</p>
         <h2 data-en="Want a look? Just open her."><span class="cl">想看看？</span><span class="cl">点开就好。</span></h2>
-        <p class="body" data-en="Tap the green dot up top and her complexion panel slides down — energy right now, how long you've looked today, and whether to rest. All at a glance. The gear in the corner opens her settings — how firm the reminders, how often — all yours to tune."><span class="copy-line">顶端那枚绿点，点一下，</span><span class="copy-line">气色面板轻轻落下——</span><span class="copy-line">此刻的精力、今天用了多久眼、要不要歇一下，</span><span class="copy-line">一眼全在。</span><span class="copy-line">右上角一枚齿轮——提醒轻还是重、隔多久提醒，都在里头按你调。</span></p>
+        <p class="body" data-en="Tap the green dot up top and her panel slides down — energy, screen time, whether to rest, all at a glance. The gear tunes how firm and how often."><span class="copy-line">点一下顶端的绿点，气色面板落下——</span><span class="copy-line">精力、用眼时长、要不要歇，一眼全在。</span><span class="copy-line">齿轮里还能调提醒的轻重和间隔。</span></p>
       </div>
       <div class="screen-card mac-screen panel-screen reveal" role="img" aria-label="EyeFlow 的菜单栏面板：Mira 的气色、今日用眼时长和两个歇息动作" data-en-label="EyeFlow's menubar panel — Mira's complexion, today's screen time, and two gentle rest actions">
         <div class="mac-bar"><span class="lens" aria-hidden="true"><i></i></span><span class="mac-clock">14:55</span></div>
@@ -992,7 +994,7 @@
       <div class="daily-copy reveal">
         <p class="eyebrow step-eyebrow" data-en="02 · How firmly to nudge">02 · 提醒的分寸</p>
         <h2 data-en="Light, or more present — your call."><span class="cl">轻一点，</span><span class="cl">还是更在场？</span></h2>
-        <p class="body" data-en="Two levels, your choice. Light is a small island at the top that tucks itself away. Strong is a bigger capsule in the center with a soft warm wash — more present, but never a takeover."><span class="copy-line">两档，你定。</span><span class="copy-line">轻量：顶端一座小岛，看完自己收起。</span><span class="copy-line">加强：居中大胶囊 + 一层暖背景，更在场，但从不夺屏。</span></p>
+        <p class="body" data-en="Two levels, your call — a small island up top, or a bigger capsule in the center. More present, never a takeover."><span class="copy-line">两档，你定——</span><span class="copy-line">顶端的小岛，或居中的大胶囊。</span><span class="copy-line">都更在场，但从不夺屏。</span></p>
       </div>
       <div class="mock-stack reveal">
         <div class="mock-cell">
@@ -1037,7 +1039,7 @@
       <div class="daily-copy reveal">
         <p class="eyebrow step-eyebrow" data-en="03 · Two depths of rest">03 · 休息，两种深度</p>
         <h2 data-en="A quick breather, or a real nap."><span class="cl">喘口气，</span><span class="cl">还是好好睡一下。</span></h2>
-        <p class="body" data-en="Short break: look 20 seconds into the distance, then back to work. Nap: a fuller pause — eyes closed longer while her complexion slowly brightens back up. Either way, she walks you through it."><span class="copy-line">短歇：看远处 20 秒，就回来。</span><span class="copy-line">小睡：闭眼久一点，看着气色一点点亮回来。</span><span class="copy-line">哪一种，她都陪你走完。</span></p>
+        <p class="body" data-en="A short break — 20 seconds into the distance. Or a nap — eyes closed while her complexion brightens back. Either way, she walks you through it."><span class="copy-line">短歇，看远处 20 秒就回来；</span><span class="copy-line">小睡，闭眼久一点，看气色慢慢亮回来。</span><span class="copy-line">两种，她都陪你走完。</span></p>
       </div>
       <div class="mock-stack reveal">
         <div class="mock-cell">
