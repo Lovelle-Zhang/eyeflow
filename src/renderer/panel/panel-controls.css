@@ -121,13 +121,14 @@
     inset 0 0 0 0.5px var(--hairline);
 }
 
-/* quit — a plain left-aligned menu row (aligns with the rows above), hover only */
+/* quit — 单独标识:一条通栏细线把它和上面的设置分开,自成一区(标签只剩「退出」) */
 .quit {
+  position: relative;
   display: flex;
   align-items: center;
   gap: 10px;
   width: 100%;
-  margin-top: 6px;
+  margin-top: 14px;
   padding: 9px 12px;
   border-radius: 11px;
   font: inherit;
@@ -140,6 +141,16 @@
   transition: background 140ms ease;
 }
 
+.quit::before {
+  content: "";
+  position: absolute;
+  top: -7px;
+  left: 4px;
+  right: 4px;
+  height: 1px;
+  background: var(--hairline);
+}
+
 .quit:hover {
   background: var(--row-bg);
   color: var(--text);
@@ -149,4 +160,13 @@
   display: grid;
   place-items: center;
   width: 20px;
+}
+
+/* 底端品牌小字(EyeFlow 从退出按钮下移到此) */
+.ver {
+  margin: 10px 4px 2px;
+  text-align: center;
+  font-size: 11px;
+  color: var(--text-soft);
+  opacity: 0.7;
 }
