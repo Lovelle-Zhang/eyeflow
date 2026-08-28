@@ -17,7 +17,7 @@ const PROMPTS = {
   en: {
     // kept short so the top capsule never clips on the real SF Pro width (zh is naturally compact)
     short: ['Rest — look far', 'Look outside', 'Ease your eyes'],
-    nap: ["You've held on a while — let's really rest now", "How about a short nap? I'll stay with you"],
+    nap: ["You've held on — rest now", "A nap? I'll stay with you"],
     napButton: 'Take a nap',
   },
 };
