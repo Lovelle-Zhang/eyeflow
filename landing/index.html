@@ -831,7 +831,7 @@
           <span class="s" aria-hidden="true"></span>
           <button type="button" data-lang="en" aria-pressed="false">EN</button>
         </span>
-        <a class="dl" href="https://github.com/Lovelle-Zhang/eyeflow/releases/latest/download/EyeFlow.dmg">Download</a>
+        <a class="dl" href="https://apps.apple.com/app/id6804146185">Download</a>
       </span>
     </nav>
   </div>
@@ -854,7 +854,7 @@
     </div>
 
     <div>
-      <a class="cta" href="https://github.com/Lovelle-Zhang/eyeflow/releases/latest/download/EyeFlow.dmg">Download for macOS</a>
+      <a class="cta" href="https://apps.apple.com/app/id6804146185">Download for macOS</a>
       <div class="meta" data-en="macOS 12+ · Free · Local-first">macOS 12+ · 免费 · 本地运行</div>
     </div>
   </section>
@@ -1140,7 +1140,7 @@
       </div>
       <h2 class="brand-line" data-en="<span class='cl'>EyeFlow —</span><span class='cl'>guarding the way you see the world.</span>"><span class="cl">EyeFlow ——</span><span class="cl">守护你看清世界的方式。</span></h2>
       <div class="actions">
-        <a class="cta" href="https://github.com/Lovelle-Zhang/eyeflow/releases/latest/download/EyeFlow.dmg">Download for macOS</a>
+        <a class="cta" href="https://apps.apple.com/app/id6804146185">Download for macOS</a>
       </div>
       <!-- 尾声 · 留住 Mira(邮件 opt-in · Buttondown);保留 .beyond 供 done 态 CSS/JS 复用 -->
       <div class="beyond" data-state="invite">
@@ -1193,23 +1193,7 @@
       });
     })();
 
-    (function () { // 手机访客:DMG 下载没有意义 — CTA 变成「复制链接,回 Mac 下载」。
-      // 必须跑在中/EN 切换的快照之前,这样换上的文案也能双语切换。
-      const ua = navigator.userAgent;
-      const isMobile = /Android|iPhone|iPod/.test(ua) || (/iPad|Macintosh/.test(ua) && navigator.maxTouchPoints > 1);
-      if (!isMobile) return;
-      document.querySelectorAll('a[href$=".dmg"]').forEach((a) => {
-        const inNav = a.classList.contains("dl");
-        a.textContent = inNav ? "复制链接" : "复制链接 · 回 Mac 下载";
-        a.dataset.en = inNav ? "Copy link" : "Copy link — download on your Mac";
-        a.addEventListener("click", (e) => {
-          e.preventDefault();
-          const done = () => { a.textContent = document.documentElement.lang === "en" ? "Copied ✓ — open on your Mac" : "已复制 ✓ 回 Mac 浏览器打开"; };
-          if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText("https://eyeflow.app").then(done).catch(done);
-          else done();
-        });
-      });
-    })();
+    // 下载改走 Mac App Store（apps.apple.com 链接手机也能开→产品页），原「手机复制 DMG 链接」逻辑已随 DMG 一并移除。
 
     (function () { // footer 版本号自动跟最新（GitHub API 发 CORS 头、可跨域读；失败保留静态兜底）
       fetch("https://api.github.com/repos/Lovelle-Zhang/eyeflow/releases/latest")
