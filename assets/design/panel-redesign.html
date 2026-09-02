@@ -1,0 +1,254 @@
+<title>EyeFlow Panel</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+  :root{
+    --page:#e9ebe3; --ink:#20261e; --muted:#5d6455; --faint:#878e7c;
+    --card:#f7f8f3; --border:rgba(33,74,58,.14); --accent-ink:#1f7a5e;
+  }
+  @media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+    --page:#0e100c; --ink:#e7eadf; --muted:#9aa08e; --faint:#6f7565;
+    --card:#191c14; --border:rgba(140,190,160,.14); --accent-ink:#7fcea6;
+  }}
+  :root[data-theme="dark"]{
+    --page:#0e100c; --ink:#e7eadf; --muted:#9aa08e; --faint:#6f7565;
+    --card:#191c14; --border:rgba(140,190,160,.14); --accent-ink:#7fcea6;
+  }
+  *{box-sizing:border-box}
+  body{margin:0; background:var(--page);
+    font-family:-apple-system,"SF Pro Text",system-ui,"PingFang SC",sans-serif;
+    color:var(--ink); -webkit-font-smoothing:antialiased;}
+  .wrap{max-width:880px; margin:0 auto; padding:clamp(26px,5vw,54px) 20px 64px}
+  .title{font-size:13px; letter-spacing:.14em; text-transform:uppercase; font-weight:600;
+    color:var(--accent-ink); text-align:center; margin:0 0 4px}
+  .sub{text-align:center; color:var(--muted); font-size:14.5px; margin:0 0 30px}
+
+  .stage{position:relative; border-radius:22px; overflow:hidden; padding:52px 18px 58px;
+    background:
+      radial-gradient(120% 90% at 14% 6%, #b9c8a8 0%, transparent 52%),
+      radial-gradient(120% 100% at 94% 98%, #7f9e86 0%, transparent 55%),
+      linear-gradient(150deg,#9fb491,#6f8e77 68%,#59775f);
+    box-shadow:inset 0 0 0 1px rgba(255,255,255,.10)}
+  .menubar{position:absolute; top:0; left:0; right:0; height:24px;
+    background:rgba(20,26,20,.30); backdrop-filter:blur(8px);
+    display:flex; align-items:center; justify-content:flex-end; gap:16px;
+    padding:0 16px; font-size:12px; color:rgba(255,255,255,.82)}
+  .menubar .tray{width:13px; height:13px; border-radius:50%;
+    background:radial-gradient(circle at 50% 42%, #eafff6, #7fd7b0 46%, rgba(120,200,160,.25) 74%, transparent);
+    box-shadow:0 0 7px 1px rgba(150,235,200,.5)}
+  .surfaces{display:flex; gap:24px; justify-content:center; align-items:flex-start; flex-wrap:wrap}
+  .col{display:flex; flex-direction:column; align-items:center}
+  .cardlabel{font-size:12px; color:rgba(255,255,255,.72); margin:0 0 10px; letter-spacing:.02em}
+
+  .panel{position:relative; width:314px; padding:12px;
+    background:rgba(20,23,17,.82); backdrop-filter:blur(30px) saturate(1.1);
+    border-radius:18px; color:#e9ece1; border:1px solid rgba(255,255,255,.07);
+    box-shadow:0 34px 66px -22px rgba(0,0,0,.62), inset 0 1px 0 rgba(255,255,255,.06)}
+  .notch{position:absolute; top:-6px; right:30px; width:12px; height:12px;
+    background:rgba(20,23,17,.82); transform:rotate(45deg); border-radius:3px 0 0 0;
+    border-left:1px solid rgba(255,255,255,.07); border-top:1px solid rgba(255,255,255,.07)}
+
+  .head{display:flex; align-items:center; gap:13px; padding:13px 14px; border-radius:13px;
+    background:linear-gradient(147deg,#5f8a72 0%,#4a7360 46%,#38564733 130%)}
+  .mira{position:relative; width:48px; height:48px; border-radius:14px; flex:none;
+    background:linear-gradient(146deg,#d1f0e3,#bfe9d0 50%,#e0eec6);
+    box-shadow:inset 0 1px 2px rgba(255,255,255,.6), inset 0 -4px 10px rgba(150,185,150,.25), 0 6px 14px -6px rgba(20,50,32,.5)}
+  .mira .lens{position:absolute; left:50%; top:50%; transform:translate(-50%,-50%);
+    width:25px; height:15px; border-radius:999px;
+    background:radial-gradient(circle at 50% 42%, #1b3d31, #08201a 82%); box-shadow:inset 0 1px 2px rgba(0,0,0,.5)}
+  .mira .core{position:absolute; left:50%; top:50%; transform:translate(-50%,-50%);
+    width:8px; height:8px; border-radius:50%;
+    background:radial-gradient(circle,#ecfff5,#93e8c3 42%,transparent 78%)}
+  .head .pct{font-size:28px; font-weight:600; letter-spacing:-.02em; line-height:1; color:#f3f7f0}
+  .head .stt{font-size:13.5px; color:rgba(240,247,240,.78); margin-top:5px}
+
+  .stats{display:flex; align-items:center; gap:15px; padding:14px 8px 13px 11px}
+  .stats .n{font-size:19px; font-weight:600; letter-spacing:-.01em; font-variant-numeric:tabular-nums}
+  .stats .l{font-size:12px; color:#9aa08e; margin-top:2px}
+  .stats .bar{width:1px; height:29px; background:rgba(255,255,255,.11)}
+
+  .seg{display:grid; gap:2px; padding:3px; background:rgba(255,255,255,.05); border-radius:11px;
+    grid-template-columns:1fr 1fr; margin:2px 4px 12px}
+  .seg button{font:inherit; font-size:14px; font-weight:500; color:#a7ad9c; border:0; cursor:pointer;
+    background:transparent; padding:7px 0; border-radius:8px; transition:.15s}
+  .seg button.on{background:rgba(255,255,255,.10); color:#f2f5ee; font-weight:600; box-shadow:0 1px 2px rgba(0,0,0,.25)}
+
+  .rows{display:flex; flex-direction:column; gap:6px; margin:0 2px}
+  .row{display:flex; align-items:center; gap:12px; padding:12px 13px; border-radius:11px; cursor:pointer}
+  .row.prim{background:rgba(127,206,166,.11); border:1px solid rgba(127,206,166,.16)}
+  .row.plain:hover{background:rgba(255,255,255,.04)}
+  .row .ic{width:22px; height:22px; display:grid; place-items:center; flex:none; color:#84d3aa}
+  .row.plain .ic{color:#c4cbb9}
+  .row .lb{font-size:15px; font-weight:600; color:#eef1e6}
+  .row .sub{font-size:12.5px; color:#8f9684; margin-left:auto; margin-right:2px}
+  .row .chev{color:#767c6b; flex:none}
+
+  .setblock{margin:12px 2px 0; padding-top:5px; border-top:1px solid rgba(255,255,255,.08)}
+  .sethdr{display:flex; align-items:center; gap:10px; padding:10px 11px; border-radius:10px; cursor:pointer;
+    color:#c9cfbd; font-size:14.5px; font-weight:500}
+  .sethdr:hover{background:rgba(255,255,255,.04)}
+  .sethdr .ic{color:#9aa08e; display:flex}
+  .sethdr .cv{margin-left:auto; color:#8b917f; display:flex}
+  .setbody{background:rgba(255,255,255,.025); border:1px solid rgba(255,255,255,.05);
+    border-radius:12px; padding:8px 11px 12px; margin:5px 2px 0}
+  .grp{background:rgba(255,255,255,.03); border:1px solid rgba(255,255,255,.055); border-radius:11px; padding:0 11px}
+  .srow{display:flex; align-items:center; justify-content:space-between; gap:12px; padding:11px 2px; min-height:44px}
+  .srow + .srow{border-top:1px solid rgba(255,255,255,.06)}
+  .srow .k{font-size:13.5px; color:#e6e9de}
+  .srow .kk{font-size:11px; color:#8b9280; margin-top:2px}
+  .ctl{display:flex; align-items:center; gap:7px; flex:none}
+  .ctl .unit{font-size:11px; color:#8b9280}
+  .segsm{display:inline-flex; gap:2px; padding:2px; background:rgba(255,255,255,.06); border-radius:9px; flex:none}
+  .segsm button{font:inherit; font-size:12px; font-weight:500; color:#a2a897; border:0; background:transparent;
+    padding:5px 10px; border-radius:7px; cursor:pointer}
+  .segsm button.on{background:rgba(255,255,255,.11); color:#f2f5ee; font-weight:600}
+  .sw{width:36px; height:21px; border-radius:22px; background:rgba(255,255,255,.13); position:relative; flex:none; cursor:pointer}
+  .sw::after{content:""; position:absolute; top:2px; left:2px; width:17px; height:17px; border-radius:50%;
+    background:#e9ece1; box-shadow:0 1px 2px rgba(0,0,0,.4)}
+  .about{text-align:center; margin-top:13px; padding-top:12px; border-top:1px solid rgba(255,255,255,.07)}
+  .about .v{font-size:12px; color:#c2c8b6; font-weight:600}
+  .about .m{font-size:11px; color:#7f8574; margin-top:3px}
+  .about .lk{font-size:11px; color:#84d3aa; margin-top:7px; display:flex; gap:14px; justify-content:center}
+  .about .lk span{cursor:pointer}
+
+  .foot2{text-align:center; margin-top:11px; padding-top:10px; border-top:1px solid rgba(255,255,255,.07)}
+  .foot2.tight{margin-top:0; padding-top:6px; border-top:0}
+  .foot2 .quit{font-size:11.5px; color:#6a7060; cursor:pointer}
+  .foot2 .quit:hover{color:#9aa08e}
+
+  .notes{margin-top:34px; background:var(--card); border:1px solid var(--border); border-radius:14px; padding:20px 22px}
+  .notes h2{font-size:15px; margin:22px 0 11px; color:var(--ink); font-weight:600}
+  .notes h2:first-child{margin-top:0}
+  .notes ul{margin:0; padding:0; list-style:none; display:flex; flex-direction:column; gap:11px}
+  .notes li{display:flex; gap:11px; font-size:14px; color:var(--muted); line-height:1.55}
+  .notes li b{color:var(--ink); font-weight:600}
+  .notes li::before{content:""; width:6px; height:6px; border-radius:50%; background:var(--accent-ink); flex:none; margin-top:8px}
+  .foot-note{margin-top:18px; padding-top:14px; border-top:1px solid var(--border); font-size:12.5px; color:var(--faint); text-align:center; line-height:1.6}
+</style>
+
+<div class="wrap">
+  <p class="title">EyeFlow · Panel</p>
+  <p class="sub">同一个菜单栏面板的两种状态（设计稿，未上线）</p>
+
+  <div class="stage">
+    <div class="menubar"><span class="tray"></span><span>9:41</span></div>
+    <div class="surfaces">
+
+      <!-- ① COLLAPSED -->
+      <div class="col">
+        <p class="cardlabel">① 未展开</p>
+        <div class="panel">
+          <div class="notch"></div>
+          <div class="head">
+            <div class="mira"><div class="lens"></div><div class="core"></div></div>
+            <div><div class="pct">86%</div><div class="stt">Eyes feeling fresh</div></div>
+          </div>
+          <div class="stats">
+            <div><div class="n">2h 40m</div><div class="l">at the screen</div></div>
+            <div class="bar"></div>
+            <div><div class="n">5</div><div class="l">breaks today</div></div>
+          </div>
+          <div class="seg"><button class="on">Gentle</button><button>Strong</button></div>
+          <div class="rows">
+            <div class="row prim">
+              <span class="ic"><svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="1.7"><circle cx="12" cy="12" r="9"/><path d="M12 3a9 9 0 0 1 0 18z" fill="currentColor" stroke="none"/></svg></span>
+              <span class="lb">Rest your eyes now</span><span class="sub">20s</span>
+              <span class="chev"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></span>
+            </div>
+            <div class="row plain">
+              <span class="ic"><svg viewBox="0 0 24 24" width="19" height="19" fill="currentColor"><path d="M13.4 3.1a8.2 8.2 0 1 0 7.5 10.6A6.6 6.6 0 0 1 13.4 3.1z"/></svg></span>
+              <span class="lb">Take a nap</span><span class="sub">3 min</span>
+              <span class="chev"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></span>
+            </div>
+          </div>
+          <div class="setblock">
+            <div class="sethdr">
+              <span class="ic"><svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor"><path d="M19.14 12.94c.04-.31.06-.63.06-.94s-.02-.63-.06-.94l2.03-1.58a.49.49 0 0 0 .12-.61l-1.92-3.32a.49.49 0 0 0-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54a.49.49 0 0 0-.48-.41h-3.84a.49.49 0 0 0-.48.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96a.49.49 0 0 0-.59.22L2.74 8.87a.49.49 0 0 0 .12.61l2.03 1.58c-.04.31-.06.63-.06.94s.02.63.06.94l-2.03 1.58a.49.49 0 0 0-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.48-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32a.49.49 0 0 0-.12-.61l-2.03-1.58ZM12 15.6c-1.99 0-3.6-1.61-3.6-3.6s1.61-3.6 3.6-3.6 3.6 1.61 3.6 3.6-1.61 3.6-3.6 3.6z"/></svg></span>
+              Settings
+              <span class="cv"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg></span>
+            </div>
+          </div>
+          <div class="foot2 tight"><span class="quit">Quit EyeFlow</span></div>
+        </div>
+      </div>
+
+      <!-- ② EXPANDED -->
+      <div class="col">
+        <p class="cardlabel">② 点 Settings 后 · 就地展开</p>
+        <div class="panel">
+          <div class="notch"></div>
+          <div class="head">
+            <div class="mira"><div class="lens"></div><div class="core"></div></div>
+            <div><div class="pct">86%</div><div class="stt">Eyes feeling fresh</div></div>
+          </div>
+          <div class="stats">
+            <div><div class="n">2h 40m</div><div class="l">at the screen</div></div>
+            <div class="bar"></div>
+            <div><div class="n">5</div><div class="l">breaks today</div></div>
+          </div>
+          <div class="seg"><button class="on">Gentle</button><button>Strong</button></div>
+          <div class="rows">
+            <div class="row prim">
+              <span class="ic"><svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="1.7"><circle cx="12" cy="12" r="9"/><path d="M12 3a9 9 0 0 1 0 18z" fill="currentColor" stroke="none"/></svg></span>
+              <span class="lb">Rest your eyes now</span><span class="sub">20s</span>
+              <span class="chev"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></span>
+            </div>
+            <div class="row plain">
+              <span class="ic"><svg viewBox="0 0 24 24" width="19" height="19" fill="currentColor"><path d="M13.4 3.1a8.2 8.2 0 1 0 7.5 10.6A6.6 6.6 0 0 1 13.4 3.1z"/></svg></span>
+              <span class="lb">Take a nap</span><span class="sub">3 min</span>
+              <span class="chev"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></span>
+            </div>
+          </div>
+          <div class="setblock">
+            <div class="sethdr">
+              <span class="ic"><svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor"><path d="M19.14 12.94c.04-.31.06-.63.06-.94s-.02-.63-.06-.94l2.03-1.58a.49.49 0 0 0 .12-.61l-1.92-3.32a.49.49 0 0 0-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54a.49.49 0 0 0-.48-.41h-3.84a.49.49 0 0 0-.48.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96a.49.49 0 0 0-.59.22L2.74 8.87a.49.49 0 0 0 .12.61l2.03 1.58c-.04.31-.06.63-.06.94s.02.63.06.94l-2.03 1.58a.49.49 0 0 0-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.48-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32a.49.49 0 0 0-.12-.61l-2.03-1.58ZM12 15.6c-1.99 0-3.6-1.61-3.6-3.6s1.61-3.6 3.6-3.6 3.6 1.61 3.6 3.6-1.61 3.6-3.6 3.6z"/></svg></span>
+              Settings
+              <span class="cv"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 15l-6-6-6 6"/></svg></span>
+            </div>
+            <div class="setbody">
+              <div class="grp">
+                <div class="srow">
+                  <div><div class="k">Nap length</div><div class="kk">The full wind-down</div></div>
+                  <div class="ctl"><div class="segsm"><button>1</button><button class="on">3</button><button>5</button></div><span class="unit">min</span></div>
+                </div>
+                <div class="srow">
+                  <div><div class="k">Open at login</div><div class="kk">Start quietly with your Mac</div></div>
+                  <div class="sw" role="switch" aria-checked="false"></div>
+                </div>
+                <div class="srow">
+                  <div class="k">Language</div>
+                  <div class="segsm"><button>中文</button><button class="on">English</button></div>
+                </div>
+              </div>
+              <div class="about">
+                <div class="v">EyeFlow · v1.1.0</div>
+                <div class="m">Notarized by Apple · runs entirely on your Mac</div>
+                <div class="lk"><span>eyeflow.app</span><span>Rate on the App Store ★</span></div>
+              </div>
+            </div>
+          </div>
+          <div class="foot2"><span class="quit">Quit EyeFlow</span></div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <div class="notes">
+    <h2>交互与结构</h2>
+    <ul>
+      <li><b>两态，同一个面板。</b> ① 未展开＝日常样子（气色 + 强度 + 两个动作 + 一行 Settings，箭头朝下）；② 点 Settings，设置在下方<b>就地展开</b>（箭头朝上＝可收起），不弹窗、不换页。</li>
+      <li><b>去重：Gentle / Strong 只留在面板。</b> 强度是"当下想调"的控制，留在面板一键可切；设置里不再重复放一份（原来那份 Reminder style 已删）。</li>
+      <li><b>Settings 独占一行、Quit 弱化。</b> Quit 收到面板最底一枚很淡小字，两态里都在同一位置。</li>
+      <li><b>文案随气色、真机两动作。</b> Eyes feeling fresh / Rest now（20s）/ Take a nap（3 min，真机档位）。</li>
+    </ul>
+    <h2>设置里放什么（守「不堆旋钮」§6.4 · 均为真机真实项）</h2>
+    <ul>
+      <li><b>Nap length</b> — 1 / 3 / 5 min（<code>napMs</code>，默认 3）。</li>
+      <li><b>Open at login</b> — 开机自启（<code>openAtLogin</code>，默认关）。</li>
+      <li><b>Language</b> — 中文 / English（<code>locale</code>，默认跟随系统）。</li>
+      <li><b>About</b> — 版本 + Apple 公证 + 官网/评分；不放「检查更新」（商店版走 App Store）。</li>
+      <li>强度 <b>reminderTier</b> 不在此列——它在面板里。</li>
+    </ul>
+    <p class="foot-note">面板是原生 <b>Panel.swift</b> 画的 → 落地在同一 Panel.swift 里做「就地展开」的高度动画。<br>发布后 backlog 的设计稿，冻结期不动；数据均对过真机源码。</p>
+  </div>
+</div>
