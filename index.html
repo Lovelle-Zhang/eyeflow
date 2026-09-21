@@ -367,6 +367,17 @@
     .mp-ic svg { display: block; width: 3.9cqi; height: 3.9cqi; }
     .mp-chev { flex: 0 0 auto; display: grid; place-items: center; width: 3.3cqi; color: rgba(255,255,255,0.55); opacity: 0.55; }
     .mp-chev svg { display: block; width: 100%; height: 100%; }
+    /* 1.1.0 面板新增:提醒强度主面板快切 + 退出区 + 版本页脚(对齐真机) */
+    .mp-strength { margin: 0 1.1cqi 3.6cqi; }
+    .mp-slabel { display: block; font-size: 3.1cqi; font-weight: 500; color: rgba(255,255,255,0.5); margin-bottom: 1.7cqi; }
+    .mp-seg { display: flex; gap: 1cqi; padding: 0.9cqi; border-radius: 3cqi; background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.09); }
+    .mp-seg span { flex: 1; text-align: center; padding: 2cqi 0; border-radius: 2.3cqi; font-size: 3.4cqi; font-weight: 500; color: rgba(255,255,255,0.6); }
+    .mp-seg span.on { background: rgba(255,255,255,0.13); color: #f6f7f9; box-shadow: inset 0 1px 0 rgba(255,255,255,0.16); }
+    .mp-sep { height: 1px; background: rgba(255,255,255,0.10); margin: 3.6cqi 1.1cqi 2.4cqi; }
+    .mp-quit { display: flex; align-items: center; justify-content: center; gap: 2cqi; padding: 1.4cqi 0; color: rgba(255,255,255,0.7); font-size: 3.4cqi; font-weight: 500; }
+    .mp-quit .mp-qic { flex: 0 0 auto; width: 3.8cqi; height: 3.8cqi; color: rgba(255,255,255,0.5); }
+    .mp-quit .mp-qic svg { display: block; width: 100%; height: 100%; }
+    .mp-ver { text-align: center; font-size: 2.9cqi; color: rgba(255,255,255,0.4); margin-top: 0.8cqi; padding-bottom: 0.6cqi; }
     /* 01 面板屏:菜单栏 + 从绿点落下的原尺寸面板(高度随内容,不留大空桌面) */
     /* the panel sits on a REAL desktop — a soft app window + a dock behind it, so
        the panel's backdrop-filter blurs actual content (genuine vibrancy), not a flat wash */
@@ -972,7 +983,7 @@
       <div class="daily-copy reveal">
         <p class="eyebrow step-eyebrow" data-en="01 · Open her up">01 · 点开看看</p>
         <h2 data-en="Want a look? Just open her."><span class="cl">想看看？</span><span class="cl">点开就好。</span></h2>
-        <p class="body" data-en="Tap the green dot up top and her panel slides down — energy, screen time, whether to rest, all at a glance. The gear tunes how firm and how often."><span class="copy-line">点一下顶端的绿点，气色面板落下——</span><span class="copy-line">精力、用眼时长、要不要歇，一眼全在。</span><span class="copy-line">齿轮里还能调提醒的轻重和间隔。</span></p>
+        <p class="body" data-en="Tap the green dot up top and her panel slides down — energy, screen time, whether to rest, all at a glance. Switch how firm right here; the gear holds the rest."><span class="copy-line">点一下顶端的绿点，气色面板落下——</span><span class="copy-line">精力、用眼时长、要不要歇，一眼全在。</span><span class="copy-line">提醒轻重当面就能切，其余都在齿轮里。</span></p>
       </div>
       <div class="screen-card mac-screen panel-screen reveal" role="img" aria-label="EyeFlow 的菜单栏面板：Mira 的气色、今日用眼时长和两个歇息动作" data-en-label="EyeFlow's menubar panel — Mira's complexion, today's screen time, and two gentle rest actions">
         <div class="mac-bar"><span class="lens" aria-hidden="true"><i></i></span><span class="mac-clock">14:55</span></div>
@@ -997,8 +1008,15 @@
             <div class="mp-div" aria-hidden="true"></div>
             <div><b data-en="3×">3 次</b><span data-en="Rests (breaks 2 · naps 1)">歇息（短歇 2 · 小睡 1）</span></div>
           </div>
+          <div class="mp-strength">
+            <span class="mp-slabel" data-en="Reminder strength">提醒强度</span>
+            <div class="mp-seg" role="img" aria-label="提醒强度：加强" data-en-label="Reminder strength: strong"><span data-en="Light">轻量</span><span class="on" data-en="Strong">加强</span></div>
+          </div>
           <div class="mp-row primary"><span class="mp-ic" aria-hidden="true"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg></span><span class="mp-lbl" data-en="Rest now">现在歇一下</span><span class="mp-meta" data-en="Short break · 20s">短歇 · 20 秒</span><span class="mp-chev" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></span></div>
           <div class="mp-row"><span class="mp-ic" aria-hidden="true"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M13.4 3.1a8.2 8.2 0 1 0 7.5 10.6 6.6 6.6 0 0 1-7.5-10.6z"/></svg></span><span class="mp-lbl" data-en="Take a nap">小睡一会儿</span><span class="mp-meta" data-en="Full · 3 min">完整 · 3 分钟</span><span class="mp-chev" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></span></div>
+          <div class="mp-sep" aria-hidden="true"></div>
+          <div class="mp-quit"><span class="mp-qic" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M12 3.2v8.4"/><path d="M6.6 6.6a8 8 0 1 0 10.8 0"/></svg></span><span data-en="Quit">退出</span></div>
+          <div class="mp-ver">EyeFlow · v1.1.0</div>
           </div>
         </div>
       </div>
