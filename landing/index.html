@@ -1198,22 +1198,45 @@
       items.forEach((el) => io.observe(el));
     })();
 
-    (function () { // Act 4 — rest WITH Mira: a real 10s look-away, opt-in and skippable
+    (function () { // Act 4 — rest WITH Mira: a real 10s look-away, opt-in and skippable + Mira 的呼吸陪伴音
       const act = document.querySelector(".rest-act");
       if (!act) return;
       const reduce = window.matchMedia("(prefers-reduced-motion: reduce)");
       let timer = 0;
+      // 小睡呼吸陪伴音(app 同款内嵌底垫·4s吸/6s呼·无缝循环);只在用户点「歇一下」这个手势后播,轻音量、淡入淡出
+      let audio = null, fadeRAF = 0;
+      function fade(to, ms, done) {
+        if (!audio) return;
+        cancelAnimationFrame(fadeRAF);
+        const from = audio.volume, t0 = performance.now();
+        (function step(t) {
+          const k = Math.min(1, (t - t0) / ms);
+          audio.volume = Math.max(0, Math.min(1, from + (to - from) * k));
+          if (k < 1) fadeRAF = requestAnimationFrame(step);
+          else if (done) done();
+        })(t0);
+      }
+      function startAudio() {
+        try {
+          if (!audio) { audio = new Audio("ambient.mp3"); audio.loop = true; }
+          audio.currentTime = 0; audio.volume = 0;
+          const p = audio.play();
+          if (p && p.then) p.then(() => fade(0.32, 1400)).catch(() => {});
+        } catch (_) {}
+      }
+      function stopAudio() { if (audio) fade(0, 700, () => { try { audio.pause(); } catch (_) {} }); }
+      function finish() { window.clearTimeout(timer); act.dataset.state = "done"; stopAudio(); }
       act.addEventListener("click", (e) => {
         const btn = e.target.closest("[data-rest]");
         if (!btn) return;
         if (btn.dataset.rest === "start") {
           act.dataset.state = "resting";
+          startAudio();
           // Non-reduced: the ring/breath pace the 10s and auto-finish. Reduced: the
           // still "resting" view waits for the visitor to tap 歇好了 themselves.
-          if (!reduce.matches) timer = window.setTimeout(() => { act.dataset.state = "done"; }, 10000);
+          if (!reduce.matches) timer = window.setTimeout(finish, 10000);
         } else if (btn.dataset.rest === "skip") {
-          window.clearTimeout(timer);
-          act.dataset.state = "done";
+          finish();
         }
       });
     })();
