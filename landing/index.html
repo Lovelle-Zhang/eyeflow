@@ -367,17 +367,14 @@
     .mp-ic svg { display: block; width: 3.9cqi; height: 3.9cqi; }
     .mp-chev { flex: 0 0 auto; display: grid; place-items: center; width: 3.3cqi; color: rgba(255,255,255,0.55); opacity: 0.55; }
     .mp-chev svg { display: block; width: 100%; height: 100%; }
-    /* 1.1.0 面板新增:提醒强度主面板快切 + 退出区 + 版本页脚(对齐真机) */
+    /* 1.1.0 面板:提醒强度主面板快切 + 设置行(收起态,对齐真机) */
     .mp-strength { margin: 0 1.1cqi 3.6cqi; }
     .mp-slabel { display: block; font-size: 3.1cqi; font-weight: 500; color: rgba(255,255,255,0.5); margin-bottom: 1.7cqi; }
     .mp-seg { display: flex; gap: 1cqi; padding: 0.9cqi; border-radius: 3cqi; background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.09); }
-    .mp-seg span { flex: 1; text-align: center; padding: 2cqi 0; border-radius: 2.3cqi; font-size: 3.4cqi; font-weight: 500; color: rgba(255,255,255,0.6); }
-    .mp-seg span.on { background: rgba(255,255,255,0.13); color: #f6f7f9; box-shadow: inset 0 1px 0 rgba(255,255,255,0.16); }
-    .mp-sep { height: 1px; background: rgba(255,255,255,0.10); margin: 3.6cqi 1.1cqi 2.4cqi; }
-    .mp-quit { display: flex; align-items: center; justify-content: center; gap: 2cqi; padding: 1.4cqi 0; color: rgba(255,255,255,0.7); font-size: 3.4cqi; font-weight: 500; }
-    .mp-quit .mp-qic { flex: 0 0 auto; width: 3.8cqi; height: 3.8cqi; color: rgba(255,255,255,0.5); }
-    .mp-quit .mp-qic svg { display: block; width: 100%; height: 100%; }
-    .mp-ver { text-align: center; font-size: 2.9cqi; color: rgba(255,255,255,0.4); margin-top: 0.8cqi; padding-bottom: 0.6cqi; }
+    .mp-seg span { flex: 1; text-align: center; padding: 2.7cqi 0; border-radius: 2.4cqi; font-size: 3.6cqi; font-weight: 500; color: rgba(255,255,255,0.6); }
+    .mp-seg span.on { background: rgba(255,255,255,0.14); color: #f6f7f9; box-shadow: inset 0 1px 0 rgba(255,255,255,0.16); }
+    .mp-row.mp-settings { background: transparent; border-color: transparent; }
+    .mp-chev.mp-chev-down { opacity: 0.5; }
     /* 01 面板屏:菜单栏 + 从绿点落下的原尺寸面板(高度随内容,不留大空桌面) */
     /* the panel sits on a REAL desktop — a soft app window + a dock behind it, so
        the panel's backdrop-filter blurs actual content (genuine vibrancy), not a flat wash */
@@ -997,7 +994,7 @@
           </div>
           <div class="mac-dock" aria-hidden="true"><i class="di-mira"></i><i style="background:linear-gradient(160deg,#5b9bd5,#3f6fb0)"></i><i style="background:linear-gradient(160deg,#f0a04b,#d97c2b)"></i><i style="background:linear-gradient(160deg,#e5675f,#c23f3f)"></i><i style="background:linear-gradient(160deg,#7bc47f,#3f9a52)"></i></div>
           <div class="mpanel">
-          <div class="mp-head"><span class="mp-gear" role="img" aria-label="设置" data-en-label="Settings"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><circle cx="12" cy="12" r="3.2"/><path d="M12 2.5v2.2M12 19.3v2.2M4.2 4.2l1.6 1.6M18.2 18.2l1.6 1.6M2.5 12h2.2M19.3 12h2.2M4.2 19.8l1.6-1.6M18.2 5.8l1.6-1.6"/></svg></span></div>
+          <div class="mp-head"><span class="mp-gear" role="img" aria-label="外观" data-en-label="Appearance"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="3.7"/><path d="M12 2.2v2.4M12 19.4v2.4M2.2 12h2.4M19.4 12h2.4M4.9 4.9l1.7 1.7M17.4 17.4l1.7 1.7M4.9 19.1l1.7-1.7M17.4 6.6l1.7-1.7"/></svg></span></div>
           <div class="mp-cap">
             <span class="mp-mark" aria-hidden="true"></span>
             <span class="mp-cap-t"><b data-en="Energy 66%">精力 66%</b><span data-en="Steady">常态</span></span>
@@ -1012,11 +1009,9 @@
             <span class="mp-slabel" data-en="Reminder strength">提醒强度</span>
             <div class="mp-seg" role="img" aria-label="提醒强度：加强" data-en-label="Reminder strength: strong"><span data-en="Light">轻量</span><span class="on" data-en="Strong">加强</span></div>
           </div>
-          <div class="mp-row primary"><span class="mp-ic" aria-hidden="true"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg></span><span class="mp-lbl" data-en="Rest now">现在歇一下</span><span class="mp-meta" data-en="Short break · 20s">短歇 · 20 秒</span><span class="mp-chev" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></span></div>
-          <div class="mp-row"><span class="mp-ic" aria-hidden="true"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M13.4 3.1a8.2 8.2 0 1 0 7.5 10.6 6.6 6.6 0 0 1-7.5-10.6z"/></svg></span><span class="mp-lbl" data-en="Take a nap">小睡一会儿</span><span class="mp-meta" data-en="Full · 3 min">完整 · 3 分钟</span><span class="mp-chev" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></span></div>
-          <div class="mp-sep" aria-hidden="true"></div>
-          <div class="mp-quit"><span class="mp-qic" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M12 3.2v8.4"/><path d="M6.6 6.6a8 8 0 1 0 10.8 0"/></svg></span><span data-en="Quit">退出</span></div>
-          <div class="mp-ver">EyeFlow · v1.1.0</div>
+          <div class="mp-row primary"><span class="mp-ic" aria-hidden="true"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg></span><span class="mp-lbl" data-en="Rest now">现在歇一下</span><span class="mp-meta" data-en="Short break · 20s">短歇 · 20 秒</span></div>
+          <div class="mp-row"><span class="mp-ic" aria-hidden="true"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M13.4 3.1a8.2 8.2 0 1 0 7.5 10.6 6.6 6.6 0 0 1-7.5-10.6z"/></svg></span><span class="mp-lbl" data-en="Take a nap">小睡一会儿</span><span class="mp-meta" data-en="Full · 3 min">完整 · 3 分钟</span></div>
+          <div class="mp-row mp-settings"><span class="mp-ic" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><circle cx="12" cy="12" r="3.2"/><path d="M12 2.5v2.2M12 19.3v2.2M4.2 4.2l1.6 1.6M18.2 18.2l1.6 1.6M2.5 12h2.2M19.3 12h2.2M4.2 19.8l1.6-1.6M18.2 5.8l1.6-1.6"/></svg></span><span class="mp-lbl" data-en="Settings">设置</span><span class="mp-chev mp-chev-down" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg></span></div>
           </div>
         </div>
       </div>
