@@ -341,7 +341,7 @@
     .mp-gear { width: 7.2cqi; height: 7.2cqi; color: rgba(255,255,255,0.55); }
     .mp-gear svg { width: 100%; height: 100%; display: block; }
     /* hero = 气色 capsule: full pill, matte green + subtle top-left highlight (panel.css .hero) */
-    .mp-cap { position: relative; overflow: hidden; display: flex; align-items: center; gap: 3.3cqi; padding: 3.3cqi 3.9cqi; border-radius: 999px; background: rgba(26,107,82,0.97); box-shadow: inset 0 0 0 1px rgba(255,255,255,0.14), 0 3.9cqi 8.9cqi -3.3cqi rgba(20,20,19,0.30); }
+    .mp-cap { position: relative; overflow: hidden; margin-top: 2.5cqi; display: flex; align-items: center; gap: 3.3cqi; padding: 3.3cqi 3.9cqi; border-radius: 999px; background: rgba(26,107,82,0.97); box-shadow: inset 0 0 0 1px rgba(255,255,255,0.14), 0 3.9cqi 8.9cqi -3.3cqi rgba(20,20,19,0.30); }
     .mp-cap::before { content: ""; position: absolute; inset: 0; border-radius: inherit; pointer-events: none; background: radial-gradient(130% 165% at 24% -18%, rgba(195,248,222,0.32) 0%, transparent 58%); }
     .mp-cap > * { position: relative; z-index: 1; }
     /* app-mark squircle: light plate + dark lens + pulse (mirrors app-mark.css at mark/44) */
@@ -383,7 +383,7 @@
        around them. cqi here shares the film's basis (% of screen width, film ÷1440). */
     .panel-screen { aspect-ratio: 1.6; }
     .panel-screen .mac-desk { display: flex; justify-content: flex-end; align-items: flex-start; padding: 4cqi; }
-    .panel-screen .mpanel { margin: 0; position: relative; z-index: 2; max-width: 35cqi; }
+    .panel-screen .mpanel { margin: 0; position: relative; z-index: 2; max-width: 28cqi; }
     .mac-win { position: absolute; left: 4cqi; top: 5cqi; width: 33cqi; height: 36cqi; border-radius: 2.4cqi; overflow: hidden; z-index: 1;
       background: rgba(252,253,251,0.9); box-shadow: 0 6cqi 12cqi -4cqi rgba(18,38,28,0.3), 0 0.4cqi 1.2cqi rgba(0,0,0,0.06); }
     .mac-win .win-bar { height: 5cqi; background: rgba(240,244,241,0.92); display: flex; align-items: center; gap: 1.2cqi; padding: 0 2cqi; border-bottom: 1px solid rgba(0,0,0,0.05); }
@@ -447,7 +447,7 @@
        a warm wash on top of it (below), so the two frames read as one place. */
     .top-screen, .strong-wash { background: radial-gradient(130% 90% at 78% -12%, rgba(255,255,255,0.7), transparent 55%), radial-gradient(105% 80% at 18% 122%, rgba(31,122,94,0.06), transparent 58%), linear-gradient(158deg, #edf0ea 0%, #dbe1d6 100%); }
     .top-screen { container-type: inline-size; aspect-ratio: 1.6; display: grid; justify-items: center; align-content: start; padding-top: 4.5cqi; }
-    .top-screen .island { font-size: 2.4cqi; }
+    .top-screen .island { font-size: 2cqi; }
 
     /* ── 加强 · 居中大胶囊 (§6.1) — a bigger capsule (≈2× the island) floating on a
        faint warm wash: more present, never a takeover. */
@@ -460,7 +460,7 @@
     .strong-wash::after { content: ""; position: absolute; inset: 0; z-index: 1; pointer-events: none; background: radial-gradient(96% 92% at 50% 48%, rgba(255,239,214,0.34) 0%, rgba(252,227,188,0.2) 46%, transparent 74%); }
     .strong-wash > .island.big { position: relative; z-index: 2; }
     /* cqi-sized so it floats centered (not filling) and the count never clips */
-    .island.big { font-size: 3.7cqi; max-width: 100%; }
+    .island.big { font-size: 3cqi; max-width: 100%; }
     .island.big .isl-body > div:first-child { white-space: nowrap; }
 
     /* 只改屏的样式:给屏加一条顶部菜单栏(Mira 绿点 + 时钟),尺寸/布局/岛全不动 */
@@ -994,7 +994,6 @@
           </div>
           <div class="mac-dock" aria-hidden="true"><i class="di-mira"></i><i style="background:linear-gradient(160deg,#5b9bd5,#3f6fb0)"></i><i style="background:linear-gradient(160deg,#f0a04b,#d97c2b)"></i><i style="background:linear-gradient(160deg,#e5675f,#c23f3f)"></i><i style="background:linear-gradient(160deg,#7bc47f,#3f9a52)"></i></div>
           <div class="mpanel">
-          <div class="mp-head"><span class="mp-gear" role="img" aria-label="外观" data-en-label="Appearance"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="3.7"/><path d="M12 2.2v2.4M12 19.4v2.4M2.2 12h2.4M19.4 12h2.4M4.9 4.9l1.7 1.7M17.4 17.4l1.7 1.7M4.9 19.1l1.7-1.7M17.4 6.6l1.7-1.7"/></svg></span></div>
           <div class="mp-cap">
             <span class="mp-mark" aria-hidden="true"></span>
             <span class="mp-cap-t"><b data-en="Energy 66%">精力 66%</b><span data-en="Steady">常态</span></span>
