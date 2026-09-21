@@ -1221,7 +1221,7 @@
           if (!audio) { audio = new Audio("ambient.mp3"); audio.loop = true; }
           audio.currentTime = 0; audio.volume = 0;
           const p = audio.play();
-          if (p && p.then) p.then(() => fade(0.32, 1400)).catch(() => {});
+          if (p && p.then) p.then(() => fade(0.78, 1200)).catch(() => {});
         } catch (_) {}
       }
       function stopAudio() { if (audio) fade(0, 700, () => { try { audio.pause(); } catch (_) {} }); }
