@@ -283,13 +283,16 @@
        text 16 / count 15 / track 3 / gap 13 / pad 12·22)。内部尺寸全部用 em 锁死到真机比例
        (mark 2.75em·lens 1.06em·gap .81em·pad .75/1.375em·body-gap .38em·track .19em·count .94em),
        换 context 只调 .island 的 font-size 即整体等比缩放,永不失真。 */
-    .island { display: inline-flex; align-items: center; gap: 0.81em; max-width: 100%; padding: 0.75em 1.375em 0.75em 0.75em; border-radius: 999px; background: rgba(26, 107, 82, 0.97); color: #f6f7f9; font-size: 16px; font-weight: 500; line-height: 1.25; letter-spacing: 0; box-shadow: 0 14px 32px -12px rgba(20,20,19,0.24), inset 0 0 0 1px rgba(255,255,255,0.14); }
-    .island .isl-mark { flex: 0 0 auto; display: grid; place-items: center; width: 2.75em; height: 2.75em; border-radius: 27%; background: linear-gradient(150deg,#eafff6 0%,#aeede0 56%,#f3eec7 100%); box-shadow: inset 0 1px 0 rgba(255,255,255,0.55), 0 1px 3px rgba(10,30,22,0.28); }
-    .island .lens { --lf: 1.06em; }
-    .island .isl-body { display: grid; gap: 0.38em; min-width: 0; }
+    .island { display: inline-flex; align-items: center; gap: 0.78em; max-width: 100%; padding: 0.6em 1.3em 0.6em 0.6em; border-radius: 999px; background: rgba(26, 107, 82, 0.97); color: #f6f7f9; font-size: 16px; font-weight: 500; line-height: 1.25; letter-spacing: 0; box-shadow: 0 14px 32px -12px rgba(20,20,19,0.24), inset 0 0 0 1px rgba(255,255,255,0.14); }
+    .island .isl-mark { flex: 0 0 auto; display: grid; place-items: center; width: 2.92em; height: 2.92em; border-radius: 31%; background: linear-gradient(150deg,#eafff6 0%,#aeede0 56%,#f3eec7 100%); box-shadow: inset 0 1px 0 rgba(255,255,255,0.55), 0 1px 3px rgba(10,30,22,0.28); }
+    .island .lens { --lf: 1.2em; }
+    .island .isl-body { display: grid; gap: 0.4em; min-width: 0; }
     .island .isl-track { height: 0.19em; border-radius: 999px; background: rgba(255,255,255,0.18); overflow: hidden; }
     .island .isl-fill { height: 100%; width: 100%; border-radius: 999px; background: #6FE7C3; }
     .island .isl-count { flex: 0 0 auto; font-size: 0.94em; font-weight: 600; color: #6fe7c3; font-variant-numeric: tabular-nums; margin-left: 0.25em; }
+    /* 完成态 ✓ — 到点打勾(真机短歇收尾:气色回、进度条排空、右侧 ✓ 圆环) */
+    .island .isl-done { flex: 0 0 auto; display: grid; place-items: center; width: 1.78em; height: 1.78em; border-radius: 50%; border: 0.12em solid rgba(226,252,240,0.62); margin-left: 0.3em; }
+    .island .isl-done::after { content: ""; width: 0.66em; height: 0.36em; border-left: 0.14em solid #9aecc6; border-bottom: 0.14em solid #9aecc6; transform: translateY(-0.06em) rotate(-45deg); }
     /* Live island — loops its real self-closing rest: 看远处 → the bar drains → 已记录 ✓.
        Slow (8s), gentle. reduced-motion freezes it on the rest state. */
     .island.live { align-items: center; }
@@ -414,6 +417,15 @@
     .rest-scene .rs-mira { display: grid; place-items: center; width: 17.4cqi; height: 8cqi; border-radius: 999px; background: rgba(26,107,82,0.97); box-shadow: 0 3cqi 6cqi -3cqi rgba(20,20,19,0.3), inset 0 0 0 1px rgba(255,255,255,0.14); }
     .rest-scene .lens { --lf: 6.4cqi; }
     .rest-scene .lens i { width: calc(var(--lf) * 0.58); height: calc(var(--lf) * 0.14); border-radius: 999px; animation: napBright 6s var(--ease) infinite; }
+    /* 小睡呼吸陪伴音的视觉暗示 — 一排随呼吸(4s 吸 / 6s 呼)起伏的柔和声波,克制 */
+    .rest-scene .rs-sound { position: relative; z-index: 2; display: flex; align-items: center; justify-content: center; gap: 0.62cqi; height: 3.6cqi; margin-top: 1.5cqi; }
+    .rest-scene .rs-sound i { width: 0.5cqi; border-radius: 999px; background: rgba(143,230,192,0.72); transform-origin: center; animation: napSound 10s var(--ease) infinite; }
+    .rest-scene .rs-sound i:nth-child(1), .rest-scene .rs-sound i:nth-child(7) { height: 34%; }
+    .rest-scene .rs-sound i:nth-child(2), .rest-scene .rs-sound i:nth-child(6) { height: 58%; }
+    .rest-scene .rs-sound i:nth-child(3), .rest-scene .rs-sound i:nth-child(5) { height: 82%; }
+    .rest-scene .rs-sound i:nth-child(4) { height: 100%; }
+    @keyframes napSound { 0%, 100% { transform: scaleY(0.4); opacity: 0.42; } 40% { transform: scaleY(1); opacity: 0.85; } }
+    @media (prefers-reduced-motion: reduce) { .rest-scene .rs-sound i { animation: none; transform: scaleY(0.72); opacity: 0.6; } }
     @keyframes napBright { 0% { opacity: 0.32; transform: translate(-50%,-50%) scaleX(1); } 46% { opacity: 0.96; transform: translate(-50%,-50%) scaleX(1.16); } 74% { opacity: 0.9; transform: translate(-50%,-50%) scaleX(1.14); } 82% { opacity: 0.32; transform: translate(-50%,-50%) scaleX(1); } 100% { opacity: 0.32; transform: translate(-50%,-50%) scaleX(1); } }
     .rest-scene .rs-clock { font-size: 5cqi; font-weight: 200; letter-spacing: 0.02em; font-variant-numeric: tabular-nums; line-height: 1; }
     .rest-scene .rs-track { width: 28cqi; height: 0.8cqi; border-radius: 999px; background: rgba(255,255,255,0.16); overflow: hidden; }
@@ -1051,16 +1063,16 @@
         <p class="mock-tag" data-en="Short break · 20s">短歇 · 20 秒</p>
         <div class="screen-card"><div class="top-screen has-bar">
         <div class="mac-bar"><span class="lens" aria-hidden="true"><i></i></span><span class="mac-clock">15:20</span></div>
-        <div class="island" role="img" aria-label="EyeFlow 短歇：看向远处 20 秒，进度条走完自动记录" data-en-label="EyeFlow's short break: look into the distance for 20 seconds; logged when the bar runs out">
+        <div class="island" role="img" aria-label="EyeFlow 短歇完成：看远处 20 秒到点，替你打个勾，气色回一点" data-en-label="EyeFlow's short break, complete — 20 seconds done, ticked off for you as color returns">
           <div class="isl-mark" aria-hidden="true"><div class="lens"><i></i></div></div>
           <div class="isl-body">
             <div data-en="Look into the distance">看向远处</div>
-            <div class="isl-track"><div class="isl-fill" style="width:58%"></div></div>
+            <div class="isl-track"><div class="isl-fill" style="width:0"></div></div>
           </div>
-          <div class="isl-count">12</div>
+          <div class="isl-done" aria-hidden="true"></div>
         </div>
         </div></div>
-        <p class="mock-note" data-en="Look far for 20 seconds — logged when you're back.">看远处 20 秒，看完自动记录。</p>
+        <p class="mock-note" data-en="Look far for 20 seconds — she ticks it off for you, and color returns.">看远处 20 秒——结束时替你打个勾，气色也回一点。</p>
         </div>
         <div class="mock-cell">
         <p class="mock-tag" data-en="Nap · full recharge">小睡 · 全屏回充</p>
@@ -1072,9 +1084,10 @@
             <div class="rs-clock">0:42</div>
             <div class="rs-track"><div class="rs-fill"></div></div>
             <p class="rs-msg" data-en="Close your eyes, and settle.">闭上眼，缓一缓。</p>
+            <div class="rs-sound" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
           </div>
         </div>
-        <p class="mock-note" data-en="Eyes closed longer — watch her complexion brighten back up.">闭眼久一点，看着气色亮回来。</p>
+        <p class="mock-note" data-en="Eyes closed longer — a breath-like sound keeps you company as her complexion brightens back.">闭眼久一点，一段随呼吸的声音陪着你，看气色亮回来。</p>
         </div>
       </div>
     </div>
@@ -1161,7 +1174,7 @@
       <span>EyeFlow</span><span class="dot"></span>
       <a href="https://github.com/Lovelle-Zhang/eyeflow" data-en="Open source">开源</a><span class="dot"></span>
       <span data-en="Notarized">已 Apple 公证</span><span class="dot"></span>
-      <span id="footer-ver">v0.3.17</span>
+      <span id="footer-ver">v1.1.0</span>
     </div>
   </footer>
 
@@ -1195,12 +1208,7 @@
 
     // 下载改走 Mac App Store（apps.apple.com 链接手机也能开→产品页），原「手机复制 DMG 链接」逻辑已随 DMG 一并移除。
 
-    (function () { // footer 版本号自动跟最新（GitHub API 发 CORS 头、可跨域读；失败保留静态兜底）
-      fetch("https://api.github.com/repos/Lovelle-Zhang/eyeflow/releases/latest")
-        .then((r) => r.json())
-        .then((d) => { if (d && d.tag_name) document.getElementById("footer-ver").textContent = d.tag_name; })
-        .catch(() => {});
-    })();
+    // footer 版本号：主分发已转 Mac App Store（1.1.0），不再自动跟 GitHub 旧 0.3.x release；直接用静态 v1.1.0。
 
     (function () { // 尾部 opt-in：提交后原地显示成功态（乐观；Buttondown 隐藏 iframe 收单 + 发确认邮件）
       const form = document.querySelector(".stay");
