@@ -1,5 +1,8 @@
 # EyeFlow Next
 
+> **⬇️ EyeFlow Mira is on the Mac App Store — https://apps.apple.com/app/id6804146185**
+> That's the current, maintained release. Development has since moved on, and this repository is no longer the active source.
+
 A **brand-new, independent** desktop application built from scratch.
 
 > **Not related to the legacy project.** EyeFlow Next shares **no code, no git
